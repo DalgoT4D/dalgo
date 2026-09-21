@@ -1,0 +1,80 @@
+[project]
+name = "prefect-proxy"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+  # web server
+  "fastapi",
+  "uvicorn",
+  "gunicorn",
+  # prefect — pinned exact (the ceiling); integrations float to latest 3.6-compatible
+  "prefect==3.6.29",
+  "prefect-airbyte",            # git source pinned in [tool.uv.sources] (rev = "v0.91")
+  "prefect-dbt==0.7.24",
+  "prefect-gcp==0.6.17",
+  "prefect-github==0.4.2",      # not imported — kept for block-type registration
+  "prefect-sqlalchemy==0.6.1",  # not imported — kept for block-type registration
+  "prefect-shell==0.3.5",
+  # dbt — pinned exact so prefect-dbt's transitive `dbt-core>=1.7.0` doesn't
+  # resolve to whatever's latest at lock time. Bump these together with the
+  # runner Dockerfile pin lines.
+  "dbt-core==1.10.19",
+  "dbt-postgres==1.10.2",
+  "dbt-bigquery==1.10.3",
+  # elementary CLI (edr) — installs the `edr` binary and the elementary
+  # macro-runner deps. Version 0.22.0 verified compatible with dbt-core 1.10.19.
+  "elementary-data==0.22.0",
+  # runtime libs imported directly by proxy code
+  "pydantic",
+  "pendulum",
+  "pytz",
+  "python-dotenv",
+  "requests",
+  "sentry-sdk",
+]
+
+[dependency-groups]
+dev = [
+  "pytest",
+  "pytest-asyncio",
+  "pytest-cov",
+  "black",
+  "pylint",
+  "pre-commit",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311"]
+include = 'ddpui\/.*\.pyi?$'
+
+[tool.pylint.messages_control]
+max-line-length = 100
+fail-under = 6.5
+disable = [
+  "missing-module-docstring",
+  "broad-exception-raised",
+  "broad-exception-caught",
+  "too-few-public-methods",
+  "logging-not-lazy",
+  "logging-fstring-interpolation"
+]
+
+[tool.pytest.ini_options]
+testpaths = [
+  "tests"
+]
+
+[tool.coverage.run]
+source = [
+  "proxy"
+]
+omit = [
+  "proxy/schemas.py",
+  "proxy/exception.py",
+  "tests/*",
+  "logger.py"
+]
+
+[tool.uv.sources]
+prefect-airbyte = { git = "https://github.com/Ishankoradia/prefect-airbyte.git", rev = "v0.91" }
