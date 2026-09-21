@@ -1,0 +1,700 @@
+'use client';
+
+import React from 'react';
+import {
+  CheckCircle2,
+  ChevronDown,
+  ChevronsDown,
+  CircleAlert,
+  SlidersHorizontal,
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Combobox, type ComboboxItem } from '@/components/ui/combobox';
+import { SyncMode, DestinationSyncMode, CAST_TYPE_OPTIONS } from '@/constants/connections';
+import type { SourceStream } from '@/types/connections';
+import type { ConnectionConceptId } from './constants';
+
+// Base (always-visible) columns: stream name + sync toggle.
+const BASE_COLUMN_COUNT = 2;
+// Destination remains an advanced setting. Google Sheets exposes the separate
+// Columns control even while advanced settings are closed so users can inspect
+// detected types and configure post-sync casts without revealing unrelated
+// per-table controls.
+const ADVANCED_DESTINATION_COLUMN_COUNT = 1;
+const COLUMNS_CONTROL_COLUMN_COUNT = 1;
+// Cursor field + primary key. These are incremental-only concepts, so they show
+// only when the source supports incremental sync (e.g. hidden for Google Sheets).
+const CURSOR_PK_COLUMN_COUNT = 2;
+// Seven advanced columns need more room than the left side of the connection
+// dialog can provide. A minimum table width keeps controls readable and lets the
+// containing region scroll horizontally instead of squeezing every field.
+const FULL_ADVANCED_TABLE_WIDTH_CLASS = 'min-w-[1080px]';
+const CAST_ADVANCED_TABLE_WIDTH_CLASS = 'min-w-[760px]';
+// The dialog only ever shows the first row or two before the fold, so with more
+// than one table the list is guaranteed to be cut off and needs a scroll hint.
+const SCROLL_HINT_MIN_STREAMS = 2;
+
+interface StreamConfigTableProps {
+  streams: SourceStream[];
+  filteredStreams: SourceStream[];
+  allSelected: boolean;
+  incrementalAllStreams: boolean;
+  expandedStreams: Set<string>;
+  streamSearch: string;
+  disabled: boolean;
+  isSaving: boolean;
+  onStreamSearchChange: (value: string) => void;
+  onToggleAllStreams: (selected: boolean) => void;
+  onIncrementalAllToggle: (checked: boolean) => void;
+  onToggleStream: (streamName: string) => void;
+  onUpdateStreamSyncMode: (streamName: string, syncMode: string) => void;
+  onUpdateStreamDestMode: (streamName: string, destinationSyncMode: string) => void;
+  onUpdateStreamCursorField: (streamName: string, cursorField: string) => void;
+  onUpdateStreamPrimaryKey: (streamName: string, primaryKey: string[]) => void;
+  onToggleStreamExpand: (streamName: string) => void;
+  onToggleColumn: (streamName: string, columnName: string) => void;
+  onUpdateCastType: (streamName: string, columnName: string, castType: string | null) => void;
+  onConfirmAllColumnTypes: (streamName: string) => void;
+  // Show the editable, confirmable column type in the expanded column view. Enabled only for
+  // sources in CAST_SUPPORTED_SOURCES (currently Google Sheets only).
+  showCastColumn?: boolean;
+  // Label used for the stream noun in headings/columns. Defaults to "Tables".
+  streamNoun?: string;
+  // Hide the Incremental column entirely (some sources never support it).
+  showIncremental?: boolean;
+  // Restrict which destination sync modes are selectable for this source.
+  allowedDestModes?: DestinationSyncMode[];
+  // Fired when a column header is clicked, to move the help panel to that concept.
+  onConceptFocus?: (id: ConnectionConceptId | null) => void;
+  // Shared advanced-settings expand bar state, owned by the parent form.
+  advancedOpen: boolean;
+  onToggleAdvanced: () => void;
+}
+
+export function StreamConfigTable({
+  streams,
+  filteredStreams,
+  allSelected,
+  incrementalAllStreams,
+  expandedStreams,
+  streamSearch,
+  disabled,
+  isSaving,
+  onStreamSearchChange,
+  onToggleAllStreams,
+  onIncrementalAllToggle,
+  onToggleStream,
+  onUpdateStreamSyncMode,
+  onUpdateStreamDestMode,
+  onUpdateStreamCursorField,
+  onUpdateStreamPrimaryKey,
+  onToggleStreamExpand,
+  onToggleColumn,
+  onUpdateCastType,
+  onConfirmAllColumnTypes,
+  showCastColumn = false,
+  streamNoun = 'Tables',
+  showIncremental = true,
+  allowedDestModes = [
+    DestinationSyncMode.OVERWRITE,
+    DestinationSyncMode.APPEND,
+    DestinationSyncMode.APPEND_DEDUP,
+  ],
+  onConceptFocus,
+  advancedOpen,
+  onToggleAdvanced,
+}: StreamConfigTableProps) {
+  const showIncrementalColumn = advancedOpen && showIncremental;
+  // Cursor field + primary key are incremental-only; hide them for sources that
+  // don't support incremental (e.g. Google Sheets keeps only Sync + Destination).
+  const showCursorPkColumns = advancedOpen && showIncremental;
+  const showColumnsControl = advancedOpen || showCastColumn;
+  const horizontalScrollEnabled = advancedOpen && (showCursorPkColumns || showCastColumn);
+  const tableWidthClass = showCursorPkColumns
+    ? FULL_ADVANCED_TABLE_WIDTH_CLASS
+    : advancedOpen && showCastColumn
+      ? CAST_ADVANCED_TABLE_WIDTH_CLASS
+      : '';
+  // Singular, lowercased noun for inline copy: "Tables"→"table".
+  const nounSingular = streamNoun.replace(/s$/i, '').toLowerCase();
+  const selectedCount = streams.filter((s) => s.selected).length;
+
+  // A column header that, when clicked, moves the help panel to its concept.
+  // Falls back to plain text when no help panel is wired up.
+  const conceptLabel = (label: string, concept: ConnectionConceptId) =>
+    onConceptFocus ? (
+      <button
+        type="button"
+        onClick={() => onConceptFocus(concept)}
+        className="cursor-pointer decoration-dotted underline-offset-2 hover:text-foreground hover:underline"
+        data-testid={`concept-header-${concept}`}
+      >
+        {label}
+      </button>
+    ) : (
+      <>{label}</>
+    );
+  // Incremental / Destination / Cursor / Primary Key render only when advanced
+  // is open. The Columns control is also visible for cast-capable sources so
+  // Google Sheets users can inspect types and configure casts independently.
+  const colCount =
+    BASE_COLUMN_COUNT +
+    (showIncrementalColumn ? 1 : 0) +
+    (advancedOpen ? ADVANCED_DESTINATION_COLUMN_COUNT : 0) +
+    (showCursorPkColumns ? CURSOR_PK_COLUMN_COUNT : 0) +
+    (showColumnsControl ? COLUMNS_CONTROL_COLUMN_COUNT : 0);
+
+  // Column widths per open-state, each summing to exactly 100%. The full
+  // advanced table also has a minimum width and scrolls within its container.
+  const colWidths = !advancedOpen
+    ? showColumnsControl
+      ? { stream: '72%', sync: '14%', columns: '14%' }
+      : { stream: '84%', sync: '16%' }
+    : showCursorPkColumns
+      ? {
+          stream: '22%',
+          sync: '8%',
+          incremental: '12%',
+          destination: '18%',
+          cursor: '20%',
+          pk: '11%',
+          columns: '9%',
+        }
+      : { stream: '40%', sync: '12%', destination: '38%', columns: '10%' };
+  return (
+    <div className="flex flex-col">
+      {/* Header with stream count + shared advanced toggle */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-base font-semibold">
+            {`Select your ${streamNoun.toLowerCase()} (${selectedCount}/${streams.length} selected)`}
+          </h3>
+          {streams.length >= SCROLL_HINT_MIN_STREAMS && (
+            <p
+              className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"
+              data-testid="streams-scroll-hint"
+            >
+              <ChevronsDown className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+              {`Scroll to see all ${streamNoun.toLowerCase()}`}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-shrink-0 items-center gap-2.5 rounded-md border px-2.5 py-1.5 text-sm font-medium text-muted-foreground">
+          <SlidersHorizontal className="h-3.5 w-3.5" />
+          <label htmlFor="advanced-streams" className="cursor-pointer">
+            {`Advanced per-${nounSingular} settings`}
+          </label>
+          <Switch
+            id="advanced-streams"
+            data-testid="advanced-streams-toggle"
+            checked={advancedOpen}
+            onCheckedChange={() => onToggleAdvanced()}
+          />
+        </div>
+      </div>
+      <div className="mb-3" />
+
+      {/* Table grows to its natural height; the parent left column owns the
+          scroll (overflow-y-auto), so the whole side scrolls as one and the
+          sticky header pins to the column while every row stays reachable. */}
+      <div
+        className="overflow-x-auto rounded-md border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        data-testid="streams-table-scroll-container"
+        role={horizontalScrollEnabled ? 'region' : undefined}
+        aria-label={horizontalScrollEnabled ? `Advanced per-${nounSingular} settings` : undefined}
+        tabIndex={horizontalScrollEnabled ? 0 : undefined}
+      >
+        <table
+          className={`w-full table-fixed text-sm ${tableWidthClass}`}
+          data-testid="streams-table"
+          data-cast-supported={showCastColumn}
+        >
+          <colgroup>
+            <col style={{ width: colWidths.stream }} />
+            <col style={{ width: colWidths.sync }} />
+            {showIncrementalColumn && <col style={{ width: colWidths.incremental }} />}
+            {advancedOpen && <col style={{ width: colWidths.destination }} />}
+            {showCursorPkColumns && (
+              <>
+                <col style={{ width: colWidths.cursor }} />
+                <col style={{ width: colWidths.pk }} />
+              </>
+            )}
+            {showColumnsControl && <col style={{ width: colWidths.columns }} />}
+          </colgroup>
+          <thead className="sticky top-0 z-10">
+            <tr className="border-b bg-muted">
+              <th className="px-3 py-2 text-left text-sm font-medium text-muted-foreground">
+                {conceptLabel(streamNoun, 'stream')}
+              </th>
+              <th className="px-3 py-2 text-center text-sm font-medium text-muted-foreground">
+                {conceptLabel('Sync?', 'sync')}
+              </th>
+              {showIncrementalColumn && (
+                <th className="px-3 py-2 text-center text-sm font-medium text-muted-foreground">
+                  {conceptLabel('Incremental?', 'sync-mode')}
+                </th>
+              )}
+              {advancedOpen && (
+                <th className="px-3 py-2 text-left text-sm font-medium text-muted-foreground">
+                  {conceptLabel('Destination', 'dest-mode')}
+                </th>
+              )}
+              {showCursorPkColumns && (
+                <>
+                  <th className="px-3 py-2 text-left text-sm font-medium text-muted-foreground">
+                    {conceptLabel('Cursor Field', 'cursor')}
+                  </th>
+                  <th className="px-3 py-2 text-left text-sm font-medium text-muted-foreground">
+                    {conceptLabel('Primary Key', 'primary-key')}
+                  </th>
+                </>
+              )}
+              {showColumnsControl && (
+                <th className="px-3 py-2 text-center text-sm font-medium text-muted-foreground">
+                  {conceptLabel('Columns', 'columns')}
+                </th>
+              )}
+            </tr>
+            {/* Global toggle row */}
+            <tr className="border-b bg-muted">
+              <td className="px-3 py-1.5">
+                <Input
+                  placeholder="Filter..."
+                  value={streamSearch}
+                  onChange={(e) => onStreamSearchChange(e.target.value)}
+                  className="w-full max-w-[260px] h-8 text-sm"
+                  data-testid="stream-filter-input"
+                />
+              </td>
+              <td className="px-3 py-1.5 text-center">
+                <Switch
+                  checked={allSelected}
+                  onCheckedChange={onToggleAllStreams}
+                  disabled={disabled || isSaving}
+                  data-testid="toggle-all-streams"
+                  className="scale-90"
+                />
+              </td>
+              {showIncrementalColumn && (
+                <td className="px-3 py-1.5 text-center">
+                  <Switch
+                    checked={incrementalAllStreams}
+                    onCheckedChange={onIncrementalAllToggle}
+                    disabled={disabled || isSaving || !allSelected}
+                    data-testid="toggle-incremental-all"
+                    className="scale-90"
+                  />
+                </td>
+              )}
+              {advancedOpen && <td className="px-3 py-1.5" />}
+              {showCursorPkColumns && (
+                <>
+                  <td className="px-3 py-1.5" />
+                  <td className="px-3 py-1.5" />
+                </>
+              )}
+              {showColumnsControl && <td className="px-3 py-1.5" />}
+            </tr>
+          </thead>
+          <tbody>
+            {filteredStreams.map((stream) => {
+              const isIncremental = stream.syncMode === SyncMode.INCREMENTAL;
+              const cursorOptions = stream.cursorFieldConfig?.all || [];
+              const primaryKeyOptions = stream.primaryKeyConfig?.all || [];
+
+              // Build combobox items for cursor field
+              const cursorItems: ComboboxItem[] = (
+                Array.isArray(cursorOptions[0])
+                  ? cursorOptions.map((o: string | string[]) => (Array.isArray(o) ? o[0] : o))
+                  : cursorOptions
+              ).map((field: string) => ({
+                value: field,
+                label: field,
+              }));
+
+              // Build combobox items for primary key
+              const pkItems: ComboboxItem[] = primaryKeyOptions.map((pk: string | string[]) => {
+                const val = Array.isArray(pk) ? pk[0] : pk;
+                return { value: val, label: val };
+              });
+
+              const isSelected = stream.selected;
+              const selectedColumns = stream.columns.filter((column) => column.selected);
+              const allColumnTypesConfirmed =
+                selectedColumns.length > 0 &&
+                selectedColumns.every((column) => column.type_confirmed);
+              const isIncrementalChecked =
+                stream.supportsIncremental && isIncremental && isSelected;
+
+              // Determine why cursor field is disabled (for tooltip)
+              const cursorDisabled =
+                disabled ||
+                isSaving ||
+                !isSelected ||
+                !stream.supportsIncremental ||
+                !isIncremental ||
+                !!stream.cursorFieldConfig?.sourceDefinedCursor;
+              const cursorDisabledReason = !isSelected
+                ? `Enable sync for this ${nounSingular} first`
+                : !stream.supportsIncremental
+                  ? 'This source does not support incremental sync'
+                  : !isIncremental
+                    ? 'Switch to incremental sync mode to set a cursor field'
+                    : stream.cursorFieldConfig?.sourceDefinedCursor
+                      ? 'Cursor field is defined by the source and cannot be changed'
+                      : '';
+
+              // Determine why primary key is disabled (for tooltip)
+              const pkDisabled =
+                disabled ||
+                isSaving ||
+                !isSelected ||
+                !stream.supportsIncremental ||
+                !isIncremental ||
+                stream.destinationSyncMode !== DestinationSyncMode.APPEND_DEDUP ||
+                !!stream.primaryKeyConfig?.sourceDefinedPrimaryKey;
+              const pkDisabledReason = !isSelected
+                ? `Enable sync for this ${nounSingular} first`
+                : !stream.supportsIncremental
+                  ? 'This source does not support incremental sync'
+                  : !isIncremental
+                    ? 'Switch to incremental sync mode to set a primary key'
+                    : stream.destinationSyncMode !== DestinationSyncMode.APPEND_DEDUP
+                      ? 'Set destination mode to Append / Dedup to configure a primary key'
+                      : stream.primaryKeyConfig?.sourceDefinedPrimaryKey
+                        ? 'Primary key is defined by the source and cannot be changed'
+                        : '';
+
+              return (
+                <React.Fragment key={stream.name}>
+                  <tr
+                    className="border-b last:border-b-0"
+                    data-testid={`stream-row-${stream.name}`}
+                  >
+                    {/* Stream name */}
+                    <td className="px-3 py-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="min-w-0 max-w-full truncate text-sm font-medium text-foreground">
+                                {stream.name}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs break-all">
+                              <p className="text-xs">{stream.name}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        {showCastColumn && isSelected && (
+                          <Badge
+                            variant="outline"
+                            className={
+                              allColumnTypesConfirmed
+                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                : 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                            }
+                          >
+                            {allColumnTypesConfirmed ? (
+                              <CheckCircle2 aria-hidden="true" />
+                            ) : (
+                              <CircleAlert aria-hidden="true" />
+                            )}
+                            {allColumnTypesConfirmed ? 'Types confirmed' : 'Needs confirmation'}
+                          </Badge>
+                        )}
+                      </div>
+                    </td>
+                    {/* Sync toggle */}
+                    <td className="px-3 py-3 text-center">
+                      <Switch
+                        checked={isSelected}
+                        onCheckedChange={() => onToggleStream(stream.name)}
+                        disabled={disabled || isSaving}
+                        data-testid={`stream-toggle-${stream.name}`}
+                        className="scale-90"
+                      />
+                    </td>
+                    {/* Incremental toggle */}
+                    {showIncrementalColumn && (
+                      <td className="px-3 py-3 text-center">
+                        <Switch
+                          checked={isIncrementalChecked}
+                          onCheckedChange={(checked) => {
+                            onUpdateStreamSyncMode(
+                              stream.name,
+                              checked ? SyncMode.INCREMENTAL : SyncMode.FULL_REFRESH
+                            );
+                          }}
+                          disabled={
+                            disabled || isSaving || !isSelected || !stream.supportsIncremental
+                          }
+                          data-testid={`stream-incremental-${stream.name}`}
+                          className="scale-90"
+                        />
+                      </td>
+                    )}
+                    {/* Destination mode */}
+                    {advancedOpen && (
+                      <td className="px-3 py-3">
+                        <Select
+                          value={stream.destinationSyncMode}
+                          onValueChange={(v) => onUpdateStreamDestMode(stream.name, v)}
+                          disabled={disabled || isSaving || !isSelected}
+                        >
+                          <SelectTrigger className="h-8 text-sm w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allowedDestModes.includes(DestinationSyncMode.OVERWRITE) && (
+                              <SelectItem
+                                value={DestinationSyncMode.OVERWRITE}
+                                disabled={isIncremental}
+                              >
+                                Overwrite
+                              </SelectItem>
+                            )}
+                            {allowedDestModes.includes(DestinationSyncMode.APPEND) && (
+                              <SelectItem value={DestinationSyncMode.APPEND}>Append</SelectItem>
+                            )}
+                            {allowedDestModes.includes(DestinationSyncMode.APPEND_DEDUP) && (
+                              <SelectItem value={DestinationSyncMode.APPEND_DEDUP}>
+                                Append / Dedup
+                              </SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                    )}
+                    {/* Cursor Field + Primary Key — incremental-only, hidden for
+                        sources without incremental support (e.g. Google Sheets) */}
+                    {showCursorPkColumns && (
+                      <>
+                        <td className="px-3 py-3 overflow-visible">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Combobox
+                                    mode="single"
+                                    items={cursorItems}
+                                    value={stream.cursorField || ''}
+                                    onValueChange={(v) => onUpdateStreamCursorField(stream.name, v)}
+                                    disabled={cursorDisabled}
+                                    placeholder="Select..."
+                                    searchPlaceholder="Search..."
+                                    compact
+                                    id={`cursor-${stream.name}`}
+                                    className="w-full"
+                                  />
+                                </div>
+                              </TooltipTrigger>
+                              {cursorDisabled && cursorDisabledReason && (
+                                <TooltipContent side="top">
+                                  <p className="text-xs">{cursorDisabledReason}</p>
+                                </TooltipContent>
+                              )}
+                            </Tooltip>
+                          </TooltipProvider>
+                        </td>
+                        {/* Primary Key — always show, disabled when not incremental+append_dedup */}
+                        <td className="px-3 py-3 overflow-visible">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Combobox
+                                    mode="multi"
+                                    items={pkItems}
+                                    values={stream.primaryKey || []}
+                                    onValuesChange={(vals) =>
+                                      onUpdateStreamPrimaryKey(stream.name, vals)
+                                    }
+                                    disabled={pkDisabled}
+                                    searchPlaceholder="Select keys..."
+                                    compact
+                                    id={`pk-${stream.name}`}
+                                    triggerClassName="h-8 !min-h-0 !flex-nowrap overflow-hidden"
+                                    className="w-full"
+                                  />
+                                </div>
+                              </TooltipTrigger>
+                              {pkDisabled && pkDisabledReason && (
+                                <TooltipContent side="top">
+                                  <p className="text-xs">{pkDisabledReason}</p>
+                                </TooltipContent>
+                              )}
+                            </Tooltip>
+                          </TooltipProvider>
+                        </td>
+                      </>
+                    )}
+                    {/* Column expand */}
+                    {showColumnsControl && (
+                      <td className="px-1 py-3 text-center">
+                        {stream.columns.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => onToggleStreamExpand(stream.name)}
+                            className="p-1 hover:bg-gray-100 rounded cursor-pointer"
+                            data-testid={`expand-columns-${stream.name}`}
+                            aria-label={`${expandedStreams.has(stream.name) ? 'Hide' : 'Show'} columns for ${stream.name}`}
+                            aria-expanded={expandedStreams.has(stream.name)}
+                          >
+                            <ChevronDown
+                              className={`h-4 w-4 text-gray-500 transition-transform ${
+                                expandedStreams.has(stream.name) ? 'rotate-180' : ''
+                              }`}
+                            />
+                          </button>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                  {/* Expanded column selection — vertical list */}
+                  {showColumnsControl &&
+                    expandedStreams.has(stream.name) &&
+                    stream.columns.length > 0 && (
+                      <tr key={`cols-${stream.name}`} className="bg-muted/30">
+                        <td colSpan={colCount} className="px-4 py-2">
+                          {showCastColumn && (
+                            <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+                              <p className="text-xs text-muted-foreground">
+                                Review the detected type for each selected column.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => onConfirmAllColumnTypes(stream.name)}
+                                disabled={
+                                  disabled ||
+                                  isSaving ||
+                                  !isSelected ||
+                                  selectedColumns.length === 0 ||
+                                  allColumnTypesConfirmed
+                                }
+                                className="rounded border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                                data-testid={`confirm-all-column-types-${stream.name}`}
+                              >
+                                {allColumnTypesConfirmed
+                                  ? 'Column types confirmed'
+                                  : 'Confirm column types'}
+                              </button>
+                            </div>
+                          )}
+                          <table
+                            data-testid={`columns-detail-table-${stream.name}`}
+                            className="w-[32rem] max-w-full table-fixed"
+                          >
+                            <thead>
+                              <tr className="border-b border-muted">
+                                <th className="py-1 px-2 w-10" />
+                                <th className="py-1 px-2 text-left text-xs font-medium text-muted-foreground">
+                                  Column
+                                </th>
+                                <th className="w-40 py-1 px-2 text-left text-xs font-medium text-muted-foreground">
+                                  {showCastColumn ? 'Column type' : 'Type'}
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {stream.columns.map((col) => {
+                                const isCursorField = stream.cursorField === col.name;
+                                const isPrimaryKey = stream.primaryKey?.includes(col.name);
+                                const isProtected = isCursorField || isPrimaryKey;
+
+                                return (
+                                  <tr
+                                    key={col.name}
+                                    className="border-b last:border-b-0 border-muted"
+                                  >
+                                    <td className="py-1.5 px-2 w-10">
+                                      <Switch
+                                        checked={col.selected}
+                                        onCheckedChange={() =>
+                                          onToggleColumn(stream.name, col.name)
+                                        }
+                                        disabled={
+                                          disabled || isSaving || !isSelected || isProtected
+                                        }
+                                        className="scale-75"
+                                        data-testid={`col-toggle-${stream.name}-${col.name}`}
+                                      />
+                                    </td>
+                                    <td className="py-1.5 px-2">
+                                      <span
+                                        className={`text-xs ${
+                                          isProtected ? 'text-muted-foreground' : 'text-foreground'
+                                        }`}
+                                      >
+                                        {col.name}
+                                      </span>
+                                    </td>
+                                    <td className="w-40 py-1.5 px-2 text-left">
+                                      {showCastColumn ? (
+                                        <Select
+                                          value={col.cast_to_type ?? '__incoming__'}
+                                          onValueChange={(v) =>
+                                            onUpdateCastType(
+                                              stream.name,
+                                              col.name,
+                                              v === '__incoming__' ? null : v
+                                            )
+                                          }
+                                          disabled={
+                                            disabled || isSaving || !isSelected || !col.selected
+                                          }
+                                          aria-disabled={
+                                            disabled || isSaving || !isSelected || !col.selected
+                                          }
+                                        >
+                                          <SelectTrigger
+                                            className="h-6 text-xs w-full"
+                                            data-testid={`cast-type-${stream.name}-${col.name}`}
+                                          >
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="__incoming__">
+                                              {col.data_type}
+                                            </SelectItem>
+                                            {CAST_TYPE_OPTIONS.map((opt) => (
+                                              <SelectItem key={opt.value} value={opt.value}>
+                                                {opt.label}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      ) : (
+                                        <span className="text-xs text-muted-foreground">
+                                          {col.data_type}
+                                        </span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    )}
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

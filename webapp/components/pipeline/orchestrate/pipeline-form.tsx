@@ -1,0 +1,750 @@
+'use client';
+
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSWRConfig } from 'swr';
+import { useForm, Controller } from 'react-hook-form';
+import { Loader2, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { TimePicker } from '@/components/ui/time-picker';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Combobox, type ComboboxItem } from '@/components/ui/combobox';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toastSuccess, toastError } from '@/lib/toast';
+import {
+  usePipeline,
+  useTransformTasks,
+  useConnections,
+  createPipeline,
+  updatePipeline,
+  setScheduleStatus,
+} from '@/hooks/api/usePipelines';
+import type {
+  TransformTask,
+  PipelineFormData,
+  ConnectionOption,
+  WeekdayOption,
+  PipelineDetailResponse,
+} from '@/types/pipeline';
+import type { Connection } from '@/types/connections';
+import { TaskSequence } from './task-sequence';
+import {
+  convertToCronExpression,
+  convertCronToSchedule,
+  localTimezone,
+  validateDefaultTasksToApplyInPipeline,
+  localTimeToUTC,
+  utcTimeToLocal,
+} from '../utils';
+import { WEEKDAYS, SCHEDULE_OPTIONS, DEFAULT_PIPELINE_NAME } from '@/constants/pipeline';
+import { trackEvent } from '@/lib/analytics';
+import { ANALYTICS_EVENTS } from '@/constants/analytics';
+import { useInsightWalkthroughStore } from '@/stores/insightWalkthroughStore';
+import { markPipelineCreated } from '@/components/onboarding/insight-walkthrough-constants';
+
+interface PipelineFormProps {
+  deploymentId?: string;
+}
+
+const PIPELINE_WORK_REQUIRED_MESSAGE = 'Select at least one connection or transform task.';
+const GUIDED_SCHEDULE_REQUIRED_MESSAGE = 'Choose Daily or Weekly to automate this pipeline.';
+
+// Wrapper component that handles data fetching
+export function PipelineForm({ deploymentId }: PipelineFormProps) {
+  const { pipeline, isLoading: pipelineLoading } = usePipeline(deploymentId || null);
+  const { tasks, isLoading: tasksLoading } = useTransformTasks(true, true);
+  const { connections, isLoading: connectionsLoading } = useConnections();
+
+  const isLoading = pipelineLoading || tasksLoading || connectionsLoading;
+
+  if (isLoading) {
+    return <FormSkeleton />;
+  }
+
+  // Only render the form content once all data is loaded
+  // This ensures defaultValues are set correctly from the start
+  // Key includes isScheduleActive to force remount when active status changes after SWR revalidation
+  return (
+    <PipelineFormContent
+      key={`${deploymentId}-${pipeline?.isScheduleActive}`}
+      deploymentId={deploymentId}
+      pipeline={pipeline}
+      tasks={tasks}
+      connections={connections}
+    />
+  );
+}
+
+interface PipelineFormContentProps {
+  deploymentId?: string;
+  pipeline: PipelineDetailResponse | undefined;
+  tasks: TransformTask[];
+  connections: Connection[];
+}
+
+// Compute initial form values from pipeline data
+function computeInitialValues(
+  pipeline: PipelineDetailResponse | undefined,
+  tasks: TransformTask[]
+): { formValues: PipelineFormData; runTransformTasks: boolean } {
+  if (!pipeline) {
+    // Create mode - use defaults
+    return {
+      formValues: {
+        active: true,
+        name: DEFAULT_PIPELINE_NAME,
+        connections: [],
+        cron: null,
+        tasks: [],
+        cronDaysOfWeek: [],
+        cronTimeOfDay: '',
+        continueOnSyncFailure: false,
+      },
+      runTransformTasks: false,
+    };
+  }
+
+  // Edit mode - compute values from pipeline
+  let tasksToApply: TransformTask[] = [];
+
+  if (tasks.length > 0 && pipeline.transformTasks.length > 0) {
+    const uuidOrder = pipeline.transformTasks.reduce((acc: Record<string, number>, obj) => {
+      acc[obj.uuid] = obj.seq;
+      return acc;
+    }, {});
+
+    tasksToApply = tasks
+      .filter((t) => uuidOrder.hasOwnProperty(t.uuid))
+      .sort((a, b) => uuidOrder[a.uuid] - uuidOrder[b.uuid]);
+  }
+
+  const cronObject = convertCronToSchedule(pipeline.cron);
+
+  return {
+    formValues: {
+      cron:
+        cronObject.schedule !== 'manual'
+          ? { id: cronObject.schedule, label: cronObject.schedule }
+          : { id: 'manual', label: 'Manual' },
+      connections: pipeline.connections
+        .sort((c1, c2) => c1.seq - c2.seq)
+        .map((conn) => ({
+          id: conn.id,
+          label: conn.name,
+        })),
+      active: pipeline.isScheduleActive,
+      name: pipeline.name,
+      tasks: tasksToApply,
+      cronDaysOfWeek: cronObject.daysOfWeek.map((day) => ({
+        id: day,
+        label: WEEKDAYS[day],
+      })),
+      cronTimeOfDay: utcTimeToLocal(cronObject.timeOfDay),
+      continueOnSyncFailure: pipeline.continueOnSyncFailure ?? false,
+    },
+    runTransformTasks: tasksToApply.length > 0,
+  };
+}
+
+function PipelineFormContent({
+  deploymentId,
+  pipeline,
+  tasks,
+  connections,
+}: PipelineFormContentProps) {
+  const router = useRouter();
+  const { mutate } = useSWRConfig();
+  const isEditMode = !!deploymentId;
+
+  // Compute initial values once when component mounts
+  const { formValues: initialValues, runTransformTasks: initialRunTransformTasks } = useMemo(
+    () => computeInitialValues(pipeline, tasks),
+    // Only compute once on mount - pipeline and tasks won't change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const [runTransformTasks, setRunTransformTasks] = useState(initialRunTransformTasks);
+  const [submitting, setSubmitting] = useState(false);
+  const isGuidedAutomatePipeline = useInsightWalkthroughStore(
+    (state) => !isEditMode && state.active && state.flow === 'automate_pipeline'
+  );
+
+  // Store the original active value to compare against for dirty checking
+  const originalActiveValue = useMemo(() => pipeline?.isScheduleActive ?? true, []);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    setError,
+    clearErrors,
+    formState: { errors },
+  } = useForm<PipelineFormData>({
+    defaultValues: initialValues,
+  });
+
+  const scheduleSelected = watch('cron');
+  const cronDaysOfWeek = watch('cronDaysOfWeek');
+  const cronTimeOfDay = watch('cronTimeOfDay');
+  const selectedConnections = watch('connections');
+  const selectedTasks = watch('tasks');
+  const hasPipelineWork = selectedConnections.length > 0 || selectedTasks.length > 0;
+
+  // Create Pipeline only lights up once the chosen frequency's required fields
+  // are actually filled — manual needs nothing extra, daily needs a time, weekly
+  // needs both days and a time.
+  const isScheduleComplete = useMemo(() => {
+    const freq = scheduleSelected?.id;
+    if (!freq) return false;
+    if (freq === 'manual') return !isGuidedAutomatePipeline;
+    if (freq === 'daily') return Boolean(cronTimeOfDay);
+    if (freq === 'weekly') return cronDaysOfWeek.length > 0 && Boolean(cronTimeOfDay);
+    return false;
+  }, [scheduleSelected, cronDaysOfWeek, cronTimeOfDay, isGuidedAutomatePipeline]);
+
+  // Walkthrough: only point at Create Pipeline once it's actually clickable —
+  // picking a frequency alone isn't enough for daily/weekly.
+  useEffect(() => {
+    const walkthrough = useInsightWalkthroughStore.getState();
+    if (
+      isGuidedAutomatePipeline &&
+      isScheduleComplete &&
+      hasPipelineWork &&
+      walkthrough.stage === 'pipeline_set_schedule'
+    ) {
+      walkthrough.advanceTo('pipeline_create_it');
+    }
+  }, [isGuidedAutomatePipeline, isScheduleComplete, hasPipelineWork]);
+
+  // Connection options for combobox
+  const connectionItems: ComboboxItem[] = useMemo(() => {
+    return connections.map((conn) => ({
+      value: conn.connectionId,
+      label: conn.name,
+    }));
+  }, [connections]);
+
+  // Weekday options
+  const weekdayItems: ComboboxItem[] = useMemo(() => {
+    return Object.entries(WEEKDAYS).map(([id, label]) => ({
+      value: id,
+      label,
+    }));
+  }, []);
+
+  // Schedule options
+  const scheduleItems: ComboboxItem[] = useMemo(() => {
+    return SCHEDULE_OPTIONS.map((opt) => ({
+      value: opt.id,
+      label: opt.label.charAt(0).toUpperCase() + opt.label.slice(1),
+      disabled: isGuidedAutomatePipeline && opt.id === 'manual',
+    }));
+  }, [isGuidedAutomatePipeline]);
+
+  const handleRunTransformTasksChange = useCallback(
+    (checked: boolean) => {
+      setRunTransformTasks(checked);
+      if (checked) {
+        // Pre-populate with default system tasks
+        const defaultTasks = tasks.filter(validateDefaultTasksToApplyInPipeline);
+        setValue('tasks', defaultTasks);
+        if (defaultTasks.length > 0) clearErrors('connections');
+      } else {
+        setValue('tasks', []);
+      }
+
+      if (checked && useInsightWalkthroughStore.getState().stage === 'pipeline_run_transform') {
+        useInsightWalkthroughStore.getState().advanceTo('pipeline_set_schedule');
+      }
+    },
+    [setValue, tasks, clearErrors]
+  );
+
+  const handleCancel = () => {
+    router.push('/orchestrate');
+  };
+
+  const onSubmit = async (data: PipelineFormData) => {
+    if (data.connections.length === 0 && data.tasks.length === 0) {
+      setError('connections', {
+        type: 'validate',
+        message: PIPELINE_WORK_REQUIRED_MESSAGE,
+      });
+      return;
+    }
+
+    const walkthroughAtSubmit = useInsightWalkthroughStore.getState();
+    const isGuidedSubmission =
+      !isEditMode && walkthroughAtSubmit.active && walkthroughAtSubmit.flow === 'automate_pipeline';
+    if (isGuidedSubmission && data.cron?.id === 'manual') {
+      setError('cron', {
+        type: 'validate',
+        message: GUIDED_SCHEDULE_REQUIRED_MESSAGE,
+      });
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const cronExpression = convertToCronExpression(
+        data.cron?.id || 'manual',
+        data.cronDaysOfWeek.map((opt) => opt.id),
+        data.cronTimeOfDay ? localTimeToUTC(data.cronTimeOfDay) : '1 0'
+      );
+
+      const selectedConns = data.connections.map((conn, index) => ({
+        id: conn.id,
+        seq: index + 1,
+      }));
+
+      const transformTasks = data.tasks.map((task, index) => ({
+        uuid: task.uuid,
+        seq: index + 1,
+      }));
+
+      if (isEditMode && deploymentId) {
+        await updatePipeline(deploymentId, {
+          name: data.name,
+          connections: selectedConns,
+          cron: cronExpression,
+          transformTasks,
+          continueOnSyncFailure: data.continueOnSyncFailure,
+        });
+
+        // Update schedule status if changed - compare against original value
+        const activeChanged = data.active !== originalActiveValue;
+        let scheduleStatusFailed = false;
+        if (activeChanged) {
+          try {
+            await setScheduleStatus(deploymentId, data.active);
+            trackEvent(ANALYTICS_EVENTS.PIPELINE_SCHEDULE_TOGGLED, {
+              new_status: data.active ? 'active' : 'inactive',
+            });
+          } catch (statusError: any) {
+            scheduleStatusFailed = true;
+            toastError.api(
+              statusError,
+              'Pipeline updated, but failed to update schedule status. Please try toggling the status again.'
+            );
+          }
+        }
+
+        // Invalidate the pipeline detail cache so next edit shows fresh data
+        mutate(`/api/prefect/v1/flows/${deploymentId}`, undefined, { revalidate: false });
+        // Also invalidate the list cache for consistency
+        mutate('/api/prefect/v1/flows/', undefined, { revalidate: false });
+
+        if (!scheduleStatusFailed) {
+          trackEvent(ANALYTICS_EVENTS.PIPELINE_UPDATED, {
+            has_schedule: Boolean(cronExpression) && cronExpression !== 'manual',
+          });
+          toastSuccess.updated('Pipeline');
+        }
+      } else {
+        await createPipeline({
+          name: data.name,
+          connections: selectedConns,
+          cron: cronExpression,
+          transformTasks,
+          continueOnSyncFailure: data.continueOnSyncFailure,
+        });
+
+        trackEvent(ANALYTICS_EVENTS.PIPELINE_CREATED, {
+          has_schedule: Boolean(cronExpression) && cronExpression !== 'manual',
+        });
+        toastSuccess.created('Pipeline');
+
+        const walkthrough = useInsightWalkthroughStore.getState();
+        if (
+          walkthrough.active &&
+          walkthrough.flow === 'automate_pipeline' &&
+          walkthrough.stage === 'pipeline_create_it' &&
+          walkthrough.orgSlug
+        ) {
+          markPipelineCreated();
+          // The end of this walkthrough: a scheduled pipeline IS the thing it set out to
+          // build. Charting what it produces is the build-insights flow, which the user
+          // starts from the Get Started checklist when they want it — and which now skips
+          // its sample/own-data question, since the pipeline already put real data in place
+          // (see TourGate.handleBuildInsightClick).
+          walkthrough.finish();
+          // Raised after finish() (which leaves it alone by design) so the pipeline list can
+          // render it a route later — the celebration belongs on the pipeline the user just
+          // built, not on the form they're leaving.
+          walkthrough.setPendingCelebration('pipeline');
+        }
+      }
+
+      router.push('/orchestrate');
+    } catch (error: any) {
+      toastError.save(error, 'pipeline');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold text-gray-900">
+          {isEditMode ? 'Update Pipeline' : 'Create Pipeline'}
+        </h1>
+        <div className="flex items-center gap-3">
+          <Button type="button" variant="outline" onClick={handleCancel} data-testid="cancel-btn">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={submitting || !isScheduleComplete || !hasPipelineWork}
+            data-testid="submit-btn"
+          >
+            {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {isEditMode ? 'Save Changes' : 'Create Pipeline'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Form content - Two column layout */}
+      <div className="bg-white rounded-lg border shadow-sm max-h-[calc(100vh-12rem)] overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x">
+          {/* Left column - Pipeline details */}
+          <div className="lg:col-span-3 p-6 space-y-6">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-lg font-semibold text-gray-900">Pipeline Details</h2>
+              {!hasPipelineWork && (
+                <p className="text-xs text-muted-foreground">
+                  <span className="text-destructive" aria-hidden="true">
+                    *
+                  </span>{' '}
+                  Choose at least one: a connection or a transform task
+                </p>
+              )}
+            </div>
+
+            {/* Active toggle (edit mode only) */}
+            {isEditMode && (
+              <div className="flex items-center gap-3">
+                <Controller
+                  name="active"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      data-testid="activeSwitch"
+                    />
+                  )}
+                />
+                <Label className="text-[15px]">Is Active?</Label>
+              </div>
+            )}
+
+            {/* Name */}
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-[15px] font-medium">
+                Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="name"
+                placeholder="Enter the name of your pipeline"
+                {...register('name', { required: 'Name is required' })}
+                data-testid="name"
+                className="h-10 text-[15px]"
+              />
+              {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+            </div>
+
+            {/* Connections */}
+            <div className="space-y-2" data-testid="connections-container">
+              <Label htmlFor="connections-search" className="text-[15px] font-medium">
+                Connections
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Connections are run in the sequence you select them.
+              </p>
+              <Controller
+                name="connections"
+                control={control}
+                render={({ field }) => (
+                  <Combobox
+                    mode="multi"
+                    items={connectionItems}
+                    values={field.value.map((c) => c.id)}
+                    onValuesChange={(values) => {
+                      const newConnections = values
+                        .map((v) => {
+                          const conn = connections.find((c) => c.connectionId === v);
+                          return conn ? { id: conn.connectionId, label: conn.name } : null;
+                        })
+                        .filter(Boolean) as ConnectionOption[];
+                      field.onChange(newConnections);
+                      if (newConnections.length > 0) clearErrors('connections');
+
+                      if (
+                        newConnections.length > 0 &&
+                        useInsightWalkthroughStore.getState().stage === 'pipeline_add_connection'
+                      ) {
+                        useInsightWalkthroughStore.getState().advanceTo('pipeline_run_transform');
+                      }
+                    }}
+                    placeholder="Select your connections"
+                    searchPlaceholder="Search connections..."
+                    id="connections"
+                  />
+                )}
+              />
+              {errors.connections && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.connections.message}
+                </p>
+              )}
+              <OptionalSettings control={control} />
+            </div>
+
+            {/* Transform tasks */}
+            <div className="space-y-3">
+              <div>
+                <Label className="text-[15px] font-medium">Transform Tasks</Label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Git pull/clone, dbt clean, and dbt deps will run automatically (in that order)
+                  before your transformation tasks.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="run-transform-tasks"
+                  data-testid="run-transform-tasks-checkbox"
+                  checked={runTransformTasks}
+                  onCheckedChange={(checked) => handleRunTransformTasksChange(checked as boolean)}
+                />
+                <Label htmlFor="run-transform-tasks" className="text-[15px]">
+                  Run transform tasks
+                </Label>
+              </div>
+
+              {runTransformTasks && (
+                <Controller
+                  name="tasks"
+                  control={control}
+                  render={({ field }) => (
+                    <TaskSequence
+                      value={field.value}
+                      onChange={(nextTasks) => {
+                        field.onChange(nextTasks);
+                        if (nextTasks.length > 0) clearErrors('connections');
+                      }}
+                      options={tasks}
+                    />
+                  )}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Right column - Schedule */}
+          <div className="lg:col-span-2 p-6 space-y-6">
+            <h2 className="text-lg font-semibold text-gray-900">Schedule</h2>
+
+            {/* Schedule type */}
+            <div className="space-y-2" data-testid="cron-container">
+              <Label htmlFor="cron-input" className="text-[15px] font-medium">
+                Frequency{' '}
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
+              </Label>
+              <Controller
+                name="cron"
+                control={control}
+                rules={{ required: 'Schedule is required' }}
+                render={({ field }) => (
+                  <Combobox
+                    items={scheduleItems}
+                    value={field.value?.id || ''}
+                    onValueChange={(value) => {
+                      const option = scheduleItems.find((s) => s.value === value);
+                      field.onChange(option ? { id: option.value, label: option.label } : null);
+                      clearErrors('cron');
+                    }}
+                    placeholder="Select schedule"
+                    id="cron"
+                  />
+                )}
+              />
+              {isGuidedAutomatePipeline && !errors.cron && (
+                <p className="text-sm text-muted-foreground">{GUIDED_SCHEDULE_REQUIRED_MESSAGE}</p>
+              )}
+              {errors.cron && (
+                <p className="text-sm text-destructive" role="alert">
+                  {errors.cron.message}
+                </p>
+              )}
+            </div>
+
+            {/* Days of week (for weekly) */}
+            {scheduleSelected?.id === 'weekly' && (
+              // testid read by the walkthrough's exit guard: this field is required but sits
+              // outside cron-container, so the guard needs to know it's part of the same step
+              // (see PIPELINE_FORM_REQUIRED_FIELDS in insight-walkthrough-coachmark.tsx).
+              <div className="space-y-2" data-testid="cron-days-of-week-container">
+                <Label className="text-[15px] font-medium">
+                  Days of the Week <span className="text-destructive">*</span>
+                </Label>
+                <Controller
+                  name="cronDaysOfWeek"
+                  control={control}
+                  rules={{ required: 'Day(s) of week is required' }}
+                  render={({ field }) => (
+                    <Combobox
+                      mode="multi"
+                      items={weekdayItems}
+                      values={field.value.map((d) => d.id)}
+                      onValuesChange={(values) => {
+                        const newDays = values
+                          .map((v) => ({
+                            id: v,
+                            label: WEEKDAYS[v],
+                          }))
+                          .filter((d) => d.label) as WeekdayOption[];
+                        field.onChange(newDays);
+                      }}
+                      placeholder="Select day(s)"
+                      id="cronDaysOfWeek"
+                    />
+                  )}
+                />
+                {errors.cronDaysOfWeek && (
+                  <p className="text-sm text-destructive">{errors.cronDaysOfWeek.message}</p>
+                )}
+              </div>
+            )}
+
+            {/* Time of day (for daily/weekly) */}
+            {scheduleSelected && scheduleSelected.id !== 'manual' && (
+              // Same as the weekday field above — required, outside cron-container.
+              <div className="space-y-2" data-testid="cron-time-of-day-container">
+                <Label className="text-[15px] font-medium">
+                  Time of Day <span className="text-destructive">*</span>
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Controller
+                    name="cronTimeOfDay"
+                    control={control}
+                    rules={{ required: 'Time of day is required' }}
+                    render={({ field }) => (
+                      <TimePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        data-testid="cronTimeOfDay"
+                      />
+                    )}
+                  />
+                  <span className="text-sm text-gray-500">({localTimezone()})</span>
+                </div>
+                {errors.cronTimeOfDay && (
+                  <p className="text-sm text-destructive">{errors.cronTimeOfDay.message}</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </form>
+  );
+}
+
+function OptionalSettings({ control }: { control: any }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mt-4">
+      <button
+        type="button"
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        onClick={() => setOpen(!open)}
+        data-testid="advanced-settings-toggle"
+      >
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? '' : '-rotate-90'}`} />
+        Advanced (optional)
+      </button>
+      {open && (
+        <div className="mt-2">
+          <Controller
+            name="continueOnSyncFailure"
+            control={control}
+            render={({ field }) => (
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  id="continue-on-sync-failure"
+                  data-testid="continue-on-sync-failure-checkbox"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  className="mt-0.5"
+                />
+                <div>
+                  <Label htmlFor="continue-on-sync-failure" className="text-sm">
+                    Continue syncing remaining connections if one fails
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    All connections will be attempted even if some fail. In case of any errors,
+                    transform tasks will not run and the errors will be raised at the end.
+                  </p>
+                </div>
+              </div>
+            )}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FormSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-8 w-48" />
+        <div className="flex gap-3">
+          <Skeleton className="h-10 w-20" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+      </div>
+      <div className="bg-white rounded-lg border shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x">
+          <div className="lg:col-span-3 p-6 space-y-6">
+            <Skeleton className="h-6 w-36" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-10 w-48" />
+            </div>
+          </div>
+          <div className="lg:col-span-2 p-6 space-y-6">
+            <Skeleton className="h-6 w-24" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

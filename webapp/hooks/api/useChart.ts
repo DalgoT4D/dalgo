@@ -1,0 +1,526 @@
+import React, { useState, useEffect } from 'react';
+import useSWR from 'swr';
+import useSWRMutation from 'swr/mutation';
+import { useWarehouse } from './useWarehouse';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/api';
+import type {
+  Chart,
+  ChartCreate,
+  ChartUpdate,
+  ChartDataPayload,
+  ChartDataResponse,
+  ChartMetric,
+  DataPreviewResponse,
+} from '@/types/charts';
+import { DashboardFilter } from './useDashboards';
+import { ResolvedDashboardFilter } from '@/lib/dashboard-filter-utils';
+
+// Fetchers
+const chartsFetcher = (url: string) => apiGet(url);
+const chartFetcher = (url: string) => apiGet(url);
+const chartDataFetcher = ([url, data]: [string, ChartDataPayload]) => apiPost(url, data);
+const dataPreviewFetcher = ([url, data]: [string, ChartDataPayload]) => apiPost(url, data);
+
+// Mutations
+const createChart = (url: string, { arg }: { arg: ChartCreate }) => apiPost(url, arg);
+
+const updateChart = (url: string, { arg }: { arg: { id: number; data: ChartUpdate } }) =>
+  apiPut(`${url}${arg.id}/`, arg.data);
+
+const deleteChart = (url: string, { arg }: { arg: number }) => apiDelete(`${url}${arg}/`);
+
+const bulkDeleteCharts = (url: string, { arg }: { arg: number[] }) =>
+  apiPost(`${url}bulk-delete/`, { chart_ids: arg });
+
+const favoriteChart = (url: string, { arg }: { arg: number }) =>
+  apiPost(`${url}${arg}/favorite/`, {});
+
+const unfavoriteChart = (url: string, { arg }: { arg: number }) =>
+  apiDelete(`${url}${arg}/favorite/`);
+
+// Hooks
+export function useCharts() {
+  return useSWR('/api/charts/', chartsFetcher);
+}
+
+export function useChart(id: number | null) {
+  return useSWR(id ? `/api/charts/${id}/` : null, chartFetcher);
+}
+
+export function useCreateChart() {
+  return useSWRMutation('/api/charts/', createChart);
+}
+
+export function useUpdateChart() {
+  return useSWRMutation('/api/charts/', updateChart);
+}
+
+export function useDeleteChart() {
+  return useSWRMutation('/api/charts/', deleteChart);
+}
+
+export function useBulkDeleteCharts() {
+  return useSWRMutation('/api/charts/', bulkDeleteCharts);
+}
+
+export function useFavoriteChart() {
+  return useSWRMutation('/api/charts/', favoriteChart);
+}
+
+export function useUnfavoriteChart() {
+  return useSWRMutation('/api/charts/', unfavoriteChart);
+}
+
+export function useChartData(payload: ChartDataPayload | null) {
+  return useSWR(payload ? ['/api/charts/chart-data/', payload] : null, chartDataFetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 2000,
+  });
+}
+
+// Table data preview for a live chart, or (when snapshotId is passed) for a
+// report snapshot. Report requests derive the chart's definition and the
+// snapshot's period lock from chart_id server-side (never from the request),
+// so filtering keeps working even if the source dashboard is later deleted —
+// `payload` is only used as the live-chart request body and the fetch-ready
+// gate; report requests send an empty body.
+export function useChartDataPreview(
+  payload: ChartDataPayload | null,
+  page: number = 1,
+  pageSize: number = 50,
+  dashboardFilters: Record<string, any> = {},
+  snapshotId?: number | null,
+  chartId?: number | null
+) {
+  // Create a stable key that includes pagination parameters and dashboard filters
+  const filterHash =
+    Object.keys(dashboardFilters).length > 0 ? JSON.stringify(dashboardFilters) : '';
+  const baseUrl = snapshotId
+    ? `/api/reports/${snapshotId}/charts/${chartId}/table-data/`
+    : '/api/charts/chart-data-preview/';
+  const swrKey = payload ? [baseUrl, payload, page, pageSize, filterHash, snapshotId] : null;
+
+  return useSWR(
+    swrKey,
+    async ([url, data, pageNum, limit, filters]: [
+      string,
+      ChartDataPayload,
+      number,
+      number,
+      string,
+    ]) => {
+      // Send page and limit as query parameters, payload as body
+      const queryParams = new URLSearchParams({
+        page: (pageNum - 1).toString(), // Backend expects 0-based page
+        limit: limit.toString(),
+      });
+
+      // Add dashboard filters if present
+      if (filters && Object.keys(dashboardFilters).length > 0) {
+        queryParams.append('dashboard_filters', JSON.stringify(dashboardFilters));
+      }
+
+      // Use the centralized API client with query parameters
+      return apiPost(`${url}?${queryParams}`, snapshotId ? {} : data);
+    }
+  );
+}
+
+// Chart data preview total rows hook — same live-vs-report split as useChartDataPreview.
+export function useChartDataPreviewTotalRows(
+  payload: ChartDataPayload | null,
+  dashboardFilters: Record<string, any> = {},
+  snapshotId?: number | null,
+  chartId?: number | null
+) {
+  // Create a stable key that includes dashboard filters
+  const filterHash =
+    Object.keys(dashboardFilters).length > 0 ? JSON.stringify(dashboardFilters) : '';
+  const baseUrl = snapshotId
+    ? `/api/reports/${snapshotId}/charts/${chartId}/table-data/total-rows/`
+    : '/api/charts/chart-data-preview/total-rows/';
+  const swrKey = payload ? [baseUrl, payload, filterHash, snapshotId] : null;
+
+  return useSWR(swrKey, ([url, data, filters]: [string, ChartDataPayload, string]) => {
+    // Add dashboard filters as query parameters if present
+    const queryParams = new URLSearchParams();
+    if (filters && Object.keys(dashboardFilters).length > 0) {
+      queryParams.append('dashboard_filters', JSON.stringify(dashboardFilters));
+    }
+
+    // Use the centralized API client with query parameters
+    return apiPost(
+      `${url}${queryParams.toString() ? `?${queryParams}` : ''}`,
+      snapshotId ? {} : data
+    );
+  });
+}
+
+// Chart export hook
+export function useChartExport() {
+  return useSWRMutation(
+    '/api/charts/export/',
+    (url: string, { arg }: { arg: { chart_id: number; format: string } }) => apiPost(url, arg)
+  );
+}
+
+// Warehouse hooks for chart builder
+export function useSchemas() {
+  return useSWR<string[]>('/api/warehouse/schemas', apiGet);
+}
+
+export function useTables(schema: string | null) {
+  return useSWR<any[]>(schema ? `/api/warehouse/tables/${schema}` : null, apiGet);
+}
+
+// Hook to get all tables from all schemas using optimized sync_tables API
+export function useAllSchemaTables() {
+  const {
+    data: warehouse,
+    isLoading: isWarehouseLoading,
+    isError: warehouseError,
+  } = useWarehouse();
+  const {
+    data: syncTablesData,
+    isLoading: isTablesLoading,
+    error: tablesError,
+  } = useSWR(warehouse ? '/api/warehouse/sync_tables?fresh=1' : null, apiGet, {
+    dedupingInterval: 30000,
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    revalidateOnMount: true,
+  });
+
+  // Transform sync_tables API response to match existing format exactly
+  const allTables = React.useMemo(() => {
+    if (!syncTablesData || !Array.isArray(syncTablesData)) {
+      return [];
+    }
+
+    return syncTablesData.map((item: any) => ({
+      schema_name: item.schema,
+      table_name: item.name,
+      full_name: `${item.schema}.${item.name}`, // Format: "schema.table"
+    }));
+  }, [syncTablesData]);
+
+  return {
+    data: allTables,
+    isLoading: isWarehouseLoading || isTablesLoading,
+    error: warehouseError || tablesError,
+    noWarehouse: !isWarehouseLoading && !warehouseError && !warehouse,
+  };
+}
+
+export function useColumns(schema: string | null, table: string | null) {
+  return useSWR<any[]>(
+    schema && table ? `/api/warehouse/table_columns/${schema}/${table}` : null,
+    apiGet
+  );
+}
+
+export function useColumnValues(
+  schema: string | null,
+  table: string | null,
+  column: string | null
+) {
+  return useSWR<string[]>(
+    schema && table && column ? `/api/warehouse/column-values/${schema}/${table}/${column}` : null,
+    apiGet,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 300000, // 5 minutes cache
+    }
+  );
+}
+
+// Raw table data hooks
+export function useRawTableData(
+  schema: string | null,
+  table: string | null,
+  page: number = 1,
+  pageSize: number = 50
+) {
+  const swrKey =
+    schema && table
+      ? `/api/warehouse/table_data/${schema}/${table}?page=${page}&limit=${pageSize}`
+      : null;
+
+  return useSWR(swrKey, apiGet, {
+    revalidateOnFocus: false,
+    dedupingInterval: 60000, // Cache for 1 minute
+  });
+}
+
+export function useTableCount(schema: string | null, table: string | null) {
+  return useSWR(schema && table ? `/api/warehouse/table_count/${schema}/${table}` : null, apiGet);
+}
+
+// Re-export types for convenience
+export type { ChartDataPayload, ChartCreate as ChartCreatePayload } from '@/types/charts';
+
+// Alias for backward compatibility with tests
+export const useChartSave = useCreateChart;
+
+// Map-specific hooks
+
+export interface GeoJSONListItem {
+  id: number;
+  name: string;
+  display_name: string;
+  is_default: boolean;
+  layer_name: string;
+  properties_key: string;
+}
+
+export interface GeoJSONDetail {
+  id: number;
+  name: string;
+  display_name: string;
+  geojson_data: any;
+  properties_key: string;
+}
+
+const geojsonListFetcher = (url: string) => apiGet(url);
+const geojsonDetailFetcher = (url: string) => apiGet(url);
+
+export function useAvailableGeoJSONs(countryCode: string = 'IND', layerLevel: number = 1) {
+  return useSWR(
+    `/api/charts/geojsons/?country_code=${countryCode}&layer_level=${layerLevel}`,
+    geojsonListFetcher
+  );
+}
+
+export function useGeoJSONData(geojsonId: number | null) {
+  return useSWR(geojsonId ? `/api/charts/geojsons/${geojsonId}/` : null, geojsonDetailFetcher);
+}
+
+// New map hooks for phase one implementation
+
+export interface Region {
+  id: number;
+  name: string;
+  display_name: string;
+  type: string;
+  parent_id: number | null;
+  country_code: string;
+  region_code: string;
+}
+
+export interface RegionGeoJSON {
+  id: number;
+  region_id: number;
+  name: string;
+  is_default: boolean;
+  properties_key: string;
+  file_size: number;
+}
+
+const regionsFetcher = (url: string) => apiGet(url);
+const regionGeoJSONsFetcher = (url: string) => apiGet(url);
+
+export function useRegions(countryCode?: string | null, regionType?: string) {
+  const params = countryCode ? new URLSearchParams({ country_code: countryCode }) : null;
+  if (params && regionType) {
+    params.append('region_type', regionType);
+  }
+
+  return useSWR(countryCode ? `/api/charts/regions/?${params!.toString()}` : null, regionsFetcher);
+}
+
+export function useChildRegions(
+  parentRegionId: number | null | undefined,
+  enabled: boolean = true
+) {
+  return useSWR(
+    enabled && parentRegionId ? `/api/charts/regions/${parentRegionId}/children/` : null,
+    regionsFetcher
+  );
+}
+
+export function useRegionGeoJSONs(regionId: number | null | undefined) {
+  return useSWR(
+    regionId ? `/api/charts/regions/${regionId}/geojsons/` : null,
+    regionGeoJSONsFetcher
+  );
+}
+
+// New hook for region hierarchy
+const regionHierarchyFetcher = (url: string) => apiGet(url);
+
+export function useRegionHierarchy(countryCode: string = 'IND') {
+  return useSWR(
+    countryCode ? `/api/charts/hierarchy/?country=${countryCode}` : null,
+    regionHierarchyFetcher
+  );
+}
+
+export function useMapData(payload: ChartDataPayload | null) {
+  return useSWR(
+    payload ? ['/api/charts/map-data/', payload] : null,
+    ([url, data]: [string, ChartDataPayload]) => apiPost(url, data)
+  );
+}
+
+// New hooks for separated data fetching
+
+export interface LayerOption {
+  id: number;
+  code: string;
+  name: string;
+  display_name: string;
+  type: string;
+  parent_id: number | null;
+}
+
+// Fetch available layers (countries, states, districts, etc.) dynamically
+export function useAvailableLayers(layerType: string = 'country') {
+  return useSWR<LayerOption[]>(`/api/charts/available-layers/?layer_type=${layerType}`, apiGet);
+}
+
+// Get region hierarchy by fetching all available region types for a country
+export function useAvailableRegionTypes(countryCode: string = 'IND') {
+  // First, get all regions without specifying type to see what types are available
+  return useSWR(`/api/charts/regions/?country_code=${countryCode}`, apiGet);
+}
+
+// Get the next layer type by looking at child regions of a specific parent
+export function useNextLayerType(parentRegionId: number | null) {
+  return useSWR(parentRegionId ? `/api/charts/regions/${parentRegionId}/children/` : null, apiGet);
+}
+
+export interface MapDataOverlayRawPayload {
+  schema_name: string;
+  table_name: string;
+  geographic_column: string;
+  // Preferred: the actual metric (supports calculated/column_expression metrics).
+  metric?: ChartMetric;
+  // Legacy fields, used when `metric` isn't provided (charts saved before the metrics array existed).
+  value_column?: string;
+  aggregate_function?: string;
+  filters?: Record<string, any>;
+  dashboard_filters?: Record<string, any>;
+  extra_config?: {
+    filters?: any[];
+    pagination?: any;
+    sort?: any[];
+  };
+}
+
+// Builds the overlay payload for a Simple-mode metric (aggregation + column).
+// Returns null when there isn't enough information to run the aggregation.
+function buildSimpleMapOverlayPayload(payload: MapDataOverlayRawPayload, metric?: ChartMetric) {
+  const aggregation = metric?.aggregation || payload.aggregate_function;
+  const column = metric?.column || payload.value_column;
+  if (!aggregation || (!column && aggregation !== 'count')) {
+    return null;
+  }
+
+  return {
+    schema_name: payload.schema_name,
+    table_name: payload.table_name,
+    geographic_column: payload.geographic_column,
+    value_column: column || payload.geographic_column,
+    metrics: [
+      {
+        column: column || (aggregation === 'count' ? payload.geographic_column : null),
+        aggregation,
+        alias: 'value',
+      },
+    ],
+    filters: payload.filters || {},
+    dashboard_filters: payload.dashboard_filters || {},
+    extra_config: payload.extra_config || {},
+  };
+}
+
+// Builds the overlay payload for a Calculated-mode metric (column_expression).
+function buildCalculatedMapOverlayPayload(payload: MapDataOverlayRawPayload, metric: ChartMetric) {
+  return {
+    schema_name: payload.schema_name,
+    table_name: payload.table_name,
+    geographic_column: payload.geographic_column,
+    metrics: [
+      {
+        column_expression: metric.column_expression,
+        alias: 'value',
+      },
+    ],
+    filters: payload.filters || {},
+    dashboard_filters: payload.dashboard_filters || {},
+    extra_config: payload.extra_config || {},
+  };
+}
+
+// Transform raw map overlay payload to match backend requirements.
+// For count operations, value_column may be absent — falls back to geographic_column.
+export function transformMapDataOverlayPayload(payload: MapDataOverlayRawPayload | null) {
+  if (!payload || !payload.schema_name || !payload.table_name || !payload.geographic_column) {
+    return null;
+  }
+
+  return payload.metric?.column_expression
+    ? buildCalculatedMapOverlayPayload(payload, payload.metric)
+    : buildSimpleMapOverlayPayload(payload, payload.metric);
+}
+
+// Fetch map data separately (for data overlay on existing GeoJSON)
+// Fetch map data overlay for a live dashboard, or (when snapshotId is passed)
+// for a report snapshot. Report requests derive the chart's definition and
+// the snapshot's period lock from chart_id server-side (never from the
+// request) — only the live dashboard_filters are still caller-supplied,
+// sent as a query param like the table endpoints — so filtering keeps
+// working even if the source dashboard is later deleted.
+export function useMapDataOverlay(
+  payload: MapDataOverlayRawPayload | null,
+  snapshotId?: number | null,
+  chartId?: number | null
+) {
+  const transformedPayload = transformMapDataOverlayPayload(payload);
+
+  // Create a simple, stable key similar to regular charts for better filter change detection
+  // Use a hash-based approach like regular charts do with query parameters
+  const filterHash = transformedPayload
+    ? JSON.stringify({
+        chart_filters: transformedPayload.dashboard_filters || [],
+        filters: transformedPayload.filters || {},
+        extra_config: transformedPayload.extra_config || {},
+      })
+    : '';
+
+  const baseUrl = snapshotId
+    ? `/api/reports/${snapshotId}/charts/${chartId}/map-data/`
+    : '/api/charts/map-data-overlay/';
+
+  const swrKey = transformedPayload
+    ? `${baseUrl}?payload=${encodeURIComponent(JSON.stringify(transformedPayload))}&filters=${encodeURIComponent(filterHash)}`
+    : null;
+
+  return useSWR(
+    swrKey,
+    async (url: string) => {
+      // Extract the payload from URL params for the API call
+      const [path, query] = url.split('?');
+      const urlParams = new URLSearchParams(query);
+      const payloadParam = urlParams.get('payload');
+      const payload = payloadParam ? JSON.parse(decodeURIComponent(payloadParam)) : null;
+
+      if (snapshotId) {
+        const dashboardFilters = payload?.dashboard_filters;
+        const hasFilters = dashboardFilters && Object.keys(dashboardFilters).length > 0;
+        const qs = hasFilters
+          ? `?dashboard_filters=${encodeURIComponent(JSON.stringify(dashboardFilters))}`
+          : '';
+        return apiPost(`${path}${qs}`, {});
+      }
+
+      return apiPost(path, payload);
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 2000, // Same 2s dedupe interval as regular charts
+    }
+  );
+}

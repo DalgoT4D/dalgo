@@ -1,0 +1,322 @@
+'use client';
+
+import { useState, useMemo, useCallback } from 'react';
+import { SyncMode, DestinationSyncMode } from '@/constants/connections';
+import { toastError } from '@/lib/toast';
+import type { SourceStream, StreamColumn } from '@/types/connections';
+
+// Manages stream selection, sync modes, columns, and filtering for connection setup
+export function useStreamConfig() {
+  const [streams, setStreams] = useState<SourceStream[]>([]);
+  const [streamSearch, setStreamSearch] = useState('');
+  const [incrementalAllStreams, setIncrementalAllStreams] = useState(false);
+  const [expandedStreams, setExpandedStreams] = useState<Set<string>>(new Set());
+
+  // Replace a discovered/loaded catalog and optionally open only its first table.
+  // The table UI is alphabetically sorted, so use the same order here to ensure
+  // the row users see first is the one that opens. Later rows remain manual.
+  const initializeStreams = useCallback((nextStreams: SourceStream[], expandFirst = false) => {
+    setStreams(nextStreams);
+    if (!expandFirst || nextStreams.length === 0) {
+      setExpandedStreams(new Set());
+      return;
+    }
+    const sortedStreams = [...nextStreams].sort((a, b) => a.name.localeCompare(b.name));
+    // Expansion is for inspecting a table, not for choosing whether it syncs.
+    // Always target the first visible row so create and edit behave identically,
+    // even when discovery leaves every table unselected.
+    const firstStreamName = sortedStreams[0].name;
+    setExpandedStreams(new Set([firstStreamName]));
+  }, []);
+
+  // Toggle a single stream's selection; resets sync/dest modes on deselect
+  const toggleStream = useCallback(
+    (streamName: string) => {
+      setStreams((prev) =>
+        prev.map((s) => {
+          if (s.name !== streamName) return s;
+          const nowSelected = !s.selected;
+          if (nowSelected) {
+            // When selecting while incrementalAllStreams is active, set incremental
+            if (incrementalAllStreams) {
+              return { ...s, selected: true, syncMode: SyncMode.INCREMENTAL };
+            }
+            return { ...s, selected: true };
+          }
+          // When deselecting, reset syncMode, destMode, casts, and confirmations.
+          return {
+            ...s,
+            selected: false,
+            syncMode: s.syncMode === SyncMode.INCREMENTAL ? SyncMode.FULL_REFRESH : s.syncMode,
+            destinationSyncMode:
+              s.destinationSyncMode !== DestinationSyncMode.OVERWRITE
+                ? DestinationSyncMode.OVERWRITE
+                : s.destinationSyncMode,
+            columns: s.columns.map(
+              (c): StreamColumn => ({ ...c, cast_to_type: null, type_confirmed: false })
+            ),
+          };
+        })
+      );
+      setExpandedStreams((prev) => {
+        const next = new Set(prev);
+        // Only collapse when deselecting
+        const stream = streams.find((s) => s.name === streamName);
+        if (stream?.selected) {
+          next.delete(streamName);
+        }
+        return next;
+      });
+    },
+    [incrementalAllStreams, streams]
+  );
+
+  // Select or deselect all streams at once; resets modes on deselect
+  const toggleAllStreams = useCallback((selected: boolean) => {
+    if (!selected) {
+      setIncrementalAllStreams(false);
+    }
+    setStreams((prev) =>
+      prev.map((s) => {
+        if (selected) return { ...s, selected: true };
+        return {
+          ...s,
+          selected: false,
+          syncMode: s.syncMode === SyncMode.INCREMENTAL ? SyncMode.FULL_REFRESH : s.syncMode,
+          destinationSyncMode:
+            s.destinationSyncMode !== DestinationSyncMode.OVERWRITE
+              ? DestinationSyncMode.OVERWRITE
+              : s.destinationSyncMode,
+          columns: s.columns.map(
+            (c): StreamColumn => ({ ...c, cast_to_type: null, type_confirmed: false })
+          ),
+        };
+      })
+    );
+  }, []);
+
+  // Set sync mode for a stream; enforces dest mode constraints (no overwrite with incremental)
+  const updateStreamSyncMode = useCallback((streamName: string, syncMode: string) => {
+    setStreams((prev) =>
+      prev.map((s) => {
+        if (s.name !== streamName) return s;
+        if (syncMode === SyncMode.INCREMENTAL) {
+          let destMode = s.destinationSyncMode;
+          if (destMode === DestinationSyncMode.OVERWRITE) {
+            toastError.api('Cannot use Overwrite when sync mode is incremental');
+            destMode = DestinationSyncMode.APPEND_DEDUP;
+          }
+          return { ...s, syncMode, destinationSyncMode: destMode };
+        }
+        return {
+          ...s,
+          syncMode,
+          destinationSyncMode: DestinationSyncMode.OVERWRITE,
+          cursorField: '',
+          primaryKey: [],
+        };
+      })
+    );
+  }, []);
+
+  // Set destination sync mode; clears primary key if not append_dedup
+  const updateStreamDestMode = useCallback((streamName: string, destinationSyncMode: string) => {
+    setStreams((prev) =>
+      prev.map((s) => {
+        if (s.name !== streamName) return s;
+        if (destinationSyncMode !== DestinationSyncMode.APPEND_DEDUP) {
+          return { ...s, destinationSyncMode, primaryKey: [] };
+        }
+        return { ...s, destinationSyncMode };
+      })
+    );
+  }, []);
+
+  // Set cursor field for incremental sync; auto-selects the cursor column
+  const updateStreamCursorField = useCallback((streamName: string, cursorField: string) => {
+    setStreams((prev) =>
+      prev.map((s) => {
+        if (s.name !== streamName) return s;
+        const columns = s.columns.map((c) =>
+          c.name === cursorField ? { ...c, selected: true } : c
+        );
+        return { ...s, cursorField, columns };
+      })
+    );
+  }, []);
+
+  // Set primary key columns for dedup; auto-selects those columns
+  const updateStreamPrimaryKey = useCallback((streamName: string, primaryKey: string[]) => {
+    setStreams((prev) =>
+      prev.map((s) => {
+        if (s.name !== streamName) return s;
+        const pkSet = new Set(primaryKey);
+        const columns = s.columns.map((c) => (pkSet.has(c.name) ? { ...c, selected: true } : c));
+        return { ...s, primaryKey, columns };
+      })
+    );
+  }, []);
+
+  // Toggle a column's selection; prevents deselecting cursor or primary key columns.
+  // Clears cast_to_type and its confirmation when a column is deselected.
+  const toggleColumn = useCallback((streamName: string, columnName: string) => {
+    setStreams((prev) =>
+      prev.map((s) => {
+        if (s.name !== streamName) return s;
+        const isCursorField = s.cursorField === columnName;
+        const isPrimaryKey = s.primaryKey?.includes(columnName);
+        if (isCursorField || isPrimaryKey) return s;
+
+        return {
+          ...s,
+          columns: s.columns.map((c) => {
+            if (c.name !== columnName) return c;
+            const nowSelected = !c.selected;
+            return {
+              ...c,
+              selected: nowSelected,
+              cast_to_type: nowSelected ? c.cast_to_type : null,
+              type_confirmed: false,
+            };
+          }),
+        };
+      })
+    );
+  }, []);
+
+  // Set a column's effective warehouse type. Null means keep the incoming type.
+  // Any change must be explicitly reconfirmed before the connection can be saved.
+  const updateCastType = useCallback(
+    (streamName: string, columnName: string, castType: string | null) => {
+      setStreams((prev) =>
+        prev.map((s) => {
+          if (s.name !== streamName) return s;
+          return {
+            ...s,
+            columns: s.columns.map((c) =>
+              c.name === columnName ? { ...c, cast_to_type: castType, type_confirmed: false } : c
+            ),
+          };
+        })
+      );
+    },
+    []
+  );
+
+  // Confirmation is scoped to one stream so users can review a table at a time.
+  const confirmAllColumnTypes = useCallback((streamName: string) => {
+    setStreams((prev) =>
+      prev.map((s) =>
+        s.name === streamName
+          ? {
+              ...s,
+              columns: s.columns.map((c) => (c.selected ? { ...c, type_confirmed: true } : c)),
+            }
+          : s
+      )
+    );
+  }, []);
+
+  // Expand or collapse a stream's detail view
+  const toggleStreamExpand = useCallback((streamName: string) => {
+    setExpandedStreams((prev) => {
+      const next = new Set(prev);
+      if (next.has(streamName)) {
+        next.delete(streamName);
+      } else {
+        next.add(streamName);
+      }
+      return next;
+    });
+  }, []);
+
+  // Bulk-toggle incremental sync for all streams; swaps dest modes accordingly
+  const handleIncrementalAllToggle = useCallback((checked: boolean) => {
+    setIncrementalAllStreams(checked);
+    if (checked) {
+      setStreams((prev) => {
+        const hasOverwrite = prev.some(
+          (s) => s.destinationSyncMode === DestinationSyncMode.OVERWRITE
+        );
+        if (hasOverwrite) {
+          toastError.api('Cannot use Overwrite when sync mode is incremental');
+        }
+        return prev.map((s) => {
+          const destMode =
+            s.destinationSyncMode === DestinationSyncMode.OVERWRITE
+              ? DestinationSyncMode.APPEND_DEDUP
+              : s.destinationSyncMode;
+          return {
+            ...s,
+            syncMode: SyncMode.INCREMENTAL,
+            destinationSyncMode: destMode,
+          };
+        });
+      });
+    } else {
+      setStreams((prev) =>
+        prev.map((s) => ({
+          ...s,
+          syncMode: SyncMode.FULL_REFRESH,
+          destinationSyncMode:
+            s.destinationSyncMode !== DestinationSyncMode.OVERWRITE
+              ? DestinationSyncMode.OVERWRITE
+              : s.destinationSyncMode,
+        }))
+      );
+    }
+  }, []);
+
+  // Alphabetically sorted streams filtered by search query
+  const filteredStreams = useMemo(() => {
+    const sorted = [...streams].sort((a, b) => a.name.localeCompare(b.name));
+    if (!streamSearch.trim()) return sorted;
+    const q = streamSearch.trim().toLowerCase();
+    return sorted.filter((s) => s.name.toLowerCase().startsWith(q));
+  }, [streams, streamSearch]);
+
+  const allSelected = streams.length > 0 && streams.every((s) => s.selected);
+  const hasSelectedStreams = streams.some((s) => s.selected);
+  const allSelectedColumnTypesConfirmed = useMemo(
+    () =>
+      streams
+        .filter((s) => s.selected)
+        .every((s) => s.columns.filter((c) => c.selected).every((c) => c.type_confirmed)),
+    [streams]
+  );
+
+  // True if any selected incremental stream is missing a cursor field
+  const isAnyCursorAbsent = useMemo(
+    () =>
+      filteredStreams
+        .filter((s) => s.selected && s.supportsIncremental)
+        .some((s) => !s.cursorField),
+    [filteredStreams]
+  );
+
+  return {
+    streams,
+    setStreams,
+    initializeStreams,
+    streamSearch,
+    setStreamSearch,
+    incrementalAllStreams,
+    expandedStreams,
+    toggleStream,
+    toggleAllStreams,
+    updateStreamSyncMode,
+    updateStreamDestMode,
+    updateStreamCursorField,
+    updateStreamPrimaryKey,
+    toggleColumn,
+    updateCastType,
+    confirmAllColumnTypes,
+    toggleStreamExpand,
+    handleIncrementalAllToggle,
+    filteredStreams,
+    allSelected,
+    hasSelectedStreams,
+    allSelectedColumnTypesConfirmed,
+    isAnyCursorAbsent,
+  };
+}

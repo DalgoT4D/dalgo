@@ -1,0 +1,322 @@
+// Centralized API config and fetch utility
+
+import { useAuthStore } from '@/stores/authStore';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8002';
+
+// Track ongoing refresh request to prevent multiple simultaneous refreshes
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> = Promise.resolve(false);
+
+function getSelectOrg() {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('selectedOrg') || undefined;
+  }
+  return undefined;
+}
+
+async function refreshAccessToken(): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v2/token/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Send cookies with request
+    });
+
+    if (!response.ok) {
+      console.error('Token refresh failed:', response.status, response.statusText);
+      return false;
+    }
+
+    // Cookie is automatically set by the server response
+    return true;
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    return false;
+  }
+}
+
+function getHeaders() {
+  const selectedOrgSlug = getSelectOrg();
+  return {
+    'Content-Type': 'application/json',
+    // No Authorization header needed - cookies are sent automatically
+    ...(selectedOrgSlug ? { 'x-dalgo-org': selectedOrgSlug } : {}),
+  };
+}
+
+function handleAuthFailure() {
+  if (typeof window !== 'undefined') {
+    // Don't redirect if we're on a public dashboard page
+    const currentPath = window.location.pathname;
+    if (
+      currentPath.startsWith('/share/dashboard/') ||
+      currentPath.startsWith('/public/dashboard/') ||
+      currentPath.startsWith('/share/report/')
+    ) {
+      console.log('[handleAuthFailure] Ignoring auth failure on public page');
+      return;
+    }
+
+    // Clear organization selection
+    localStorage.removeItem('selectedOrg');
+
+    // Update auth store
+    const store = useAuthStore.getState();
+    store.logout();
+
+    // Navigate to login page
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
+  }
+}
+
+async function apiFetch(path: string, options: RequestInit = {}, retryCount = 0): Promise<any> {
+  const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+
+  const isFormData = options.body instanceof FormData;
+
+  const headers: HeadersInit = {
+    ...(options.headers || {}),
+    ...getHeaders(),
+  };
+
+  if (isFormData) {
+    // Delete after merge so Content-Type from either source is removed,
+    // letting the browser set multipart/form-data boundary automatically
+    delete (headers as Record<string, string>)['Content-Type'];
+  }
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      credentials: 'include', // Always include cookies
+    });
+
+    // Handle 498 - access token expired, try to refresh using refresh token
+    if (response.status === 498) {
+      if (retryCount === 0) {
+        // Prevent multiple simultaneous refresh attempts
+        if (!isRefreshing) {
+          isRefreshing = true;
+          refreshPromise = refreshAccessToken().finally(() => {
+            isRefreshing = false;
+          });
+        }
+
+        const success = await refreshPromise;
+
+        if (success) {
+          // Retry the original request with the new access token cookie
+          return apiFetch(path, options, retryCount + 1);
+        }
+      }
+
+      // Refresh failed or retry still got 498 - logout the user
+      handleAuthFailure();
+      throw new Error('Authentication failed. Please log in again.');
+    }
+
+    // Handle 401 - completely unauthorized (blacklisted, invalid, or refresh token expired)
+    if (response.status === 401) {
+      handleAuthFailure();
+      throw new Error('Authentication failed. Please log in again.');
+    }
+
+    // Check if response has JSON content
+    const contentType = response.headers.get('content-type');
+    let data;
+
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError);
+        data = { error: 'Invalid JSON response from server' };
+      }
+    } else {
+      // Non-JSON response (could be HTML error page, text, etc.)
+      const text = await response.text();
+      console.error('Non-JSON response:', text);
+      data = { error: `Server returned non-JSON response: ${text.substring(0, 100)}...` };
+    }
+
+    if (!response.ok) {
+      // Simplified error logging
+      console.error('🚨 API Error:', {
+        url,
+        method: options.method || 'GET',
+        status: response.status,
+        statusText: response.statusText,
+        responseData: data,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Handle different error formats from the backend
+      let errorMessage = 'API request failed';
+
+      if (data) {
+        if (data.detail) {
+          // Handle array of validation errors
+          if (Array.isArray(data.detail)) {
+            // Extract messages from validation error array
+            const messages = data.detail.map((err: any) => {
+              if (err.msg) {
+                // Include field location if available
+                const location = err.loc && err.loc.length > 0 ? err.loc[err.loc.length - 1] : null;
+                return location ? `${location}: ${err.msg}` : err.msg;
+              }
+              return typeof err === 'string' ? err : JSON.stringify(err);
+            });
+            errorMessage = messages.join(', ');
+          } else if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+          } else {
+            errorMessage = JSON.stringify(data.detail);
+          }
+        } else if (data.error) {
+          errorMessage = data.error;
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (typeof data === 'string') {
+          errorMessage = data;
+        } else {
+          errorMessage = `API error: ${response.status} ${response.statusText}`;
+        }
+      }
+
+      const err = new Error(errorMessage) as Error & { status: number };
+      err.status = response.status;
+      throw err;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('🔥 API Network Error:', error?.message || error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('An unexpected error occurred');
+  }
+}
+
+// Helper for GET requests
+export function apiGet(path: string, options: RequestInit = {}) {
+  return apiFetch(path, { ...options, method: 'GET' });
+}
+
+// Helper for POST requests
+export function apiPost(path: string, body: any, options: RequestInit = {}) {
+  return apiFetch(path, {
+    ...options,
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+// Helper for PUT requests. Pass a FormData body for file uploads — apiFetch
+// already strips Content-Type so the browser sets the multipart boundary.
+export function apiPut(path: string, body: any, options: RequestInit = {}) {
+  return apiFetch(path, {
+    ...options,
+    method: 'PUT',
+    body: body instanceof FormData ? body : JSON.stringify(body),
+  });
+}
+
+// Helper for PATCH requests
+export function apiPatch(path: string, body: any, options: RequestInit = {}) {
+  return apiFetch(path, {
+    ...options,
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
+// Helper for DELETE requests
+export function apiDelete(path: string, options: RequestInit = {}) {
+  return apiFetch(path, { ...options, method: 'DELETE' });
+}
+
+// Helper for public GET requests (no auth, no cookies)
+export async function apiPublicGet(path: string) {
+  const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Public API error: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// Helper for public POST requests (no auth, no cookies)
+export async function apiPublicPost(path: string, body: any, queryParams?: URLSearchParams) {
+  const base = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+  const url = queryParams?.toString() ? `${base}?${queryParams}` : base;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    // Append the backend's own `detail` when there is one. Several endpoints return the
+    // same status for different causes (e.g. /trial/activate 400s for both an expired
+    // token and a rejected password); without the detail the caller can only show one
+    // generic message and will name the wrong cause half the time.
+    const detail = await response
+      .json()
+      .then((payload) => (typeof payload?.detail === 'string' ? payload.detail : ''))
+      .catch(() => '');
+    throw new Error(
+      `Public API error: ${response.status} ${response.statusText}${detail ? ` - ${detail}` : ''}`
+    );
+  }
+  return response.json();
+}
+
+// Helper for POST requests that return binary data
+export async function apiPostBinary(path: string, body: any, options: RequestInit = {}) {
+  const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+  const headers: HeadersInit = {
+    ...getHeaders(),
+    ...(options.headers || {}),
+  };
+
+  const response = await fetch(url, {
+    ...options,
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+    credentials: 'include', // Include cookies
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status} ${response.statusText}`);
+  }
+
+  return response.blob();
+}
+
+// Helper for GET requests that return binary data (e.g. file downloads)
+export async function apiGetBinary(path: string, options: RequestInit = {}) {
+  const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+  const selectedOrgSlug = getSelectOrg();
+  const headers: HeadersInit = {
+    ...(selectedOrgSlug ? { 'x-dalgo-org': selectedOrgSlug } : {}),
+    ...(options.headers || {}),
+  };
+
+  const response = await fetch(url, {
+    ...options,
+    method: 'GET',
+    headers,
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status} ${response.statusText}`);
+  }
+
+  return response.blob();
+}

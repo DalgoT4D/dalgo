@@ -1,0 +1,760 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { NEXT_PUBLIC_WEBAPP_ENVIRONMENT } from '@/constants/constants';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
+import {
+  BarChart3,
+  Database,
+  Settings,
+  FileText,
+  AlertTriangle,
+  ChevronDown,
+  Home,
+  LayoutDashboard,
+  ChartBarBig,
+  ChevronLeft,
+  ChevronRight,
+  Users,
+  Target,
+  Palette,
+} from 'lucide-react';
+import IngestIcon from '@/assets/icons/ingest';
+import TransformIcon from '@/assets/icons/transform';
+import ExploreIcon from '@/assets/icons/explore';
+import DataQualityIcon from '@/assets/icons/data-quality';
+import PipelineOverviewIcon from '@/assets/icons/pipeline-overview';
+import OrchestrateIcon from '@/assets/icons/orchestrate';
+import { Header } from './header';
+import { useAuthStore } from '@/stores/authStore';
+import { FREE_TRIAL_PLAN_NAME } from '@/constants/trial';
+import { useSidebarStore } from '@/stores/sidebarStore';
+import { useFeatureFlags, FeatureFlagKeys } from '@/hooks/api/useFeatureFlags';
+import { TransformTypeEnum as TransformType, useTransformType } from '@/hooks/api/useTransform';
+import Image from 'next/image';
+import { ACCESS_PAGE_ROLES, ADMIN_ROLES, DATA_SECTION_ROLES, Role, useRbac } from '@/lib/rbac';
+import { ResourceSharingNoticeCarousel } from '@/components/onboarding/resource-sharing-notice-carousel';
+import { TourGate } from '@/components/onboarding/tour-gate';
+
+// Define types for navigation items
+export interface NavItemType {
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  isActive: boolean;
+  children?: NavItemType[];
+  hide?: boolean;
+  visibleToRoles?: Role[];
+}
+
+// Menu items to hide in production environment
+const PRODUCTION_HIDDEN_ITEMS: string[] = [
+  // Add menu item titles to hide in production
+];
+// Function to filter menu items for production environment
+const filterMenuItemsForProduction = (items: NavItemType[]): NavItemType[] => {
+  if (NEXT_PUBLIC_WEBAPP_ENVIRONMENT !== 'production') {
+    return items; // Show full menu for development and staging
+  }
+
+  return items.filter((item) => {
+    // Check if the main item should be hidden in production
+    if (PRODUCTION_HIDDEN_ITEMS.includes(item.title)) {
+      return false;
+    }
+
+    // If item has children, filter them too
+    if (item.children && item.children.length > 0) {
+      const filteredChildren = item.children.filter(
+        (child) => !PRODUCTION_HIDDEN_ITEMS.includes(child.title)
+      );
+
+      // If all children are hidden, hide the parent too
+      if (filteredChildren.length === 0) {
+        return false;
+      }
+
+      // Return item with filtered children
+      return {
+        ...item,
+        children: filteredChildren,
+      };
+    }
+
+    return true;
+  });
+};
+
+// Define the navigation items with their routes and icons
+export const getNavItems = (
+  currentPath: string,
+  hasSupersetSetup: boolean = false,
+  isFeatureFlagEnabled: (flag: FeatureFlagKeys) => boolean,
+  transformType?: string,
+  roleSlug: Role | '' = '',
+  isTrialOrg: boolean = false
+): NavItemType[] => {
+  const allNavItems: NavItemType[] = [
+    {
+      title: 'Impact',
+      href: '/impact',
+      icon: Home,
+      isActive: currentPath === '/impact',
+    },
+    {
+      title: 'KPIs',
+      href: '/kpis',
+      icon: Target,
+      isActive: currentPath.startsWith('/kpis'),
+    },
+    {
+      title: 'Charts',
+      href: '/charts',
+      icon: ChartBarBig,
+      isActive: currentPath.startsWith('/charts'),
+    },
+    {
+      title: 'Dashboards',
+      href: '/dashboards',
+      icon: LayoutDashboard,
+      // /dashboards/usage lives under the Settings section, not Dashboards —
+      // exclude it so the Dashboards nav item doesn't highlight when viewing it.
+      isActive:
+        (currentPath === '/dashboards' || currentPath.startsWith('/dashboards/')) &&
+        !currentPath.startsWith('/dashboards/usage'),
+    },
+    {
+      title: 'Reports',
+      href: '/reports',
+      icon: FileText,
+      isActive: currentPath.startsWith('/reports'),
+      hide: !isFeatureFlagEnabled(FeatureFlagKeys.REPORTS),
+    },
+    {
+      title: 'Alerts',
+      href: '/alerts',
+      icon: AlertTriangle,
+      isActive: currentPath.startsWith('/alerts'),
+    },
+    {
+      title: 'Data',
+      // Parent nav item is clickable and would 404/AccessDeny anyone whose role
+      // can't view /pipeline. Route Members to /metrics (their first Data child)
+      // and staff to /pipeline. Empty roleSlug (still loading) → default to
+      // /metrics — safest for the yet-unknown role.
+      href: DATA_SECTION_ROLES.includes(roleSlug as Role) ? '/pipeline' : '/metrics',
+      icon: Database,
+      isActive: false,
+      // Data parent visible to everyone; staff-only children carry their own
+      // visibleToRoles so Members only see Metrics + Alerts (per resource-sharing spec).
+      children: [
+        {
+          title: 'Overview',
+          href: '/pipeline',
+          icon: PipelineOverviewIcon,
+          isActive: currentPath.startsWith('/pipeline'),
+          visibleToRoles: DATA_SECTION_ROLES,
+        },
+        {
+          title: 'Ingest',
+          href: '/ingest',
+          icon: IngestIcon,
+          isActive: currentPath.startsWith('/ingest'),
+          visibleToRoles: DATA_SECTION_ROLES,
+        },
+        {
+          title: 'Transform',
+          href: '/transform',
+          icon: TransformIcon,
+          isActive: currentPath.startsWith('/transform'),
+          visibleToRoles: DATA_SECTION_ROLES,
+        },
+        {
+          title: 'Orchestrate',
+          href: '/orchestrate',
+          icon: OrchestrateIcon,
+          isActive: currentPath.startsWith('/orchestrate'),
+          visibleToRoles: DATA_SECTION_ROLES,
+        },
+        {
+          title: 'Explore',
+          href: '/explore',
+          icon: ExploreIcon,
+          isActive: currentPath.startsWith('/explore'),
+          visibleToRoles: DATA_SECTION_ROLES,
+        },
+        {
+          title: 'Metrics',
+          href: '/metrics',
+          icon: BarChart3,
+          isActive: currentPath.startsWith('/metrics'),
+        },
+        {
+          title: 'Quality',
+          href: '/data-quality',
+          icon: DataQualityIcon,
+          isActive: currentPath.startsWith('/data-quality'),
+          visibleToRoles: DATA_SECTION_ROLES,
+          // Hidden for free-trial orgs: Elementary needs a full dbt setup a trial org
+          // never reaches, so the page can only ever show its not-set-up state.
+          hide:
+            !isFeatureFlagEnabled(FeatureFlagKeys.DATA_QUALITY) ||
+            transformType === TransformType.UI ||
+            isTrialOrg,
+        },
+      ],
+    },
+    {
+      title: 'Settings',
+      // Parent nav is clickable — route each role to a Settings child they can
+      // actually reach. Admins land on Branding (the historical default);
+      // Analysts don't have Branding, so land them on Access instead.
+      href: ADMIN_ROLES.includes(roleSlug as Role) ? '/settings/branding' : '/settings/access',
+      icon: Settings,
+      isActive: false,
+      // Every Settings child requires Analyst+ or a role-gated feature flag —
+      // hide the whole section from Members. (Superset Usage under Settings
+      // has its own feature-flag + viz_url gate; if any of those cases opens
+      // up for Members later, relax this.)
+      visibleToRoles: ACCESS_PAGE_ROLES,
+      children: [
+        {
+          title: 'Branding',
+          href: '/settings/branding',
+          icon: Palette,
+          isActive: currentPath.startsWith('/settings/branding'),
+          visibleToRoles: ADMIN_ROLES,
+        },
+        {
+          title: 'Access',
+          href: '/settings/access',
+          icon: Users,
+          isActive: currentPath.startsWith('/settings/access'),
+          visibleToRoles: ACCESS_PAGE_ROLES,
+        },
+        {
+          title: 'Warehouse',
+          href: '/settings/warehouse',
+          icon: Database,
+          isActive: currentPath.startsWith('/settings/warehouse'),
+          visibleToRoles: DATA_SECTION_ROLES,
+        },
+        ...(isFeatureFlagEnabled(FeatureFlagKeys.USAGE_DASHBOARD) && hasSupersetSetup
+          ? [
+              {
+                title: 'Superset Usage',
+                href: '/dashboards/usage',
+                icon: BarChart3,
+                isActive: currentPath === '/dashboards/usage',
+              },
+            ]
+          : []),
+      ],
+    },
+  ];
+
+  // Apply role visibility: set hide=true for items whose visibleToRoles excludes the current role.
+  // Composes with existing feature-flag hide — both must pass for an item to show.
+  // An empty roleSlug (user not yet loaded) is treated as most-restrictive.
+  const applyRoleFilter = (items: NavItemType[]): NavItemType[] =>
+    items.map((item) => {
+      const hiddenByRole = !!(
+        item.visibleToRoles &&
+        (!roleSlug || !item.visibleToRoles.includes(roleSlug as Role))
+      );
+      const children = item.children ? applyRoleFilter(item.children) : undefined;
+      return {
+        ...item,
+        hide: item.hide || hiddenByRole,
+        ...(children !== undefined ? { children } : {}),
+      };
+    });
+
+  return applyRoleFilter(filterMenuItemsForProduction(allNavItems));
+};
+
+// A parent menu item is "active" when the current path lives inside any of its visible children.
+const hasActiveChild = (item: NavItemType): boolean => {
+  if (!item.children) return false;
+  return item.children.some((child) => !child.hide && child.isActive);
+};
+
+// Collapsed navigation item component
+function CollapsedNavItem({
+  item,
+  onExpandSidebar,
+}: {
+  item: NavItemType;
+  onExpandSidebar?: () => void;
+}) {
+  const visibleChildren = item.children?.filter((child) => !child.hide) || [];
+  const hasChildren = visibleChildren.length > 0;
+  // Only self-active highlights here. Parents (Data/Settings) never highlight in collapsed view —
+  // their children render directly below and carry the selection themselves.
+  const active = item.isActive;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link
+            href={item.href}
+            onClick={() => {
+              // Parents (Data, Settings) expand the sidebar so the full submenu is visible.
+              if (hasChildren) {
+                onExpandSidebar?.();
+              }
+            }}
+            className={cn(
+              'flex items-center justify-center w-full p-3 rounded-lg hover:bg-[#0066FF]/3 hover:text-[#002B5C] transition-colors group',
+              active && 'bg-[#0066FF]/10 text-[#002B5C] font-bold'
+            )}
+          >
+            <item.icon className="h-6 w-6 flex-shrink-0" />
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent side="right" className="ml-2">
+          <p className="font-medium">{item.title}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+// Expanded navigation item component
+function ExpandedNavItem({
+  item,
+  isExpanded,
+  onToggle,
+}: {
+  item: NavItemType;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const visibleChildren = item.children?.filter((child) => !child.hide) || [];
+  const hasChildren = visibleChildren.length > 0;
+
+  if (hasChildren) {
+    return (
+      <div className="space-y-1">
+        <div
+          className={cn(
+            'flex items-center rounded-lg transition-colors hover:bg-[#0066FF]/3 group',
+            item.isActive && 'bg-[#0066FF]/10 hover:bg-[#0066FF]/10'
+          )}
+        >
+          <Link
+            href={item.href}
+            className={cn(
+              'flex items-center gap-3 p-3 transition-colors flex-1 rounded-l-lg group-hover:text-[#002B5C]',
+              item.isActive && 'text-[#002B5C] font-bold'
+            )}
+            title={item.title}
+          >
+            <item.icon className="h-6 w-6 flex-shrink-0" />
+            <span className={cn('font-medium', item.isActive && 'font-bold')}>{item.title}</span>
+          </Link>
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={`Toggle ${item.title} submenu`}
+            className={cn(
+              'p-2 transition-colors rounded-r-lg group-hover:text-[#002B5C]',
+              item.isActive && 'text-[#002B5C]'
+            )}
+          >
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 transition-transform flex-shrink-0 text-muted-foreground group-hover:text-[#002B5C]',
+                isExpanded && 'rotate-180'
+              )}
+            />
+          </button>
+        </div>
+
+        {isExpanded && (
+          <div className="ml-8 space-y-1">
+            {visibleChildren.map((child, index) => (
+              <Link
+                key={index}
+                href={child.href}
+                className={cn(
+                  'flex items-center gap-3 p-3 rounded-lg hover:bg-[#0066FF]/3 hover:text-[#002B5C] transition-colors text-sm',
+                  child.isActive && 'bg-[#0066FF]/10 text-[#002B5C] font-bold'
+                )}
+                title={child.title}
+              >
+                <child.icon
+                  className={cn(
+                    'flex-shrink-0',
+                    child.title === 'About' ||
+                      child.title === 'Branding' ||
+                      child.title === 'Warehouse' ||
+                      child.title === 'User Management'
+                      ? 'h-5 w-5'
+                      : 'h-6 w-6'
+                  )}
+                  style={{ strokeWidth: 1.5 }}
+                />
+                <span>{child.title}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        'flex items-center gap-3 p-3 rounded-lg hover:bg-[#0066FF]/3 hover:text-[#002B5C] transition-colors group',
+        item.isActive && 'bg-[#0066FF]/10 text-[#002B5C] font-bold'
+      )}
+      title={item.title}
+    >
+      <item.icon className="h-6 w-6 flex-shrink-0" />
+      <span className={cn('font-medium', item.isActive && 'font-bold')}>{item.title}</span>
+    </Link>
+  );
+}
+
+// Mobile navigation item component
+function MobileNavItem({
+  item,
+  onClose,
+  isExpanded,
+  onToggle,
+}: {
+  item: NavItemType;
+  onClose: () => void;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const visibleChildren = item.children?.filter((child) => !child.hide) || [];
+  const hasChildren = visibleChildren.length > 0;
+
+  if (hasChildren) {
+    return (
+      <div className="space-y-1">
+        <div
+          className={cn(
+            'flex items-center rounded-lg transition-colors hover:bg-[#0066FF]/3 group',
+            item.isActive && 'bg-[#0066FF]/10 hover:bg-[#0066FF]/10'
+          )}
+        >
+          <Link
+            href={item.href}
+            onClick={onClose}
+            className={cn(
+              'flex items-center gap-3 p-3 transition-colors flex-1 rounded-l-lg group-hover:text-[#002B5C]',
+              item.isActive && 'text-[#002B5C] font-bold'
+            )}
+          >
+            <item.icon className="h-6 w-6" />
+            <span className={cn('font-medium', item.isActive && 'font-bold')}>{item.title}</span>
+          </Link>
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={`Toggle ${item.title} submenu`}
+            className={cn(
+              'p-2 transition-colors rounded-r-lg group-hover:text-[#002B5C]',
+              item.isActive && 'text-[#002B5C]'
+            )}
+          >
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 transition-transform text-muted-foreground group-hover:text-[#002B5C]',
+                isExpanded && 'rotate-180'
+              )}
+            />
+          </button>
+        </div>
+        {isExpanded && (
+          <div className="ml-8 space-y-1">
+            {visibleChildren.map((child, index) => (
+              <Link
+                key={index}
+                href={child.href}
+                onClick={onClose}
+                className={cn(
+                  'flex items-center gap-3 p-3 rounded-lg hover:bg-[#0066FF]/3 hover:text-[#002B5C] transition-colors',
+                  child.isActive && 'bg-[#0066FF]/10 text-[#002B5C] font-bold'
+                )}
+              >
+                <child.icon
+                  className={cn(
+                    'flex-shrink-0',
+                    child.title === 'About' ||
+                      child.title === 'Branding' ||
+                      child.title === 'Warehouse' ||
+                      child.title === 'User Management'
+                      ? 'h-5 w-5'
+                      : 'h-6 w-6'
+                  )}
+                  style={{ strokeWidth: 1.5 }}
+                />
+                <span className="text-sm">{child.title}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={item.href}
+      onClick={onClose}
+      className={cn(
+        'flex items-center gap-3 p-3 rounded-lg hover:bg-[#0066FF]/3 hover:text-[#002B5C] transition-colors',
+        item.isActive && 'bg-[#0066FF]/10 text-[#002B5C] font-bold'
+      )}
+    >
+      <item.icon className="h-6 w-6 flex-shrink-0" />
+      <span className={cn('font-medium', item.isActive && 'font-bold')}>{item.title}</span>
+    </Link>
+  );
+}
+
+export function MainLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // Collapse and per-menu open/closed both live in the sidebar store rather than in local
+  // state: the trial walkthrough opens the menu from outside this component when a coachmark
+  // is anchored to a nav item (see stores/sidebarStore.ts). Everything below still drives them
+  // exactly as it did — this component remains the only thing that ever COLLAPSES the sidebar.
+  const isSidebarCollapsed = useSidebarStore((s) => s.collapsed);
+  const setIsSidebarCollapsed = useSidebarStore((s) => s.setCollapsed);
+  const toggleSidebarCollapsed = useSidebarStore((s) => s.toggleCollapsed);
+  // Explicit open/closed state per parent menu. `undefined` means "follow the path" (fallback
+  // to hasActiveChild). Once set (auto on subtree entry, or manually via the chevron), the
+  // state persists — navigating out of a subtree does NOT auto-close the parent.
+  const expandedMenus = useSidebarStore((s) => s.expandedMenus);
+  const openMenus = useSidebarStore((s) => s.openMenus);
+  const setMenuExpanded = useSidebarStore((s) => s.setMenuExpanded);
+  const registerParentMenus = useSidebarStore((s) => s.registerParentMenus);
+  const responsive = useResponsiveLayout();
+  const { currentOrg } = useAuthStore();
+  const { role } = useRbac();
+  const { isFeatureFlagEnabled } = useFeatureFlags();
+  const { transformType } = useTransformType();
+  const getCurrentOrgUser = useAuthStore((s) => s.getCurrentOrgUser);
+  const isTrialOrg = getCurrentOrgUser()?.subscription_plan === FREE_TRIAL_PLAN_NAME;
+  const hasSupersetSetup = Boolean(currentOrg?.viz_url);
+  const navItems = getNavItems(
+    pathname,
+    hasSupersetSetup,
+    isFeatureFlagEnabled,
+    transformType,
+    role ?? '',
+    isTrialOrg
+  );
+
+  // Auto-open a parent's submenu when the current path enters its subtree. Never auto-closes.
+  useEffect(() => {
+    openMenus(navItems.filter((item) => item.children && hasActiveChild(item)).map((i) => i.title));
+    // navItems is recomputed each render from the same inputs; depending on pathname is sufficient.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, openMenus]);
+
+  // Publish "which parent owns this child href" for anything that needs to open the menu from
+  // outside the layout — the walkthrough coachmarks anchored to /ingest, /transform and
+  // /orchestrate, which are Data's children and aren't rendered at all while Data is closed.
+  useEffect(() => {
+    const map: Record<string, string> = {};
+    for (const item of navItems) {
+      for (const child of item.children ?? []) {
+        if (!child.hide) map[child.href] = item.title;
+      }
+    }
+    registerParentMenus(map);
+    // Same as above: navItems is derived from pathname and the memo-stable hook values.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, registerParentMenus]);
+
+  const getMenuExpanded = (item: NavItemType): boolean =>
+    expandedMenus[item.title] ?? hasActiveChild(item);
+
+  const toggleMenuExpansion = (item: NavItemType) => {
+    setMenuExpanded(item.title, !getMenuExpanded(item));
+  };
+
+  // Auto-collapse sidebar on specific dashboard/chart pages
+  useEffect(() => {
+    const shouldAutoCollapse =
+      // Chart pages
+      pathname === '/charts/create' ||
+      pathname.match(/^\/charts\/[^\/]+\/edit$/) ||
+      (pathname.match(/^\/charts\/[^\/]+$/) && !pathname.includes('/edit')) ||
+      // Dashboard pages
+      pathname === '/dashboards/create' ||
+      pathname.match(/^\/dashboards\/[^\/]+\/edit$/) ||
+      (pathname.match(/^\/dashboards\/[^\/]+$/) && !pathname.includes('/edit')) ||
+      // Report pages
+      pathname.match(/^\/reports\/[^\/]+$/) ||
+      // Transform canvas (edit workflow)
+      pathname === '/transform/canvas';
+
+    // Auto-collapse when navigating to these pages
+    if (shouldAutoCollapse) {
+      setIsSidebarCollapsed(true);
+    }
+  }, [pathname, setIsSidebarCollapsed]);
+
+  // Determine if sidebar should be shown based on screen size
+  const shouldShowDesktopSidebar = responsive.isDesktop;
+
+  return (
+    <div id="main-layout-root" className="h-screen w-screen overflow-hidden bg-gray-50">
+      {/* SECTION 1: NAVBAR - Fixed Full Width */}
+      <header
+        id="main-layout-navbar"
+        className="h-16 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-shrink-0 shadow-md"
+      >
+        <div id="main-layout-navbar-container" className="h-full px-4 lg:px-6">
+          <Header
+            onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            hideMenu={false}
+            responsive={responsive}
+          />
+        </div>
+      </header>
+
+      {/* CONTENT AREA: Remaining Height */}
+      <div id="main-layout-content-area" className="flex h-[calc(100vh-4rem)]">
+        {/* SECTION 2: SIDEBAR - Only show on desktop screens */}
+        {shouldShowDesktopSidebar && (
+          <aside
+            id="main-layout-sidebar"
+            className={cn(
+              'flex flex-col border-r bg-background transition-all duration-300 flex-shrink-0 relative',
+              isSidebarCollapsed ? 'w-16' : 'w-64'
+            )}
+          >
+            {/* Lightweight Collapse Button - Top Edge */}
+            <div className="absolute top-6 -right-3 z-20">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSidebarCollapsed}
+                className={cn(
+                  'h-6 w-6 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200/60 shadow-sm hover:bg-white hover:shadow-md transition-all duration-200',
+                  'text-gray-400 hover:text-gray-600',
+                  'opacity-75 hover:opacity-100'
+                )}
+                title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              >
+                {isSidebarCollapsed ? (
+                  <ChevronRight className="h-5 w-5" />
+                ) : (
+                  <ChevronLeft className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
+
+            {/* Sidebar Navigation */}
+            <div id="main-layout-sidebar-nav" className="flex-1 overflow-y-auto p-4 space-y-2">
+              {isSidebarCollapsed
+                ? // Collapsed: top-level icons; if a parent's submenu is open (path-derived or
+                  // manually toggled), render its children as icons directly beneath it.
+                  navItems
+                    .filter((item) => !item.hide)
+                    .flatMap((item, index) => {
+                      const visibleChildren = item.children?.filter((c) => !c.hide) || [];
+                      if (visibleChildren.length > 0) {
+                        return visibleChildren.map((child, cIdx) => (
+                          <CollapsedNavItem key={`${child.href}-${cIdx}`} item={child} />
+                        ));
+                      }
+                      return [
+                        <CollapsedNavItem
+                          key={`${item.href}-${index}`}
+                          item={item}
+                          onExpandSidebar={() => setIsSidebarCollapsed(false)}
+                        />,
+                      ];
+                    })
+                : // Expanded: hierarchical; submenu auto-opens on subtree entry, stays until the
+                  // user closes it via the chevron.
+                  navItems
+                    .filter((item) => !item.hide)
+                    .map((item, index) => (
+                      <ExpandedNavItem
+                        key={index}
+                        item={item}
+                        isExpanded={getMenuExpanded(item)}
+                        onToggle={() => toggleMenuExpansion(item)}
+                      />
+                    ))}
+            </div>
+          </aside>
+        )}
+        {/* Mobile Sidebar */}
+        <Sheet
+          key="main-layout-mobile-sidebar"
+          open={isMobileMenuOpen}
+          onOpenChange={setIsMobileMenuOpen}
+        >
+          <SheetContent id="main-layout-mobile-sidebar-content" side="left" className="p-0 w-72">
+            <SheetTitle className="sr-only">Dalgo navigation</SheetTitle>
+            <div id="main-layout-mobile-sidebar-wrapper" className="flex flex-col h-full">
+              <div className="p-4 border-b">
+                <div className="flex items-center gap-3">
+                  <Image
+                    src="/dalgo_logo.svg"
+                    alt="Dalgo"
+                    width={60}
+                    height={68}
+                    className="text-primary"
+                  />
+                </div>
+              </div>
+
+              <div className="flex-1 p-4 space-y-2 overflow-y-auto">
+                {navItems
+                  .filter((item) => !item.hide)
+                  .map((item, index) => (
+                    <MobileNavItem
+                      key={index}
+                      item={item}
+                      onClose={() => setIsMobileMenuOpen(false)}
+                      isExpanded={getMenuExpanded(item)}
+                      onToggle={() => toggleMenuExpansion(item)}
+                    />
+                  ))}
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* SECTION 3: MAIN CONTENT AREA - Remaining Width */}
+        <main id="main-layout-main-content" className="flex-1 overflow-hidden bg-gray-50">
+          {/* Page Container - Dashboard pages handle their own scrolling */}
+          <div id="main-layout-page-container" className="h-full w-full">
+            {/* Consistent Inner Padding Container - No padding for dashboard pages */}
+            <div id="main-layout-inner-container" className="h-full">
+              {/* Content Area */}
+              <div id="main-layout-content-wrapper" className="h-full w-full">
+                {children}
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      {/* One-time RBAC v2 migration notice — shows once per user, on any page */}
+      <ResourceSharingNoticeCarousel />
+      <TourGate />
+    </div>
+  );
+}

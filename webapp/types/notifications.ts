@@ -1,0 +1,69 @@
+// Core notification interface
+export interface Notification {
+  id: number;
+  urgent: boolean;
+  author: string;
+  message: string;
+  read_status: boolean;
+  timestamp: string; // ISO 8601 format from backend
+}
+
+// API response for paginated notifications
+export interface NotificationsResponse {
+  total_notifications: number;
+  res: Notification[];
+}
+
+// Unread count API response
+export interface UnreadCountResponse {
+  res: number;
+}
+
+// User preferences
+export interface UserPreferences {
+  enable_email_notifications: boolean;
+  enable_schema_change_notifications: boolean;
+  last_visited_transform_tab?: 'ui' | 'github' | null;
+}
+
+// Organization preferences
+export interface OrgPreferences {
+  enable_discord_notifications: boolean;
+  discord_webhook: string;
+  default_analyst_level: 'view' | 'edit' | 'no_access';
+  default_member_level: 'view' | 'edit' | 'no_access';
+  allow_public_sharing: boolean;
+}
+
+// API response wrappers
+export interface UserPreferencesResponse {
+  res: UserPreferences;
+}
+
+export interface OrgPreferencesResponse {
+  res: OrgPreferences;
+}
+
+// Form data for preferences
+export interface NotificationPreferencesForm {
+  enable_email_notifications: boolean;
+  enable_schema_change_notifications: boolean;
+}
+
+// Bulk action payloads
+export interface MarkAsReadPayload {
+  notification_ids: number[];
+  read_status: boolean;
+}
+
+// Tab types
+export type NotificationTab = 'all' | 'read' | 'unread';
+
+import { ReadStatus } from '@/constants/notifications';
+
+// Filter parameters
+export interface NotificationFilters {
+  limit: number;
+  page: number;
+  read_status?: ReadStatus; // undefined = all
+}
