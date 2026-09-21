@@ -1,0 +1,27 @@
+FROM python:3.10-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    UV_LINK_MODE=copy
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential curl git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir uv
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project
+
+COPY . .
+RUN uv sync --frozen
+
+EXPOSE 8080
+
+CMD ["uv", "run", "gunicorn", "proxy.main:app", \
+     "--workers", "4", \
+     "--worker-class", "uvicorn.workers.UvicornWorker", \
+     "--bind", "0.0.0.0:8080"]

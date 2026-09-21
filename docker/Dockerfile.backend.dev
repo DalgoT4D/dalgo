@@ -1,0 +1,33 @@
+FROM python:3.10.12-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_COMPILE_BYTECODE=1 \
+    PATH=/opt/venv/bin:$PATH
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential libpq-dev curl git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir uv
+
+# Stage A: deps only — cached layer, invalidates only on lockfile change.
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project
+
+# Stage B: full sync including the project (editable install pointing to /app).
+# At runtime, when /app is bind-mounted, the editable install still resolves correctly.
+COPY . .
+RUN uv sync --frozen
+
+EXPOSE 8002
+
+CMD ["uvicorn", "ddpui.asgi:application", \
+     "--host", "0.0.0.0", "--port", "8002", \
+     "--reload", "--timeout-keep-alive", "60"]
