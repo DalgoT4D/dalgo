@@ -30,3 +30,7 @@ logs/
 .DS_Store
 .idea/
 .vscode/
+
+# Sync tooling
+.sync-cache/
+.sync-state
