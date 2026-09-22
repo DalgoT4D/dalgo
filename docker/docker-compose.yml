@@ -14,6 +14,16 @@ x-backend: &backend
   env_file: ../backend/.env
   environment:
     REDIS_HOST: redis
+    REDIS_PORT: ${REDIS_PORT:-6379}
+    DBPORT: ${DBPORT:-5432}
+    PREFECT_HTTP_TIMEOUT: ${PREFECT_HTTP_TIMEOUT:-30}
+    PREFECT_RETRY_CRASHED_FLOW_RUNS: ${PREFECT_RETRY_CRASHED_FLOW_RUNS:-False}
+    PREFECT_AIRBYTE_TASKS_TIMEOUT_SECS: ${PREFECT_AIRBYTE_TASKS_TIMEOUT_SECS:-60}
+    AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-ap-south-1}
+    AIRBYTE_SERVER_APIVER: ${AIRBYTE_SERVER_APIVER:-v1}
+    AIRBYTE_USE_SSL: ${AIRBYTE_USE_SSL:-false}
+    LLM_SERVICE_API_URL: http://ai-llm-service:7001
+    LLM_SERVICE_API_VER: ${LLM_SERVICE_API_VER:-v1}
   restart: unless-stopped
   depends_on:
     redis:
@@ -28,6 +38,8 @@ x-ai-llm: &ai-llm
     CELERY_BROKER_URL: redis://redis:6379/0
     CELERY_RESULT_BACKEND: redis://redis:6379/0
     CELERY_BROKER: redis://redis:6379/0
+    AI_PLATFORM_POLLING_INTERVAL_SECS: ${AI_PLATFORM_POLLING_INTERVAL_SECS:-30}
+    AI_PLATFORM_REQUEST_TIMEOUT_SECS: ${AI_PLATFORM_REQUEST_TIMEOUT_SECS:-120}
   restart: unless-stopped
   depends_on:
     redis:
@@ -100,6 +112,12 @@ services:
     env_file: ../prefect-proxy/.env
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
+      PREFECT_PROXY_API_PORT: ${PREFECT_PROXY_API_PORT:-8080}
+      PREFECT_API_TIMEOUT: ${PREFECT_API_TIMEOUT:-30}
+      PREFECT_API_RETRY: ${PREFECT_API_RETRY:-false}
+      PREFECT_API_RETRY_DELAY: ${PREFECT_API_RETRY_DELAY:-3}
+      PREFECT_PROXY_GIT_BRANCH: ${PREFECT_PROXY_GIT_BRANCH:-main}
+      LOGDIR: ${LOGDIR:-logs}
     ports:
       - "${PROXY_HOST_PORT:-8080}:8080"
     depends_on:
@@ -109,7 +127,7 @@ services:
   prefect-worker-ddp-1:
     image: dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
     container_name: prefect-worker-ddp-1
-    command: prefect worker start --pool ${PREFECT_WORK_POOL:-dalgo_work_pool} -q ddp --limit 1
+    command: prefect worker start --pool ${PREFECT_WORK_POOL:-dalgo_work_pool} -q ddp
     env_file: ../prefect-proxy/.env
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
@@ -117,10 +135,10 @@ services:
       - prefect-server
     restart: unless-stopped
 
-  prefect-worker-ddp-2:
+  prefect-worker-manual-dbt-1:
     image: dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
-    container_name: prefect-worker-ddp-2
-    command: prefect worker start --pool ${PREFECT_WORK_POOL:-dalgo_work_pool} -q ddp --limit 1
+    container_name: prefect-worker-manual-dbt-1
+    command: prefect worker start --pool ${PREFECT_WORK_POOL:-dalgo_work_pool} -q manual-dbt
     env_file: ../prefect-proxy/.env
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
@@ -128,10 +146,10 @@ services:
       - prefect-server
     restart: unless-stopped
 
-  prefect-worker-manual-dbt:
+  prefect-worker-edr:
     image: dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
-    container_name: prefect-worker-manual-dbt
-    command: prefect worker start --pool ${PREFECT_WORK_POOL:-dalgo_work_pool} -q manual-dbt --limit 1
+    container_name: prefect-worker-edr
+    command: prefect worker start --pool ${PREFECT_WORK_POOL:-dalgo_work_pool} -q edr
     env_file: ../prefect-proxy/.env
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
