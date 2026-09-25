@@ -29,9 +29,15 @@ x-backend-base: &backend-base
     AIRBYTE_USE_SSL: ${AIRBYTE_USE_SSL:-false}
     LLM_SERVICE_API_URL: http://ai-llm-service:7001
     LLM_SERVICE_API_VER: ${LLM_SERVICE_API_VER:-v1}
+    DEV_SECRETS_DIR: /secrets
   volumes:
     - ../backend:/app
     - backend_uv_cache:/root/.cache/uv
+    - ${DEV_SECRETS_HOST_PATH}:/secrets:ro
+    - ${CLIENTDBT_ROOT_MOUNT}:${CLIENTDBT_ROOT_MOUNT}
+    - ${DBT_VENV_MOUNT}:${DBT_VENV_MOUNT}
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
   restart: unless-stopped
 
 x-ai-llm-base: &ai-llm-base
@@ -68,19 +74,19 @@ services:
   prefect-server:
     image: dalgo-prefect:dev
     container_name: prefect-server
-    command: prefect server start --host 0.0.0.0
+    command: uv run prefect server start --host 0.0.0.0
     ports:
       - "4200:4200"
     volumes:
       - prefect_data:/root/.prefect
-      - ../prefect-proxy/prefect-profiles.toml:/root/.prefect/profiles.toml:ro
+      - ../prefect-proxy/profiles.toml:/root/.prefect/profiles.toml:ro
     restart: unless-stopped
 
   prefect-proxy:
     image: dalgo-prefect:dev
     build:
-      context: ../prefect-proxy
-      dockerfile: Dockerfile.prefect-proxy.dev
+      context: ..
+      dockerfile: docker/Dockerfile.prefect-proxy.dev
     container_name: prefect-proxy
     env_file: ../prefect-proxy/.env
     environment:
@@ -103,9 +109,13 @@ services:
   prefect-worker-ddp-1:
     image: dalgo-prefect:dev
     container_name: prefect-worker-ddp-1
-    command: prefect worker start --pool ${PREFECT_WORK_POOL:-dalgo_work_pool} -q ddp
+    command: sh -c "uv run prefect worker start --pool $${PREFECT_WORK_POOL:-dalgo_work_pool} -q ddp"
+    env_file: ../prefect-proxy/.env
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
+    volumes:
+      - ${CLIENTDBT_ROOT_MOUNT}:${CLIENTDBT_ROOT_MOUNT}
+      - ${DBT_VENV_MOUNT}:${DBT_VENV_MOUNT}
     depends_on:
       - prefect-server
     restart: unless-stopped
@@ -113,29 +123,24 @@ services:
   prefect-worker-manual-dbt-1:
     image: dalgo-prefect:dev
     container_name: prefect-worker-manual-dbt-1
-    command: prefect worker start --pool ${PREFECT_WORK_POOL:-dalgo_work_pool} -q manual-dbt
+    command: sh -c "uv run prefect worker start --pool $${PREFECT_WORK_POOL:-dalgo_work_pool} -q manual-dbt"
+    env_file: ../prefect-proxy/.env
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
+    volumes:
+      - ${CLIENTDBT_ROOT_MOUNT}:${CLIENTDBT_ROOT_MOUNT}
+      - ${DBT_VENV_MOUNT}:${DBT_VENV_MOUNT}
     depends_on:
       - prefect-server
     restart: unless-stopped
 
-  prefect-worker-edr:
-    image: dalgo-prefect:dev
-    container_name: prefect-worker-edr
-    command: prefect worker start --pool ${PREFECT_WORK_POOL:-dalgo_work_pool} -q edr
-    environment:
-      PREFECT_API_URL: http://prefect-server:4200/api
-    depends_on:
-      - prefect-server
-    restart: unless-stopped
 
   # ── Backend ────────────────────────────────────────────────────────────────
   backend:
     <<: *backend-base
     build:
-      context: ../backend
-      dockerfile: Dockerfile.backend.dev
+      context: ..
+      dockerfile: docker/Dockerfile.backend.dev
     container_name: backend
     ports:
       - "${BACKEND_HOST_PORT:-8002}:8002"
@@ -178,8 +183,8 @@ services:
   # mount on macOS. Rebuild when code or webapp/.env changes.
   webapp:
     build:
-      context: ../webapp
-      dockerfile: Dockerfile.webapp
+      context: ..
+      dockerfile: docker/Dockerfile.webapp
     container_name: webapp
     env_file: ../webapp/.env
     ports:
@@ -192,8 +197,8 @@ services:
   ai-llm-service:
     <<: *ai-llm-base
     build:
-      context: ../ai-llm-service
-      dockerfile: Dockerfile.ai-llm-service
+      context: ..
+      dockerfile: docker/Dockerfile.ai-llm-service
     container_name: ai-llm-service
     command: uv run uvicorn main:app --port 7001 --host 0.0.0.0 --reload --reload-dir src/ --reload-dir config/
     ports:

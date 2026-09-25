@@ -18,12 +18,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir uv
 
 # Stage A: deps only — cached layer, invalidates only on lockfile change.
-COPY pyproject.toml uv.lock ./
+COPY backend/pyproject.toml backend/uv.lock ./
 RUN uv sync --frozen --no-install-project
 
 # Stage B: full sync including the project (editable install pointing to /app).
 # At runtime, when /app is bind-mounted, the editable install still resolves correctly.
-COPY . .
+COPY backend/ .
 RUN uv sync --frozen
 
 EXPOSE 8002

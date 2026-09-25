@@ -4,14 +4,14 @@
 # Stage 1: Dependencies (runs on native build platform — fast, no emulation)
 FROM --platform=$BUILDPLATFORM node:20-alpine AS deps
 WORKDIR /app
-COPY package*.json ./
+COPY webapp/package*.json ./
 RUN npm ci
 
 # Stage 2: Builder (runs on native build platform — fast, no emulation)
 FROM --platform=$BUILDPLATFORM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY webapp/ .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 

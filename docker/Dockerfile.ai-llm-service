@@ -6,12 +6,12 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 
 # install dependencies
-COPY pyproject.toml /app
-COPY uv.lock /app
+COPY ai-llm-service/pyproject.toml /app
+COPY ai-llm-service/uv.lock /app
 RUN uv sync --frozen --no-cache
 
-COPY /src /app/src
-COPY /config /app/config
-COPY main.py /app/
+COPY ai-llm-service/src /app/src
+COPY ai-llm-service/config /app/config
+COPY ai-llm-service/main.py /app/
 
 EXPOSE 7001

@@ -18,11 +18,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir uv
 
 # Stage A: deps only — cached layer.
-COPY pyproject.toml uv.lock ./
+COPY prefect-proxy/pyproject.toml prefect-proxy/uv.lock ./
 RUN uv sync --frozen --no-install-project
 
 # Stage B: full sync with project (editable install pointing to /app).
-COPY . .
+COPY prefect-proxy/ .
 RUN uv sync --frozen
 
 EXPOSE 8080

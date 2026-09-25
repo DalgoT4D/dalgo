@@ -13,10 +13,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN pip install --no-cache-dir uv
 
-COPY pyproject.toml uv.lock ./
+COPY prefect-proxy/pyproject.toml prefect-proxy/uv.lock ./
 RUN uv sync --frozen --no-install-project
 
-COPY . .
+COPY prefect-proxy/ .
 RUN uv sync --frozen
 
 EXPOSE 8080
