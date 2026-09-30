@@ -1,0 +1,60 @@
+name: Webapp CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'webapp/**'
+      - 'docker/Dockerfile.webapp'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'webapp/**'
+      - 'docker/Dockerfile.webapp'
+
+defaults:
+  run:
+    working-directory: webapp
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: webapp/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Prettier
+        run: npm run format:check
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Set up Docker Buildx
+        if: github.event_name == 'pull_request'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (verify only)
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.workspace }}
+          file: docker/Dockerfile.webapp
+          push: false
+          tags: dalgo-webapp:ci
