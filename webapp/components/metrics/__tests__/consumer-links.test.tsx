@@ -1,0 +1,125 @@
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { ConsumerLinks } from '../consumer-links';
+import type { MetricConsumersResponse } from '@/types/metrics';
+
+describe('ConsumerLinks', () => {
+  it('shows "unused" when no consumers', () => {
+    const consumers: MetricConsumersResponse = { charts: [], kpis: [], alerts: [] };
+    render(<ConsumerLinks consumers={consumers} />);
+    expect(screen.getByText('unused')).toBeInTheDocument();
+  });
+
+  it('shows chart count when only charts', () => {
+    const consumers: MetricConsumersResponse = {
+      charts: [{ id: 1, title: 'Chart A', chart_type: 'bar' }],
+      kpis: [],
+      alerts: [],
+    };
+    render(<ConsumerLinks consumers={consumers} />);
+    expect(screen.getByText('1 Chart')).toBeInTheDocument();
+  });
+
+  it('shows KPI count when only KPIs', () => {
+    const consumers: MetricConsumersResponse = {
+      charts: [],
+      kpis: [{ id: 1, name: 'KPI A' }],
+      alerts: [],
+    };
+    render(<ConsumerLinks consumers={consumers} />);
+    expect(screen.getByText('1 KPI')).toBeInTheDocument();
+  });
+
+  it('shows both counts with comma separator', () => {
+    const consumers: MetricConsumersResponse = {
+      charts: [
+        { id: 1, title: 'Chart A', chart_type: 'bar' },
+        { id: 2, title: 'Chart B', chart_type: 'line' },
+      ],
+      kpis: [{ id: 1, name: 'KPI A' }],
+      alerts: [],
+    };
+    render(<ConsumerLinks consumers={consumers} />);
+    expect(screen.getByText('2 Charts')).toBeInTheDocument();
+    expect(screen.getByText('1 KPI')).toBeInTheDocument();
+    expect(screen.getByText(',')).toBeInTheDocument();
+  });
+
+  it('pluralizes correctly', () => {
+    const consumers: MetricConsumersResponse = {
+      charts: [{ id: 1, title: 'A', chart_type: 'bar' }],
+      kpis: [
+        { id: 1, name: 'KPI A' },
+        { id: 2, name: 'KPI B' },
+        { id: 3, name: 'KPI C' },
+      ],
+      alerts: [],
+    };
+    render(<ConsumerLinks consumers={consumers} />);
+    expect(screen.getByText('1 Chart')).toBeInTheDocument();
+    expect(screen.getByText('3 KPIs')).toBeInTheDocument();
+  });
+
+  it('shows popover with item names on click', async () => {
+    const user = userEvent.setup();
+    const consumers: MetricConsumersResponse = {
+      charts: [
+        { id: 1, title: 'Revenue Chart', chart_type: 'bar' },
+        { id: 2, title: 'Trend Chart', chart_type: 'line' },
+      ],
+      kpis: [],
+      alerts: [],
+    };
+    render(<ConsumerLinks consumers={consumers} />);
+
+    await user.click(screen.getByText('2 Charts'));
+    expect(screen.getByText('Revenue Chart')).toBeInTheDocument();
+    expect(screen.getByText('Trend Chart')).toBeInTheDocument();
+  });
+
+  it('renders links with target="_blank"', async () => {
+    const user = userEvent.setup();
+    const consumers: MetricConsumersResponse = {
+      charts: [{ id: 42, title: 'My Chart', chart_type: 'bar' }],
+      kpis: [],
+      alerts: [],
+    };
+    render(<ConsumerLinks consumers={consumers} />);
+
+    await user.click(screen.getByText('1 Chart'));
+    const link = screen.getByText('My Chart');
+    expect(link.closest('a')).toHaveAttribute('href', '/charts/42');
+    expect(link.closest('a')).toHaveAttribute('target', '_blank');
+  });
+
+  it('inherits color from parent in inherit variant (no forced color)', () => {
+    const consumers: MetricConsumersResponse = {
+      charts: [{ id: 1, title: 'Chart', chart_type: 'bar' }],
+      kpis: [],
+      alerts: [],
+    };
+    render(<ConsumerLinks consumers={consumers} variant="inherit" />);
+    const button = screen.getByText('1 Chart');
+    // inherit variant has no inline color style so it picks up parent text color
+    expect(button).not.toHaveStyle({ color: 'var(--primary)' });
+    expect(button).toHaveClass('underline');
+  });
+
+  it('shows alert count and link to /alerts page', async () => {
+    const user = userEvent.setup();
+    const consumers: MetricConsumersResponse = {
+      charts: [],
+      kpis: [],
+      alerts: [
+        { id: 7, name: 'Latency alert', alert_type: 'metric_threshold' },
+        { id: 8, name: 'Errors alert', alert_type: 'metric_threshold' },
+      ],
+    };
+    render(<ConsumerLinks consumers={consumers} />);
+    expect(screen.getByText('2 Alerts')).toBeInTheDocument();
+    await user.click(screen.getByText('2 Alerts'));
+    const link = screen.getByText('Latency alert').closest('a');
+    expect(link).toHaveAttribute('href', '/alerts');
+  });
+});

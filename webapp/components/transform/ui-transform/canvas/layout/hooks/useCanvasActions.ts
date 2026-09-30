@@ -1,0 +1,257 @@
+// Hook that handles canvas action dispatch (delete-node, run-workflow, sync-sources, etc.)
+// and the sync-sources polling logic.
+
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { useSWRConfig } from 'swr';
+import { useTransformStore, useCanvasAction } from '@/stores/transformStore';
+import { useCanvasSources } from '@/hooks/api/useCanvasSources';
+import { useCanvasOperations } from '@/hooks/api/useCanvasOperations';
+import type { RunWorkflowParams } from '@/hooks/api/useWorkflowExecution';
+import { PERMISSIONS, useRbac } from '@/lib/rbac';
+import { CANVAS_GRAPH_KEY } from '@/hooks/api/useCanvasGraph';
+import { CanvasNodeTypeEnum } from '@/types/transform';
+import { apiGet } from '@/lib/api';
+import { toastSuccess, toastError } from '@/lib/toast';
+import { CANVAS_CONSTANTS } from '@/constants/transform';
+import { TaskProgressStatus } from '@/constants/pipeline';
+import { useInsightWalkthroughStore } from '@/stores/insightWalkthroughStore';
+
+interface UseCanvasActionsParams {
+  isPreview: boolean;
+  /** Shared runWorkflow function from the single useWorkflowExecution instance */
+  runWorkflow: (params: RunWorkflowParams) => Promise<void>;
+}
+
+export function useCanvasActions({ isPreview, runWorkflow }: UseCanvasActionsParams) {
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const { mutate } = useSWRConfig();
+  const canvasAction = useCanvasAction();
+
+  const {
+    clearCanvasAction,
+    openOperationPanel,
+    setTempLockCanvas,
+    setSelectedLowerTab,
+    setLockUpperSection,
+    setDbtRunLogs,
+  } = useTransformStore();
+
+  const { refresh: refreshSources, syncSources } = useCanvasSources();
+  const { deleteOperationNode } = useCanvasOperations();
+  const { hasPermission } = useRbac();
+
+  // Handle sync sources — locks upper section, polls progress into logs pane
+  const handleSyncSources = useCallback(async () => {
+    setIsSyncing(true);
+    setLockUpperSection(true);
+    setSelectedLowerTab('logs');
+    setDbtRunLogs([]);
+
+    const POLL_INTERVAL_MS = CANVAS_CONSTANTS.SYNC_POLL_INTERVAL;
+
+    try {
+      const { taskId, hashKey } = await syncSources();
+
+      // Poll for task progress
+      let isComplete = false;
+      while (!isComplete) {
+        try {
+          const response = await apiGet(`/api/tasks/${taskId}?hashkey=${hashKey}`);
+
+          if (response?.progress) {
+            const now = new Date().toISOString();
+            const progressItems = response.progress as Array<{
+              message?: string;
+              status?: string;
+              timestamp?: string;
+            }>;
+            const logs = progressItems.map((log) => ({
+              message: log.message || '',
+              status: log.status || 'running',
+              timestamp: log.timestamp || now,
+            }));
+            setDbtRunLogs(logs);
+
+            const lastLog = response.progress[response.progress.length - 1] as
+              | { status?: string }
+              | undefined;
+            if (
+              lastLog?.status === TaskProgressStatus.COMPLETED ||
+              lastLog?.status === TaskProgressStatus.FAILED
+            ) {
+              isComplete = true;
+            }
+          }
+        } catch {
+          // Polling failed — continue trying
+        }
+
+        if (!isComplete) {
+          await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+        }
+      }
+
+      await refreshSources();
+      await mutate(CANVAS_GRAPH_KEY);
+      toastSuccess.generic('Sources synced successfully');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to sync sources';
+      toastError.api(message);
+    } finally {
+      setIsSyncing(false);
+      setLockUpperSection(false);
+    }
+  }, [
+    syncSources,
+    refreshSources,
+    setSelectedLowerTab,
+    setLockUpperSection,
+    setDbtRunLogs,
+    mutate,
+  ]);
+
+  // Auto-sync sources on first canvas open. Re-evaluates when permissions
+  // resolve after mount (auth loads async); the ref keeps it to a single sync.
+  const hasAutoSynced = useRef(false);
+  useEffect(() => {
+    if (hasAutoSynced.current || isPreview) return;
+    if (!hasPermission(PERMISSIONS.CAN_SYNC_SOURCES)) return;
+    hasAutoSynced.current = true;
+    handleSyncSources();
+  }, [hasPermission, handleSyncSources, isPreview]);
+
+  // Handle canvas actions (delete-node, open-opconfig-panel, run-workflow, sync-sources, etc.)
+  useEffect(() => {
+    if (!canvasAction.type) return;
+
+    const handleAction = async () => {
+      switch (canvasAction.type) {
+        case 'delete-node': {
+          const actionData = (canvasAction.data || {}) as Record<string, unknown>;
+          const nodeId = actionData.nodeId as string | undefined;
+          const nodeType = actionData.nodeType as string | undefined;
+          const isDummy = actionData.isDummy as boolean | undefined;
+          const canvasNodeUuid = actionData.canvasNodeUuid as string | undefined;
+          const deleteId = canvasNodeUuid || nodeId;
+
+          if (!deleteId) {
+            clearCanvasAction();
+            return;
+          }
+
+          // Don't delete dummy nodes via API
+          if (isDummy) {
+            clearCanvasAction();
+            return;
+          }
+
+          setTempLockCanvas(true);
+          try {
+            // v1 uses unified /nodes/ endpoint for all canvas node deletions
+            // deleteOperationNode already calls refreshGraph() internally
+            await deleteOperationNode(deleteId);
+            toastSuccess.generic(
+              nodeType === CanvasNodeTypeEnum.Operation || nodeType === 'operation'
+                ? 'Operation deleted'
+                : 'Node removed from canvas'
+            );
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Failed to delete node';
+            toastError.api(message);
+          } finally {
+            setTempLockCanvas(false);
+          }
+          clearCanvasAction();
+          break;
+        }
+
+        case 'open-opconfig-panel': {
+          openOperationPanel();
+          break;
+        }
+
+        case 'run-workflow': {
+          try {
+            setSelectedLowerTab('logs');
+            const runData = (canvasAction.data || { run_type: 'run' }) as RunWorkflowParams;
+            await runWorkflow(runData);
+            // Refresh canvas after workflow completes
+            await mutate(CANVAS_GRAPH_KEY);
+
+            // Walkthrough: only claim the table is built once the run actually
+            // finished, not the instant Save was clicked (CreateTableForm dispatches
+            // this action fire-and-forget — runWorkflow above is what awaits the
+            // real 2s-poll completion).
+            // Either canvas stage can be live here: the Save-button step is the normal one,
+            // pipeline_name_table the case where the name was left as typed-once/untouched so
+            // its own hand-off never fired.
+            const canvasStage = useInsightWalkthroughStore.getState().stage;
+            if (
+              canvasStage === 'pipeline_name_table' ||
+              canvasStage === 'pipeline_save_new_table'
+            ) {
+              useInsightWalkthroughStore.getState().advanceTo('pipeline_table_built');
+            }
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Failed to run workflow';
+            toastError.api(message);
+          }
+          clearCanvasAction();
+          break;
+        }
+
+        case 'delete-source-tree-node': {
+          const actionData = (canvasAction.data || {}) as Record<string, unknown>;
+          const nodeId = actionData.nodeId as string | undefined;
+          if (!nodeId) {
+            clearCanvasAction();
+            return;
+          }
+
+          setTempLockCanvas(true);
+          try {
+            // deleteOperationNode already calls refreshGraph() internally
+            await deleteOperationNode(nodeId);
+            toastSuccess.generic('Source removed from canvas');
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Failed to remove source';
+            toastError.api(message);
+          } finally {
+            setTempLockCanvas(false);
+          }
+          clearCanvasAction();
+          break;
+        }
+
+        case 'sync-sources': {
+          handleSyncSources();
+          clearCanvasAction();
+          break;
+        }
+
+        case 'refresh-canvas': {
+          await Promise.all([mutate(CANVAS_GRAPH_KEY), refreshSources()]);
+          clearCanvasAction();
+          break;
+        }
+
+        case 'focus-node': {
+          // Handled by Canvas component — do not clear here
+          break;
+        }
+
+        default:
+          clearCanvasAction();
+      }
+    };
+
+    handleAction();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canvasAction.type]);
+
+  return {
+    isSyncing,
+    handleSyncSources,
+  };
+}
