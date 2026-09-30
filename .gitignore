@@ -1,0 +1,36 @@
+# Env files — copy from *.template or *.example and fill in values
+.env
+.env.local
+.env.*.local
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+celerybeat-schedule.db
+celerybeat.pid
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# Logs
+*.log
+logs/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Sync tooling
+.sync-cache/
+.sync-state

@@ -1,0 +1,59 @@
+# ── Builder ───────────────────────────────────────────────────────────────────
+FROM python:3.10.12-slim AS builder
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_COMPILE_BYTECODE=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential curl git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir uv
+
+# Deps-only layer — only invalidated when lockfile changes.
+COPY prefect-proxy/pyproject.toml prefect-proxy/uv.lock ./
+RUN uv sync --frozen --no-install-project
+
+# Full sync with editable install pointing to /app.
+COPY prefect-proxy/ .
+RUN uv sync --frozen
+
+# ── Runtime ───────────────────────────────────────────────────────────────────
+FROM python:3.10.12-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_COMPILE_BYTECODE=1 \
+    PATH=/opt/venv/bin:$PATH
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir uv
+
+RUN useradd --create-home --shell /bin/bash dalgouser
+
+COPY --from=builder --chown=dalgouser:dalgouser /opt/venv /opt/venv
+
+RUN mkdir -p /app && chown dalgouser:dalgouser /app
+
+USER dalgouser
+
+WORKDIR /app
+
+EXPOSE 8080
+
+CMD ["uvicorn", "proxy.main:app", \
+     "--host", "0.0.0.0", "--port", "8080", "--reload"]
