@@ -34,10 +34,12 @@ fi
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 echo "==> Saving monorepo-specific files to $TMP"
-cp -r "$ROOT/docker"    "$TMP/"
-cp -r "$ROOT/scripts"   "$TMP/"
-cp    "$ROOT/README.md" "$TMP/"
-cp    "$ROOT/.gitignore" "$TMP/"
+cp -r "$ROOT/docker"      "$TMP/"
+cp -r "$ROOT/scripts"     "$TMP/"
+cp -r "$ROOT/.github"     "$TMP/"
+cp    "$ROOT/README.md"   "$TMP/"
+cp    "$ROOT/.gitignore"  "$TMP/"
+cp    "$ROOT/codecov.yml" "$TMP/"
 
 # Save local config files (gitignored — survive git rm, but be explicit)
 echo "==> Saving local config files"
@@ -96,13 +98,15 @@ done
 
 # ── 6. Add monorepo-specific files ─────────────────────────────────────────
 echo ""
-echo "==> Adding monorepo Docker infra and tooling"
-cp -r "$TMP/docker"    "$ROOT/"
-cp -r "$TMP/scripts"   "$ROOT/"
-cp    "$TMP/README.md" "$ROOT/"
-cp    "$TMP/.gitignore" "$ROOT/"
-git -C "$ROOT" add docker/ scripts/ README.md .gitignore
-git -C "$ROOT" commit --quiet -m "add: monorepo Docker infra, sync tooling, and docs"
+echo "==> Adding monorepo Docker infra, CI, and tooling"
+cp -r "$TMP/docker"      "$ROOT/"
+cp -r "$TMP/scripts"     "$ROOT/"
+cp -r "$TMP/.github"     "$ROOT/"
+cp    "$TMP/README.md"   "$ROOT/"
+cp    "$TMP/.gitignore"  "$ROOT/"
+cp    "$TMP/codecov.yml" "$ROOT/"
+git -C "$ROOT" add docker/ scripts/ .github/ README.md .gitignore codecov.yml
+git -C "$ROOT" commit --quiet -m "add: monorepo Docker infra, CI, sync tooling, and docs"
 
 # Restore local config files (gitignored — not committed, just put back on disk)
 echo "==> Restoring local config files"
