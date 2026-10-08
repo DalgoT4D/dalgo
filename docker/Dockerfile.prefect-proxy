@@ -1,0 +1,57 @@
+# ── Builder ───────────────────────────────────────────────────────────────────
+FROM python:3.10-slim AS builder
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_COMPILE_BYTECODE=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential curl git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir uv
+
+COPY prefect-proxy/pyproject.toml prefect-proxy/uv.lock ./
+RUN uv sync --frozen --no-install-project
+
+COPY prefect-proxy/ .
+RUN uv sync --frozen
+
+# ── Runtime ───────────────────────────────────────────────────────────────────
+FROM python:3.10-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_PYTHON_DOWNLOADS=never \
+    PATH=/opt/venv/bin:$PATH
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir uv
+
+RUN useradd --create-home --shell /bin/bash dalgouser
+
+COPY --from=builder --chown=dalgouser:dalgouser /opt/venv /opt/venv
+COPY --from=builder --chown=dalgouser:dalgouser /app /app
+
+USER dalgouser
+
+WORKDIR /app
+
+EXPOSE 8080
+
+CMD ["uv", "run", "gunicorn", "proxy.main:app", \
+     "--workers", "4", \
+     "--worker-class", "uvicorn.workers.UvicornWorker", \
+     "--bind", "0.0.0.0:8080"]

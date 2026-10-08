@@ -1,0 +1,25 @@
+coverage:
+  status:
+    project:
+      default:
+        enabled: false  # don't report aggregate monorepo coverage — per-flag only
+    patch:
+      default:
+        enabled: true
+
+flag_management:
+  default_rules:
+    carryforward: true  # retain last coverage when a service wasn't touched
+  individual_flags:
+    - name: backend
+      paths:
+        - backend/
+      carryforward: true
+    - name: prefect-proxy
+      paths:
+        - prefect-proxy/
+      carryforward: true
+    - name: webapp
+      paths:
+        - webapp/
+      carryforward: true

@@ -1,0 +1,35 @@
+name: AI LLM Service CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ai-llm-service/**'
+      - 'docker/Dockerfile.ai-llm-service'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ai-llm-service/**'
+      - 'docker/Dockerfile.ai-llm-service'
+
+defaults:
+  run:
+    working-directory: ai-llm-service
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (verify only)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.workspace }}
+          file: docker/Dockerfile.ai-llm-service
+          push: false
+          tags: dalgo-ai-llm:ci
