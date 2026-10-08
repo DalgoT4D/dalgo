@@ -1,7 +1,7 @@
 # Dev compose — bind-mounts source for hot reload, builds Dockerfile.*.dev images.
 #
 # Postgres runs on the host (reached via host.docker.internal).
-# Redis is a compose service shared by backend Celery and ai-llm-service.
+# Two Redis instances: redis (backend Celery) and redis-llm (ai-llm-service).
 #
 # App env lives in each service's own .env:
 #   ../backend/.env, ../prefect-proxy/.env, ../webapp/.env, ../ai-llm-service/.env
@@ -43,11 +43,11 @@ x-ai-llm-base: &ai-llm-base
   image: dalgo-ai-llm:dev
   env_file: ../ai-llm-service/.env
   environment:
-    REDIS_HOST: redis
+    REDIS_HOST: redis-llm
     REDIS_PORT: "6379"
-    CELERY_BROKER_URL: redis://redis:6379/0
-    CELERY_RESULT_BACKEND: redis://redis:6379/0
-    CELERY_BROKER: redis://redis:6379/0
+    CELERY_BROKER_URL: redis://redis-llm:6379/0
+    CELERY_RESULT_BACKEND: redis://redis-llm:6379/0
+    CELERY_BROKER: redis://redis-llm:6379/0
     AI_PLATFORM_POLLING_INTERVAL_SECS: ${AI_PLATFORM_POLLING_INTERVAL_SECS:-30}
     AI_PLATFORM_REQUEST_TIMEOUT_SECS: ${AI_PLATFORM_REQUEST_TIMEOUT_SECS:-120}
   volumes:
@@ -63,6 +63,19 @@ services:
     container_name: redis
     ports:
       - "${REDIS_HOST_PORT:-6370}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis-llm:
+    image: redis:7-alpine
+    container_name: redis-llm
+    ports:
+      - "${REDIS_LLM_HOST_PORT:-6380}:6379"
+    volumes:
+      - redis_llm_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -201,7 +214,7 @@ services:
     ports:
       - "${LLM_HOST_PORT:-7001}:7001"
     depends_on:
-      redis:
+      redis-llm:
         condition: service_healthy
 
   ai-llm-celery-worker:
@@ -216,3 +229,4 @@ volumes:
   backend_uv_cache:
   proxy_uv_cache:
   ai_llm_uv_cache:
+  redis_llm_data:

@@ -1,6 +1,6 @@
 # Production compose — builds prod images, no bind mounts, no hot reload.
 # Postgres and Prefect server are managed externally; configure via each service's .env.
-# Redis is included here (used by backend Celery and ai-llm-service).
+# Two Redis instances: redis (backend Celery) and redis-llm (ai-llm-service).
 #
 # Run from this directory:
 #   docker compose build
@@ -38,16 +38,16 @@ x-ai-llm: &ai-llm
   image: dalgo-ai-llm:${LLM_IMAGE_TAG:-latest}
   env_file: ../ai-llm-service/.env
   environment:
-    REDIS_HOST: redis
+    REDIS_HOST: redis-llm
     REDIS_PORT: "6379"
-    CELERY_BROKER_URL: redis://redis:6379/0
-    CELERY_RESULT_BACKEND: redis://redis:6379/0
-    CELERY_BROKER: redis://redis:6379/0
+    CELERY_BROKER_URL: redis://redis-llm:6379/0
+    CELERY_RESULT_BACKEND: redis://redis-llm:6379/0
+    CELERY_BROKER: redis://redis-llm:6379/0
     AI_PLATFORM_POLLING_INTERVAL_SECS: ${AI_PLATFORM_POLLING_INTERVAL_SECS:-30}
     AI_PLATFORM_REQUEST_TIMEOUT_SECS: ${AI_PLATFORM_REQUEST_TIMEOUT_SECS:-120}
   restart: unless-stopped
   depends_on:
-    redis:
+    redis-llm:
       condition: service_healthy
 
 services:
@@ -56,6 +56,17 @@ services:
     restart: unless-stopped
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-llm:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_llm_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -198,4 +209,5 @@ services:
 
 volumes:
   redis_data:
+  redis_llm_data:
   prefect_data:
