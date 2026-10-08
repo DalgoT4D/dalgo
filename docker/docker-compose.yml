@@ -16,6 +16,7 @@ x-backend: &backend
   environment:
     REDIS_HOST: redis
     REDIS_PORT: "6379"
+    PREFECT_PROXY_API_URL: http://prefect-proxy:8080
     LLM_SERVICE_API_URL: http://ai-llm-service:7001
   volumes:
     - ${CLIENTDBT_ROOT_MOUNT}:${CLIENTDBT_ROOT_MOUNT}
