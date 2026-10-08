@@ -1,5 +1,5 @@
 # ── Builder ───────────────────────────────────────────────────────────────────
-FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.10.12-bookworm-slim AS builder
 
 ENV PYTHONUNBUFFERED=1 \
     UV_LINK_MODE=copy \
@@ -20,7 +20,7 @@ COPY backend/ .
 RUN uv sync --frozen
 
 # ── Runtime ───────────────────────────────────────────────────────────────────
-FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
+FROM ghcr.io/astral-sh/uv:python3.10.12-bookworm-slim
 
 ENV PYTHONUNBUFFERED=1 \
     UV_LINK_MODE=copy \
