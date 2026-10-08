@@ -1,9 +1,7 @@
 # ── Builder ───────────────────────────────────────────────────────────────────
-FROM python:3.10.12-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim AS builder
 
 ENV PYTHONUNBUFFERED=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1 \
     UV_LINK_MODE=copy \
     UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_PYTHON_DOWNLOADS=never \
@@ -12,10 +10,8 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential libpq-dev curl git \
+        build-essential libpq-dev git \
     && rm -rf /var/lib/apt/lists/*
-
-RUN pip install --no-cache-dir uv
 
 # Deps-only layer — only invalidated when lockfile changes.
 COPY backend/pyproject.toml backend/uv.lock ./
@@ -26,11 +22,9 @@ COPY backend/ .
 RUN uv sync --frozen
 
 # ── Runtime ───────────────────────────────────────────────────────────────────
-FROM python:3.10.12-slim
+FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
 
 ENV PYTHONUNBUFFERED=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1 \
     UV_LINK_MODE=copy \
     UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_PYTHON_DOWNLOADS=never \
@@ -40,8 +34,6 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git libpq5 \
     && rm -rf /var/lib/apt/lists/*
-
-RUN pip install --no-cache-dir uv
 
 RUN useradd --create-home --shell /bin/bash dalgouser
 
