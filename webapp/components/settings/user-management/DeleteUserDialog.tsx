@@ -1,0 +1,77 @@
+'use client';
+
+import { useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
+import { ANALYTICS_EVENTS } from '@/constants/analytics';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useUserActions } from '@/hooks/api/useUserManagement';
+
+interface DeleteUserDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  userEmail: string;
+  onSuccess: () => void;
+}
+
+export function DeleteUserDialog({
+  open,
+  onOpenChange,
+  userEmail,
+  onSuccess,
+}: DeleteUserDialogProps) {
+  const { deleteUser } = useUserActions();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteUser(userEmail);
+      trackEvent(ANALYTICS_EVENTS.USER_DELETED);
+      onSuccess();
+    } catch (error) {
+      // Error is handled in the hook
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete User</AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                Are you sure you want to delete <strong>{userEmail}</strong>? This will permanently
+                remove the user from your organization. The user will need to be invited again to
+                rejoin the platform.
+              </p>
+              <p>You will be made the owner of all resources currently owned by this user.</p>
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            data-testid="delete-user-confirm"
+          >
+            {isDeleting ? 'Deleting...' : 'Delete User'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
