@@ -1,22 +1,19 @@
 #!/usr/bin/env bash
-# Pull the latest code from each individual GitHub repo and sync it into the
-# monorepo. Run this whenever changes land in the individual repos during the
-# transition period.
+# Pull the latest commits from each individual GitHub repo and bring them into
+# the monorepo with full commit history preserved.
 #
 # On each run the script:
-#   1. Shallow-clones the repo (or fetches if already cached in .sync-cache/)
-#   2. rsyncs everything except build artefacts into the service directory
-#   3. Records the upstream HEAD so you can see what was last synced
+#   1. Fetches the upstream repo (cached in .sync-cache/)
+#   2. Counts new commits since the last sync
+#   3. Creates a filter-repo'd clone (prefix = service/)
+#   4. Cherry-picks the new commits onto the monorepo main branch
+#   5. Records the upstream HEAD in .sync-state
 #
-# Nothing in docker/ is touched — Dockerfiles and compose files are monorepo-owned.
+# Prerequisites: brew install git-filter-repo
 #
 # Usage:
 #   ./scripts/sync.sh                          # sync all services
 #   ./scripts/sync.sh backend webapp           # sync specific services
-#
-# After running:
-#   git diff --stat
-#   git add -A && git commit -m "sync: $(date +%Y-%m-%d)"
 
 set -euo pipefail
 
@@ -27,28 +24,19 @@ STATE_FILE="$ROOT/.sync-state"
 
 mkdir -p "$CACHE_DIR"
 
-EXCLUDES=(
-  --exclude='.git'
-  --exclude='.venv'
-  --exclude='node_modules'
-  --exclude='__pycache__'
-  --exclude='*.pyc'
-  --exclude='.next'
-  --exclude='celerybeat-schedule.db'
-  --exclude='*.log'
-  --exclude='.mypy_cache'
-  --exclude='.pytest_cache'
-  --exclude='*.egg-info'
-)
+if ! command -v git-filter-repo &>/dev/null; then
+  echo "ERROR: git-filter-repo not found. Install with: brew install git-filter-repo" >&2
+  exit 1
+fi
 
 sync_service() {
   local dest_name="$1" remote_url="$2"
   local cache="$CACHE_DIR/$dest_name"
-  local dest="$ROOT/$dest_name"
 
   echo ""
   echo "==> $dest_name"
 
+  # 1. Update cache
   if [ -d "$cache/.git" ]; then
     git -C "$cache" fetch --quiet origin
     git -C "$cache" reset --quiet --hard origin/HEAD
@@ -56,18 +44,62 @@ sync_service() {
     git clone --quiet "$remote_url" "$cache"
   fi
 
-  local head
-  head="$(git -C "$cache" rev-parse HEAD)"
+  local new_head
+  new_head="$(git -C "$cache" rev-parse HEAD)"
 
-  mkdir -p "$dest"
-  rsync -a "${EXCLUDES[@]}" "$cache/" "$dest/"
+  # 2. Check for prior sync state
+  local last_hash
+  last_hash="$(grep "^$dest_name " "$STATE_FILE" 2>/dev/null | awk '{print $2}')"
 
-  # Record last synced commit
+  if [ -z "$last_hash" ]; then
+    echo "    no prior sync state — run bootstrap.sh first" >&2
+    return 1
+  fi
+
+  if [ "$new_head" = "$last_hash" ]; then
+    echo "    already up to date @ ${new_head:0:12}"
+    return
+  fi
+
+  # 3. Count new upstream commits
+  local new_count
+  new_count="$(git -C "$cache" rev-list --count "${last_hash}..HEAD")"
+  echo "    $new_count new commit(s) to import"
+
+  # 4. Build a filter-repo'd clone (all history prefixed with dest_name/)
+  local filtered_dir
+  filtered_dir="$(mktemp -d)"
+  git clone --no-local --quiet "$cache" "$filtered_dir"
+  git -C "$filtered_dir" filter-repo --to-subdirectory-filter "${dest_name}/" --quiet
+
+  # 5. Fetch filtered objects into the monorepo; FETCH_HEAD points to the tip
+  local remote_name="_sync_${dest_name}_$$"
+  git -C "$ROOT" remote add "$remote_name" "$filtered_dir"
+  git -C "$ROOT" fetch --quiet "$remote_name"
+  git -C "$ROOT" remote remove "$remote_name"
+  rm -rf "$filtered_dir"
+
+  # 6. Cherry-pick new commits oldest-first
+  local commits
+  commits="$(git -C "$ROOT" log FETCH_HEAD --reverse --oneline -n "$new_count" | awk '{print $1}')"
+
+  local picked=0
+  while IFS= read -r hash; do
+    if ! git -C "$ROOT" cherry-pick "$hash"; then
+      echo ""
+      echo "    ERROR: cherry-pick $hash failed. Resolve conflicts then re-run." >&2
+      git -C "$ROOT" cherry-pick --abort 2>/dev/null || true
+      return 1
+    fi
+    picked=$((picked + 1))
+  done <<< "$commits"
+
+  # 7. Update state
   grep -v "^$dest_name " "$STATE_FILE" 2>/dev/null > "$STATE_FILE.tmp" || true
-  echo "$dest_name $head $remote_url" >> "$STATE_FILE.tmp"
+  echo "$dest_name $new_head $remote_url" >> "$STATE_FILE.tmp"
   mv "$STATE_FILE.tmp" "$STATE_FILE"
 
-  echo "    synced @ ${head:0:12}"
+  echo "    imported $picked commit(s) @ ${new_head:0:12}"
 }
 
 if [ $# -eq 0 ]; then
@@ -87,8 +119,5 @@ for target in "${TARGETS[@]}"; do
 done
 
 echo ""
-echo "==> Done. Last synced state:"
-cat "$STATE_FILE" 2>/dev/null | awk '{printf "    %-20s %s\n", $1, $2}'
-echo ""
-echo "    Review:  git diff --stat"
-echo "    Commit:  git add -A && git commit -m \"sync: \$(date +%Y-%m-%d)\""
+echo "==> Done. Synced state:"
+awk '{printf "    %-20s %s\n", $1, $2}' "$STATE_FILE" 2>/dev/null
