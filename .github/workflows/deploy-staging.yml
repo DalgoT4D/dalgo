@@ -297,6 +297,21 @@ jobs:
               docker compose exec -T backend python manage.py migrate $app $target"
           done
 
+      - name: Sync server checkout to deploy ref
+        env:
+          DEPLOY_REF:  ${{ needs.plan.outputs.deploy_ref }}
+          DEPLOY_PATH: ${{ vars.STAGING_DEPLOY_PATH || '/home/ddp/dalgo' }}
+          SSH_HOST:    ${{ vars.STAGING_SSH_HOST }}
+          SSH_USER:    ${{ vars.STAGING_SSH_USER }}
+        run: |
+          set -euo pipefail
+          ssh "$SSH_USER@$SSH_HOST" bash -s <<EOF
+            set -euo pipefail
+            cd $DEPLOY_PATH
+            git fetch origin $DEPLOY_REF
+            git -c advice.detachedHead=false checkout $DEPLOY_REF
+          EOF
+
       - name: Pull image and restart stack
         env:
           IMAGE_TAG:   ${{ needs.plan.outputs.image_tag }}
