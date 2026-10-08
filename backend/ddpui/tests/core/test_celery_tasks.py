@@ -503,9 +503,7 @@ def test_detect_schema_changes_for_org_ensure_orphan_connections_are_deleted(
     assert OrgSchemaChange.objects.filter(org=org_without_workspace).count() == 0
     tag = " [STAGING]" if not PRODUCTION else ""
     mock_send_text_message.assert_called_once_with(
-        "adminemail",
-        f"Schema change detection errors for test-org-WO-slug{tag}",
-        "error",
+        "adminemail", f"Schema change detection errors for test-org-WO-slug{tag}", "error"
     )
 
 
@@ -529,9 +527,7 @@ def test_detect_schema_changes_for_org_notifies_when_auto_accept_fallback_leaves
     )
     # Simulate the fallback: apply_schema_change raised and the fallback created a row
     OrgSchemaChange.objects.create(
-        org=org_without_workspace,
-        connection_id=connection_id,
-        change_type="non_breaking",
+        org=org_without_workspace, connection_id=connection_id, change_type="non_breaking"
     )
 
     with patch(
@@ -676,9 +672,7 @@ def test_clear_stuck_locks_terminal_state_recent(orguser):
     """Test clear_stuck_locks with terminal state but recent end_time (<5 min)"""
     # Create locks
     lock1 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser),
-        locked_by=orguser,
-        flow_run_id="recent-flow-run-id",
+        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="recent-flow-run-id"
     )
 
     # Mock flow run that ended 2 minutes ago
@@ -706,14 +700,10 @@ def test_clear_stuck_locks_terminal_state_old(orguser):
     """Test clear_stuck_locks with terminal state and old end_time (>5 min)"""
     # Create locks for same flow_run_id
     lock1 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser),
-        locked_by=orguser,
-        flow_run_id="old-flow-run-id",
+        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="old-flow-run-id"
     )
     lock2 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser),
-        locked_by=orguser,
-        flow_run_id="old-flow-run-id",
+        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="old-flow-run-id"
     )
 
     # Mock flow run that ended 10 minutes ago
@@ -768,9 +758,7 @@ def test_clear_stuck_locks_no_end_time_fallback_to_updated(orguser):
 def test_clear_stuck_locks_running_state_ignored(orguser):
     """Test clear_stuck_locks ignores non-terminal states"""
     lock = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser),
-        locked_by=orguser,
-        flow_run_id="running-flow-run-id",
+        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="running-flow-run-id"
     )
 
     mock_flow_run = {
@@ -796,19 +784,13 @@ def test_clear_stuck_locks_multiple_flow_runs(orguser):
     """Test clear_stuck_locks with multiple different flow_run_ids"""
     # Create locks for different flow_run_ids
     lock1 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser),
-        locked_by=orguser,
-        flow_run_id="old-flow-1",
+        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="old-flow-1"
     )
     lock2 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser),
-        locked_by=orguser,
-        flow_run_id="old-flow-2",
+        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="old-flow-2"
     )
     lock3 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser),
-        locked_by=orguser,
-        flow_run_id="recent-flow",
+        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="recent-flow"
     )
 
     old_time = datetime.now(pytz.utc) - timedelta(minutes=10)
@@ -855,9 +837,7 @@ def test_clear_stuck_locks_multiple_flow_runs(orguser):
 def test_clear_stuck_locks_api_error_handling(orguser):
     """Test clear_stuck_locks handles API errors gracefully"""
     lock = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser),
-        locked_by=orguser,
-        flow_run_id="error-flow-run-id",
+        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="error-flow-run-id"
     )
 
     with patch("ddpui.celeryworkers.tasks.get_flow_run_poll") as mock_get_flow_run, patch(
@@ -875,9 +855,7 @@ def test_clear_stuck_locks_api_error_handling(orguser):
 def test_clear_stuck_locks_no_time_fields(orguser):
     """Test clear_stuck_locks when both end_time and updated are null/unparseable"""
     lock = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser),
-        locked_by=orguser,
-        flow_run_id="no-time-flow-run-id",
+        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="no-time-flow-run-id"
     )
 
     mock_flow_run = {
