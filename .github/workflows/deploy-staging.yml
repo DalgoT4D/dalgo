@@ -294,7 +294,7 @@ jobs:
           while read app target; do
             echo "→ migrate $app $target"
             ssh "$SSH_USER@$SSH_HOST" "cd $DEPLOY_PATH/docker && \
-              docker compose exec -T backend python manage.py migrate $app $target"
+              docker compose -f docker-compose.staging.yml exec -T backend python manage.py migrate $app $target"
           done
 
       - name: Sync server checkout to deploy ref
@@ -334,8 +334,8 @@ jobs:
             export LLM_IMAGE_TAG=$IMAGE_TAG
             export PROXY_IMAGE_TAG=$IMAGE_TAG
             export WEBAPP_IMAGE_TAG=$IMAGE_TAG
-            docker compose pull
-            docker compose up -d
+            docker compose -f docker-compose.staging.yml pull
+            docker compose -f docker-compose.staging.yml up -d
           EOF
 
       - name: Run post-deploy (migrate, seeds, system user, role cache)
@@ -345,7 +345,7 @@ jobs:
           SSH_USER:    ${{ vars.STAGING_SSH_USER }}
         run: |
           ssh "$SSH_USER@$SSH_HOST" "cd $DEPLOY_PATH/docker && \
-            docker compose exec -T backend bash scripts/post-deploy.sh"
+            docker compose -f docker-compose.staging.yml exec -T backend bash scripts/post-deploy.sh"
 
       - name: Swap staging label (if PR swap)
         if: needs.plan.outputs.pr_number != '' && needs.plan.outputs.previous_pr != ''

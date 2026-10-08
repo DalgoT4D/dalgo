@@ -114,6 +114,7 @@ for target in "${TARGETS[@]}"; do
     webapp)         sync_service webapp         https://github.com/DalgoT4D/webapp_v2.git ;;
     prefect-proxy)  sync_service prefect-proxy  https://github.com/DalgoT4D/prefect-proxy.git ;;
     ai-llm-service) sync_service ai-llm-service https://github.com/DalgoT4D/ai-llm-service.git ;;
+    docs)           sync_service docs           https://github.com/DalgoT4D/dalgo_docs.git ;;
     *) echo "Unknown service: $target" >&2; exit 1 ;;
   esac
 done

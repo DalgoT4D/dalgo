@@ -1,23 +1,19 @@
-# Dev compose — bind-mounts source for hot reload, builds Dockerfile.*.dev images.
+# Staging compose — identical to docker-compose.yml except for the DEV_SECRETS_HOST_PATH
+# mount into backend/celery containers (so staging can resolve DEV_SECRETS_DIR-backed secrets).
 #
-# Postgres runs on the host (reached via host.docker.internal).
-# Two Redis instances: redis (backend Celery) and redis-llm (ai-llm-service).
-#
-# App env lives in each service's own .env:
-#   ../backend/.env, ../prefect-proxy/.env, ../webapp/.env, ../ai-llm-service/.env
+# Requires DEV_SECRETS_HOST_PATH set in docker/.env (or shell).
 #
 # Run from this directory:
-#   docker compose -f docker-compose.dev.yml up -d
-#   docker compose -f docker-compose.dev.yml build backend
+#   docker compose -f docker-compose.staging.yml build
+#   docker compose -f docker-compose.staging.yml up -d
 
 name: dalgo
 
-x-backend-base: &backend-base
-  image: dalgo-backend:dev
+x-backend: &backend
+  image: ${REGISTRY:-}dalgo-backend:${BACKEND_IMAGE_TAG:-latest}
   env_file: ../backend/.env
-  # Only container-networking / container-path vars live here. All app config → backend/.env.
+  # Only container-networking vars live here. All app config → backend/.env.
   environment:
-    DBHOST: host.docker.internal
     REDIS_HOST: redis
     REDIS_PORT: "6379"
     PREFECT_PROXY_API_URL: http://prefect-proxy:8080
@@ -25,16 +21,18 @@ x-backend-base: &backend-base
     DEV_SECRETS_DIR: /secrets
     USE_AWS_SECRETS_MANAGER: "False"
   volumes:
-    - ../backend:/app
-    - backend_uv_cache:/home/dalgouser/.cache/uv
-    - ${DEV_SECRETS_HOST_PATH}:/secrets:ro
     - ${CLIENTDBT_ROOT_MOUNT}:${CLIENTDBT_ROOT_MOUNT}
+    - ${DEV_SECRETS_HOST_PATH}:/secrets:ro
   extra_hosts:
     - "host.docker.internal:host-gateway"
+    - "airbyte-abctl-airbyte-server-svc.airbyte-abctl.svc.cluster.local:host-gateway"
   restart: unless-stopped
+  depends_on:
+    redis:
+      condition: service_healthy
 
-x-ai-llm-base: &ai-llm-base
-  image: dalgo-ai-llm:dev
+x-ai-llm: &ai-llm
+  image: ${REGISTRY:-}dalgo-ai-llm:${LLM_IMAGE_TAG:-latest}
   env_file: ../ai-llm-service/.env
   # Only container-networking vars live here. All app config → ai-llm-service/.env.
   environment:
@@ -43,41 +41,71 @@ x-ai-llm-base: &ai-llm-base
     CELERY_BROKER_URL: redis://redis-llm:6379/0
     CELERY_RESULT_BACKEND: redis://redis-llm:6379/0
     CELERY_BROKER: redis://redis-llm:6379/0
-  volumes:
-    - ../ai-llm-service:/app
-    - ai_llm_uv_cache:/root/.cache/uv
-  extra_hosts:
-    - "host.docker.internal:host-gateway"
   restart: unless-stopped
+  depends_on:
+    redis-llm:
+      condition: service_healthy
 
 services:
   redis:
     image: redis:7-alpine
-    container_name: redis
-    ports:
-      - "${REDIS_HOST_PORT:-6370}:6379"
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
 
   redis-llm:
     image: redis:7-alpine
-    container_name: redis-llm
-    ports:
-      - "${REDIS_LLM_HOST_PORT:-6380}:6379"
+    restart: unless-stopped
     volumes:
       - redis_llm_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
 
+  # ── Backend ────────────────────────────────────────────────────────────────
+  backend:
+    <<: *backend
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: backend
+    ports:
+      - "${BACKEND_HOST_PORT:-8002}:8002"
+
+  celery-worker:
+    <<: *backend
+    command: uv run celery -A ddpui worker -n ddpui -Q default
+    depends_on:
+      - backend
+
+  celery-canvasdbt-worker:
+    <<: *backend
+    command: uv run celery -A ddpui worker -n ddpui -Q canvas_dbt --autoscale=3,1
+    depends_on:
+      - backend
+
+  celery-alerts-worker:
+    <<: *backend
+    command: uv run celery -A ddpui worker -n ddpui-q -Q alerts
+    depends_on:
+      - backend
+
+  celery-beat:
+    <<: *backend
+    command: uv run celery -A ddpui beat --scheduler redbeat.RedBeatScheduler
+    depends_on:
+      - backend
+
   # ── Prefect ────────────────────────────────────────────────────────────────
   prefect-server:
-    image: dalgo-prefect:dev
+    image: ${REGISTRY:-}dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
     container_name: prefect-server
     command: uv run prefect server start --host 0.0.0.0
     ports:
@@ -88,10 +116,10 @@ services:
     restart: unless-stopped
 
   prefect-proxy:
-    image: dalgo-prefect:dev
     build:
       context: ..
-      dockerfile: docker/Dockerfile.prefect-proxy.dev
+      dockerfile: docker/Dockerfile.prefect-proxy
+    image: ${REGISTRY:-}dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
     container_name: prefect-proxy
     env_file: ../prefect-proxy/.env
     # Only container-networking vars live here. All app config → prefect-proxy/.env.
@@ -101,13 +129,10 @@ services:
       - "${PROXY_HOST_PORT:-8080}:8080"
     depends_on:
       - prefect-server
-    volumes:
-      - ../prefect-proxy:/app
-      - proxy_uv_cache:/home/dalgouser/.cache/uv
     restart: unless-stopped
 
   prefect-worker-ddp-1:
-    image: dalgo-prefect:dev
+    image: ${REGISTRY:-}dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
     container_name: prefect-worker-ddp-1
     command: sh -c "uv run prefect worker start --pool $${PREFECT_WORK_POOL:-dalgo_work_pool} -q ddp"
     env_file: ../prefect-proxy/.env
@@ -120,7 +145,7 @@ services:
     restart: unless-stopped
 
   prefect-worker-manual-dbt-1:
-    image: dalgo-prefect:dev
+    image: ${REGISTRY:-}dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
     container_name: prefect-worker-manual-dbt-1
     command: sh -c "uv run prefect worker start --pool $${PREFECT_WORK_POOL:-dalgo_work_pool} -q manual-dbt"
     env_file: ../prefect-proxy/.env
@@ -133,88 +158,47 @@ services:
     restart: unless-stopped
 
 
-  # ── Backend ────────────────────────────────────────────────────────────────
-  backend:
-    <<: *backend-base
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.backend.dev
-    container_name: backend
-    ports:
-      - "${BACKEND_HOST_PORT:-8002}:8002"
+  prefect-worker-dailybackup:
+    image: ${REGISTRY:-}dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
+    container_name: prefect-worker-dailybackup
+    command: uv run prefect worker start --pool dailybackup
+    env_file: ../prefect-proxy/.env
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
     depends_on:
-      redis:
-        condition: service_healthy
-      prefect-proxy:
-        condition: service_started
-
-  celery-worker:
-    <<: *backend-base
-    container_name: celery-worker
-    command: celery -A ddpui worker -n ddpui -Q default
-    depends_on:
-      - backend
-
-  celery-canvasdbt-worker:
-    <<: *backend-base
-    container_name: celery-canvasdbt-worker
-    command: celery -A ddpui worker -n ddpui -Q canvas_dbt --autoscale=3,1
-    depends_on:
-      - backend
-
-  celery-alerts-worker:
-    <<: *backend-base
-    container_name: celery-alerts-worker
-    command: celery -A ddpui worker -n ddpui-q -Q alerts
-    depends_on:
-      - backend
-
-  celery-beat:
-    <<: *backend-base
-    container_name: celery-beat
-    command: celery -A ddpui beat
-    depends_on:
-      - backend
+      - prefect-server
+    restart: unless-stopped
 
   # ── Frontend ───────────────────────────────────────────────────────────────
-  # Built as a standalone Next.js image — faster than next dev over a bind
-  # mount on macOS. Rebuild when code or webapp/.env changes.
   webapp:
     build:
       context: ..
       dockerfile: docker/Dockerfile.webapp
+    image: ${REGISTRY:-}dalgo-webapp:${WEBAPP_IMAGE_TAG:-latest}
     container_name: webapp
     env_file: ../webapp/.env
     ports:
       - "${WEBAPP_HOST_PORT:-3001}:3001"
-    depends_on:
-      - backend
     restart: unless-stopped
 
   # ── AI / LLM Service ───────────────────────────────────────────────────────
   ai-llm-service:
-    <<: *ai-llm-base
+    <<: *ai-llm
     build:
       context: ..
       dockerfile: docker/Dockerfile.ai-llm-service
     container_name: ai-llm-service
-    command: uv run uvicorn main:app --port 7001 --host 0.0.0.0 --reload --reload-dir src/ --reload-dir config/
+    command: uv run uvicorn main:app --port 7001 --host 0.0.0.0
     ports:
       - "${LLM_HOST_PORT:-7001}:7001"
-    depends_on:
-      redis-llm:
-        condition: service_healthy
 
   ai-llm-celery-worker:
-    <<: *ai-llm-base
-    container_name: ai-llm-celery-worker
+    <<: *ai-llm
     command: uv run celery -A main.celery worker -n llm -Q llm --loglevel=INFO
     depends_on:
       - ai-llm-service
 
 volumes:
-  prefect_data:
-  backend_uv_cache:
-  proxy_uv_cache:
-  ai_llm_uv_cache:
+  redis_data:
   redis_llm_data:
+  prefect_data:
