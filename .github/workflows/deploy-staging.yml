@@ -41,6 +41,7 @@ jobs:
       image_tag:     ${{ steps.decide.outputs.image_tag }}   # main-abc1234 or pr-123-def5678
       pr_number:     ${{ steps.decide.outputs.pr_number }}
       previous_pr:   ${{ steps.decide.outputs.previous_pr }}
+      owner_lc:      ${{ steps.decide.outputs.owner_lc }}    # ghcr requires lowercase
     steps:
       - id: decide
         env:
@@ -106,6 +107,8 @@ jobs:
             fi
           fi
 
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+
           {
             echo "should_deploy=$SHOULD_DEPLOY"
             echo "deploy_ref=$DEPLOY_REF"
@@ -113,6 +116,7 @@ jobs:
             echo "image_tag=$IMAGE_TAG"
             echo "pr_number=$PR_NUMBER"
             echo "previous_pr=$PREVIOUS_PR"
+            echo "owner_lc=$OWNER_LC"
           } >> "$GITHUB_OUTPUT"
 
   # ─────────────────────────────────────────────────────────────────────────
@@ -159,7 +163,7 @@ jobs:
           file: ${{ matrix.dockerfile }}
           platforms: linux/arm64
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ needs.plan.outputs.image_tag }}
+          tags: ghcr.io/${{ needs.plan.outputs.owner_lc }}/${{ matrix.image }}:${{ needs.plan.outputs.image_tag }}
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to:   type=gha,scope=${{ matrix.service }},mode=max
 
@@ -194,24 +198,24 @@ jobs:
           file: docker/Dockerfile.webapp
           platforms: linux/arm64
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/dalgo-webapp:${{ needs.plan.outputs.image_tag }}
+          tags: ghcr.io/${{ needs.plan.outputs.owner_lc }}/dalgo-webapp:${{ needs.plan.outputs.image_tag }}
           cache-from: type=gha,scope=webapp
           cache-to:   type=gha,scope=webapp,mode=max
           build-args: |
-            NEXT_PUBLIC_BACKEND_URL=${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
-            NEXT_PUBLIC_EMBEDDED_WEBAPP_URL=${{ secrets.NEXT_PUBLIC_EMBEDDED_WEBAPP_URL }}
+            NEXT_PUBLIC_BACKEND_URL=${{ vars.NEXT_PUBLIC_BACKEND_URL }}
+            NEXT_PUBLIC_EMBEDDED_WEBAPP_URL=${{ vars.NEXT_PUBLIC_EMBEDDED_WEBAPP_URL }}
             NEXT_PUBLIC_WEBAPP_ENVIRONMENT=staging
             NEXT_PUBLIC_USAGE_DASHBOARD_ID=${{ secrets.NEXT_PUBLIC_USAGE_DASHBOARD_ID }}
-            NEXT_PUBLIC_USAGE_DASHBOARD_DOMAIN=${{ secrets.NEXT_PUBLIC_USAGE_DASHBOARD_DOMAIN }}
-            NEXT_PUBLIC_DOCS_BASE_URL=${{ secrets.NEXT_PUBLIC_DOCS_BASE_URL }}
-            NEXT_PUBLIC_AIRBYTE_URL=${{ secrets.NEXT_PUBLIC_AIRBYTE_URL }}
+            NEXT_PUBLIC_USAGE_DASHBOARD_DOMAIN=${{ vars.NEXT_PUBLIC_USAGE_DASHBOARD_DOMAIN }}
+            NEXT_PUBLIC_DOCS_BASE_URL=${{ vars.NEXT_PUBLIC_DOCS_BASE_URL }}
+            NEXT_PUBLIC_AIRBYTE_URL=${{ vars.NEXT_PUBLIC_AIRBYTE_URL }}
             NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
             NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
-            NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
-            NEXT_PUBLIC_POSTHOG_INGEST_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_INGEST_HOST }}
-            POSTHOG_PROXY_HOST=${{ secrets.POSTHOG_PROXY_HOST }}
-            POSTHOG_PROXY_ASSETS_HOST=${{ secrets.POSTHOG_PROXY_ASSETS_HOST }}
+            NEXT_PUBLIC_POSTHOG_HOST=${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
+            NEXT_PUBLIC_POSTHOG_INGEST_HOST=${{ vars.NEXT_PUBLIC_POSTHOG_INGEST_HOST }}
+            POSTHOG_PROXY_HOST=${{ vars.POSTHOG_PROXY_HOST }}
+            POSTHOG_PROXY_ASSETS_HOST=${{ vars.POSTHOG_PROXY_ASSETS_HOST }}
 
   # ─────────────────────────────────────────────────────────────────────────
   # Compute migration rollback targets from origin/main (per Django app)
@@ -272,15 +276,15 @@ jobs:
       - name: Trust host
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H "${{ secrets.STAGING_SSH_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ vars.STAGING_SSH_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Rollback previous PR's migrations
         if: needs.plan.outputs.previous_pr != ''
         env:
           TARGETS_JSON: ${{ needs.rollback-plan.outputs.targets }}
-          DEPLOY_PATH:  ${{ secrets.STAGING_DEPLOY_PATH || '/home/ddp/dalgo' }}
-          SSH_HOST:     ${{ secrets.STAGING_SSH_HOST }}
-          SSH_USER:     ${{ secrets.STAGING_SSH_USER }}
+          DEPLOY_PATH:  ${{ vars.STAGING_DEPLOY_PATH || '/home/ddp/dalgo' }}
+          SSH_HOST:     ${{ vars.STAGING_SSH_HOST }}
+          SSH_USER:     ${{ vars.STAGING_SSH_USER }}
         run: |
           set -euo pipefail
           echo "Rolling back PR #${{ needs.plan.outputs.previous_pr }}"
@@ -294,15 +298,14 @@ jobs:
       - name: Pull image and restart stack
         env:
           IMAGE_TAG:   ${{ needs.plan.outputs.image_tag }}
-          DEPLOY_PATH: ${{ secrets.STAGING_DEPLOY_PATH || '/home/ddp/dalgo' }}
-          SSH_HOST:    ${{ secrets.STAGING_SSH_HOST }}
-          SSH_USER:    ${{ secrets.STAGING_SSH_USER }}
-          OWNER:       ${{ github.repository_owner }}
+          DEPLOY_PATH: ${{ vars.STAGING_DEPLOY_PATH || '/home/ddp/dalgo' }}
+          SSH_HOST:    ${{ vars.STAGING_SSH_HOST }}
+          SSH_USER:    ${{ vars.STAGING_SSH_USER }}
+          OWNER_LC:    ${{ needs.plan.outputs.owner_lc }}
           GH_ACTOR:    ${{ github.actor }}
           GH_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          OWNER_LC=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
           REGISTRY="ghcr.io/${OWNER_LC}/"
 
           ssh "$SSH_USER@$SSH_HOST" bash -s <<EOF
@@ -320,9 +323,9 @@ jobs:
 
       - name: Apply forward migrations
         env:
-          DEPLOY_PATH: ${{ secrets.STAGING_DEPLOY_PATH || '/home/ddp/dalgo' }}
-          SSH_HOST:    ${{ secrets.STAGING_SSH_HOST }}
-          SSH_USER:    ${{ secrets.STAGING_SSH_USER }}
+          DEPLOY_PATH: ${{ vars.STAGING_DEPLOY_PATH || '/home/ddp/dalgo' }}
+          SSH_HOST:    ${{ vars.STAGING_SSH_HOST }}
+          SSH_USER:    ${{ vars.STAGING_SSH_USER }}
         run: |
           ssh "$SSH_USER@$SSH_HOST" "cd $DEPLOY_PATH/docker && \
             docker compose exec -T backend python manage.py migrate"
