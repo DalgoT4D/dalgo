@@ -22,7 +22,7 @@ x-backend: &backend
     USE_AWS_SECRETS_MANAGER: "False"
   volumes:
     - ${CLIENTDBT_ROOT_MOUNT}:${CLIENTDBT_ROOT_MOUNT}
-    - ${DEV_SECRETS_HOST_PATH}:/secrets:ro
+    - ${DEV_SECRETS_HOST_PATH}:/secrets
   extra_hosts:
     - "host.docker.internal:host-gateway"
     - "airbyte-abctl-airbyte-server-svc.airbyte-abctl.svc.cluster.local:host-gateway"

@@ -27,7 +27,7 @@ x-backend-base: &backend-base
   volumes:
     - ../backend:/app
     - backend_uv_cache:/home/dalgouser/.cache/uv
-    - ${DEV_SECRETS_HOST_PATH}:/secrets:ro
+    - ${DEV_SECRETS_HOST_PATH}:/secrets
     - ${CLIENTDBT_ROOT_MOUNT}:${CLIENTDBT_ROOT_MOUNT}
   extra_hosts:
     - "host.docker.internal:host-gateway"
