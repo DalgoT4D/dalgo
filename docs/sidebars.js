@@ -1,0 +1,161 @@
+/**
+ * Dalgo docs sidebar — mirrors the product left-nav exactly.
+ * Sections 1–3 are docs-only orientation content.
+ * Sections 4–9 match the product navigation order.
+ * Section 10 is convention (support).
+ */
+
+// @ts-check
+
+/** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
+const sidebars = {
+  tutorialSidebar: [
+    // 1. Welcome
+    'welcome',
+
+    // 2. Quickstart — linear first-timer path
+    {
+      type: 'category',
+      label: 'Quickstart',
+      link: { type: 'doc', id: 'quickstart/index' },
+      items: [
+        'quickstart/account-setup',
+        'quickstart/impact',
+        'quickstart/first-dashboard',
+        'quickstart/first-report',
+        'quickstart/next-steps',
+      ],
+    },
+
+    // 3. Concepts — shared vocabulary
+    {
+      type: 'category',
+      label: 'Concepts',
+      items: [
+        'concepts/glossary',
+      ],
+    },
+
+    // 4. Impact — home screen
+    {
+      type: 'category',
+      label: 'Impact',
+      link: { type: 'doc', id: 'impact/index' },
+      items: [],
+    },
+
+    // 5. KPIs — top-level product surface
+    {
+      type: 'category',
+      label: 'KPIs',
+      link: { type: 'doc', id: 'kpis/index' },
+      items: [
+        'kpis/creating-a-kpi',
+        'kpis/notes',
+        'kpis/sharing',
+      ],
+    },
+
+    // 6. Charts — top-level product surface
+    {
+      type: 'category',
+      label: 'Charts',
+      link: { type: 'doc', id: 'charts/index' },
+      items: [
+        'charts/creating-a-chart',
+        'charts/chart-types',
+        'charts/sharing',
+      ],
+    },
+
+    // 7. Dashboards
+    {
+      type: 'category',
+      label: 'Dashboards',
+      link: { type: 'doc', id: 'dashboards/index' },
+      items: [
+        'dashboards/viewing',
+        'dashboards/creating',
+        'dashboards/sharing',
+        'dashboards/superset-usage',
+        'dashboards/superset',
+      ],
+    },
+
+    // 8. Reports
+    {
+      type: 'category',
+      label: 'Reports',
+      link: { type: 'doc', id: 'reports/index' },
+      items: [
+        'reports/creating',
+        'reports/comments',
+        'reports/sharing',
+        'reports/exporting',
+      ],
+    },
+
+    // 8. Data — renamed from "Managing Data", mirrors product nav
+    {
+      type: 'category',
+      label: 'Data',
+      link: { type: 'doc', id: 'data/index' },
+      items: [
+        'data/overview',
+        // Ingest is a single page in the product (sources + connections on one
+        // screen), so it's a single doc here — no sub-items. The warehouse moved
+        // to Settings > Warehouse.
+        'data/ingest/index',
+        {
+          type: 'category',
+          label: 'Transform',
+          link: { type: 'doc', id: 'data/transform/index' },
+          items: [
+            'data/transform/ui-transform',
+            'data/transform/dbt-transform',
+            'data/transform/switching-repositories',
+          ],
+        },
+        'data/orchestrate',
+        'data/explore',
+        'data/metrics',
+        'data/quality',
+      ],
+    },
+
+    // 9. Alerts — top-level product surface
+    {
+      type: 'category',
+      label: 'Alerts',
+      link: { type: 'doc', id: 'alerts/index' },
+      items: [
+        'alerts/creating-an-alert',
+      ],
+    },
+
+    // 11. Settings
+    {
+      type: 'category',
+      label: 'Settings',
+      link: { type: 'doc', id: 'settings/index' },
+      items: [
+        'settings/branding',
+        'settings/access',
+        'settings/warehouse',
+      ],
+    },
+
+    // 12. Support
+    {
+      type: 'category',
+      label: 'Support',
+      link: { type: 'doc', id: 'support/index' },
+      items: [
+        'support/getting-help',
+        'support/troubleshooting',
+      ],
+    },
+  ],
+};
+
+module.exports = sidebars;
