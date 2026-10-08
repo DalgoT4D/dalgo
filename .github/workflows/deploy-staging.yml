@@ -1,0 +1,348 @@
+name: Deploy to Staging
+
+# Triggers:
+#   - push to main            → deploy main, roll back any PR currently on staging
+#   - PR labeled `staging`    → unlabel any other PR, roll back its migrations, deploy this PR
+#   - push to a labeled PR    → re-deploy the PR (no label swap, no rollback)
+#
+# Image tags (one per build):
+#   - main:  ghcr.io/<owner>/dalgo-<service>:main-<short-sha>
+#   - PR:    ghcr.io/<owner>/dalgo-<service>:pr-<n>-<short-sha>
+#
+# Rollback target is always derived from origin/main — "undo whatever is above
+# main's migrations". Safe across PR rebases/renumbers.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [labeled, unlabeled, synchronize]
+
+concurrency:
+  group: staging-deploy
+  cancel-in-progress: false
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────
+  # Decide whether to proceed and what ref to deploy
+  # ─────────────────────────────────────────────────────────────────────────
+  plan:
+    runs-on: ubuntu-latest
+    # Skip runs triggered by non-staging label changes.
+    if: |
+      github.event_name != 'pull_request' ||
+      github.event.action == 'synchronize' ||
+      (github.event.action == 'labeled'   && github.event.label.name == 'staging') ||
+      (github.event.action == 'unlabeled' && github.event.label.name == 'staging')
+    outputs:
+      should_deploy: ${{ steps.decide.outputs.should_deploy }}
+      deploy_ref:    ${{ steps.decide.outputs.deploy_ref }}
+      short_sha:     ${{ steps.decide.outputs.short_sha }}
+      image_tag:     ${{ steps.decide.outputs.image_tag }}   # main-abc1234 or pr-123-def5678
+      pr_number:     ${{ steps.decide.outputs.pr_number }}
+      previous_pr:   ${{ steps.decide.outputs.previous_pr }}
+    steps:
+      - id: decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          EVENT="${{ github.event_name }}"
+          ACTION="${{ github.event.action || '' }}"
+          LABEL="${{ github.event.label.name || '' }}"
+
+          SHOULD_DEPLOY=false
+          DEPLOY_REF=""
+          PR_NUMBER=""
+          IMAGE_TAG=""
+
+          if [[ "$EVENT" == "push" ]]; then
+            SHOULD_DEPLOY=true
+            DEPLOY_REF="${{ github.sha }}"
+            SHORT_SHA="${DEPLOY_REF:0:7}"
+            IMAGE_TAG="main-${SHORT_SHA}"
+          elif [[ "$EVENT" == "pull_request" ]]; then
+            if [[ "$ACTION" == "labeled" && "$LABEL" == "staging" ]]; then
+              SHOULD_DEPLOY=true
+              DEPLOY_REF="${{ github.event.pull_request.head.sha }}"
+              PR_NUMBER="${{ github.event.pull_request.number }}"
+              SHORT_SHA="${DEPLOY_REF:0:7}"
+              IMAGE_TAG="pr-${PR_NUMBER}-${SHORT_SHA}"
+            elif [[ "$ACTION" == "unlabeled" && "$LABEL" == "staging" ]]; then
+              # Label removed → reset staging to main. Roll back the PR's migrations.
+              SHOULD_DEPLOY=true
+              DEPLOY_REF=$(gh api repos/${{ github.repository }}/commits/main --jq '.sha')
+              SHORT_SHA="${DEPLOY_REF:0:7}"
+              IMAGE_TAG="main-${SHORT_SHA}"
+              # The PR that just got unlabeled is the one to roll back
+              UNLABELED_PR="${{ github.event.pull_request.number }}"
+            elif [[ "$ACTION" == "synchronize" ]]; then
+              # Only redeploy if this PR already has the staging label
+              HAS=$(gh pr view "${{ github.event.pull_request.number }}" \
+                      --repo "${{ github.repository }}" \
+                      --json labels --jq '.labels[].name' | grep -Fx staging || true)
+              if [[ -n "$HAS" ]]; then
+                SHOULD_DEPLOY=true
+                DEPLOY_REF="${{ github.event.pull_request.head.sha }}"
+                PR_NUMBER="${{ github.event.pull_request.number }}"
+                SHORT_SHA="${DEPLOY_REF:0:7}"
+                IMAGE_TAG="pr-${PR_NUMBER}-${SHORT_SHA}"
+              fi
+            fi
+          fi
+
+          # Find the PR to roll back:
+          #   - unlabeled event: the PR that just lost its label
+          #   - otherwise: whichever PR currently has staging (and isn't the one we're deploying)
+          if [[ -n "${UNLABELED_PR:-}" ]]; then
+            PREVIOUS_PR="$UNLABELED_PR"
+          else
+            PREVIOUS_PR=$(gh pr list --repo "${{ github.repository }}" \
+                            --label staging --state open \
+                            --json number --jq '.[0].number' 2>/dev/null || echo "")
+            if [[ "$PREVIOUS_PR" == "$PR_NUMBER" ]]; then
+              PREVIOUS_PR=""   # same PR being redeployed → nothing to roll back
+            fi
+          fi
+
+          {
+            echo "should_deploy=$SHOULD_DEPLOY"
+            echo "deploy_ref=$DEPLOY_REF"
+            echo "short_sha=${SHORT_SHA:-}"
+            echo "image_tag=$IMAGE_TAG"
+            echo "pr_number=$PR_NUMBER"
+            echo "previous_pr=$PREVIOUS_PR"
+          } >> "$GITHUB_OUTPUT"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Build + push all service images in parallel
+  # ─────────────────────────────────────────────────────────────────────────
+  build:
+    needs: plan
+    if: needs.plan.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - service: backend
+            dockerfile: docker/Dockerfile.backend
+            image: dalgo-backend
+          - service: prefect-proxy
+            dockerfile: docker/Dockerfile.prefect-proxy
+            image: dalgo-prefect-proxy
+          - service: ai-llm-service
+            dockerfile: docker/Dockerfile.ai-llm-service
+            image: dalgo-ai-llm
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.deploy_ref }}
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push ${{ matrix.service }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/arm64
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ needs.plan.outputs.image_tag }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to:   type=gha,scope=${{ matrix.service }},mode=max
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Build + push webapp (separate job — needs NEXT_PUBLIC_* build args)
+  # ─────────────────────────────────────────────────────────────────────────
+  build-webapp:
+    needs: plan
+    if: needs.plan.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.deploy_ref }}
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push webapp
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.webapp
+          platforms: linux/arm64
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/dalgo-webapp:${{ needs.plan.outputs.image_tag }}
+          cache-from: type=gha,scope=webapp
+          cache-to:   type=gha,scope=webapp,mode=max
+          build-args: |
+            NEXT_PUBLIC_BACKEND_URL=${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
+            NEXT_PUBLIC_EMBEDDED_WEBAPP_URL=${{ secrets.NEXT_PUBLIC_EMBEDDED_WEBAPP_URL }}
+            NEXT_PUBLIC_WEBAPP_ENVIRONMENT=staging
+            NEXT_PUBLIC_USAGE_DASHBOARD_ID=${{ secrets.NEXT_PUBLIC_USAGE_DASHBOARD_ID }}
+            NEXT_PUBLIC_USAGE_DASHBOARD_DOMAIN=${{ secrets.NEXT_PUBLIC_USAGE_DASHBOARD_DOMAIN }}
+            NEXT_PUBLIC_DOCS_BASE_URL=${{ secrets.NEXT_PUBLIC_DOCS_BASE_URL }}
+            NEXT_PUBLIC_AIRBYTE_URL=${{ secrets.NEXT_PUBLIC_AIRBYTE_URL }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+            NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+            NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+            NEXT_PUBLIC_POSTHOG_INGEST_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_INGEST_HOST }}
+            POSTHOG_PROXY_HOST=${{ secrets.POSTHOG_PROXY_HOST }}
+            POSTHOG_PROXY_ASSETS_HOST=${{ secrets.POSTHOG_PROXY_ASSETS_HOST }}
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Compute migration rollback targets from origin/main (per Django app)
+  # ─────────────────────────────────────────────────────────────────────────
+  rollback-plan:
+    needs: [plan, build, build-webapp]
+    if: needs.plan.outputs.should_deploy == 'true' && needs.plan.outputs.previous_pr != ''
+    runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.compute.outputs.targets }}  # JSON {"app": "0140", ...}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - id: compute
+        run: |
+          set -euo pipefail
+          declare -A TARGETS
+          # Walk every migrations/ dir under backend/ddpui
+          while IFS= read -r mig_dir; do
+            app=$(basename "$(dirname "$mig_dir")")
+            latest=$(ls "$mig_dir" 2>/dev/null \
+                     | grep -E '^[0-9]{4}_.*\.py$' \
+                     | sort | tail -1 \
+                     | sed 's/\.py$//' || true)
+            [[ -n "$latest" ]] && TARGETS[$app]="$latest"
+          done < <(find backend/ddpui -type d -name migrations)
+
+          JSON="{"
+          first=true
+          for k in "${!TARGETS[@]}"; do
+            $first || JSON+=","
+            JSON+="\"$k\":\"${TARGETS[$k]}\""
+            first=false
+          done
+          JSON+="}"
+          echo "targets=$JSON" >> "$GITHUB_OUTPUT"
+          echo "Rollback targets: $JSON"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Deploy: SSH to server, roll back, pull new image, migrate forward
+  # ─────────────────────────────────────────────────────────────────────────
+  deploy:
+    needs: [plan, build, build-webapp, rollback-plan]
+    if: |
+      always() &&
+      needs.plan.outputs.should_deploy == 'true' &&
+      needs.build.result == 'success' &&
+      needs.build-webapp.result == 'success' &&
+      (needs.rollback-plan.result == 'success' || needs.rollback-plan.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+      - name: Trust host
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.STAGING_SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Rollback previous PR's migrations
+        if: needs.plan.outputs.previous_pr != ''
+        env:
+          TARGETS_JSON: ${{ needs.rollback-plan.outputs.targets }}
+          DEPLOY_PATH:  ${{ secrets.STAGING_DEPLOY_PATH || '/home/ddp/dalgo' }}
+          SSH_HOST:     ${{ secrets.STAGING_SSH_HOST }}
+          SSH_USER:     ${{ secrets.STAGING_SSH_USER }}
+        run: |
+          set -euo pipefail
+          echo "Rolling back PR #${{ needs.plan.outputs.previous_pr }}"
+          echo "$TARGETS_JSON" | jq -r 'to_entries[] | "\(.key) \(.value)"' | \
+          while read app target; do
+            echo "→ migrate $app $target"
+            ssh "$SSH_USER@$SSH_HOST" "cd $DEPLOY_PATH/docker && \
+              docker compose exec -T backend python manage.py migrate $app $target"
+          done
+
+      - name: Pull image and restart stack
+        env:
+          IMAGE_TAG:   ${{ needs.plan.outputs.image_tag }}
+          DEPLOY_PATH: ${{ secrets.STAGING_DEPLOY_PATH || '/home/ddp/dalgo' }}
+          SSH_HOST:    ${{ secrets.STAGING_SSH_HOST }}
+          SSH_USER:    ${{ secrets.STAGING_SSH_USER }}
+          OWNER:       ${{ github.repository_owner }}
+          GH_ACTOR:    ${{ github.actor }}
+          GH_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          OWNER_LC=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
+          REGISTRY="ghcr.io/${OWNER_LC}/"
+
+          ssh "$SSH_USER@$SSH_HOST" bash -s <<EOF
+            set -euo pipefail
+            cd $DEPLOY_PATH/docker
+            echo "$GH_TOKEN" | docker login ghcr.io -u $GH_ACTOR --password-stdin
+            export REGISTRY=$REGISTRY
+            export BACKEND_IMAGE_TAG=$IMAGE_TAG
+            export LLM_IMAGE_TAG=$IMAGE_TAG
+            export PROXY_IMAGE_TAG=$IMAGE_TAG
+            export WEBAPP_IMAGE_TAG=$IMAGE_TAG
+            docker compose pull
+            docker compose up -d
+          EOF
+
+      - name: Apply forward migrations
+        env:
+          DEPLOY_PATH: ${{ secrets.STAGING_DEPLOY_PATH || '/home/ddp/dalgo' }}
+          SSH_HOST:    ${{ secrets.STAGING_SSH_HOST }}
+          SSH_USER:    ${{ secrets.STAGING_SSH_USER }}
+        run: |
+          ssh "$SSH_USER@$SSH_HOST" "cd $DEPLOY_PATH/docker && \
+            docker compose exec -T backend python manage.py migrate"
+
+      - name: Swap staging label (if PR swap)
+        if: needs.plan.outputs.pr_number != '' && needs.plan.outputs.previous_pr != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr edit ${{ needs.plan.outputs.previous_pr }} \
+            --repo "${{ github.repository }}" --remove-label staging
+          gh pr comment ${{ needs.plan.outputs.previous_pr }} \
+            --repo "${{ github.repository }}" \
+            --body "Staging taken over by #${{ needs.plan.outputs.pr_number }}. Migrations rolled back."
+
+      - name: Comment on deployed PR
+        if: needs.plan.outputs.pr_number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ needs.plan.outputs.pr_number }} \
+            --repo "${{ github.repository }}" \
+            --body "Deployed to staging: \`${{ needs.plan.outputs.image_tag }}\`"

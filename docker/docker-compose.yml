@@ -10,7 +10,7 @@
 name: dalgo
 
 x-backend: &backend
-  image: dalgo-backend:${BACKEND_IMAGE_TAG:-latest}
+  image: ${REGISTRY:-}dalgo-backend:${BACKEND_IMAGE_TAG:-latest}
   env_file: ../backend/.env
   environment:
     REDIS_HOST: redis
@@ -35,7 +35,7 @@ x-backend: &backend
       condition: service_healthy
 
 x-ai-llm: &ai-llm
-  image: dalgo-ai-llm:${LLM_IMAGE_TAG:-latest}
+  image: ${REGISTRY:-}dalgo-ai-llm:${LLM_IMAGE_TAG:-latest}
   env_file: ../ai-llm-service/.env
   environment:
     REDIS_HOST: redis-llm
@@ -109,7 +109,7 @@ services:
 
   # ── Prefect ────────────────────────────────────────────────────────────────
   prefect-server:
-    image: dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
+    image: ${REGISTRY:-}dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
     container_name: prefect-server
     command: uv run prefect server start --host 0.0.0.0
     ports:
@@ -123,7 +123,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.prefect-proxy
-    image: dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
+    image: ${REGISTRY:-}dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
     container_name: prefect-proxy
     env_file: ../prefect-proxy/.env
     environment:
@@ -141,7 +141,7 @@ services:
     restart: unless-stopped
 
   prefect-worker-ddp-1:
-    image: dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
+    image: ${REGISTRY:-}dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
     container_name: prefect-worker-ddp-1
     command: sh -c "uv run prefect worker start --pool $${PREFECT_WORK_POOL:-dalgo_work_pool} -q ddp"
     env_file: ../prefect-proxy/.env
@@ -154,7 +154,7 @@ services:
     restart: unless-stopped
 
   prefect-worker-manual-dbt-1:
-    image: dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
+    image: ${REGISTRY:-}dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
     container_name: prefect-worker-manual-dbt-1
     command: sh -c "uv run prefect worker start --pool $${PREFECT_WORK_POOL:-dalgo_work_pool} -q manual-dbt"
     env_file: ../prefect-proxy/.env
@@ -168,7 +168,7 @@ services:
 
 
   prefect-worker-dailybackup:
-    image: dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
+    image: ${REGISTRY:-}dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
     container_name: prefect-worker-dailybackup
     command: uv run prefect worker start --pool dailybackup
     env_file: ../prefect-proxy/.env
@@ -183,7 +183,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.webapp
-    image: dalgo-webapp:${WEBAPP_IMAGE_TAG:-latest}
+    image: ${REGISTRY:-}dalgo-webapp:${WEBAPP_IMAGE_TAG:-latest}
     container_name: webapp
     env_file: ../webapp/.env
     ports:
