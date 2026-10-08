@@ -96,6 +96,7 @@ import { useFullscreen } from '@/hooks/useFullscreen';
 import { PERMISSIONS, useRbac } from '@/lib/rbac';
 import { trackEvent } from '@/lib/analytics';
 import { ANALYTICS_EVENTS } from '@/constants/analytics';
+import { EMPTY_DEPENDENT_GROUP_FILTER_IDS } from '@/constants/dashboard-filters';
 import { getChartViewUrl, getKpiViewUrl, WIDGET_NAVIGATION_SOURCES } from '@/lib/widget-navigation';
 import {
   markDashboardShared,

@@ -75,6 +75,7 @@ import { initializeTabsData } from './tabs/tab-utils';
 import { moveWidgetBetweenTabs, pointerToGridPosition } from './tabs/cross-tab-drag';
 import { trackEvent } from '@/lib/analytics';
 import { ANALYTICS_EVENTS, DASHBOARD_UPDATE_SOURCES } from '@/constants/analytics';
+import { EMPTY_DEPENDENT_GROUP_FILTER_IDS } from '@/constants/dashboard-filters';
 import { useInsightWalkthroughStore } from '@/stores/insightWalkthroughStore';
 import { useAuthStore } from '@/stores/authStore';
 import {
