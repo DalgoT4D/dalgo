@@ -338,14 +338,14 @@ jobs:
             docker compose up -d
           EOF
 
-      - name: Apply forward migrations
+      - name: Run post-deploy (migrate, seeds, system user, role cache)
         env:
           DEPLOY_PATH: ${{ vars.STAGING_DEPLOY_PATH || '/home/ddp/dalgo' }}
           SSH_HOST:    ${{ vars.STAGING_SSH_HOST }}
           SSH_USER:    ${{ vars.STAGING_SSH_USER }}
         run: |
           ssh "$SSH_USER@$SSH_HOST" "cd $DEPLOY_PATH/docker && \
-            docker compose exec -T backend python manage.py migrate"
+            docker compose exec -T backend bash scripts/post-deploy.sh"
 
       - name: Swap staging label (if PR swap)
         if: needs.plan.outputs.pr_number != '' && needs.plan.outputs.previous_pr != ''
