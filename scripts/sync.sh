@@ -85,7 +85,14 @@ sync_service() {
 
   local picked=0
   while IFS= read -r hash; do
-    if ! git -C "$ROOT" cherry-pick "$hash"; then
+    # Pass -m 1 for merge commits (mainline = first parent).
+    local m_flag=""
+    if [ "$(git -C "$ROOT" rev-list --parents -n 1 "$hash" | awk '{print NF-1}')" -gt 1 ]; then
+      m_flag="-m 1"
+    fi
+    # --allow-empty keeps the commit record even if its diff is already applied
+    # (common when we manually edited files that later landed upstream).
+    if ! git -C "$ROOT" cherry-pick $m_flag --allow-empty --keep-redundant-commits "$hash"; then
       echo ""
       echo "    ERROR: cherry-pick $hash failed. Resolve conflicts then re-run." >&2
       git -C "$ROOT" cherry-pick --abort 2>/dev/null || true
