@@ -26,7 +26,7 @@ const config = {
     // GitHub pages deployment config.
     // If you aren't using GitHub pages, you don't need these.
     organizationName: "DalgoT4D", // Usually your GitHub org/user name.
-    projectName: "dalgo_docs", // Usually your repo name.
+    projectName: "dalgo", // Usually your repo name.
 
     onBrokenLinks: "warn",
     onBrokenMarkdownLinks: "warn",
@@ -49,12 +49,12 @@ const config = {
                     routeBasePath: "/",
                     sidebarPath: require.resolve("./sidebars.js"),
                     editUrl:
-                        "https://github.com/DalgoT4D/dalgo_docs/tree/main/",
+                        "https://github.com/DalgoT4D/dalgo/tree/main/docs/",
                 },
                 blog: {
                     showReadingTime: true,
                     editUrl:
-                        "https://github.com/DalgoT4D/dalgo_docs/tree/main/",
+                        "https://github.com/DalgoT4D/dalgo/tree/main/docs/",
                 },
                 theme: {
                     customCss: require.resolve("./src/css/custom.css"),
@@ -71,7 +71,7 @@ const config = {
                 path: "self-serve-docs",
                 routeBasePath: "self-serve-documentation",
                 sidebarPath: require.resolve("./sidebarsSelfServe.js"),
-                editUrl: "https://github.com/DalgoT4D/dalgo_docs/tree/main/",
+                editUrl: "https://github.com/DalgoT4D/dalgo/tree/main/docs/",
             },
         ],
         [
@@ -81,7 +81,7 @@ const config = {
                 path: "release-notes-docs",
                 routeBasePath: "release-notes",
                 sidebarPath: require.resolve("./sidebarsReleaseNotes.js"),
-                editUrl: "https://github.com/DalgoT4D/dalgo_docs/tree/main/",
+                editUrl: "https://github.com/DalgoT4D/dalgo/tree/main/docs/",
             },
         ],
     ],
@@ -176,7 +176,7 @@ const config = {
                             },
                             {
                                 label: "License",
-                                href: "https://github.com/DalgoT4D/dalgo_docs/blob/main/LICENSE",
+                                href: "https://github.com/DalgoT4D/dalgo/blob/main/docs/LICENSE",
                             },
                         ],
                     },
