@@ -2,6 +2,10 @@
 
 Monorepo for all Dalgo services. Service code lives in top-level directories; all Docker configuration is centralised under `docker/`.
 
+## License
+
+The entire repository — code, configuration, and documentation — is licensed under the **GNU Affero General Public License v3.0** (see [LICENSE](./LICENSE)). If you run a modified version of Dalgo as a networked service, you must make the modified source available to its users under the same license.
+
 ## Coverage
 
 | Service | Coverage |
