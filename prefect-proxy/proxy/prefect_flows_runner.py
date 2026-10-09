@@ -30,6 +30,12 @@ from datetime import datetime
 from pathlib import Path
 from time import sleep
 
+# When prefect loads this file from the monorepo clone, sys.path only has the
+# script's directory (proxy/). Insert prefect-proxy/ so `from proxy.X ...` resolves.
+_PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _PACKAGE_ROOT not in sys.path:
+    sys.path.insert(0, _PACKAGE_ROOT)
+
 import yaml
 from prefect import flow, task, get_run_logger
 from prefect.blocks.system import Secret

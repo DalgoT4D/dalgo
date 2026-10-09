@@ -420,6 +420,7 @@ def post_deployment_v1(payload: DeploymentCreate2) -> dict:
         source = GitRepository(
             url="https://github.com/DalgoT4D/dalgo.git",
             branch=PREFECT_PROXY_GIT_BRANCH,
+            directories=["prefect-proxy"],
         )
         deployment_id = flow.from_source(
             source=source,
