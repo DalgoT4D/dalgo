@@ -97,7 +97,5 @@ def test_download_file_calls_get_object_and_returns_response():
 
         result = download_file("test-bucket", "some/key/file.html")
 
-    mock_s3.get_object.assert_called_once_with(
-        Bucket="test-bucket", Key="some/key/file.html"
-    )
+    mock_s3.get_object.assert_called_once_with(Bucket="test-bucket", Key="some/key/file.html")
     assert result == mock_response

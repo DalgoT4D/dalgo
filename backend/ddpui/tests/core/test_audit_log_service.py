@@ -132,9 +132,7 @@ class TestWriteAuditLog:
     @patch("ddpui.core.audit_log_service.django.db.connection.close")
     @patch("ddpui.core.audit_log_service.AuditLog.objects.create")
     @patch("ddpui.core.audit_log_service.logger")
-    def test_logs_error_on_db_failure(
-        self, mock_logger, mock_create, mock_close, test_org
-    ):
+    def test_logs_error_on_db_failure(self, mock_logger, mock_create, mock_close, test_org):
         """_write_audit_log logs errors instead of crashing on DB failure."""
         mock_create.side_effect = Exception("Database error")
 
@@ -168,9 +166,7 @@ class TestCreateAuditLog:
     """Tests for the create_audit_log public function."""
 
     @patch("ddpui.core.audit_log_service._write_audit_log")
-    def test_starts_background_thread_with_correct_args(
-        self, mock_write, test_org, test_orguser
-    ):
+    def test_starts_background_thread_with_correct_args(self, mock_write, test_org, test_orguser):
         """create_audit_log starts a thread that calls _write_audit_log with correct args."""
 
         create_audit_log(
@@ -219,9 +215,7 @@ class TestCreateAuditLog:
         assert call_kwargs["orguser_email"] == ""
 
     @patch("ddpui.core.audit_log_service._write_audit_log")
-    def test_defaults_resource_fields_to_empty_dict(
-        self, mock_write, test_org, test_orguser
-    ):
+    def test_defaults_resource_fields_to_empty_dict(self, mock_write, test_org, test_orguser):
         """create_audit_log defaults resource_fields to empty dict when not provided."""
         create_audit_log(
             org=test_org,
@@ -241,9 +235,7 @@ class TestCreateAuditLog:
 
     @patch("ddpui.core.audit_log_service.threading.Thread")
     @patch("ddpui.core.audit_log_service.logger")
-    def test_never_raises_exception(
-        self, mock_logger, mock_thread_class, test_org, test_orguser
-    ):
+    def test_never_raises_exception(self, mock_logger, mock_thread_class, test_org, test_orguser):
         """create_audit_log catches exceptions and logs them instead of crashing."""
         mock_thread_class.side_effect = RuntimeError("Thread pool exhausted")
 

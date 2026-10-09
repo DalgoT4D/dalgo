@@ -326,9 +326,7 @@ def test_from_timestamp_float_timestamp():
     """tests from_timestamp with a float timestamp"""
     timestamp = 1640995200.5
     result = from_timestamp(timestamp)
-    expected = datetime.fromtimestamp(
-        1640995200, tz=pytz.UTC
-    )  # int() truncates the decimal
+    expected = datetime.fromtimestamp(1640995200, tz=pytz.UTC)  # int() truncates the decimal
     assert result == expected
 
 

@@ -85,9 +85,7 @@ class TestSupersetService:
     def test_retry_logic(self, superset_service, mock_redis):
         """Test exponential backoff retry on transient failures."""
         # Mock the get_access_token to return a token
-        with patch.object(
-            superset_service, "get_access_token", return_value="test-token"
-        ):
+        with patch.object(superset_service, "get_access_token", return_value="test-token"):
             with patch("requests.request") as mock_request:
                 # First two attempts fail, third succeeds
                 mock_request.side_effect = [
@@ -121,9 +119,7 @@ class TestSupersetService:
             with patch("requests.request") as mock_request:
                 # First attempt returns 401, second succeeds
                 response_401 = Mock(status_code=401)
-                response_success = Mock(
-                    status_code=200, json=lambda: {"result": "success"}
-                )
+                response_success = Mock(status_code=200, json=lambda: {"result": "success"})
                 mock_request.side_effect = [response_401, response_success]
 
                 with patch("time.sleep"):
@@ -146,17 +142,13 @@ class TestSupersetService:
         dashboard_uuid = "test-dashboard-uuid"
         mock_redis.get.return_value = None  # No cached token
 
-        with patch.object(
-            superset_service, "get_access_token", return_value="access-token"
-        ):
+        with patch.object(superset_service, "get_access_token", return_value="access-token"):
             with patch.object(
                 superset_service,
                 "get_csrf_token",
                 return_value=("csrf-token", "session-cookie"),
             ):
-                with patch(
-                    "ddpui.services.superset_service.secretsmanager"
-                ) as mock_secrets:
+                with patch("ddpui.services.superset_service.secretsmanager") as mock_secrets:
                     mock_secrets.retrieve_dalgo_user_superset_credentials.return_value = {
                         "username": "admin"
                     }
@@ -174,7 +166,9 @@ class TestSupersetService:
 
                         # Verify caching
                         mock_redis.set.assert_called_once()
-                        cache_key = f"superset:token:{superset_service.org.id}:guest:{dashboard_uuid}"
+                        cache_key = (
+                            f"superset:token:{superset_service.org.id}:guest:{dashboard_uuid}"
+                        )
                         args = mock_redis.set.call_args[0]
                         assert args[0] == cache_key
                         assert args[2] == 240  # Guest token TTL
@@ -196,9 +190,7 @@ class TestSupersetService:
             assert "Superset request failed: Connection failed" in str(exc_info.value)
 
         # Test 401 error after all retries
-        with patch.object(
-            superset_service, "get_access_token", return_value="test-token"
-        ):
+        with patch.object(superset_service, "get_access_token", return_value="test-token"):
             with patch("requests.request") as mock_request:
                 mock_request.return_value = Mock(status_code=401)
 
@@ -213,12 +205,8 @@ class TestSupersetService:
 
     def test_get_dashboards_with_filters(self, superset_service, mock_redis):
         """Test dashboard listing with search and status filters."""
-        with patch.object(
-            superset_service, "get_access_token", return_value="test-token"
-        ):
-            with patch.object(
-                superset_service, "_make_request_with_retry"
-            ) as mock_request:
+        with patch.object(superset_service, "get_access_token", return_value="test-token"):
+            with patch.object(superset_service, "_make_request_with_retry") as mock_request:
                 mock_response = Mock()
                 mock_response.json.return_value = {
                     "result": [{"id": 1, "title": "Test Dashboard"}],
@@ -243,15 +231,11 @@ class TestSupersetService:
                 assert len(params["filters"]) == 2
 
                 # Check filters
-                search_filter = next(
-                    f for f in params["filters"] if f["col"] == "dashboard_title"
-                )
+                search_filter = next(f for f in params["filters"] if f["col"] == "dashboard_title")
                 assert search_filter["opr"] == "ct"
                 assert search_filter["value"] == "test"
 
-                status_filter = next(
-                    f for f in params["filters"] if f["col"] == "published"
-                )
+                status_filter = next(f for f in params["filters"] if f["col"] == "published")
                 assert status_filter["opr"] == "eq"
                 assert status_filter["value"] is True
 
@@ -268,26 +252,18 @@ class TestSupersetService:
 
         # Test cache miss
         mock_redis.get.return_value = None
-        with patch.object(
-            superset_service, "get_access_token", return_value="test-token"
-        ):
-            with patch.object(
-                superset_service, "_make_request_with_retry"
-            ) as mock_request:
+        with patch.object(superset_service, "get_access_token", return_value="test-token"):
+            with patch.object(superset_service, "_make_request_with_retry") as mock_request:
                 mock_response = Mock()
                 mock_response.content = thumbnail_data
                 mock_request.return_value = mock_response
 
-                result = superset_service.get_dashboard_thumbnail(
-                    dashboard_id, thumbnail_url
-                )
+                result = superset_service.get_dashboard_thumbnail(dashboard_id, thumbnail_url)
                 assert result == thumbnail_data
 
                 # Verify caching
                 mock_redis.set.assert_called_once()
-                cache_key = (
-                    f"superset:thumbnail:{superset_service.org.id}:{dashboard_id}"
-                )
+                cache_key = f"superset:thumbnail:{superset_service.org.id}:{dashboard_id}"
                 args = mock_redis.set.call_args[0]
                 assert args[0] == cache_key
                 assert args[1] == thumbnail_data

@@ -167,9 +167,7 @@ class TestListDashboards:
         assert len(response) == 1
         assert response[0].title == "Test Dashboard"
 
-    def test_list_dashboards_search_no_results(
-        self, orguser, sample_dashboard, seed_db
-    ):
+    def test_list_dashboards_search_no_results(self, orguser, sample_dashboard, seed_db):
         """Test search with no matching results"""
         request = mock_request(orguser)
 
@@ -318,9 +316,7 @@ class TestFavoriteDashboard:
         assert response == {"is_favorite": False}
         assert _dashboard_is_favorite(request, sample_dashboard.id) is False
 
-    def test_unfavorite_dashboard_not_favorited(
-        self, orguser, sample_dashboard, seed_db
-    ):
+    def test_unfavorite_dashboard_not_favorited(self, orguser, sample_dashboard, seed_db):
         """Unfavoriting a dashboard that was never favorited is a no-op, not an error"""
         request = mock_request(orguser)
 
@@ -339,9 +335,7 @@ class TestFavoriteDashboard:
 
     def test_favorite_is_per_user(self, orguser, sample_dashboard, org, seed_db):
         """One user's favorite has no effect on another user's view of the same dashboard"""
-        other_user = User.objects.create(
-            username="otherfavuser", email="otherfav@test.com"
-        )
+        other_user = User.objects.create(username="otherfavuser", email="otherfav@test.com")
         other_orguser = OrgUser.objects.create(
             user=other_user,
             org=org,
@@ -350,21 +344,14 @@ class TestFavoriteDashboard:
 
         favorite_dashboard(mock_request(orguser), dashboard_id=sample_dashboard.id)
 
-        assert (
-            _dashboard_is_favorite(mock_request(orguser), sample_dashboard.id) is True
-        )
-        assert (
-            _dashboard_is_favorite(mock_request(other_orguser), sample_dashboard.id)
-            is False
-        )
+        assert _dashboard_is_favorite(mock_request(orguser), sample_dashboard.id) is True
+        assert _dashboard_is_favorite(mock_request(other_orguser), sample_dashboard.id) is False
 
         # Cleanup
         other_orguser.delete()
         other_user.delete()
 
-    def test_list_dashboards_reflects_favorite(
-        self, orguser, sample_dashboard, seed_db
-    ):
+    def test_list_dashboards_reflects_favorite(self, orguser, sample_dashboard, seed_db):
         """list_dashboards marks only the favorited dashboard as is_favorite"""
         request = mock_request(orguser)
         favorite_dashboard(request, dashboard_id=sample_dashboard.id)
@@ -379,20 +366,13 @@ class TestFavoriteDashboard:
         """get_dashboard reports the user's real favorite state, not the schema default"""
         request = mock_request(orguser)
 
-        assert (
-            get_dashboard(request, dashboard_id=sample_dashboard.id).is_favorite
-            is False
-        )
+        assert get_dashboard(request, dashboard_id=sample_dashboard.id).is_favorite is False
 
         favorite_dashboard(request, dashboard_id=sample_dashboard.id)
 
-        assert (
-            get_dashboard(request, dashboard_id=sample_dashboard.id).is_favorite is True
-        )
+        assert get_dashboard(request, dashboard_id=sample_dashboard.id).is_favorite is True
 
-    def test_get_dashboard_favorite_is_per_user(
-        self, orguser, sample_dashboard, org, seed_db
-    ):
+    def test_get_dashboard_favorite_is_per_user(self, orguser, sample_dashboard, org, seed_db):
         """get_dashboard scopes is_favorite to the requesting user"""
         other_user = User.objects.create(
             username="otherdashdetailuser", email="otherdashdetail@test.com"
@@ -406,15 +386,11 @@ class TestFavoriteDashboard:
         favorite_dashboard(mock_request(orguser), dashboard_id=sample_dashboard.id)
 
         assert (
-            get_dashboard(
-                mock_request(orguser), dashboard_id=sample_dashboard.id
-            ).is_favorite
+            get_dashboard(mock_request(orguser), dashboard_id=sample_dashboard.id).is_favorite
             is True
         )
         assert (
-            get_dashboard(
-                mock_request(other_orguser), dashboard_id=sample_dashboard.id
-            ).is_favorite
+            get_dashboard(mock_request(other_orguser), dashboard_id=sample_dashboard.id).is_favorite
             is False
         )
 
@@ -422,9 +398,7 @@ class TestFavoriteDashboard:
         other_orguser.delete()
         other_user.delete()
 
-    def test_delete_dashboard_removes_favorite_rows(
-        self, orguser, sample_dashboard, seed_db
-    ):
+    def test_delete_dashboard_removes_favorite_rows(self, orguser, sample_dashboard, seed_db):
         """Deleting a dashboard cleans up its Favorite rows instead of orphaning them"""
         # Create another dashboard so we're not deleting the last one in the org
         Dashboard.objects.create(
@@ -438,9 +412,7 @@ class TestFavoriteDashboard:
         dashboard_id = sample_dashboard.id
         request = mock_request(orguser)
         favorite_dashboard(request, dashboard_id=dashboard_id)
-        assert Favorite.objects.filter(
-            resource_type="dashboard", resource_id=dashboard_id
-        ).exists()
+        assert Favorite.objects.filter(resource_type="dashboard", resource_id=dashboard_id).exists()
 
         delete_dashboard(request, dashboard_id=dashboard_id)
 
@@ -510,9 +482,7 @@ class TestUpdateDashboard:
             description="Updated Description",
         )
 
-        response = update_dashboard(
-            request, dashboard_id=sample_dashboard.id, payload=payload
-        )
+        response = update_dashboard(request, dashboard_id=sample_dashboard.id, payload=payload)
 
         assert response.id == sample_dashboard.id
         assert response.title == "Updated Dashboard"
@@ -525,9 +495,7 @@ class TestUpdateDashboard:
 
         payload = DashboardUpdate(description="Only description updated")
 
-        response = update_dashboard(
-            request, dashboard_id=sample_dashboard.id, payload=payload
-        )
+        response = update_dashboard(request, dashboard_id=sample_dashboard.id, payload=payload)
 
         assert response.title == original_title
         assert response.description == "Only description updated"
@@ -543,9 +511,7 @@ class TestUpdateDashboard:
 
         assert excinfo.value.status_code == 404
 
-    def test_update_dashboard_layout_and_components(
-        self, orguser, sample_dashboard, seed_db
-    ):
+    def test_update_dashboard_layout_and_components(self, orguser, sample_dashboard, seed_db):
         """Test updating layout and components via tabs"""
         from ddpui.schemas.dashboard_schema import DashboardTabSchema
 
@@ -571,9 +537,7 @@ class TestUpdateDashboard:
             ]
         )
 
-        response = update_dashboard(
-            request, dashboard_id=sample_dashboard.id, payload=payload
-        )
+        response = update_dashboard(request, dashboard_id=sample_dashboard.id, payload=payload)
 
         assert len(response.tabs) == 1
         assert len(response.tabs[0].layout_config) == 2
@@ -585,9 +549,7 @@ class TestUpdateDashboard:
 
         payload = DashboardUpdate(is_published=True)
 
-        response = update_dashboard(
-            request, dashboard_id=sample_dashboard.id, payload=payload
-        )
+        response = update_dashboard(request, dashboard_id=sample_dashboard.id, payload=payload)
 
         assert response.is_published is True
         assert response.published_at is not None
@@ -682,9 +644,7 @@ class TestCreateFilter:
             order=1,
         )
 
-        response = create_filter(
-            request, dashboard_id=sample_dashboard.id, payload=payload
-        )
+        response = create_filter(request, dashboard_id=sample_dashboard.id, payload=payload)
 
         assert response.name == "Category Filter"
         assert response.filter_type == "value"
@@ -718,9 +678,7 @@ class TestCreateFilter:
 class TestUpdateFilter:
     """Tests for update_filter endpoint"""
 
-    def test_update_filter_success(
-        self, orguser, sample_dashboard, sample_filter, seed_db
-    ):
+    def test_update_filter_success(self, orguser, sample_dashboard, sample_filter, seed_db):
         """Test successfully updating a filter"""
         request = mock_request(orguser)
 
@@ -779,9 +737,7 @@ class TestDeleteFilter:
 
         request = mock_request(orguser)
 
-        response = delete_filter(
-            request, dashboard_id=sample_dashboard.id, filter_id=filter_id
-        )
+        response = delete_filter(request, dashboard_id=sample_dashboard.id, filter_id=filter_id)
 
         assert response.get("success") is True
         assert not DashboardFilter.objects.filter(id=filter_id).exists()
@@ -804,9 +760,7 @@ class TestDeleteFilter:
 class TestDuplicateDashboardTabs:
     """Tests for duplicate_dashboard() tabs copying with filter ID remapping"""
 
-    def test_duplicate_dashboard_copies_empty_tabs(
-        self, orguser, sample_dashboard, seed_db
-    ):
+    def test_duplicate_dashboard_copies_empty_tabs(self, orguser, sample_dashboard, seed_db):
         """Test that duplicating a dashboard with no tabs results in empty tabs"""
         sample_dashboard.tabs = []
         sample_dashboard.save()
@@ -875,18 +829,11 @@ class TestDuplicateDashboardTabs:
         new_filter_id = int(new_filter_key.replace("filter-", ""))
 
         # Old filter ID must NOT appear in the new tab
-        assert f"filter-{original_filter.id}" not in [
-            item["i"] for item in new_tab.layout_config
-        ]
+        assert f"filter-{original_filter.id}" not in [item["i"] for item in new_tab.layout_config]
         # New filter ID must appear in layout_config
-        assert f"filter-{new_filter_id}" in [
-            item["i"] for item in new_tab.layout_config
-        ]
+        assert f"filter-{new_filter_id}" in [item["i"] for item in new_tab.layout_config]
         # New filter ID must appear in components config
-        assert (
-            new_tab.components[f"filter-{new_filter_id}"]["config"]["filterId"]
-            == new_filter_id
-        )
+        assert new_tab.components[f"filter-{new_filter_id}"]["config"]["filterId"] == new_filter_id
 
         # Cleanup
         original_filter.delete()
@@ -926,9 +873,7 @@ class TestDuplicateDashboardTabs:
 
         new_config = response.tabs[0].components["text-1"]["config"]
         assert new_config["imageKey"] != original_image_key
-        assert new_config["imageKey"].startswith(
-            f"orgs/{orguser.org.pk}/dashboards/images/"
-        )
+        assert new_config["imageKey"].startswith(f"orgs/{orguser.org.pk}/dashboards/images/")
         assert (
             new_config["imageUrl"]
             == "https://test-bucket.s3.amazonaws.com/orgs/dash-api-test-org/dashboards/images/new.png"
@@ -988,16 +933,12 @@ def test_create_dashboard_creates_audit_log(mock_audit_log, seed_db, orguser):
 
 
 @patch("ddpui.services.dashboard_service.create_audit_log")
-def test_update_dashboard_creates_audit_log(
-    mock_audit_log, seed_db, orguser, sample_dashboard
-):
+def test_update_dashboard_creates_audit_log(mock_audit_log, seed_db, orguser, sample_dashboard):
     """Test that updating a dashboard creates an audit log entry."""
     request = mock_request(orguser)
     payload = DashboardUpdate(title="Updated Dashboard Title")
 
-    response = update_dashboard(
-        request, dashboard_id=sample_dashboard.id, payload=payload
-    )
+    response = update_dashboard(request, dashboard_id=sample_dashboard.id, payload=payload)
 
     assert response.title == "Updated Dashboard Title"
     mock_audit_log.assert_called_once()
@@ -1167,9 +1108,7 @@ def test_delete_dashboard_creates_audit_log(mock_audit_log, seed_db, orguser, or
 
 
 @patch("ddpui.api.dashboard_native_api.create_audit_log")
-def test_duplicate_dashboard_creates_audit_log(
-    mock_audit_log, seed_db, orguser, sample_dashboard
-):
+def test_duplicate_dashboard_creates_audit_log(mock_audit_log, seed_db, orguser, sample_dashboard):
     """Test that duplicating a dashboard creates an audit log entry."""
     request = mock_request(orguser)
 
@@ -1246,9 +1185,7 @@ class TestUploadDashboardWidgetImage:
     def test_upload_widget_image_success(self, orguser, seed_db):
         """Test a successful upload returns the service's url/key and forwards the org"""
         request = mock_request(orguser)
-        file = SimpleUploadedFile(
-            "test.png", b"fake-image-bytes", content_type="image/png"
-        )
+        file = SimpleUploadedFile("test.png", b"fake-image-bytes", content_type="image/png")
 
         with patch(
             "ddpui.api.dashboard_native_api.upload_widget_image",
@@ -1271,15 +1208,11 @@ class TestUploadDashboardWidgetImage:
     def test_upload_widget_image_validation_error_returns_400(self, orguser, seed_db):
         """Test that a validation error from the service surfaces as HTTP 400"""
         request = mock_request(orguser)
-        file = SimpleUploadedFile(
-            "test.pdf", b"not-an-image", content_type="application/pdf"
-        )
+        file = SimpleUploadedFile("test.pdf", b"not-an-image", content_type="application/pdf")
 
         with patch(
             "ddpui.api.dashboard_native_api.upload_widget_image",
-            side_effect=WidgetImageValidationError(
-                "Invalid file type: application/pdf"
-            ),
+            side_effect=WidgetImageValidationError("Invalid file type: application/pdf"),
         ):
             with pytest.raises(HttpError) as excinfo:
                 upload_dashboard_widget_image(request, file=file)

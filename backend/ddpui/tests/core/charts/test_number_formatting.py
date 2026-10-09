@@ -155,10 +155,7 @@ class TestPrefixSuffix:
         assert format_number_v2(85, "default", 0, suffix=" people") == "85 people"
 
     def test_prefix_and_suffix(self):
-        assert (
-            format_number_v2(1234, "indian", 0, prefix="₹", suffix=" total")
-            == "₹1,234 total"
-        )
+        assert format_number_v2(1234, "indian", 0, prefix="₹", suffix=" total") == "₹1,234 total"
 
 
 # ── decimal-place clamping (mirrors frontend MAX_DECIMAL_PLACES=10 / min 0) ─

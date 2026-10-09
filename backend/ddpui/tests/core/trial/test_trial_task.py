@@ -75,9 +75,7 @@ def test_clone_trial_org_task_never_forwards_client_role_as_rbac_role(
 
 @patch("ddpui.core.trial.tasks.TaskProgress")
 @patch("ddpui.core.trial.tasks.clone_template_org")
-def test_clone_trial_org_task_failure_records_progress(
-    mock_clone, mock_taskprogress_cls
-):
+def test_clone_trial_org_task_failure_records_progress(mock_clone, mock_taskprogress_cls):
     from ddpui.core.trial.tasks import clone_trial_org_task
 
     mock_progress = MagicMock()
@@ -90,9 +88,7 @@ def test_clone_trial_org_task_failure_records_progress(
     mock_progress.add.assert_any_call({"message": "queued", "status": "queued"})
     # M2: the polled progress must not leak raw exception text — generic message only.
     failed_calls = [
-        c.args[0]
-        for c in mock_progress.add.call_args_list
-        if c.args[0].get("status") == "failed"
+        c.args[0] for c in mock_progress.add.call_args_list if c.args[0].get("status") == "failed"
     ]
     assert len(failed_calls) == 1
     assert failed_calls[0]["message"] == "clone failed"
@@ -102,9 +98,7 @@ def test_clone_trial_org_task_failure_records_progress(
 @patch("ddpui.core.trial.tasks.release_clone_lock")
 @patch("ddpui.core.trial.tasks.TaskProgress")
 @patch("ddpui.core.trial.tasks.clone_template_org")
-def test_clone_task_releases_lock_on_success(
-    mock_clone, mock_taskprogress_cls, mock_release
-):
+def test_clone_task_releases_lock_on_success(mock_clone, mock_taskprogress_cls, mock_release):
     """The per-email running-clone lock must be freed when the clone finishes, so a later
     retry (or a fresh trial for that email) isn't blocked until the TTL backstop expires.
     """
@@ -123,9 +117,7 @@ def test_clone_task_releases_lock_on_success(
 @patch("ddpui.core.trial.tasks.release_clone_lock")
 @patch("ddpui.core.trial.tasks.TaskProgress")
 @patch("ddpui.core.trial.tasks.clone_template_org")
-def test_clone_task_releases_lock_on_failure(
-    mock_clone, mock_taskprogress_cls, mock_release
-):
+def test_clone_task_releases_lock_on_failure(mock_clone, mock_taskprogress_cls, mock_release):
     """Lock freed on the failure path too (finally) — otherwise "Try again" would hit a held
     lock and 409 until the TTL expired."""
     from ddpui.core.trial.tasks import clone_trial_org_task
@@ -159,9 +151,7 @@ def test_clone_task_timeout_records_failed_and_releases_lock(
     clone_trial_org_task("task-timeout", 5, "slow@b.org", "Acme", "account-manager")
 
     failed_calls = [
-        c.args[0]
-        for c in mock_progress.add.call_args_list
-        if c.args[0].get("status") == "failed"
+        c.args[0] for c in mock_progress.add.call_args_list if c.args[0].get("status") == "failed"
     ]
     assert len(failed_calls) == 1
     assert failed_calls[0]["message"] == "clone failed"
@@ -235,9 +225,7 @@ def test_clone_task_survives_a_failing_biz_dev_notification(
     clone_trial_org_task("task-mailfail", 5, "a@b.org", "Acme", "monitoring_evaluation")
 
     # still reported as completed, and nothing raised
-    assert any(
-        c.args[0].get("status") == "completed" for c in mock_progress.add.call_args_list
-    )
+    assert any(c.args[0].get("status") == "completed" for c in mock_progress.add.call_args_list)
     mock_biz_dev.send_notification.assert_not_called()
 
 

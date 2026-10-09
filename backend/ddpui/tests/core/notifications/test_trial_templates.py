@@ -52,9 +52,7 @@ def test_verify_email_has_headline_link_and_expiry_note():
 
 
 def test_welcome_email_lists_three_actions_and_badge():
-    plain, html_body = render_trial_welcome_email(
-        "https://app.dalgo.org/impact", trial_days=14
-    )
+    plain, html_body = render_trial_welcome_email("https://app.dalgo.org/impact", trial_days=14)
     assert "Your workspace is ready" in html_body
     assert "Trial · 14 days</span>" in html_body
     for title in (
@@ -123,10 +121,7 @@ def test_cta_url_with_query_string_survives_round_trip():
         schedule_call_url=url,
     )
     assert "&amp;amp;" not in html_body
-    assert (
-        'href="https://app.dalgo.org/settings/billing?utm=email&amp;src=trial"'
-        in html_body
-    )
+    assert 'href="https://app.dalgo.org/settings/billing?utm=email&amp;src=trial"' in html_body
 
 
 def test_all_cta_call_sites_single_escape_a_query_string_url():
@@ -192,16 +187,16 @@ def test_trial_shell_is_single_source_of_truth():
     trial_ast = ast.parse(trial_source)
     for node in trial_ast.body:
         if isinstance(node, ast.FunctionDef) and node.name.startswith("render_"):
-            body = "\n".join(
-                trial_source.splitlines()[node.lineno - 1 : node.end_lineno]
-            )
+            body = "\n".join(trial_source.splitlines()[node.lineno - 1 : node.end_lineno])
             assert (
                 "_render_trial_email_shell" in body
             ), f"{node.name} must call _render_trial_email_shell — do not inline the trial shell"
 
     # Navy wordmark fragment (source-level check — the `{_DALGO_NAVY}` placeholder
     # is inspected before f-string substitution).
-    trial_wordmark_fragment = '<span style="color:{_DALGO_NAVY}; font-size:22px; font-weight:800;">Dalgo</span>'
+    trial_wordmark_fragment = (
+        '<span style="color:{_DALGO_NAVY}; font-size:22px; font-weight:800;">Dalgo</span>'
+    )
     assert (
         trial_wordmark_fragment in trial_shell_source
     ), "trial_shell.py must render the navy Dalgo wordmark"
@@ -246,9 +241,7 @@ REQUESTED_AT = datetime.datetime(2026, 8, 8, 11, 4, tzinfo=datetime.timezone.utc
 
 def test_subscription_request_email_renders_both_blocks():
     org, orguser, org_plan = _fake_request_actors()
-    subject, body = build_subscription_request_email(
-        org, orguser, org_plan, REQUESTED_AT
-    )
+    subject, body = build_subscription_request_email(org, orguser, org_plan, REQUESTED_AT)
 
     assert subject == "Subscription request: Noora Health"
     assert body == (
@@ -328,9 +321,7 @@ def test_new_org_signup_email_renders_both_blocks():
 
 def test_new_org_signup_email_falls_back_for_missing_values():
     """Trial signup collects no name, and the plan/role lookups can come back empty."""
-    org, orguser, _ = _fake_request_actors(
-        work_domain=None, full_name="", role_name=None
-    )
+    org, orguser, _ = _fake_request_actors(work_domain=None, full_name="", role_name=None)
 
     _, body = build_new_org_signup_email(org, orguser, None, None)
 
@@ -389,9 +380,7 @@ def test_testimonial_contains_quote_and_attribution():
 
 def test_text_link_renders_label_and_href_with_arrow():
     """the footer link carries its label, the url, and the trailing arrow glyph"""
-    html_out = _render_trial_text_link(
-        "Schedule a call with us", "https://cal.example/x"
-    )
+    html_out = _render_trial_text_link("Schedule a call with us", "https://cal.example/x")
     assert 'href="https://cal.example/x"' in html_out
     assert "Schedule a call with us" in html_out
     assert "&#8599;" in html_out
@@ -449,9 +438,7 @@ def test_day3_in_progress_reverses_order_for_the_other_flow():
 
 def test_completion_email_ticks_both_and_offers_keep_exploring():
     """email C congratulates and offers KEEP EXPLORING — there is no upgrade CTA"""
-    plain, html_out = render_trial_completion_email(
-        "https://app.example", "https://cal.example"
-    )
+    plain, html_out = render_trial_completion_email("https://app.example", "https://cal.example")
     assert "Congratulations" in html_out
     assert html_out.count("&#10003;") == 2
     assert "KEEP EXPLORING" in html_out
@@ -463,9 +450,7 @@ def test_completion_email_ticks_both_and_offers_keep_exploring():
 def test_all_three_carry_testimonial_and_call_link():
     """the testimonial block and footer link are common to A, B and C"""
     renders = [
-        render_trial_day3_not_started_email(
-            "https://app.example", "https://cal.example"
-        ),
+        render_trial_day3_not_started_email("https://app.example", "https://cal.example"),
         render_trial_day3_in_progress_email(
             "insights", "https://app.example", "https://cal.example"
         ),

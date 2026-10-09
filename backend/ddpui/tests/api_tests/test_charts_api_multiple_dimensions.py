@@ -118,9 +118,7 @@ class TestGetChartDataMultipleDimensions:
             schema_name="public",
             table_name="test_table",
             dimensions=["KEY", "region"],
-            metrics=[
-                ChartMetric(aggregation="count", column=None, alias="Total Count")
-            ],
+            metrics=[ChartMetric(aggregation="count", column=None, alias="Total Count")],
         )
 
         response = get_chart_data(request, payload)
@@ -231,9 +229,7 @@ class TestGetChartDataPreviewMultipleDimensions:
     """Tests for get_chart_data_preview endpoint with multiple dimensions"""
 
     @patch("ddpui.core.charts.charts_service.get_chart_data_table_preview")
-    def test_preview_two_dimensions_one_metric(
-        self, mock_preview, orguser, org_warehouse, seed_db
-    ):
+    def test_preview_two_dimensions_one_metric(self, mock_preview, orguser, org_warehouse, seed_db):
         """Test preview with 2 dimensions and 1 metric"""
         mock_preview.return_value = {
             "columns": ["KEY", "region", "Total Count"],
@@ -257,9 +253,7 @@ class TestGetChartDataPreviewMultipleDimensions:
             schema_name="public",
             table_name="test_table",
             dimensions=["KEY", "region"],
-            metrics=[
-                ChartMetric(aggregation="count", column=None, alias="Total Count")
-            ],
+            metrics=[ChartMetric(aggregation="count", column=None, alias="Total Count")],
         )
 
         response = get_chart_data_preview(request, payload, page=0, limit=10)
@@ -366,9 +360,7 @@ class TestGenerateChartDataMultipleDimensions:
 
     @patch("ddpui.core.charts.charts_service.get_warehouse_client")
     @patch("ddpui.core.charts.charts_service.execute_chart_query")
-    def test_generate_table_two_dimensions(
-        self, mock_execute, mock_warehouse, org_warehouse
-    ):
+    def test_generate_table_two_dimensions(self, mock_execute, mock_warehouse, org_warehouse):
         """Test generating table chart data with 2 dimensions"""
         # Mock warehouse client
         mock_warehouse_obj = MagicMock()
@@ -386,9 +378,7 @@ class TestGenerateChartDataMultipleDimensions:
             schema_name="public",
             table_name="test_table",
             dimensions=["KEY", "region"],
-            metrics=[
-                ChartMetric(aggregation="count", column=None, alias="Total Count")
-            ],
+            metrics=[ChartMetric(aggregation="count", column=None, alias="Total Count")],
         )
 
         result = generate_chart_data_and_config(payload, org_warehouse)
@@ -450,9 +440,7 @@ class TestGenerateChartDataMultipleDimensions:
 
     @patch("ddpui.core.charts.charts_service.get_warehouse_client")
     @patch("ddpui.core.charts.charts_service.execute_chart_query")
-    def test_generate_table_dimensions_only(
-        self, mock_execute, mock_warehouse, org_warehouse
-    ):
+    def test_generate_table_dimensions_only(self, mock_execute, mock_warehouse, org_warehouse):
         """Test generating table chart data with dimensions only"""
         # Mock warehouse client
         mock_warehouse_obj = MagicMock()
@@ -499,9 +487,7 @@ class TestMultipleDimensionsMultipleMetrics:
     """Comprehensive tests for multiple dimensions with multiple metrics"""
 
     @patch("ddpui.api.charts_api.generate_chart_data_and_config")
-    def test_two_dimensions_two_metrics(
-        self, mock_generate, orguser, org_warehouse, seed_db
-    ):
+    def test_two_dimensions_two_metrics(self, mock_generate, orguser, org_warehouse, seed_db):
         """Test table chart with 2 dimensions and 2 metrics"""
         mock_generate.return_value = {
             "data": {
@@ -548,9 +534,7 @@ class TestMultipleDimensionsMultipleMetrics:
         assert "Revenue" in columns
 
     @patch("ddpui.api.charts_api.generate_chart_data_and_config")
-    def test_two_dimensions_three_metrics(
-        self, mock_generate, orguser, org_warehouse, seed_db
-    ):
+    def test_two_dimensions_three_metrics(self, mock_generate, orguser, org_warehouse, seed_db):
         """Test table chart with 2 dimensions and 3 metrics"""
         mock_generate.return_value = {
             "data": {
@@ -594,9 +578,7 @@ class TestMultipleDimensionsMultipleMetrics:
         assert "Average Price" in columns
 
     @patch("ddpui.api.charts_api.generate_chart_data_and_config")
-    def test_four_dimensions_three_metrics(
-        self, mock_generate, orguser, org_warehouse, seed_db
-    ):
+    def test_four_dimensions_three_metrics(self, mock_generate, orguser, org_warehouse, seed_db):
         """Test table chart with 4 dimensions and 3 metrics"""
         mock_generate.return_value = {
             "data": {

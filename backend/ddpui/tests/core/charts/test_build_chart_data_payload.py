@@ -199,9 +199,7 @@ class TestBuildChartDataPayload:
             "extra_config": {
                 "x_axis_column": "date",
                 "dimension_column": "source",
-                "metrics": [
-                    {"column": "visits", "aggregation": "sum", "alias": "Visits"}
-                ],
+                "metrics": [{"column": "visits", "aggregation": "sum", "alias": "Visits"}],
                 "filters": [
                     {
                         "column": "date",

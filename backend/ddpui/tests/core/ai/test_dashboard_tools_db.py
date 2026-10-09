@@ -86,9 +86,7 @@ def test_create_dashboard_runs_the_api_side_effects(mock_audit_log, org, admin):
 
 
 @patch("ddpui.services.dashboard_service.create_audit_log")
-def test_charts_added_to_a_shared_dashboard_are_shared_too(
-    mock_audit_log, org, admin, member
-):
+def test_charts_added_to_a_shared_dashboard_are_shared_too(mock_audit_log, org, admin, member):
     """The bug: the tool saved tabs itself and skipped sync_dashboard_cascade,
     so people the dashboard was shared with could not see the new chart."""
     first, added = _chart(org, admin, "First"), _chart(org, admin, "Added")

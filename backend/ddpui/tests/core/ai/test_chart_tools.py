@@ -36,9 +36,7 @@ def saved(monkeypatch):
 
 
 def run_tool(ctx, **kwargs):
-    return chart_tools.create_chart.func(
-        runtime=type("R", (), {"context": ctx})(), **kwargs
-    )
+    return chart_tools.create_chart.func(runtime=type("R", (), {"context": ctx})(), **kwargs)
 
 
 def make_chart_context(**overrides):
@@ -199,9 +197,7 @@ def test_rejects_bad_chart_type_and_missing_dimension(saved):
         chart_type="bar",
         schema_name="prod",
         table_name="surveys",
-        extra_config={
-            "metrics": [{"aggregation": "count"}]
-        },  # no dimension_column for bar
+        extra_config={"metrics": [{"aggregation": "count"}]},  # no dimension_column for bar
     )
     assert artifact["status"] == "rejected"
     assert "data" not in saved

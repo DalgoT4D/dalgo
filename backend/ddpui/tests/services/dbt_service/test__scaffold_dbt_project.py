@@ -21,9 +21,7 @@ def test_scaffold_dbt_project_success(tmp_path):
     # Mock DbtProjectManager.run_dbt_command to succeed
     with patch(
         "ddpui.ddpdbt.dbt_service.DbtProjectManager.run_dbt_command"
-    ) as mock_run_command, patch(
-        "ddpui.ddpdbt.dbt_service.shutil.copy"
-    ) as mock_copy, patch(
+    ) as mock_run_command, patch("ddpui.ddpdbt.dbt_service.shutil.copy") as mock_copy, patch(
         "ddpui.ddpdbt.dbt_service.shutil.rmtree"
     ) as mock_rmtree, patch(
         "ddpui.ddpdbt.dbt_service.assets.__file__", "/fake/path/to/assets/__init__.py"
@@ -73,9 +71,7 @@ def test_scaffold_dbt_project_dbt_init_fails(tmp_path):
     orgdbt = OrgDbt.objects.create(project_dir=str(dbtrepo_dir), dbt_venv="test_venv")
 
     # Mock DbtProjectManager.run_dbt_command to fail
-    with patch(
-        "ddpui.ddpdbt.dbt_service.DbtProjectManager.run_dbt_command"
-    ) as mock_run_command:
+    with patch("ddpui.ddpdbt.dbt_service.DbtProjectManager.run_dbt_command") as mock_run_command:
         mock_run_command.side_effect = subprocess.CalledProcessError(1, "dbt init")
 
         dbtrepo_dir.mkdir(parents=True, exist_ok=True)
@@ -105,7 +101,5 @@ def test_scaffold_dbt_project_asset_copy_fails(tmp_path):
         dbtrepo_dir.mkdir(parents=True, exist_ok=True)
 
         # Call the function and expect it to fail
-        with pytest.raises(
-            Exception, match="Something went wrong while copying asset files"
-        ):
+        with pytest.raises(Exception, match="Something went wrong while copying asset files"):
             _scaffold_dbt_project(org, orgdbt, project_name, dbtrepo_dir)

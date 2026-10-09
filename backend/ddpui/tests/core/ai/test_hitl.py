@@ -20,9 +20,7 @@ from ddpui.tests.core.ai.test_tools import FakeWarehouse
 
 def _invoke(agent, question, context, thread="t1"):
     config = {"configurable": {"thread_id": thread}}
-    result = agent.invoke(
-        {"messages": [HumanMessage(question)]}, context=context, config=config
-    )
+    result = agent.invoke({"messages": [HumanMessage(question)]}, context=context, config=config)
     return result, config
 
 
@@ -104,15 +102,11 @@ def test_ask_user_pauses_and_the_answer_becomes_the_tool_result():
     assert event["kind"] == "question"
     assert event["question"] == "Which program do you mean?"
 
-    resume = build_resume_payload(
-        event["requests"], approve=True, answer="Girls' Education"
-    )
+    resume = build_resume_payload(event["requests"], approve=True, answer="Girls' Education")
     result = agent.invoke(Command(resume=resume), context=context, config=config)
 
     # the human's reply came back to the model as the ask_user tool result
-    tool_messages = [
-        m for m in result["messages"] if m.type == "tool" and m.name == "ask_user"
-    ]
+    tool_messages = [m for m in result["messages"] if m.type == "tool" and m.name == "ask_user"]
     assert tool_messages and tool_messages[-1].content == "Girls' Education"
     assert result["messages"][-1].content == "For Girls' Education: 312 enrollments."
 
@@ -199,13 +193,9 @@ def test_ask_user_without_middleware_falls_back_to_its_body():
         ]
     )
     agent = build_agent(model=model, human_in_the_loop=False)
-    result = agent.invoke(
-        {"messages": [HumanMessage("surveys?")]}, context=make_context()
-    )
+    result = agent.invoke({"messages": [HumanMessage("surveys?")]}, context=make_context())
 
-    tool_messages = [
-        m for m in result["messages"] if m.type == "tool" and m.name == "ask_user"
-    ]
+    tool_messages = [m for m in result["messages"] if m.type == "tool" and m.name == "ask_user"]
     assert tool_messages and "No user is available" in tool_messages[-1].content
     assert result["messages"][-1].content == "Assuming 2026: 41 surveys."
 
@@ -221,9 +211,7 @@ def test_approval_event_lists_the_querys_columns():
         "action_requests": [
             {
                 "name": "execute_sql",
-                "args": {
-                    "sql": "SELECT phone FROM prod.beneficiaries WHERE phone = '99'"
-                },
+                "args": {"sql": "SELECT phone FROM prod.beneficiaries WHERE phone = '99'"},
                 "description": "",
             }
         ]
@@ -266,9 +254,7 @@ def test_approval_event_reports_a_column_build_failure():
 
 def test_non_sql_tools_get_no_columns_field():
     interrupt_value = {
-        "action_requests": [
-            {"name": "create_chart", "args": {"title": "x"}, "description": ""}
-        ]
+        "action_requests": [{"name": "create_chart", "args": {"title": "x"}, "description": ""}]
     }
     event = input_required_event(interrupt_value, make_context(FakeWarehouse()))
     assert "columns" not in event["requests"][0]
@@ -297,12 +283,8 @@ def test_lookup_column_values_pauses_for_approval():
     )
     agent = build_agent(checkpointer=InMemorySaver(), model=model)
 
-    result, _config = _invoke(
-        agent, "what districts are there?", make_context(warehouse)
-    )
+    result, _config = _invoke(agent, "what districts are there?", make_context(warehouse))
 
     interrupt = result["__interrupt__"][0]
-    assert [r["name"] for r in interrupt.value["action_requests"]] == [
-        "lookup_column_values"
-    ]
+    assert [r["name"] for r in interrupt.value["action_requests"]] == ["lookup_column_values"]
     assert warehouse.executed == []

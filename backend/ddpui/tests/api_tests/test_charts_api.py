@@ -358,9 +358,7 @@ class TestCreateChartPerType:
     every persisted customization the UI sent."""
 
     @pytest.mark.parametrize("chart_type", list(CHART_UI_PAYLOADS.keys()))
-    def test_create_with_real_ui_payload(
-        self, chart_type, orguser, org_warehouse, seed_db
-    ):
+    def test_create_with_real_ui_payload(self, chart_type, orguser, org_warehouse, seed_db):
         request = mock_request(orguser)
         payload_dict = CHART_UI_PAYLOADS[chart_type]
         payload = ChartCreate(**payload_dict)
@@ -595,9 +593,7 @@ class TestBulkDeleteCharts:
 class TestGetChartDashboards:
     """Tests for get_chart_dashboards endpoint"""
 
-    def test_get_chart_dashboards_with_dashboard(
-        self, orguser, sample_chart, org, seed_db
-    ):
+    def test_get_chart_dashboards_with_dashboard(self, orguser, sample_chart, org, seed_db):
         """Test getting dashboards that use a chart"""
         # Create a dashboard that uses the chart
         dashboard = Dashboard.objects.create(
@@ -706,9 +702,7 @@ class TestFavoriteChart:
 
     def test_favorite_is_per_user(self, orguser, sample_chart, org, seed_db):
         """One user's favorite has no effect on another user's view of the same chart"""
-        other_user = User.objects.create(
-            username="otherfavuser", email="otherfav@test.com"
-        )
+        other_user = User.objects.create(username="otherfavuser", email="otherfav@test.com")
         other_orguser = OrgUser.objects.create(
             user=other_user,
             org=org,
@@ -747,9 +741,7 @@ class TestFavoriteChart:
 
     def test_get_chart_favorite_is_per_user(self, orguser, sample_chart, org, seed_db):
         """get_chart scopes is_favorite to the requesting user"""
-        other_user = User.objects.create(
-            username="otherdetailuser", email="otherdetail@test.com"
-        )
+        other_user = User.objects.create(username="otherdetailuser", email="otherdetail@test.com")
         other_orguser = OrgUser.objects.create(
             user=other_user,
             org=org,
@@ -758,14 +750,8 @@ class TestFavoriteChart:
 
         favorite_chart(mock_request(orguser), chart_id=sample_chart.id)
 
-        assert (
-            get_chart(mock_request(orguser), chart_id=sample_chart.id).is_favorite
-            is True
-        )
-        assert (
-            get_chart(mock_request(other_orguser), chart_id=sample_chart.id).is_favorite
-            is False
-        )
+        assert get_chart(mock_request(orguser), chart_id=sample_chart.id).is_favorite is True
+        assert get_chart(mock_request(other_orguser), chart_id=sample_chart.id).is_favorite is False
 
         # Cleanup
         other_orguser.delete()
@@ -775,15 +761,11 @@ class TestFavoriteChart:
         """Deleting a chart cleans up its Favorite rows instead of orphaning them"""
         chart_id = sample_chart.id
         favorite_chart(mock_request(orguser), chart_id=chart_id)
-        assert Favorite.objects.filter(
-            resource_type="chart", resource_id=chart_id
-        ).exists()
+        assert Favorite.objects.filter(resource_type="chart", resource_id=chart_id).exists()
 
         delete_chart(mock_request(orguser), chart_id=chart_id)
 
-        assert not Favorite.objects.filter(
-            resource_type="chart", resource_id=chart_id
-        ).exists()
+        assert not Favorite.objects.filter(resource_type="chart", resource_id=chart_id).exists()
 
     def test_bulk_delete_charts_removes_favorite_rows(self, orguser, org, seed_db):
         """Bulk-deleting charts cleans up their Favorite rows too"""
@@ -811,9 +793,7 @@ class TestFavoriteChart:
         favorite_chart(request, chart_id=chart_a.id)
         favorite_chart(request, chart_id=chart_b.id)
 
-        bulk_delete_charts(
-            request, BulkDeleteRequest(chart_ids=[chart_a.id, chart_b.id])
-        )
+        bulk_delete_charts(request, BulkDeleteRequest(chart_ids=[chart_a.id, chart_b.id]))
 
         assert not Favorite.objects.filter(
             resource_type="chart", resource_id__in=[chart_a.id, chart_b.id]
@@ -829,9 +809,7 @@ class TestGetChartData:
     """Tests for get_chart_data endpoint"""
 
     @patch("ddpui.api.charts_api.generate_chart_data_and_config")
-    def test_get_chart_data_success(
-        self, mock_generate, orguser, org_warehouse, seed_db
-    ):
+    def test_get_chart_data_success(self, mock_generate, orguser, org_warehouse, seed_db):
         """Test successfully getting chart data"""
         mock_generate.return_value = {
             "data": {"categories": ["A", "B"], "values": [10, 20]},
@@ -892,9 +870,7 @@ class TestGetMapDataOverlay:
             schema_name="public",
             table_name="orders",
             geographic_column="state",
-            metrics=[
-                ChartMetric(column_expression="SUM(amount) / SUM(count)", alias="value")
-            ],
+            metrics=[ChartMetric(column_expression="SUM(amount) / SUM(count)", alias="value")],
         )
 
         response = get_map_data_overlay(request, payload)
@@ -983,9 +959,7 @@ from ddpui.models.audit_log import AuditLogResourceType, AuditLogAction
 
 
 @patch("ddpui.services.chart_service.create_audit_log")
-def test_create_chart_creates_audit_log(
-    mock_audit_log, seed_db, orguser, org_warehouse
-):
+def test_create_chart_creates_audit_log(mock_audit_log, seed_db, orguser, org_warehouse):
     """Test that creating a chart creates an audit log entry."""
     request = mock_request(orguser)
     payload = ChartCreate(
@@ -1043,9 +1017,7 @@ def test_update_chart_creates_audit_log(mock_audit_log, seed_db, orguser, sample
 
 
 @patch("ddpui.api.charts_api.create_audit_log")
-def test_update_chart_untouched_title_still_logged(
-    mock_audit_log, seed_db, orguser, sample_chart
-):
+def test_update_chart_untouched_title_still_logged(mock_audit_log, seed_db, orguser, sample_chart):
     """title is always logged (the resource's current value), even when the
     request didn't touch it, so the row stays self-identifying without a
     separate name column."""
@@ -1129,9 +1101,7 @@ def test_bulk_delete_charts_creates_audit_log(mock_audit_log, seed_db, orguser, 
 
 
 @patch("ddpui.api.charts_api.create_audit_log")
-@patch(
-    "ddpui.api.charts_api.stream_chart_data_csv", return_value=iter([b"col1,col2\n"])
-)
+@patch("ddpui.api.charts_api.stream_chart_data_csv", return_value=iter([b"col1,col2\n"]))
 def test_download_chart_data_csv_creates_audit_log(
     mock_stream, mock_audit_log, seed_db, orguser, org_warehouse
 ):

@@ -74,9 +74,7 @@ def authuser():
 def org_with_server_block():
     """a pytest fixture which creates an Org having an airbyte workspace and server block"""
     print("creating org with server block")
-    org = Org.objects.create(
-        airbyte_workspace_id="FAKE-WORKSPACE-ID", slug="test-org-slug"
-    )
+    org = Org.objects.create(airbyte_workspace_id="FAKE-WORKSPACE-ID", slug="test-org-slug")
     OrgPrefectBlockv1.objects.create(
         block_type=AIRBYTESERVER,
         block_id="test-server-blk-id",
@@ -105,23 +103,17 @@ def generate_sync_org_tasks(seed_master_tasks, org_with_server_block):
     """creates the sync org tasks with fake connections ids for the org"""
     task = Task.objects.filter(slug="airbyte-sync").first()
     for connection_id in CONNECTION_IDS:
-        OrgTask.objects.create(
-            task=task, connection_id=connection_id, org=org_with_server_block
-        )
+        OrgTask.objects.create(task=task, connection_id=connection_id, org=org_with_server_block)
 
 
 @pytest.fixture()
 def generate_transform_org_tasks(seed_master_tasks, org_with_server_block):
-    for task in Task.objects.filter(
-        type__in=[TaskType.DBT, TaskType.GIT], is_system=True
-    ):
+    for task in Task.objects.filter(type__in=[TaskType.DBT, TaskType.GIT], is_system=True):
         OrgTask.objects.create(task=task, org=org_with_server_block)
 
 
 @pytest.fixture
-def test_dataflow(
-    org_with_server_block, generate_sync_org_tasks, generate_transform_org_tasks
-):
+def test_dataflow(org_with_server_block, generate_sync_org_tasks, generate_transform_org_tasks):
     dataflow = OrgDataFlowv1.objects.create(
         org=org_with_server_block,
         name="test-dataflow-name",
@@ -142,9 +134,7 @@ def test_fetch_pipeline_lock_v1_no_lock(test_dataflow):
     assert result is None
 
 
-def test_fetch_pipeline_lock_v1_lock_no_flow_run_id(
-    test_dataflow: OrgDataFlowv1, orguser: OrgUser
-):
+def test_fetch_pipeline_lock_v1_lock_no_flow_run_id(test_dataflow: OrgDataFlowv1, orguser: OrgUser):
     lock = TaskLock.objects.create(
         orgtask=OrgTask.objects.filter(org=test_dataflow.org).first(),
         locked_by=orguser,
@@ -159,9 +149,7 @@ def test_fetch_pipeline_lock_v1_lock_no_flow_run_id(
     }
 
 
-def test_fetch_pipeline_lock_v1_flow_run_scheduled(
-    test_dataflow: OrgDataFlowv1, orguser: OrgUser
-):
+def test_fetch_pipeline_lock_v1_flow_run_scheduled(test_dataflow: OrgDataFlowv1, orguser: OrgUser):
     with patch("ddpui.ddpprefect.prefect_service.get_flow_run") as mock_get_flow_run:
         lock = TaskLock.objects.create(
             orgtask=OrgTask.objects.filter(org=test_dataflow.org).first(),
@@ -183,9 +171,7 @@ def test_fetch_pipeline_lock_v1_flow_run_scheduled(
         assert result["flowRunId"] == "some_flow_run_id"
 
 
-def test_fetch_pipeline_lock_v1_flow_run_pending(
-    test_dataflow: OrgDataFlowv1, orguser: OrgUser
-):
+def test_fetch_pipeline_lock_v1_flow_run_pending(test_dataflow: OrgDataFlowv1, orguser: OrgUser):
     with patch("ddpui.ddpprefect.prefect_service.get_flow_run") as mock_get_flow_run:
         lock = TaskLock.objects.create(
             orgtask=OrgTask.objects.filter(org=test_dataflow.org).first(),
@@ -207,9 +193,7 @@ def test_fetch_pipeline_lock_v1_flow_run_pending(
         assert result["flowRunId"] == "some_flow_run_id"
 
 
-def test_fetch_pipeline_lock_v1_flow_run_running(
-    test_dataflow: OrgDataFlowv1, orguser: OrgUser
-):
+def test_fetch_pipeline_lock_v1_flow_run_running(test_dataflow: OrgDataFlowv1, orguser: OrgUser):
     flow_run_id = "some_flow_run_id"
     lock = TaskLock.objects.create(
         orgtask=OrgTask.objects.filter(org=test_dataflow.org).first(),
@@ -237,9 +221,7 @@ def test_fetch_pipeline_lock_v1_flow_run_running(
     assert result["flowRunId"] == "some_flow_run_id"
 
 
-def test_fetch_pipeline_lock_v1_flow_run_completed(
-    test_dataflow: OrgDataFlowv1, orguser: OrgUser
-):
+def test_fetch_pipeline_lock_v1_flow_run_completed(test_dataflow: OrgDataFlowv1, orguser: OrgUser):
     flow_run_id = "some_flow_run_id"
     lock = TaskLock.objects.create(
         orgtask=OrgTask.objects.filter(org=test_dataflow.org).first(),
@@ -354,9 +336,7 @@ def test_normalize_airbyte_column_name():
 # =============================================================================
 
 
-def _make_orgtask_with_transform(
-    post_sync_transform, wtype="postgres", with_secret_block=True
-):
+def _make_orgtask_with_transform(post_sync_transform, wtype="postgres", with_secret_block=True):
     """Factory: creates an org + warehouse (+ optional dbt-profile secret block)
     and an OrgTask carrying the given post_sync_transform payload."""
     org = Org.objects.create(name="o", slug="o")
@@ -436,9 +416,7 @@ def test_build_connection_block_extra_no_secret_block_skips_ops():
     post_sync_transform = {
         "ops": [{"type": "cast", "schema": "s", "table": "t", "config": {"a": "int"}}]
     }
-    org_task = _make_orgtask_with_transform(
-        post_sync_transform, with_secret_block=False
-    )
+    org_task = _make_orgtask_with_transform(post_sync_transform, with_secret_block=False)
     extra = build_connection_block_extra(org_task)
     assert extra["env"] == {}
     # ops list is still built — the empty env acts as the runtime gate
@@ -486,9 +464,7 @@ def test_setup_dbt_core_task_config_no_secret_block_logs_and_empty_env():
         project_dir_relative="proj/dbtrepo",
     )
 
-    config = setup_dbt_core_task_config(
-        org_task, project_params, warehouse_secret_block=None
-    )
+    config = setup_dbt_core_task_config(org_task, project_params, warehouse_secret_block=None)
     assert config.env == {}
 
 

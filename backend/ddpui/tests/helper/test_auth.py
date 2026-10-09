@@ -49,18 +49,14 @@ def org_user_accountmanager(user: User, org: Org):
 
 @pytest.fixture
 def org_user_pipelinemanager(user: User, org: Org):
-    temp_org_user = OrgUser.objects.create(
-        user=user, org=org, role=OrgUserRole.PIPELINE_MANAGER
-    )
+    temp_org_user = OrgUser.objects.create(user=user, org=org, role=OrgUserRole.PIPELINE_MANAGER)
     yield temp_org_user
     temp_org_user.delete()
 
 
 @pytest.fixture
 def org_user_reportviewer(user: User, org: Org):
-    temp_org_user = OrgUser.objects.create(
-        user=user, org=org, role=OrgUserRole.REPORT_VIEWER
-    )
+    temp_org_user = OrgUser.objects.create(user=user, org=org, role=OrgUserRole.REPORT_VIEWER)
     yield temp_org_user
     temp_org_user.delete()
 

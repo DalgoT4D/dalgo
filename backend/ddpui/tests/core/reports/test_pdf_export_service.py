@@ -42,17 +42,13 @@ class TestGeneratePdfDashboardFilters:
     """dashboard_filters, when provided, must be encoded into the Playwright URL
     so the print-mode page can seed its filter state from it."""
 
-    @override_settings(
-        RENDER_SECRET="test-secret", FRONTEND_URL_V2="http://localhost:3001"
-    )
+    @override_settings(RENDER_SECRET="test-secret", FRONTEND_URL_V2="http://localhost:3001")
     @patch("ddpui.core.reports.pdf_export_service.sync_playwright")
     def test_appends_dashboard_filters_to_url(self, mock_sync_playwright):
         mock_page = _make_mock_page()
         mock_sync_playwright.return_value = _make_mock_playwright_cm(mock_page)
 
-        result = PdfExportService.generate_pdf(
-            1, "tok123", dashboard_filters={"1": "2025-01-15"}
-        )
+        result = PdfExportService.generate_pdf(1, "tok123", dashboard_filters={"1": "2025-01-15"})
 
         assert result == b"%PDF-1.4 content"
         goto_url = mock_page.goto.call_args[0][0]
@@ -61,9 +57,7 @@ class TestGeneratePdfDashboardFilters:
         )
         assert "2025-01-15" in goto_url
 
-    @override_settings(
-        RENDER_SECRET="test-secret", FRONTEND_URL_V2="http://localhost:3001"
-    )
+    @override_settings(RENDER_SECRET="test-secret", FRONTEND_URL_V2="http://localhost:3001")
     @patch("ddpui.core.reports.pdf_export_service.sync_playwright")
     def test_no_dashboard_filters_omits_query_param(self, mock_sync_playwright):
         mock_page = _make_mock_page()

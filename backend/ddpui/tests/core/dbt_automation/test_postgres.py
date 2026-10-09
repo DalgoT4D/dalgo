@@ -8,9 +8,7 @@ from ddpui.utils.warehouse.old_client.postgres import PostgresClient
 @pytest.fixture
 def mock_tunnel():
     """Mock the SSHTunnelForwarder class."""
-    with patch(
-        "ddpui.utils.warehouse.old_client.postgres.SSHTunnelForwarder"
-    ) as MockTunnel:
+    with patch("ddpui.utils.warehouse.old_client.postgres.SSHTunnelForwarder") as MockTunnel:
         instance = MagicMock()
         instance.local_bind_port = 6543
         MockTunnel.return_value = instance
@@ -29,9 +27,7 @@ def mock_connection():
 
 def test_get_connection_1():
     """tests PostgresClient.get_connection"""
-    with patch(
-        "ddpui.utils.warehouse.old_client.postgres.psycopg2.connect"
-    ) as mock_connect:
+    with patch("ddpui.utils.warehouse.old_client.postgres.psycopg2.connect") as mock_connect:
         PostgresClient.get_connection(
             {"host": "HOST", "port": 1234, "user": "USER", "password": "PASSWORD"}
         )
@@ -47,9 +43,7 @@ def test_get_connection_1():
 
 def test_get_connection_2():
     """tests PostgresClient.get_connection"""
-    with patch(
-        "ddpui.utils.warehouse.old_client.postgres.psycopg2.connect"
-    ) as mock_connect:
+    with patch("ddpui.utils.warehouse.old_client.postgres.psycopg2.connect") as mock_connect:
         PostgresClient.get_connection(
             {
                 "host": "HOST",
@@ -72,9 +66,7 @@ def test_get_connection_2():
 
 def test_get_connection_3():
     """tests PostgresClient.get_connection"""
-    with patch(
-        "ddpui.utils.warehouse.old_client.postgres.psycopg2.connect"
-    ) as mock_connect:
+    with patch("ddpui.utils.warehouse.old_client.postgres.psycopg2.connect") as mock_connect:
         PostgresClient.get_connection(
             {
                 "sslmode": "verify-ca",
@@ -91,9 +83,7 @@ def test_get_connection_3():
 
 def test_get_connection_4():
     """tests PostgresClient.get_connection"""
-    with patch(
-        "ddpui.utils.warehouse.old_client.postgres.psycopg2.connect"
-    ) as mock_connect:
+    with patch("ddpui.utils.warehouse.old_client.postgres.psycopg2.connect") as mock_connect:
         PostgresClient.get_connection(
             {
                 "sslmode": True,
@@ -110,9 +100,7 @@ def test_get_connection_4():
 
 def test_get_connection_5():
     """tests PostgresClient.get_connection"""
-    with patch(
-        "ddpui.utils.warehouse.old_client.postgres.psycopg2.connect"
-    ) as mock_connect:
+    with patch("ddpui.utils.warehouse.old_client.postgres.psycopg2.connect") as mock_connect:
         PostgresClient.get_connection(
             {
                 "sslmode": False,
@@ -129,9 +117,7 @@ def test_get_connection_5():
 
 def test_get_connection_6():
     """tests PostgresClient.get_connection"""
-    with patch(
-        "ddpui.utils.warehouse.old_client.postgres.psycopg2.connect"
-    ) as mock_connect:
+    with patch("ddpui.utils.warehouse.old_client.postgres.psycopg2.connect") as mock_connect:
         PostgresClient.get_connection(
             {
                 "sslmode": {
@@ -148,21 +134,15 @@ def test_get_connection_6():
 
 def test_get_connection_7():
     """tests PostgresClient.get_connection"""
-    with patch(
-        "ddpui.utils.warehouse.old_client.postgres.psycopg2.connect"
-    ) as mock_connect:
+    with patch("ddpui.utils.warehouse.old_client.postgres.psycopg2.connect") as mock_connect:
         PostgresClient.get_connection(
             {"sslmode": {"mode": "disable", "ca_certificate": "LONG-CERTIFICATE"}}
         )
         mock_connect.assert_called_once()
-        mock_connect.assert_called_with(
-            sslmode="disable", sslrootcert=ANY, connect_timeout=15
-        )
+        mock_connect.assert_called_with(sslmode="disable", sslrootcert=ANY, connect_timeout=15)
 
 
-def test_init_with_ssh_pkey_writes_tempfile_and_starts_tunnel(
-    mock_tunnel, mock_connection
-):
+def test_init_with_ssh_pkey_writes_tempfile_and_starts_tunnel(mock_tunnel, mock_connection):
     """tests PostgresClient.__init__ with ssh_pkey"""
     fake_key_content = "FAKE_PRIVATE_KEY_CONTENT"
 
@@ -178,9 +158,7 @@ def test_init_with_ssh_pkey_writes_tempfile_and_starts_tunnel(
         "ssh_pkey": fake_key_content,
     }
 
-    with patch(
-        "tempfile.NamedTemporaryFile", wraps=tempfile.NamedTemporaryFile
-    ) as mock_tempfile:
+    with patch("tempfile.NamedTemporaryFile", wraps=tempfile.NamedTemporaryFile) as mock_tempfile:
         client = PostgresClient(conn_info)
 
         # Ensure temporary file was created
@@ -300,9 +278,7 @@ def test_generate_profiles_yaml_dbt():
 
 def test_get_total_rows():
     """tests PostgresClient.get_total_rows"""
-    with patch.object(
-        PostgresClient, "execute", return_value=[[10]]
-    ) as mock_execute, patch(
+    with patch.object(PostgresClient, "execute", return_value=[[10]]) as mock_execute, patch(
         "ddpui.utils.warehouse.old_client.postgres.psycopg2.connect"
     ):
         client = PostgresClient(

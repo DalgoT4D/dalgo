@@ -54,17 +54,13 @@ def test_validate_condition_rejects_invalid(alert_type, payload):
     ],
 )
 def test_evaluate_threshold(operator, target, value, expected):
-    result = cond.evaluate(
-        "metric_threshold", {"operator": operator, "value": target}, value
-    )
+    result = cond.evaluate("metric_threshold", {"operator": operator, "value": target}, value)
     assert result is expected
 
 
 def test_evaluate_empty_result_does_not_fire():
     """None (empty query result) = condition not satisfied."""
-    assert (
-        cond.evaluate("metric_threshold", {"operator": "lt", "value": 0}, None) is False
-    )
+    assert cond.evaluate("metric_threshold", {"operator": "lt", "value": 0}, None) is False
     assert cond.evaluate("kpi_rag", {"rag_states": ["red"]}, None) is False
 
 
@@ -86,15 +82,11 @@ def test_evaluate_kpi_rag(selected, current, expected):
 
 
 def test_pretty_threshold():
-    assert (
-        cond.pretty("metric_threshold", {"operator": "lt", "value": 50}) == "value < 50"
-    )
+    assert cond.pretty("metric_threshold", {"operator": "lt", "value": 50}) == "value < 50"
 
 
 def test_pretty_kpi_rag():
-    assert (
-        cond.pretty("kpi_rag", {"rag_states": ["red", "amber"]}) == "RAG = red, amber"
-    )
+    assert cond.pretty("kpi_rag", {"rag_states": ["red", "amber"]}) == "RAG = red, amber"
 
 
 def test_pretty_empty():

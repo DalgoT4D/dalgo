@@ -104,8 +104,7 @@ class TestUnionTablesSql:
 
         # Verify the relations array has both tables
         assert (
-            "relations=[source('raw_data', 'users_2023'),source('raw_data', 'users_2024')]"
-            in sql
+            "relations=[source('raw_data', 'users_2023'),source('raw_data', 'users_2024')]" in sql
         )
 
         # Verify output columns
@@ -539,9 +538,7 @@ class TestRawSqlOperation:
         ]
 
         for select_clause, expected_cols in test_cases:
-            result = extract_output_columns_from_select_clause(
-                select_clause, source_cols
-            )
+            result = extract_output_columns_from_select_clause(select_clause, source_cols)
             assert result == expected_cols, f"Failed for: {select_clause}"
 
     def test_functions_with_parentheses_and_commas(self, mock_warehouse):
@@ -605,10 +602,7 @@ class TestRawSqlOperation:
 
         # Should correctly identify all columns including function with commas
         assert output_cols == ["id", "name", "email"]
-        assert (
-            "SELECT id, coalesce(first_name, last_name, 'Unknown') as name, email"
-            in sql
-        )
+        assert "SELECT id, coalesce(first_name, last_name, 'Unknown') as name, email" in sql
 
     def test_function_without_alias(self, mock_warehouse):
         """Test rawsql with functions that don't have aliases"""
@@ -649,9 +643,7 @@ class TestRawSqlOperation:
         ]
 
         for select_clause, expected_cols in test_cases:
-            result = extract_output_columns_from_select_clause(
-                select_clause, source_cols
-            )
+            result = extract_output_columns_from_select_clause(select_clause, source_cols)
             assert result == expected_cols, f"Failed for: {select_clause}"
 
 
@@ -963,10 +955,7 @@ class TestWhereFilterOperation:
         sql, columns = where_filter_sql(config, mock_warehouse)
 
         # Verify multiple null operators combined
-        assert (
-            'WHERE ("first_name" IS NOT NULL AND "email" IS NULL AND "phone" IS NOT NULL)'
-            in sql
-        )
+        assert 'WHERE ("first_name" IS NOT NULL AND "email" IS NULL AND "phone" IS NOT NULL)' in sql
         assert columns == ["first_name", "last_name", "email", "phone"]
 
     def test_wherefilter_frontend_payload_format(self, mock_warehouse):

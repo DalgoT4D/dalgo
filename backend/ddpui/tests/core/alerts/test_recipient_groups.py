@@ -22,18 +22,14 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def org():
-    o = Org.objects.create(
-        name="RecipTest Org", slug="recip-test", airbyte_workspace_id="ws-r"
-    )
+    o = Org.objects.create(name="RecipTest Org", slug="recip-test", airbyte_workspace_id="ws-r")
     yield o
     o.delete()
 
 
 @pytest.fixture
 def other_org():
-    o = Org.objects.create(
-        name="Other Org", slug="other-org", airbyte_workspace_id="ws-o"
-    )
+    o = Org.objects.create(name="Other Org", slug="other-org", airbyte_workspace_id="ws-o")
     yield o
     o.delete()
 
@@ -57,9 +53,7 @@ def group(org, orguser):
 
 @pytest.fixture
 def other_group(other_org, orguser):
-    g = OrgUserGroup.objects.create(
-        name="Other Group", org=other_org, created_by=orguser
-    )
+    g = OrgUserGroup.objects.create(name="Other Group", org=other_org, created_by=orguser)
     yield g
     g.delete()
 
@@ -75,9 +69,7 @@ def test_validate_user_group_recipient_valid(seed_db, org, group):
 def test_validate_user_group_recipient_wrong_org(seed_db, org, other_group):
     """A group from another org raises AlertValidationError."""
     with pytest.raises(AlertValidationError, match="not in this org"):
-        _validate_recipients(
-            [{"type": "user_group", "user_group_id": other_group.id}], org
-        )
+        _validate_recipients([{"type": "user_group", "user_group_id": other_group.id}], org)
 
 
 def test_validate_user_group_recipient_missing_id(seed_db, org):

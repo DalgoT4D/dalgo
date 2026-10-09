@@ -101,9 +101,7 @@ def test_prefect_post_success(mock_getenv, mock_post):
     response = prefect_post(endpoint, payload)
 
     assert response == {"key": "value"}
-    mock_post.assert_called_once_with(
-        "http://localhost/test_endpoint", timeout=30, json=payload
-    )
+    mock_post.assert_called_once_with("http://localhost/test_endpoint", timeout=30, json=payload)
 
 
 @patch("requests.post")
@@ -151,9 +149,7 @@ def test_prefect_patch_success(mock_getenv, mock_patch):
     response = prefect_patch(endpoint, payload)
 
     assert response == {"key": "value"}
-    mock_patch.assert_called_once_with(
-        "http://localhost/test_endpoint", timeout=30, json=payload
-    )
+    mock_patch.assert_called_once_with("http://localhost/test_endpoint", timeout=30, json=payload)
 
 
 @patch("requests.patch")
@@ -169,9 +165,7 @@ def test_prefect_patch_success_204(mock_getenv, mock_patch):
     response = prefect_patch(endpoint, payload)
 
     assert response == {}
-    mock_patch.assert_called_once_with(
-        "http://localhost/test_endpoint", timeout=30, json=payload
-    )
+    mock_patch.assert_called_once_with("http://localhost/test_endpoint", timeout=30, json=payload)
 
 
 @patch("requests.patch")
@@ -303,9 +297,7 @@ async def test_get_airbyte_server_block_id_valid_blockname(mock_load):
 @pytest.mark.asyncio
 @patch("proxy.service.AirbyteServer.load", new_callable=AsyncMock)
 async def test_get_airbyte_server_block_id_invalid_blockname(mock_load):
-    mock_load.side_effect = ValueError(
-        "no airbyte server block named invalid_blockname"
-    )
+    mock_load.side_effect = ValueError("no airbyte server block named invalid_blockname")
     blockname = "invalid_blockname"
     result = await get_airbyte_server_block_id(blockname)
     assert result is None
@@ -382,9 +374,7 @@ async def test_put_airbyte_server_block():
         serverPort="1234",
         apiVersion="test_version",
     )
-    with patch(
-        "proxy.service.AirbyteServer.load", new_callable=AsyncMock
-    ) as mock_load, patch(
+    with patch("proxy.service.AirbyteServer.load", new_callable=AsyncMock) as mock_load, patch(
         "proxy.service.AirbyteServer.save", new_callable=AsyncMock
     ) as mock_save:
         mock_load.return_value = MockAirbyteServer(
@@ -404,9 +394,7 @@ async def test_put_airbyte_server_block_failure():
         serverPort="1234",
         apiVersion="test_version",
     )
-    with patch(
-        "proxy.service.AirbyteServer.save", new_callable=AsyncMock
-    ) as mock_save, patch(
+    with patch("proxy.service.AirbyteServer.save", new_callable=AsyncMock) as mock_save, patch(
         "proxy.service.AirbyteServer.load", new_callable=AsyncMock
     ) as mock_load:
         mock_load.return_value = "expected_block_id"
@@ -686,9 +674,7 @@ def test_get_flow_runs_by_deployment_id_prefect_post():
             "deployments": {"id": {"any_": [deployment_id]}},
             "flow_runs": {
                 "operator": "and_",
-                "state": {
-                    "type": {"any_": ["COMPLETED", "FAILED", "CRASHED", "CANCELLED"]}
-                },
+                "state": {"type": {"any_": ["COMPLETED", "FAILED", "CRASHED", "CANCELLED"]}},
             },
             "limit": limit,
         }
@@ -875,9 +861,7 @@ def test_get_flow_run_logs_type_error():
 
 def test_get_flow_run_logs_prefect_post():
     with patch("proxy.service.prefect_post") as prefect_post_mock:
-        with patch(
-            "proxy.service.traverse_flow_run_graph"
-        ) as traverse_flow_run_graph_mock:
+        with patch("proxy.service.traverse_flow_run_graph") as traverse_flow_run_graph_mock:
             traverse_flow_run_graph_mock.return_value = ["flow_run_id"]
             flow_run_id = "flow_run_id"
             taks_run_id = "task_run_id"
@@ -1160,9 +1144,7 @@ def test_retry_flow_run(mock_pendulum: Mock, mock_prefect_post: Mock):
                 "message": "Retry via prefect proxy",
                 "type": "SCHEDULED",
                 "state_details": {
-                    "scheduled_time": str(
-                        pendulum.time(0, 0, 0) + pendulum.duration(minutes=5)
-                    )
+                    "scheduled_time": str(pendulum.time(0, 0, 0) + pendulum.duration(minutes=5))
                 },  # using pendulum because prefect also uses it
             },
         },
@@ -1195,16 +1177,12 @@ class PayloadModel(BaseModel):
 
 @pytest.fixture
 def mock_payload():
-    return PayloadModel(
-        state={"name": "Cancelling", "type": "CANCELLING"}, force="TRUE"
-    )
+    return PayloadModel(state={"name": "Cancelling", "type": "CANCELLING"}, force="TRUE")
 
 
 @patch("proxy.service.prefect_get")
 @patch("proxy.service.prefect_post")
-def test_cancel_flow_run_pending(
-    mock_prefect_post, mock_prefect_get, mock_payload: PayloadModel
-):
+def test_cancel_flow_run_pending(mock_prefect_post, mock_prefect_get, mock_payload: PayloadModel):
     """Test successful cancellation of a PENDING flow run."""
     mock_prefect_get.return_value = {"state_type": "PENDING"}
 
@@ -1217,9 +1195,7 @@ def test_cancel_flow_run_pending(
 
 @patch("proxy.service.prefect_get")
 @patch("proxy.service.prefect_post")
-def test_cancel_flow_run_scheduled(
-    mock_prefect_post, mock_prefect_get, mock_payload: PayloadModel
-):
+def test_cancel_flow_run_scheduled(mock_prefect_post, mock_prefect_get, mock_payload: PayloadModel):
     """Test successful cancellation of a SCHEDULED flow run."""
     mock_prefect_get.return_value = {"state_type": "SCHEDULED"}
 

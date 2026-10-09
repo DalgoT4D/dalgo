@@ -90,9 +90,7 @@ def test_switch_git_repository_v1_managed_to_external_empty_success(setup_data):
         assert "Successfully switched to new git repository" in result["message"]
 
         # Verify repository access was validated (should happen in every scenario)
-        mock_validate.assert_called_once_with(
-            "https://github.com/user/new-repo", "ghp_token123"
-        )
+        mock_validate.assert_called_once_with("https://github.com/user/new-repo", "ghp_token123")
 
         # Verify empty check was performed
         mock_empty_check.assert_called_once()

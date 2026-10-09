@@ -125,9 +125,7 @@ class TestListMetrics:
 
     def test_list_metrics_filter_dataset(self, orguser, sample_metric, seed_db):
         request = mock_request(orguser)
-        response = list_metrics(
-            request, schema_name="public", table_name="beneficiaries"
-        )
+        response = list_metrics(request, schema_name="public", table_name="beneficiaries")
         assert response.total >= 1
 
     def test_list_metrics_empty(self, orguser, seed_db):
@@ -393,9 +391,7 @@ from ddpui.models.audit_log import AuditLogResourceType, AuditLogAction
 class TestMetricAuditLogs:
     @patch("ddpui.core.metric.metric_service.MetricService.validate_metric_query")
     @patch("ddpui.core.metric.metric_service.create_audit_log")
-    def test_create_metric_creates_audit_log(
-        self, mock_audit_log, mock_validate, orguser, seed_db
-    ):
+    def test_create_metric_creates_audit_log(self, mock_audit_log, mock_validate, orguser, seed_db):
         """Test that creating a metric creates an audit log entry."""
         OrgWarehouse.objects.create(org=orguser.org, wtype="postgres", credentials={})
         request = mock_request(orguser)
@@ -462,9 +458,7 @@ class TestMetricAuditLogs:
         OrgWarehouse.objects.filter(org=orguser.org).delete()
 
     @patch("ddpui.api.metric_api.create_audit_log")
-    def test_delete_metric_creates_audit_log(
-        self, mock_audit_log, orguser, org, seed_db
-    ):
+    def test_delete_metric_creates_audit_log(self, mock_audit_log, orguser, org, seed_db):
         """Test that deleting a metric creates an audit log entry."""
         metric = Metric.objects.create(
             name="Metric To Delete",

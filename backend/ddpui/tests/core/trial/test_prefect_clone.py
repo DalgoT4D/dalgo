@@ -42,9 +42,7 @@ def _make_template_dataflow_with_tasks(template: Org):
         type=TaskType.DBT, slug="dbt-run", label="DBT run", command="run"
     )
 
-    sync_orgtask = OrgTask.objects.create(
-        org=template, task=sync_task, connection_id="tmpl-conn-1"
-    )
+    sync_orgtask = OrgTask.objects.create(org=template, task=sync_task, connection_id="tmpl-conn-1")
     dbt_orgtask = OrgTask.objects.create(org=template, task=dbt_task, dbt=template.dbt)
 
     dataflow = OrgDataFlowv1.objects.create(
@@ -111,9 +109,7 @@ def test_resolve_transform_orgtask_copies_template_parameters_onto_existing():
         org=trial_org, task=dbt_task, dbt=trial_org.dbt, parameters={}
     )
 
-    resolved = prefect_clone._resolve_trial_transform_orgtask(
-        template_orgtask, trial_org
-    )
+    resolved = prefect_clone._resolve_trial_transform_orgtask(template_orgtask, trial_org)
 
     assert resolved.id == existing.id  # reused the existing row, not a fresh mint
     existing.refresh_from_db()
@@ -144,9 +140,7 @@ def test_resolve_transform_orgtask_keeps_parameterized_variants_distinct():
         parameters={"flags": ["--select", "b"]},
     )
     # Step 6 pre-seeded one param-less row
-    OrgTask.objects.create(
-        org=trial_org, task=dbt_task, dbt=trial_org.dbt, parameters={}
-    )
+    OrgTask.objects.create(org=trial_org, task=dbt_task, dbt=trial_org.dbt, parameters={})
 
     resolved_a = prefect_clone._resolve_trial_transform_orgtask(template_a, trial_org)
     resolved_b = prefect_clone._resolve_trial_transform_orgtask(template_b, trial_org)
@@ -184,9 +178,7 @@ def test_build_pipeline_payload_skips_auto_managed_dbt_tasks(mock_prefect_servic
     dbt_clean_task = Task.objects.create(
         type=TaskType.DBT, slug="dbt-clean", label="DBT clean", command="clean"
     )
-    dbt_clean_orgtask = OrgTask.objects.create(
-        org=template, task=dbt_clean_task, dbt=template.dbt
-    )
+    dbt_clean_orgtask = OrgTask.objects.create(org=template, task=dbt_clean_task, dbt=template.dbt)
     dataflow = OrgDataFlowv1.objects.create(
         org=template,
         name="clean-only",
@@ -197,9 +189,7 @@ def test_build_pipeline_payload_skips_auto_managed_dbt_tasks(mock_prefect_servic
     )
     DataflowOrgTask.objects.create(dataflow=dataflow, orgtask=dbt_clean_orgtask, seq=0)
 
-    payload = prefect_clone.build_pipeline_payload(
-        dataflow, trial_org, connection_map={}
-    )
+    payload = prefect_clone.build_pipeline_payload(dataflow, trial_org, connection_map={})
 
     assert payload.connections == []
     assert payload.transformTasks == []
@@ -263,9 +253,7 @@ def test_clone_orchestrate_dataflows_calls_create_pipeline_per_template_dataflow
     mock_pipeline_service.create_pipeline.return_value = {"deploymentId": "dep-new"}
     connection_map = {"tmpl-conn-1": "trial-conn-1"}
 
-    deployment_ids = prefect_clone.clone_orchestrate_dataflows(
-        template, trial_org, connection_map
-    )
+    deployment_ids = prefect_clone.clone_orchestrate_dataflows(template, trial_org, connection_map)
 
     mock_pipeline_service.create_pipeline.assert_called_once()
     called_org, called_payload = mock_pipeline_service.create_pipeline.call_args[0]
@@ -328,9 +316,7 @@ def test_sync_transform_tasks_copies_standalone_params_and_fixes_deployments(
     )
 
     # trial: the param-less dbt-run row step 5 created, with its manual deployment already baked
-    trial_run_task = OrgTask.objects.create(
-        org=trial_org, task=dbt_task, dbt=trial_org.dbt
-    )
+    trial_run_task = OrgTask.objects.create(org=trial_org, task=dbt_task, dbt=trial_org.dbt)
     manual_flow = OrgDataFlowv1.objects.create(
         org=trial_org,
         name="manual-run",
@@ -360,9 +346,7 @@ def test_sync_transform_tasks_copies_standalone_params_and_fixes_deployments(
     mock_prefect_service.update_dataflow_v1.assert_called_once()
     dep_id, update_payload = mock_prefect_service.update_dataflow_v1.call_args[0]
     assert dep_id == "manual-dep-1"
-    assert update_payload.deployment_params["config"]["tasks"] == [
-        {"slug": "dbt-run", "seq": 0}
-    ]
+    assert update_payload.deployment_params["config"]["tasks"] == [{"slug": "dbt-run", "seq": 0}]
 
     # (c) fresh variant got a manual deployment created
     mock_create_deployment.assert_called_once()

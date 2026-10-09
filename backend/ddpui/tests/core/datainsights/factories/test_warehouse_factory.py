@@ -127,9 +127,7 @@ def test_postgres_client_builds_its_engine_with_the_registry_pool_settings():
     postgres_engine_registry._engines.clear()
 
     with patch("ddpui.utils.warehouse.client.postgres.inspect"):
-        with patch(
-            "ddpui.utils.warehouse.client.postgres.create_engine"
-        ) as mock_create_engine:
+        with patch("ddpui.utils.warehouse.client.postgres.create_engine") as mock_create_engine:
             PostgresClient({**BASE_PG_CREDS, "sslmode": "require"})
 
     mock_create_engine.assert_called_once_with(
@@ -150,9 +148,7 @@ def test_repeated_clients_for_one_warehouse_share_a_single_engine():
     postgres_engine_registry._engines.clear()
 
     with patch("ddpui.utils.warehouse.client.postgres.inspect"):
-        with patch(
-            "ddpui.utils.warehouse.client.postgres.create_engine"
-        ) as mock_create_engine:
+        with patch("ddpui.utils.warehouse.client.postgres.create_engine") as mock_create_engine:
             first = PostgresClient(dict(BASE_PG_CREDS))
             second = PostgresClient(dict(BASE_PG_CREDS))
 

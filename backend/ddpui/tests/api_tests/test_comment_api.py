@@ -322,9 +322,7 @@ class TestListComments:
             org=org,
         )
         request = mock_request(orguser)
-        response = list_comments(
-            request, snapshot_id=snapshot.id, target_type="summary"
-        )
+        response = list_comments(request, snapshot_id=snapshot.id, target_type="summary")
         assert response["success"] is True
         assert len(response["data"]) == 1
         assert response["data"][0].content == "Summary note"
@@ -349,9 +347,7 @@ class TestListComments:
 
     def test_empty_list(self, orguser, snapshot):
         request = mock_request(orguser)
-        response = list_comments(
-            request, snapshot_id=snapshot.id, target_type="summary"
-        )
+        response = list_comments(request, snapshot_id=snapshot.id, target_type="summary")
         assert response["success"] is True
         assert len(response["data"]) == 0
 
@@ -364,9 +360,7 @@ class TestListComments:
             org=org,
         )
         request = mock_request(orguser)
-        response = list_comments(
-            request, snapshot_id=snapshot.id, target_type="summary"
-        )
+        response = list_comments(request, snapshot_id=snapshot.id, target_type="summary")
         assert response["data"][0].is_new is True
 
     def test_chart_requires_chart_id(self, orguser, snapshot):
@@ -398,9 +392,7 @@ class TestCreateComment:
     @patch("ddpui.core.reports.mention_service.MentionService.process_mentions")
     def test_create_chart(self, mock_mentions, orguser, snapshot):
         request = mock_request(orguser)
-        payload = CommentCreate(
-            target_type="chart", target_id=10, content="Chart comment"
-        )
+        payload = CommentCreate(target_type="chart", target_id=10, content="Chart comment")
         response = create_comment(request, snapshot_id=snapshot.id, payload=payload)
         assert response["success"] is True
         assert response["data"]["target_id"] == 10
@@ -425,9 +417,7 @@ class TestCreateComment:
     @patch("ddpui.core.reports.mention_service.MentionService.process_mentions")
     def test_chart_not_in_snapshot(self, mock_mentions, orguser, snapshot):
         request = mock_request(orguser)
-        payload = CommentCreate(
-            target_type="chart", target_id=999, content="Ghost chart"
-        )
+        payload = CommentCreate(target_type="chart", target_id=999, content="Ghost chart")
         with pytest.raises(HttpError) as exc:
             create_comment(request, snapshot_id=snapshot.id, payload=payload)
         assert exc.value.status_code == 400
@@ -474,9 +464,7 @@ class TestUpdateComment:
         comment.delete()
 
     @patch("ddpui.core.reports.mention_service.MentionService.process_mentions")
-    def test_update_other_forbidden(
-        self, mock_mentions, orguser, other_orguser, snapshot, org
-    ):
+    def test_update_other_forbidden(self, mock_mentions, orguser, other_orguser, snapshot, org):
         comment = Comment.objects.create(
             target_type=CommentTargetType.SUMMARY,
             snapshot=snapshot,
@@ -487,9 +475,7 @@ class TestUpdateComment:
         request = mock_request(other_orguser)
         payload = CommentUpdate(content="Trying to edit")
         with pytest.raises(HttpError) as exc:
-            update_comment(
-                request, snapshot_id=snapshot.id, comment_id=comment.id, payload=payload
-            )
+            update_comment(request, snapshot_id=snapshot.id, comment_id=comment.id, payload=payload)
         assert exc.value.status_code == 403
         comment.delete()
 
@@ -497,9 +483,7 @@ class TestUpdateComment:
         request = mock_request(orguser)
         payload = CommentUpdate(content="Ghost")
         with pytest.raises(HttpError) as exc:
-            update_comment(
-                request, snapshot_id=snapshot.id, comment_id=99999, payload=payload
-            )
+            update_comment(request, snapshot_id=snapshot.id, comment_id=99999, payload=payload)
         assert exc.value.status_code == 404
 
 
@@ -522,9 +506,7 @@ class TestDeleteComment:
         )
         comment_id = comment.id
         request = mock_request(orguser)
-        response = delete_comment(
-            request, snapshot_id=snapshot.id, comment_id=comment_id
-        )
+        response = delete_comment(request, snapshot_id=snapshot.id, comment_id=comment_id)
         assert response["success"] is True
         # sole author in thread => hard-delete
         assert not Comment.objects.filter(id=comment_id).exists()
@@ -544,9 +526,7 @@ class TestDeleteComment:
             default_analyst_level=AccessLevel.VIEW,
             default_member_level=AccessLevel.VIEW,
         )
-        view_user = User.objects.create(
-            username="view_only_del", email="view_only_del@t.com"
-        )
+        view_user = User.objects.create(username="view_only_del", email="view_only_del@t.com")
         view_orguser = OrgUser.objects.create(
             user=view_user,
             org=org,

@@ -139,15 +139,11 @@ def test_get_table_details_renders_columns_without_row_data():
     # metadata only: no sample rows means no warehouse values reach the model here
     assert "Pune" not in result
     # only the catalog's pg_catalog lookup ran — no query touched the table's rows
-    assert not any(
-        'prod"."surveys' in sql or "SELECT *" in sql for sql in warehouse.executed
-    )
+    assert not any('prod"."surveys' in sql or "SELECT *" in sql for sql in warehouse.executed)
 
 
 def test_get_table_details_rejects_unknown_table():
-    result = get_table_details.func(
-        schema_name="prod", table_name="nope", runtime=make_runtime()
-    )
+    result = get_table_details.func(schema_name="prod", table_name="nope", runtime=make_runtime())
     assert "not found" in result and "surveys" in result
 
 
@@ -281,9 +277,7 @@ def test_schema_map_for_shapes_the_qualify_input():
 
     mapping = catalog.schema_map_for(ctx, {"prod.beneficiaries"})
 
-    assert mapping == {
-        "prod": {"beneficiaries": {"phone": "text", "person_id": "integer"}}
-    }
+    assert mapping == {"prod": {"beneficiaries": {"phone": "text", "person_id": "integer"}}}
 
 
 def test_schema_map_for_skips_unqualified_names():
@@ -315,9 +309,7 @@ def test_execute_sql_without_ticks_runs_unhashed():
     warehouse = FakeWarehouse(rows=[{"district": "Pune"}])
     runtime = make_runtime(warehouse)
 
-    _, artifact = execute_sql.func(
-        sql="SELECT district FROM prod.surveys", runtime=runtime
-    )
+    _, artifact = execute_sql.func(sql="SELECT district FROM prod.surveys", runtime=runtime)
 
     # the projection is now always resolved (a catalog round-trip), even with
     # nothing ticked, but the SQL that reaches the warehouse stays unhashed
@@ -335,6 +327,4 @@ def test_execute_sql_rejects_an_unexpandable_star_even_with_nothing_ticked():
     )
 
     assert artifact["status"] == "rejected"
-    assert warehouse.executed == [] or all(
-        "SELECT *" not in q for q in warehouse.executed
-    )
+    assert warehouse.executed == [] or all("SELECT *" not in q for q in warehouse.executed)

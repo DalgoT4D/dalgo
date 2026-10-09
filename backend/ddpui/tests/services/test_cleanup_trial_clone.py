@@ -275,9 +275,7 @@ def test_expired_skips_org_merely_named_trial(mock_delete_org, mock_drop):
 
 @patch("ddpui.management.commands.cleanup_trial_clone.drop_trial_database")
 @patch("ddpui.management.commands.cleanup_trial_clone.delete_trial_org")
-def test_delete_stamps_deleted_at_and_keeps_the_signup_record(
-    mock_delete_org, mock_drop
-):
+def test_delete_stamps_deleted_at_and_keeps_the_signup_record(mock_delete_org, mock_drop):
     """After the deletion the TrialSignup row is the only trace the trial existed."""
     make_trial("t@x.org")
     record = record_signup(
@@ -299,9 +297,7 @@ def test_delete_stamps_deleted_at_and_keeps_the_signup_record(
 @patch("ddpui.management.commands.cleanup_trial_clone.record_deletion")
 @patch("ddpui.management.commands.cleanup_trial_clone.drop_trial_database")
 @patch("ddpui.management.commands.cleanup_trial_clone.delete_trial_org")
-def test_delete_survives_a_record_stamp_failure(
-    mock_delete_org, mock_drop, mock_record
-):
+def test_delete_survives_a_record_stamp_failure(mock_delete_org, mock_drop, mock_record):
     """The account is already deleted by then — a bookkeeping error must not abort the deletion."""
     make_trial("t@x.org")
     mock_record.side_effect = Exception("db down")
@@ -319,9 +315,7 @@ def test_delete_leaves_another_emails_record_open(mock_delete_org, mock_drop):
     other = record_signup(
         TrialSignupSchema(email="other@x.org", org_name="Other", role="data_technology")
     )
-    record_signup(
-        TrialSignupSchema(email="t@x.org", org_name="Acme", role="data_technology")
-    )
+    record_signup(TrialSignupSchema(email="t@x.org", org_name="Acme", role="data_technology"))
 
     call_command("cleanup_trial_clone", "--email", "t@x.org")
 
@@ -358,9 +352,7 @@ def test_expiry_selection_is_evaluated_against_the_run_time_not_a_fixed_hour():
     assert list(command.expired_trial_plans(one_second_before)) == []
     # exactly at end_date counts — `lte`, so a trial is never carried an extra hour
     assert [plan.org for plan in command.expired_trial_plans(end_date)] == [org]
-    assert [plan.org for plan in command.expired_trial_plans(on_the_hour_after)] == [
-        org
-    ]
+    assert [plan.org for plan in command.expired_trial_plans(on_the_hour_after)] == [org]
 
 
 @patch("ddpui.management.commands.cleanup_trial_clone.RedisClient")
@@ -404,9 +396,7 @@ def test_expired_deletion_is_registered_as_an_hourly_beat_task():
     assert schedule != crontab(minute=0, hour=0)
 
 
-@patch(
-    "ddpui.management.commands.cleanup_trial_clone.trial_notifications.send_ops_alert"
-)
+@patch("ddpui.management.commands.cleanup_trial_clone.trial_notifications.send_ops_alert")
 @patch("ddpui.management.commands.cleanup_trial_clone.time.sleep")
 @patch("ddpui.management.commands.cleanup_trial_clone.drop_trial_database")
 @patch("ddpui.management.commands.cleanup_trial_clone.delete_trial_org")
@@ -432,14 +422,10 @@ def test_expired_alerts_once_per_sweep_listing_every_failure(
     assert f"trial-{email_hash8('second@x.org')}-acme" in body
 
 
-@patch(
-    "ddpui.management.commands.cleanup_trial_clone.trial_notifications.send_ops_alert"
-)
+@patch("ddpui.management.commands.cleanup_trial_clone.trial_notifications.send_ops_alert")
 @patch("ddpui.management.commands.cleanup_trial_clone.drop_trial_database")
 @patch("ddpui.management.commands.cleanup_trial_clone.delete_trial_org")
-def test_expired_stays_silent_when_every_teardown_works(
-    mock_delete_org, mock_drop, mock_alert
-):
+def test_expired_stays_silent_when_every_teardown_works(mock_delete_org, mock_drop, mock_alert):
     """The hourly sweep runs 24x a day. It must only mail on failure."""
     make_trial("fine@x.org")
 

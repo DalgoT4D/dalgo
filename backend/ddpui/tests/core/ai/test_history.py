@@ -39,9 +39,7 @@ def test_non_sql_tools_and_empty_ai_messages_are_hidden():
     messages = [
         HumanMessage("q"),
         AIMessage("", tool_calls=[{"name": "list_tables", "args": {}, "id": "c1"}]),
-        ToolMessage(
-            content="Tables in prod: ...", name="list_tables", tool_call_id="c1"
-        ),
+        ToolMessage(content="Tables in prod: ...", name="list_tables", tool_call_id="c1"),
         AIMessage("Answer."),
     ]
     out = map_messages(messages)
@@ -76,9 +74,7 @@ def test_legacy_dashboard_artifacts_replay_on_the_answer():
     reloading those sessions must still show the chip."""
     messages = [
         HumanMessage("put it on a new dashboard"),
-        AIMessage(
-            "", tool_calls=[{"name": "create_dashboard", "args": {}, "id": "d1"}]
-        ),
+        AIMessage("", tool_calls=[{"name": "create_dashboard", "args": {}, "id": "d1"}]),
         ToolMessage(
             content="Done — dashboard 'Field Ops' (id 7).",
             name="create_dashboard",
@@ -203,9 +199,7 @@ def test_a_message_typed_instead_of_approving_replays_as_the_users_bubble():
 def _ask(call_id: str, question: str) -> AIMessage:
     return AIMessage(
         "",
-        tool_calls=[
-            {"name": "ask_user", "args": {"question": question}, "id": call_id}
-        ],
+        tool_calls=[{"name": "ask_user", "args": {"question": question}, "id": call_id}],
     )
 
 

@@ -69,9 +69,7 @@ def test_first_turn_clarification_ends_at_clarify_node():
     agent = build_agent(checkpointer=InMemorySaver(), model=MustNotRun(script=[]))
 
     async def fake_route(question, model=None, history=None):
-        return RouteResult(
-            intent="needs_clarification", clarification="Compare what to what?"
-        )
+        return RouteResult(intent="needs_clarification", clarification="Compare what to what?")
 
     async def must_not_reply(question, model=None):
         raise AssertionError("casual_reply must not run when a clarification exists")
@@ -89,9 +87,7 @@ def test_clarification_with_history_falls_through_to_the_agent():
     the agent holds the conversation and resolves references itself."""
     agent = build_agent(
         checkpointer=InMemorySaver(),
-        model=ScriptedChatModel(
-            script=[AIMessage(content="Here is the chart answer.")]
-        ),
+        model=ScriptedChatModel(script=[AIMessage(content="Here is the chart answer.")]),
     )
 
     seen = {}
@@ -147,9 +143,7 @@ def test_thread_continuity_with_checkpointer_on_parent_only():
 
         def _generate(self, messages, stop=None, run_manager=None, **kwargs):
             self.seen.append(list(messages))
-            return super()._generate(
-                messages, stop=stop, run_manager=run_manager, **kwargs
-            )
+            return super()._generate(messages, stop=stop, run_manager=run_manager, **kwargs)
 
     model = RecordingModel(
         script=[
@@ -314,9 +308,7 @@ def test_sql_agent_hands_off_creation_to_the_guide_agent_mid_turn():
                     tool_calls=[
                         {
                             "name": "handoff_to_platform_guide",
-                            "args": {
-                                "request_summary": "create the 6 KPIs we discussed"
-                            },
+                            "args": {"request_summary": "create the 6 KPIs we discussed"},
                             "id": "h1",
                         }
                     ],

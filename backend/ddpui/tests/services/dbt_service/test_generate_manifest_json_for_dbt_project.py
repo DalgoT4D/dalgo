@@ -25,9 +25,7 @@ def org_with_dbt_workspace(tmpdir_factory):
 
     # create dbt_project.yml file
     yml_obj = {"profile": "dummy"}
-    with open(
-        str(org_dir / "dbtrepo" / "dbt_project.yml"), "w", encoding="utf-8"
-    ) as output:
+    with open(str(org_dir / "dbtrepo" / "dbt_project.yml"), "w", encoding="utf-8") as output:
         yaml.safe_dump(yml_obj, output)
 
     dbt = OrgDbt.objects.create(

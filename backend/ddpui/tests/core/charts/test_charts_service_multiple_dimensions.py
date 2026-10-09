@@ -161,9 +161,7 @@ class TestTransformDataForChart:
         payload = TransformDataForChart(
             chart_type="table",
             dimensions=["KEY", "region", "country"],
-            metrics=[
-                ChartMetric(aggregation="count", column=None, alias="Total Count")
-            ],
+            metrics=[ChartMetric(aggregation="count", column=None, alias="Total Count")],
         )
 
         result = charts_service.transform_data_for_chart(results, payload)
@@ -342,14 +340,10 @@ class TestGetChartDataTablePreview:
             schema_name="public",
             table_name="test",
             dimensions=["KEY", "region", "country"],
-            metrics=[
-                ChartMetric(aggregation="count", column=None, alias="Total Count")
-            ],
+            metrics=[ChartMetric(aggregation="count", column=None, alias="Total Count")],
         )
 
-        result = charts_service.get_chart_data_table_preview(
-            mock_org_warehouse, payload, 0, 10
-        )
+        result = charts_service.get_chart_data_table_preview(mock_org_warehouse, payload, 0, 10)
 
         assert "columns" in result
         columns = result["columns"]
@@ -397,9 +391,7 @@ class TestGetChartDataTablePreview:
             ],
         )
 
-        result = charts_service.get_chart_data_table_preview(
-            mock_org_warehouse, payload, 0, 10
-        )
+        result = charts_service.get_chart_data_table_preview(mock_org_warehouse, payload, 0, 10)
 
         assert "columns" in result
         columns = result["columns"]
@@ -511,9 +503,7 @@ class TestExecuteMapDataOverlay:
             "ddpui.core.charts.charts_service.execute_chart_query",
             return_value=[{"state_name": "Karnataka", "count_all_Total Count": 9}],
         ):
-            result = execute_map_data_overlay(
-                map_payload, MagicMock(), warehouse_client
-            )
+            result = execute_map_data_overlay(map_payload, MagicMock(), warehouse_client)
 
         assert result == {"data": [{"name": "Karnataka", "value": 9.0}], "count": 1}
 
@@ -528,8 +518,6 @@ class TestExecuteMapDataOverlay:
             "ddpui.core.charts.charts_service.execute_chart_query",
             return_value=[{"state_name": "Karnataka", "value": 500}],
         ):
-            result = execute_map_data_overlay(
-                map_payload, MagicMock(), warehouse_client
-            )
+            result = execute_map_data_overlay(map_payload, MagicMock(), warehouse_client)
 
         assert result == {"data": [{"name": "Karnataka", "value": 500.0}], "count": 1}

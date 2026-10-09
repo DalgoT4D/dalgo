@@ -71,9 +71,7 @@ def org_setup(monkeypatch):
     """Org + warehouse + one orguser, with a fake two-schema warehouse."""
     org = Org.objects.create(name="Ctx Test Org", slug="ctx-test")
     OrgWarehouse.objects.create(org=org, wtype="postgres")
-    user = User.objects.create(
-        username="ctxuser", email="ctxuser@test.com", password="x"
-    )
+    user = User.objects.create(username="ctxuser", email="ctxuser@test.com", password="x")
     orguser = OrgUser.objects.create(user=user, org=org)
     monkeypatch.setattr(
         context_module.WarehouseFactory,
@@ -138,8 +136,6 @@ def test_no_memory_row_means_empty_org_memory(org_setup):
 
 @pytest.mark.django_db
 def test_memory_over_cap_is_rejected_at_save_time(org_setup):
-    config = ChatWithDataOrgConfig(
-        org=org_setup.org, memory_text="x" * (MAX_ORG_MEMORY_CHARS + 1)
-    )
+    config = ChatWithDataOrgConfig(org=org_setup.org, memory_text="x" * (MAX_ORG_MEMORY_CHARS + 1))
     with pytest.raises(ValidationError):
         config.full_clean()

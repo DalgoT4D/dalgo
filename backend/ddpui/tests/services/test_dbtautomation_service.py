@@ -286,9 +286,7 @@ def test_delete_dbt_source_integration_delete_yaml_file(orgdbt_source, tmp_path)
             {
                 "name": orgdbt_source.source_name or "default_source",
                 "schema": "staging",
-                "tables": [
-                    {"identifier": "test-src"}
-                ],  # Only one table, will be deleted
+                "tables": [{"identifier": "test-src"}],  # Only one table, will be deleted
             }
         ],
     }
@@ -399,9 +397,7 @@ def test_delete_dbt_source_integration_source_not_in_yaml(orgdbt_source, tmp_pat
         assert unchanged_content == sources_yaml_content
 
 
-def test_delete_dbt_source_edge_case_same_table_different_schemas(
-    orgdbt_source, tmp_path
-):
+def test_delete_dbt_source_edge_case_same_table_different_schemas(orgdbt_source, tmp_path):
     """Test that delete_dbt_source correctly handles sources with same table name but different schemas"""
 
     # Create temporary DBT project structure
@@ -483,9 +479,7 @@ def test_delete_dbt_source_edge_case_same_table_different_schemas(
         assert staging_source["name"] == "staging_schema"
         assert len(staging_source["tables"]) == 1
         remaining_table = staging_source["tables"][0]
-        assert (
-            remaining_table["identifier"] == "products"
-        )  # Only products should remain
+        assert remaining_table["identifier"] == "products"  # Only products should remain
 
 
 # Tests for convert_canvas_node_to_frontend_format
@@ -565,9 +559,7 @@ def test_convert_canvas_node_operation_type_not_last_in_chain(orgdbt):
     )
 
     # Create edge from operation_node_1 to operation_node_2
-    CanvasEdge.objects.create(
-        from_node=operation_node_1, to_node=operation_node_2, seq=1
-    )
+    CanvasEdge.objects.create(from_node=operation_node_1, to_node=operation_node_2, seq=1)
 
     result = convert_canvas_node_to_frontend_format(operation_node_1)
 
@@ -692,9 +684,7 @@ def test_convert_canvas_node_model_type_with_changed_files_unpublished_exact_mat
 
     # Create changed files list that includes this model's exact path
     changed_files = [
-        GitChangedFile(
-            filename="models/user_model.sql", status="modified"
-        ),  # Exact match
+        GitChangedFile(filename="models/user_model.sql", status="modified"),  # Exact match
         GitChangedFile(filename="models/other_model.sql", status="added"),
     ]
 
@@ -732,17 +722,13 @@ def test_convert_canvas_node_model_type_with_changed_files_unpublished_parent_di
 
     # Create changed files list with parent directory
     changed_files = [
-        GitChangedFile(
-            filename="models/staging/", status="added"
-        ),  # Parent directory ends with /
+        GitChangedFile(filename="models/staging/", status="added"),  # Parent directory ends with /
         GitChangedFile(filename="models/other_model.sql", status="modified"),
     ]
 
     result = convert_canvas_node_to_frontend_format(model_node, changed_files)
 
-    assert (
-        result["isPublished"] is False
-    )  # File under changed parent directory, so unpublished
+    assert result["isPublished"] is False  # File under changed parent directory, so unpublished
 
 
 def test_convert_canvas_node_model_type_with_changed_files_unpublished_directory_prefix(
@@ -782,9 +768,7 @@ def test_convert_canvas_node_model_type_with_changed_files_unpublished_directory
 
     result = convert_canvas_node_to_frontend_format(model_node, changed_files)
 
-    assert (
-        result["isPublished"] is False
-    )  # File under changed directory, so unpublished
+    assert result["isPublished"] is False  # File under changed directory, so unpublished
 
 
 def test_convert_canvas_node_model_type_without_dbtmodel(orgdbt):
@@ -823,9 +807,7 @@ def test_convert_canvas_node_model_type_with_changed_files_but_no_dbtmodel(orgdb
         # operation_config defaults to {}
     )
 
-    changed_files = [
-        GitChangedFile(filename="models/some_model.sql", status="modified")
-    ]
+    changed_files = [GitChangedFile(filename="models/some_model.sql", status="modified")]
 
     result = convert_canvas_node_to_frontend_format(model_node, changed_files)
 
@@ -945,9 +927,7 @@ def test_ensure_source_yml_definition_create_new_source(
     # Verify mocks were called correctly
     mock_read_dbt_sources.assert_called_once_with(orgdbt)
     mock_get_dir.assert_called_once_with(orgdbt)
-    expected_sources_groups = {
-        schema: {schema: [table]}
-    }  # source_name -> {schema -> [tables]}
+    expected_sources_groups = {schema: {schema: [table]}}  # source_name -> {schema -> [tables]}
     mock_generate.assert_called_once_with(
         sources_groups=expected_sources_groups,
         dbt_project=ANY,  # dbtProject instance
@@ -1056,9 +1036,7 @@ def test_ensure_source_yml_definition_exact_match_among_multiple(
 # Integration tests for ensure_source_yml_definition_in_project with actual YAML files
 
 
-def test_ensure_source_yml_definition_integration_create_new_yaml_file(
-    orgdbt, tmp_path
-):
+def test_ensure_source_yml_definition_integration_create_new_yaml_file(orgdbt, tmp_path):
     """Test creating a new YAML file when none exists"""
     # Create temporary DBT project structure
     dbt_project_dir = tmp_path / "test_dbt_project"
@@ -1100,9 +1078,7 @@ def test_ensure_source_yml_definition_integration_create_new_yaml_file(
         assert yaml_content["sources"][0]["tables"][0]["identifier"] == table
 
 
-def test_ensure_source_yml_definition_integration_append_to_existing_yaml(
-    orgdbt, tmp_path
-):
+def test_ensure_source_yml_definition_integration_append_to_existing_yaml(orgdbt, tmp_path):
     """Test appending to existing YAML file without creating duplicates"""
     # Create temporary DBT project structure
     dbt_project_dir = tmp_path / "test_dbt_project"
@@ -1162,9 +1138,7 @@ def test_ensure_source_yml_definition_integration_append_to_existing_yaml(
         assert new_table in table_identifiers
 
 
-def test_ensure_source_yml_definition_integration_no_duplicate_creation(
-    orgdbt, tmp_path
-):
+def test_ensure_source_yml_definition_integration_no_duplicate_creation(orgdbt, tmp_path):
     """Test that calling the function twice doesn't create duplicates"""
     # Create temporary DBT project structure
     dbt_project_dir = tmp_path / "test_dbt_project"
@@ -1241,17 +1215,13 @@ def test_ensure_source_yml_definition_integration_multiple_schemas(orgdbt, tmp_p
         assert len(yaml_content["sources"]) == 2
 
         # Find schema1 source - should have 2 tables
-        schema1_source = next(
-            s for s in yaml_content["sources"] if s["name"] == "schema1"
-        )
+        schema1_source = next(s for s in yaml_content["sources"] if s["name"] == "schema1")
         assert len(schema1_source["tables"]) == 2
         table_identifiers = [table["identifier"] for table in schema1_source["tables"]]
         assert "table1" in table_identifiers
         assert "table3" in table_identifiers
 
         # Find schema2 source - should have 1 table
-        schema2_source = next(
-            s for s in yaml_content["sources"] if s["name"] == "schema2"
-        )
+        schema2_source = next(s for s in yaml_content["sources"] if s["name"] == "schema2")
         assert len(schema2_source["tables"]) == 1
         assert schema2_source["tables"][0]["identifier"] == "table2"

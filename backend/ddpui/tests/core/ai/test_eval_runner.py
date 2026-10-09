@@ -43,9 +43,7 @@ def run(item, *, script, warehouse=None, intent=None, routed=None):
     model = ScriptedChatModel(script=script)
     context = make_context(warehouse or FakeWarehouse(rows=[{"n": 171}]))
     return asyncio.run(
-        eval_runner.run_item(
-            EvalItem(**item), context=context, model=model, judge=False
-        )
+        eval_runner.run_item(EvalItem(**item), context=context, model=model, judge=False)
     )
 
 
@@ -64,9 +62,7 @@ def test_gold_sql_match_passes(routed_as):
         item,
         warehouse=warehouse,
         script=[
-            sql_call(
-                "SELECT COUNT(DISTINCT beneficiary_id) AS n FROM prod.enrollments", "c1"
-            ),
+            sql_call("SELECT COUNT(DISTINCT beneficiary_id) AS n FROM prod.enrollments", "c1"),
             AIMessage(content="**171** beneficiaries are enrolled."),
         ],
     )
@@ -117,9 +113,7 @@ def test_expected_value_fallback(routed_as):
 
 def test_routing_mismatch_fails(routed_as):
     item = {"question": "compare them", "expected_intent": "needs_clarification"}
-    result = run(
-        item, script=[AIMessage(content="ok")], intent="data_question", routed=routed_as
-    )
+    result = run(item, script=[AIMessage(content="ok")], intent="data_question", routed=routed_as)
     assert result.routing_ok is False
     assert not result.hard_pass
 

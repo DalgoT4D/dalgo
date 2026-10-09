@@ -48,9 +48,7 @@ def test_resolve_model_name_prefers_env(monkeypatch):
     monkeypatch.setenv("TEST_SUMMARY_MODEL", "gpt-5.5")
     assert resolve_model_name("TEST_SUMMARY_MODEL", "claude-sonnet-5") == "gpt-5.5"
     monkeypatch.delenv("TEST_SUMMARY_MODEL")
-    assert (
-        resolve_model_name("TEST_SUMMARY_MODEL", "claude-sonnet-5") == "claude-sonnet-5"
-    )
+    assert resolve_model_name("TEST_SUMMARY_MODEL", "claude-sonnet-5") == "claude-sonnet-5"
 
 
 # ── user-selectable models (UI model picker) ────────────────────────────────

@@ -41,9 +41,7 @@ def test_sql_agent_no_longer_carries_creation_tools():
 
 def test_both_agents_build_with_their_subsets():
     sql_agent = build_agent(model=ScriptedChatModel(script=[]), human_in_the_loop=False)
-    guide_agent = build_guide_agent(
-        model=ScriptedChatModel(script=[]), human_in_the_loop=False
-    )
+    guide_agent = build_guide_agent(model=ScriptedChatModel(script=[]), human_in_the_loop=False)
     assert sql_agent is not None and guide_agent is not None
     # a typo'd name fails loudly at build, not silently at runtime
     with pytest.raises(KeyError):
@@ -74,9 +72,7 @@ class FakeRedis:
 @pytest.fixture
 def fake_redis(monkeypatch):
     redis = FakeRedis()
-    monkeypatch.setattr(
-        docs_tools.RedisClient, "get_instance", staticmethod(lambda: redis)
-    )
+    monkeypatch.setattr(docs_tools.RedisClient, "get_instance", staticmethod(lambda: redis))
     return redis
 
 
@@ -89,9 +85,7 @@ def _fake_response(html: str):
 
 def test_get_dalgo_help_fetches_page_and_appends_url(monkeypatch, fake_redis):
     html = "<html><nav>menu</nav><main><h1>Creating a chart</h1><p>Select Charts.</p></main></html>"
-    monkeypatch.setattr(
-        docs_tools.requests, "get", lambda url, timeout: _fake_response(html)
-    )
+    monkeypatch.setattr(docs_tools.requests, "get", lambda url, timeout: _fake_response(html))
 
     out = docs_tools.get_dalgo_help.func(topic="creating_a_chart")
 
@@ -262,9 +256,7 @@ def test_guide_agent_pauses_on_create_metric_for_approval():
             AIMessage(content="Created."),
         ]
     )
-    agent = build_guide_agent(
-        checkpointer=InMemorySaver(), model=model, human_in_the_loop=True
-    )
+    agent = build_guide_agent(checkpointer=InMemorySaver(), model=model, human_in_the_loop=True)
     ctx = make_context()
 
     result = agent.invoke(

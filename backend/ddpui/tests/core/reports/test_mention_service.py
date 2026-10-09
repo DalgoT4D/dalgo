@@ -137,9 +137,7 @@ class TestProcessMentions:
     """Tests for MentionService.process_mentions orchestration"""
 
     @patch("ddpui.core.notifications.triggers.mention.send_html_message")
-    def test_stores_and_notifies(
-        self, mock_send, comment, org, author_orguser, mentioned_orguser
-    ):
+    def test_stores_and_notifies(self, mock_send, comment, org, author_orguser, mentioned_orguser):
         result = MentionService.process_mentions(
             comment, org, author_orguser, [mentioned_orguser.user.email]
         )
@@ -165,9 +163,7 @@ class TestProcessMentions:
         assert Notification.objects.count() == 0
 
     @patch("ddpui.core.notifications.triggers.mention.send_html_message")
-    def test_filters_valid_only(
-        self, mock_send, comment, org, author_orguser, mentioned_orguser
-    ):
+    def test_filters_valid_only(self, mock_send, comment, org, author_orguser, mentioned_orguser):
         result = MentionService.process_mentions(
             comment,
             org,
@@ -196,9 +192,7 @@ class TestStoreMentionedEmails:
         assert mentioned_orguser.user.email in comment.mentioned_emails
 
     def test_deduplicates_emails(self, comment, mentioned_orguser):
-        MentionService.store_mentioned_emails(
-            comment, [mentioned_orguser, mentioned_orguser]
-        )
+        MentionService.store_mentioned_emails(comment, [mentioned_orguser, mentioned_orguser])
         comment.refresh_from_db()
         assert comment.mentioned_emails.count(mentioned_orguser.user.email) == 1
 

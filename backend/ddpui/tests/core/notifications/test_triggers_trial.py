@@ -20,9 +20,7 @@ from ddpui.core.notifications.triggers.trial import (
 
 def test_send_verification():
     """Verification email — branded HTML with plain-text fallback."""
-    with patch(
-        "ddpui.core.notifications.triggers.trial.send_html_message"
-    ) as mock_send:
+    with patch("ddpui.core.notifications.triggers.trial.send_html_message") as mock_send:
         send_verification("to_email", "verify_url")
         mock_send.assert_called_once()
         args, _ = mock_send.call_args
@@ -34,9 +32,7 @@ def test_send_verification():
 
 def test_send_welcome():
     """Welcome email — branded HTML with plain-text fallback."""
-    with patch(
-        "ddpui.core.notifications.triggers.trial.send_html_message"
-    ) as mock_send:
+    with patch("ddpui.core.notifications.triggers.trial.send_html_message") as mock_send:
         send_welcome("to_email", "login_url")
         mock_send.assert_called_once()
         args, _ = mock_send.call_args
@@ -48,9 +44,7 @@ def test_send_welcome():
 
 def test_send_day3_not_started():
     """Day-3 nudge for a user with no walkthrough progress."""
-    with patch(
-        "ddpui.core.notifications.triggers.trial.send_html_message"
-    ) as mock_send:
+    with patch("ddpui.core.notifications.triggers.trial.send_html_message") as mock_send:
         send_day3_not_started("to@x.org", "https://app", "https://cal")
         assert mock_send.call_count == 1
         to_email, subject, text_body, html_body = mock_send.call_args[0]
@@ -62,12 +56,8 @@ def test_send_day3_not_started():
 
 def test_send_day3_in_progress_passes_completed_flow_through():
     """The completed flow reaches the renderer, so the right row is ticked."""
-    with patch(
-        "ddpui.core.notifications.triggers.trial.send_html_message"
-    ) as mock_send:
-        send_day3_in_progress(
-            "to@x.org", "automate_pipeline", "https://app", "https://cal"
-        )
+    with patch("ddpui.core.notifications.triggers.trial.send_html_message") as mock_send:
+        send_day3_in_progress("to@x.org", "automate_pipeline", "https://app", "https://cal")
         _, subject, _, html_body = mock_send.call_args[0]
         assert subject == "Pick up where you left off"
         assert html_body.index("Setup an automated data pipeline") < html_body.index(
@@ -77,9 +67,7 @@ def test_send_day3_in_progress_passes_completed_flow_through():
 
 def test_send_completion():
     """The completion email carries the workspace url."""
-    with patch(
-        "ddpui.core.notifications.triggers.trial.send_html_message"
-    ) as mock_send:
+    with patch("ddpui.core.notifications.triggers.trial.send_html_message") as mock_send:
         send_completion("to@x.org", "https://app", "https://cal")
         _, subject, _, html_body = mock_send.call_args[0]
         assert subject == "You've completed your tour of Dalgo"
@@ -88,9 +76,7 @@ def test_send_completion():
 
 def test_send_midpoint():
     """The midpoint email renders the day-of-total progress bar."""
-    with patch(
-        "ddpui.core.notifications.triggers.trial.send_html_message"
-    ) as mock_send:
+    with patch("ddpui.core.notifications.triggers.trial.send_html_message") as mock_send:
         send_midpoint("to@x.org", 7, 14, "https://cal")
         _, subject, _, html_body = mock_send.call_args[0]
         assert subject == "You're halfway through your Dalgo trial"
@@ -99,9 +85,7 @@ def test_send_midpoint():
 
 def test_send_pre_end():
     """The pre-end email shows the remaining days and the formatted end date."""
-    with patch(
-        "ddpui.core.notifications.triggers.trial.send_html_message"
-    ) as mock_send:
+    with patch("ddpui.core.notifications.triggers.trial.send_html_message") as mock_send:
         send_pre_end("to@x.org", 12, 14, "15 Aug 2026", "https://cal")
         _, subject, _, html_body = mock_send.call_args[0]
         assert subject == "2 days left in your Dalgo trial"

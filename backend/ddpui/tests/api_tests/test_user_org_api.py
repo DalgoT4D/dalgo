@@ -171,9 +171,9 @@ def mock_request(orguser: OrgUser = None):
     mock_request.orguser = orguser
     mock_request.permissions = []
     if orguser and orguser.new_role:
-        permission_slugs = RolePermission.objects.filter(
-            role=orguser.new_role
-        ).values_list("permission__slug", flat=True)
+        permission_slugs = RolePermission.objects.filter(role=orguser.new_role).values_list(
+            "permission__slug", flat=True
+        )
         mock_request.permissions = list(permission_slugs)
 
     return mock_request
@@ -186,9 +186,7 @@ def test_seed_data(seed_db):
     assert Permission.objects.count() > 5
 
 
-def test_get_current_userv2_has_user(
-    authuser, org_with_workspace, org_without_workspace
-):
+def test_get_current_userv2_has_user(authuser, org_with_workspace, org_without_workspace):
     """tests /worksspace/detatch/"""
     orguser1 = OrgUser.objects.create(
         user=authuser,
@@ -255,9 +253,7 @@ def test_get_current_userv2_returns_the_plan_window(authuser, org_with_workspace
     assert response[0].plan_end_date == end
 
 
-def test_get_current_userv2_plan_window_is_null_without_a_plan(
-    authuser, org_with_workspace
-):
+def test_get_current_userv2_plan_window_is_null_without_a_plan(authuser, org_with_workspace):
     """an org with no OrgPlans row reports no window rather than raising
 
     Legitimate state for older orgs. The frontend treats null dates as "not a trial" and shows
@@ -342,9 +338,7 @@ def test_post_organization_user_invalid_email(orguser):
     assert str(excinfo.value) == "that is not a valid email address"
 
 
-@patch.multiple(
-    "ddpui.core.notifications.triggers.user", send_signup=Mock(return_value=1)
-)
+@patch.multiple("ddpui.core.notifications.triggers.user", send_signup=Mock(return_value=1))
 def test_post_organization_user_success(orguser):
     """a success test"""
     request = mock_request(orguser)
@@ -369,9 +363,7 @@ def test_post_organization_user_success(orguser):
         the_authuser.delete()
 
 
-@patch.multiple(
-    "ddpui.core.notifications.triggers.user", send_signup=Mock(return_value=1)
-)
+@patch.multiple("ddpui.core.notifications.triggers.user", send_signup=Mock(return_value=1))
 def test_post_organization_user_success_lowercase_email(orguser):
     """a success test"""
     request = mock_request(orguser)
@@ -478,19 +470,13 @@ def test_delete_organization_users_success_v1(orguser):
         user=user,
         new_role=Role.objects.filter(slug=GUEST_ROLE).first(),
     )
-    assert (
-        OrgUser.objects.filter(org=orguser.org, user__email=payload.email).count() == 1
-    )
+    assert OrgUser.objects.filter(org=orguser.org, user__email=payload.email).count() == 1
     delete_organization_users_v1(request, payload)
-    assert (
-        OrgUser.objects.filter(org=orguser.org, user__email=payload.email).count() == 0
-    )
+    assert OrgUser.objects.filter(org=orguser.org, user__email=payload.email).count() == 0
     user.delete()
 
 
-def test_delete_organization_users_keeps_their_dashboards_and_charts_v1(
-    seed_db, orguser
-):
+def test_delete_organization_users_keeps_their_dashboards_and_charts_v1(seed_db, orguser):
     """deleting an orguser reassigns their dashboards and charts to the requesting admin"""
     request = mock_request(orguser)
     payload = DeleteOrgUserPayload(email="useremail")
@@ -590,9 +576,7 @@ def test_delete_organization_users_keeps_their_metrics_kpis_alerts_v1(seed_db, o
     user.delete()
 
 
-def test_delete_organization_users_reassigns_dashboard_to_requestor_v1(
-    seed_db, orguser
-):
+def test_delete_organization_users_reassigns_dashboard_to_requestor_v1(seed_db, orguser):
     """after a creator is deleted, their dashboard is reassigned to the requesting admin"""
     request = mock_request(orguser)
     payload = DeleteOrgUserPayload(email="useremail")
@@ -607,9 +591,7 @@ def test_delete_organization_users_reassigns_dashboard_to_requestor_v1(
     )
     # a second dashboard so the reassigned one isn't the org's last (deleting
     # the last dashboard is blocked by a separate rule)
-    Dashboard.objects.create(
-        title="other-dashboard", org=orguser.org, created_by=orguser
-    )
+    Dashboard.objects.create(title="other-dashboard", org=orguser.org, created_by=orguser)
 
     delete_organization_users_v1(request, payload)
     dashboard.refresh_from_db()
@@ -847,10 +829,7 @@ def test_get_organizations_warehouses(orguser):
     assert "warehouses" in response
     assert len(response["warehouses"]) == 1
     assert response["warehouses"][0]["wtype"] == "postgres"
-    assert (
-        response["warehouses"][0]["airbyte_destination"]["destination_id"]
-        == "destination_id_1"
-    )
+    assert response["warehouses"][0]["airbyte_destination"]["destination_id"] == "destination_id_1"
     warehouse.delete()
 
 
@@ -875,9 +854,7 @@ def test_post_organization_user_invite_v1_no_org(orguser):
 def test_post_organization_user_invite_v1_nosuchrole(orguser):
     """failing test, no such role"""
     request = mock_request(orguser)
-    payload = NewInvitationSchema(
-        invited_email="some-email", invited_role_uuid=uuid.uuid4()
-    )
+    payload = NewInvitationSchema(invited_email="some-email", invited_role_uuid=uuid.uuid4())
     with pytest.raises(HttpError) as excinfo:
         post_organization_user_invite_v1(request, payload)
     assert str(excinfo.value) == "Invalid role"
@@ -907,9 +884,7 @@ def test_post_organization_user_invite_v1(mock_awsses, orguser):
     request = mock_request(orguser)
 
     assert (
-        Invitation.objects.filter(
-            invited_email=payload.invited_email, invited_by=orguser
-        ).count()
+        Invitation.objects.filter(invited_email=payload.invited_email, invited_by=orguser).count()
         == 0
     )
     post_organization_user_invite_v1(request, payload)
@@ -932,9 +907,7 @@ def test_post_organization_user_invite_v1_multiple_open_invites(mock_awsses, org
     another_org = Org.objects.create(name="anotherorg", slug="anotherorg")
     another_user = User.objects.create(username="anotheruser", email="anotheruser")
     new_role = Role.objects.filter(slug=ADMIN_ROLE).first()
-    another_org_user = OrgUser.objects.create(
-        org=another_org, user=another_user, new_role=new_role
-    )
+    another_org_user = OrgUser.objects.create(org=another_org, user=another_user, new_role=new_role)
     Invitation.objects.create(
         invited_email="inivted_email",
         invited_new_role=new_role,
@@ -950,9 +923,7 @@ def test_post_organization_user_invite_v1_multiple_open_invites(mock_awsses, org
     request = mock_request(orguser)
 
     assert (
-        Invitation.objects.filter(
-            invited_email=payload.invited_email, invited_by=orguser
-        ).count()
+        Invitation.objects.filter(invited_email=payload.invited_email, invited_by=orguser).count()
         == 0
     )
     post_organization_user_invite_v1(request, payload)
@@ -971,9 +942,7 @@ def test_post_organization_user_invite_v1_multiple_open_invites(mock_awsses, org
 
 
 @patch("ddpui.core.notifications.triggers.user.send_invite_user", mock_awsses=Mock())
-def test_post_organization_user_invite_v1_lowercase_email(
-    mock_awsses, orguser: OrgUser
-):
+def test_post_organization_user_invite_v1_lowercase_email(mock_awsses, orguser: OrgUser):
     """success test, inviting a new user"""
     payload = NewInvitationSchema(
         invited_email="INVITED_EMAIL",
@@ -1020,10 +989,7 @@ def test_post_organization_user_invite_v1_user_exists(mock_awsses, orguser: OrgU
     mock_awsses.assert_called_once()
 
     assert OrgUser.objects.filter(user=user, new_role=guest_role).count() == 1
-    assert (
-        OrgUser.objects.filter(user=user, org=orguser.org, new_role=guest_role).count()
-        == 1
-    )
+    assert OrgUser.objects.filter(user=user, org=orguser.org, new_role=guest_role).count() == 1
 
 
 # ================================================================================
@@ -1032,9 +998,7 @@ def test_post_organization_user_invite_v1_user_exists(mock_awsses, orguser: OrgU
 def test_post_organization_user_accept_invite_v1_fail(orguser):
     """failing test, invalid invite code"""
     request = mock_request(orguser)
-    payload = AcceptInvitationSchema(
-        invite_code="invalid-invite_code", password="password"
-    )
+    payload = AcceptInvitationSchema(invite_code="invalid-invite_code", password="password")
 
     with pytest.raises(HttpError) as excinfo:
         post_organization_user_accept_invite_v1(request, payload)
@@ -1064,10 +1028,7 @@ def test_post_organization_user_accept_invite_v1(orguser, seed_db):
     )
     response = post_organization_user_accept_invite_v1(request, payload)
     assert response.email == "invited_email"
-    assert (
-        OrgUser.objects.filter(user__email="invited_email", new_role=guest_role).count()
-        == 1
-    )
+    assert OrgUser.objects.filter(user__email="invited_email", new_role=guest_role).count() == 1
     assert UserAttributes.objects.filter(user__email="invited_email").exists()
 
 
@@ -1078,9 +1039,7 @@ def test_post_organization_user_accept_invite_v1_creates_audit_logs(
     """Accepting an invitation logs both an INVITATION status update and an
     ORG_USER create, attributed to the org the invitation belongs to."""
     request = mock_request(orguser)
-    payload = AcceptInvitationSchema(
-        invite_code="invite_code_audit", password="password"
-    )
+    payload = AcceptInvitationSchema(invite_code="invite_code_audit", password="password")
 
     guest_role = Role.objects.filter(slug=GUEST_ROLE).first()
     Invitation.objects.create(
@@ -1133,10 +1092,7 @@ def test_post_organization_user_accept_invite_v1_lowercase_email(orguser, seed_d
     )
     response = post_organization_user_accept_invite_v1(request, payload)
     assert response.email == "invited_email"
-    assert (
-        OrgUser.objects.filter(user__email="invited_email", new_role=guest_role).count()
-        == 1
-    )
+    assert OrgUser.objects.filter(user__email="invited_email", new_role=guest_role).count() == 1
 
 
 def test_post_organization_user_accept_invite_v1_firstaccount_fail(orguser, seed_db):
@@ -1189,10 +1145,7 @@ def test_post_organization_user_accept_invite_v1_secondaccount(orguser, seed_db)
     )
     response = post_organization_user_accept_invite_v1(request, payload)
     assert response.email == "invited_email"
-    assert (
-        OrgUser.objects.filter(user__email="invited_email", new_role=guest_role).count()
-        == 2
-    )
+    assert OrgUser.objects.filter(user__email="invited_email", new_role=guest_role).count() == 2
     assert (
         OrgUser.objects.filter(
             user__email="invited_email", org__slug=orguser.org.slug, new_role=guest_role
@@ -1273,9 +1226,7 @@ def test_get_invitations_v1(orguser):
     response = get_invitations_v1(request)
     assert len(response) == 1
     assert response[0]["invited_email"] == "invited-email"
-    assert response[0]["invited_on"] == datetime(
-        2023, 1, 1, 4, 30, 0, tzinfo=timezone.pytz.utc
-    )
+    assert response[0]["invited_on"] == datetime(2023, 1, 1, 4, 30, 0, tzinfo=timezone.pytz.utc)
     assert response[0]["invited_role"] == {
         "uuid": guest_role.uuid,
         "name": guest_role.name,
@@ -1340,9 +1291,7 @@ def test_delete_invitation(orguser):
     assert not Invitation.objects.filter(id=invitation.id).exists()
 
 
-def test_post_organization_accept_tnc_no_org(
-    orguser: OrgUser, org_without_workspace: Org
-):
+def test_post_organization_accept_tnc_no_org(orguser: OrgUser, org_without_workspace: Org):
     """tests post_organization_accept_tnc"""
     orguser.org = None
 
@@ -1353,9 +1302,7 @@ def test_post_organization_accept_tnc_no_org(
     assert str(excinfo.value) == "create an organization first"
 
 
-def test_post_organization_accept_tnc_cannot(
-    orguser: OrgUser, org_without_workspace: Org
-):
+def test_post_organization_accept_tnc_cannot(orguser: OrgUser, org_without_workspace: Org):
     """tests post_organization_accept_tnc"""
     orguser.org = org_without_workspace
     orguser.save()
@@ -1381,9 +1328,7 @@ def test_post_organization_accept_tnc_already_accepted(
     orguser.org = org_without_workspace
     orguser.save()
 
-    OrgTnC.objects.create(
-        org=orguser.org, tnc_accepted_by=orguser, tnc_accepted_on=datetime.now()
-    )
+    OrgTnC.objects.create(org=orguser.org, tnc_accepted_by=orguser, tnc_accepted_on=datetime.now())
 
     request = mock_request(orguser)
 
@@ -1462,9 +1407,7 @@ def test_delete_organization_warehouses_v1_calls_all_cleanup(orguser):
 
 
 @patch("ddpui.api.user_org_api.create_audit_log")
-def test_delete_organization_warehouses_v1_creates_audit_log(
-    mock_audit_log, orguser, seed_db
-):
+def test_delete_organization_warehouses_v1_creates_audit_log(mock_audit_log, orguser, seed_db):
     """Deleting the org's warehouse logs its name, returned by
     delete_warehouse() itself (no separate fetch of the warehouse by the API layer)."""
     warehouse = OrgWarehouse.objects.create(
@@ -1550,9 +1493,7 @@ def test_post_organization_v1_creates_audit_log(
 @patch("ddpui.auth.RedisClient.get_instance")
 @patch("ddpui.api.user_org_api.AccessToken")
 @patch("ddpui.api.user_org_api.RefreshToken")
-def test_post_logout_blacklists_access_token_jti(
-    mock_refresh_token, mock_access_token, mock_redis
-):
+def test_post_logout_blacklists_access_token_jti(mock_refresh_token, mock_access_token, mock_redis):
     """Test that logout stores the access token JTI in Redis with correct TTL."""
     access_jti = "access-jti-abc123"
     refresh_jti = "refresh-jti-xyz789"
@@ -1599,9 +1540,7 @@ def test_post_logout_blacklists_refresh_token_jti_in_redis(
     post_logout(request)
 
     all_calls = mock_redis.return_value.set.call_args_list
-    refresh_call = next(
-        c for c in all_calls if c[0][0] == f"blacklisted_jti:{refresh_jti}"
-    )
+    refresh_call = next(c for c in all_calls if c[0][0] == f"blacklisted_jti:{refresh_jti}")
     assert refresh_call[0][1] == "1"
     assert abs(refresh_call[1]["ex"] - 604800) < 5
 
@@ -1751,9 +1690,7 @@ def assert_audit_log_call(
 @patch("ddpui.api.user_org_api.create_audit_log")
 @patch("ddpui.api.user_org_api.CustomTokenObtainSerializer")
 @patch("ddpui.api.user_org_api.orguserfunctions.lookup_user")
-def test_login_v2_creates_audit_log(
-    mock_lookup, mock_serializer, mock_audit_log, orguser
-):
+def test_login_v2_creates_audit_log(mock_lookup, mock_serializer, mock_audit_log, orguser):
     """Test that login v2 creates an audit log entry"""
     # Setup mocks
     mock_serializer_instance = MagicMock()
@@ -1800,9 +1737,7 @@ def test_change_password_creates_audit_log(mock_change_pwd, mock_audit_log, orgu
     mock_change_pwd.return_value = (True, None)
 
     request = mock_request(orguser)
-    payload = ChangePasswordSchema(
-        password="newpassword", confirmPassword="newpassword"
-    )
+    payload = ChangePasswordSchema(password="newpassword", confirmPassword="newpassword")
 
     change_password(request, payload)
 

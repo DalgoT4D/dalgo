@@ -72,23 +72,17 @@ def test_handler_maps_model_and_tool_events_to_trace():
     handler = LangfuseTurnHandler(trace, model_name="claude-sonnet-5")
 
     model_run = uuid.uuid4()
-    handler.on_chat_model_start(
-        {}, [[HumanMessage("how many surveys?")]], run_id=model_run
-    )
+    handler.on_chat_model_start({}, [[HumanMessage("how many surveys?")]], run_id=model_run)
     message = AIMessage(content="1,284 surveys.")
     message.usage_metadata = {
         "input_tokens": 900,
         "output_tokens": 40,
         "total_tokens": 940,
     }
-    handler.on_llm_end(
-        LLMResult(generations=[[ChatGeneration(message=message)]]), run_id=model_run
-    )
+    handler.on_llm_end(LLMResult(generations=[[ChatGeneration(message=message)]]), run_id=model_run)
 
     tool_run = uuid.uuid4()
-    handler.on_tool_start(
-        {"name": "execute_sql"}, "SELECT COUNT(*)...", run_id=tool_run
-    )
+    handler.on_tool_start({"name": "execute_sql"}, "SELECT COUNT(*)...", run_id=tool_run)
     handler.on_tool_end("Query returned 1 rows.", run_id=tool_run)
 
     handler.finish(output="1,284 surveys.", status="completed")
@@ -451,9 +445,7 @@ def test_finish_stamps_agent_tag_and_metadata_preserving_base_tags():
     base = ["admin-dev", "postgres", "env:dev", "model:claude-sonnet-5"]
     handler = LangfuseTurnHandler(trace, model_name="m", base_tags=base)
 
-    handler.finish(
-        output="Created the KPI.", status="completed", agent="guide", handed_off=True
-    )
+    handler.finish(output="Created the KPI.", status="completed", agent="guide", handed_off=True)
 
     updated = trace.updated_with
     assert updated["metadata"] == {"status": "completed", "agent": "guide"}

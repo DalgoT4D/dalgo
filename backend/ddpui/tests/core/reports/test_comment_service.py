@@ -114,15 +114,11 @@ class TestFetchComments:
             author=author_orguser,
             org=org,
         )
-        comments = CommentService._fetch_comments(
-            snapshot, CommentTargetType.SUMMARY, None
-        )
+        comments = CommentService._fetch_comments(snapshot, CommentTargetType.SUMMARY, None)
         assert len(comments) == 1
         assert comments[0].content == "Summary comment"
 
-    def test_returns_chart_comments_filtered_by_chart_id(
-        self, snapshot, author_orguser, org
-    ):
+    def test_returns_chart_comments_filtered_by_chart_id(self, snapshot, author_orguser, org):
         Comment.objects.create(
             target_type=CommentTargetType.CHART,
             snapshot=snapshot,
@@ -140,17 +136,13 @@ class TestFetchComments:
             org=org,
         )
 
-        comments = CommentService._fetch_comments(
-            snapshot, CommentTargetType.CHART, target_id=10
-        )
+        comments = CommentService._fetch_comments(snapshot, CommentTargetType.CHART, target_id=10)
         assert len(comments) == 1
         assert comments[0].target_id == 10
 
     def test_chart_without_chart_id_raises(self, snapshot):
         with pytest.raises(CommentValidationError, match="target_id is required"):
-            CommentService._fetch_comments(
-                snapshot, CommentTargetType.CHART, target_id=None
-            )
+            CommentService._fetch_comments(snapshot, CommentTargetType.CHART, target_id=None)
 
     def test_returns_chronological_order(self, snapshot, author_orguser, org):
         c1 = Comment.objects.create(
@@ -168,9 +160,7 @@ class TestFetchComments:
             org=org,
         )
 
-        comments = CommentService._fetch_comments(
-            snapshot, CommentTargetType.SUMMARY, None
-        )
+        comments = CommentService._fetch_comments(snapshot, CommentTargetType.SUMMARY, None)
         assert comments[0].id == c1.id
         assert comments[1].id == c2.id
 
@@ -191,9 +181,7 @@ class TestFetchComments:
             org=org,
         )
 
-        comments = CommentService._fetch_comments(
-            snapshot, CommentTargetType.SUMMARY, None
-        )
+        comments = CommentService._fetch_comments(snapshot, CommentTargetType.SUMMARY, None)
         assert len(comments) == 1
         assert comments[0].target_type == CommentTargetType.SUMMARY
 
@@ -206,9 +194,7 @@ class TestFetchComments:
 class TestAnnotateIsNew:
     """Tests for CommentService._annotate_is_new"""
 
-    def test_all_new_when_no_read_status(
-        self, snapshot, author_orguser, other_orguser, org
-    ):
+    def test_all_new_when_no_read_status(self, snapshot, author_orguser, other_orguser, org):
         """When the user has never opened the thread, all comments are new."""
         comment = Comment.objects.create(
             target_type=CommentTargetType.SUMMARY,
@@ -264,9 +250,7 @@ class TestAnnotateIsNew:
         )
         assert comment.is_new is False
 
-    def test_comments_after_read_cursor_are_new(
-        self, snapshot, author_orguser, other_orguser, org
-    ):
+    def test_comments_after_read_cursor_are_new(self, snapshot, author_orguser, other_orguser, org):
         """Comments created after last_read_at are new."""
         # Set read cursor in the past
         past = timezone.now() - timedelta(hours=1)
@@ -301,14 +285,10 @@ class TestAnnotateIsNew:
             org=org,
         )
 
-        CommentService._annotate_is_new(
-            [comment], snapshot, CommentTargetType.SUMMARY, None, None
-        )
+        CommentService._annotate_is_new([comment], snapshot, CommentTargetType.SUMMARY, None, None)
         assert comment.is_new is True
 
-    def test_chart_read_status_uses_chart_id(
-        self, snapshot, author_orguser, other_orguser, org
-    ):
+    def test_chart_read_status_uses_chart_id(self, snapshot, author_orguser, other_orguser, org):
         """Read status for chart comments uses the chart_id filter."""
         # Read status for chart 10 only
         CommentReadStatus.objects.create(
@@ -382,9 +362,7 @@ class TestGetCommentStates:
         )
         assert result == []
 
-    def test_summary_entry_has_correct_fields(
-        self, snapshot, author_orguser, other_orguser, org
-    ):
+    def test_summary_entry_has_correct_fields(self, snapshot, author_orguser, other_orguser, org):
         """Summary entry has target_type='summary' and target_id=None."""
         Comment.objects.create(
             target_type=CommentTargetType.SUMMARY,
@@ -398,16 +376,12 @@ class TestGetCommentStates:
             org=org,
             orguser=other_orguser,
         )
-        summary = next(
-            (e for e in result if e["target_type"] == CommentTargetType.SUMMARY), None
-        )
+        summary = next((e for e in result if e["target_type"] == CommentTargetType.SUMMARY), None)
         assert summary is not None
         assert summary["target_id"] is None
         assert summary["state"] in ("unread", "read", "mentioned")
 
-    def test_chart_entry_has_correct_fields(
-        self, snapshot, author_orguser, other_orguser, org
-    ):
+    def test_chart_entry_has_correct_fields(self, snapshot, author_orguser, other_orguser, org):
         """Chart entry has target_type='chart' and an integer chart_id."""
         Comment.objects.create(
             target_type=CommentTargetType.CHART,
@@ -422,9 +396,7 @@ class TestGetCommentStates:
             org=org,
             orguser=other_orguser,
         )
-        chart_entry = next(
-            (e for e in result if e["target_type"] == CommentTargetType.CHART), None
-        )
+        chart_entry = next((e for e in result if e["target_type"] == CommentTargetType.CHART), None)
         assert chart_entry is not None
         assert chart_entry["target_id"] == 10
         assert chart_entry["state"] in ("unread", "read", "mentioned")
@@ -467,9 +439,7 @@ class TestGetCommentStates:
         assert (CommentTargetType.CHART, 10) in target_types
         assert (CommentTargetType.CHART, 20) in target_types
 
-    def test_unread_state_for_never_read(
-        self, snapshot, author_orguser, other_orguser, org
-    ):
+    def test_unread_state_for_never_read(self, snapshot, author_orguser, other_orguser, org):
         """User who never opened a thread sees 'unread' state."""
         Comment.objects.create(
             target_type=CommentTargetType.SUMMARY,
@@ -483,14 +453,10 @@ class TestGetCommentStates:
             org=org,
             orguser=other_orguser,
         )
-        summary = next(
-            e for e in result if e["target_type"] == CommentTargetType.SUMMARY
-        )
+        summary = next(e for e in result if e["target_type"] == CommentTargetType.SUMMARY)
         assert summary["state"] == "unread"
 
-    def test_read_state_after_mark_as_read(
-        self, snapshot, author_orguser, other_orguser, org
-    ):
+    def test_read_state_after_mark_as_read(self, snapshot, author_orguser, other_orguser, org):
         """After marking as read, state becomes 'read'."""
         Comment.objects.create(
             target_type=CommentTargetType.SUMMARY,
@@ -509,9 +475,7 @@ class TestGetCommentStates:
             org=org,
             orguser=other_orguser,
         )
-        summary = next(
-            e for e in result if e["target_type"] == CommentTargetType.SUMMARY
-        )
+        summary = next(e for e in result if e["target_type"] == CommentTargetType.SUMMARY)
         assert summary["state"] == "read"
 
     def test_mentioned_state(self, snapshot, author_orguser, other_orguser, org):
@@ -529,14 +493,10 @@ class TestGetCommentStates:
             org=org,
             orguser=other_orguser,
         )
-        summary = next(
-            e for e in result if e["target_type"] == CommentTargetType.SUMMARY
-        )
+        summary = next(e for e in result if e["target_type"] == CommentTargetType.SUMMARY)
         assert summary["state"] == "mentioned"
 
-    def test_edited_comment_stays_read(
-        self, snapshot, author_orguser, other_orguser, org
-    ):
+    def test_edited_comment_stays_read(self, snapshot, author_orguser, other_orguser, org):
         """Editing a comment (bumping updated_at) should NOT flip it back to unread.
 
         We use created_at for the unread check, not updated_at.
@@ -563,16 +523,10 @@ class TestGetCommentStates:
             org=org,
             orguser=other_orguser,
         )
-        summary = next(
-            e for e in result if e["target_type"] == CommentTargetType.SUMMARY
-        )
-        assert (
-            summary["state"] == "read"
-        ), "Editing a comment should not make it unread again"
+        summary = next(e for e in result if e["target_type"] == CommentTargetType.SUMMARY)
+        assert summary["state"] == "read", "Editing a comment should not make it unread again"
 
-    def test_deleted_comments_excluded(
-        self, snapshot, author_orguser, other_orguser, org
-    ):
+    def test_deleted_comments_excluded(self, snapshot, author_orguser, other_orguser, org):
         """Soft-deleted comments should not affect state."""
         Comment.objects.create(
             target_type=CommentTargetType.SUMMARY,
@@ -594,16 +548,10 @@ class TestGetCommentStates:
             org=org,
             orguser=other_orguser,
         )
-        summary = next(
-            e for e in result if e["target_type"] == CommentTargetType.SUMMARY
-        )
-        assert (
-            summary["state"] == "unread"
-        ), "Only visible comments should determine state"
+        summary = next(e for e in result if e["target_type"] == CommentTargetType.SUMMARY)
+        assert summary["state"] == "unread", "Only visible comments should determine state"
 
-    def test_read_status_does_not_cross_targets(
-        self, snapshot, author_orguser, other_orguser, org
-    ):
+    def test_read_status_does_not_cross_targets(self, snapshot, author_orguser, other_orguser, org):
         """Reading summary should NOT affect chart unread state, and vice versa."""
         Comment.objects.create(
             target_type=CommentTargetType.SUMMARY,
@@ -631,14 +579,10 @@ class TestGetCommentStates:
             org=org,
             orguser=other_orguser,
         )
-        summary = next(
-            e for e in result if e["target_type"] == CommentTargetType.SUMMARY
-        )
+        summary = next(e for e in result if e["target_type"] == CommentTargetType.SUMMARY)
         chart = next(e for e in result if e["target_type"] == CommentTargetType.CHART)
         assert summary["state"] == "read"
-        assert (
-            chart["state"] == "unread"
-        ), "Reading summary should not mark chart as read"
+        assert chart["state"] == "unread", "Reading summary should not mark chart as read"
 
 
 class TestCreateComment:

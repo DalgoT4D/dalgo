@@ -180,9 +180,7 @@ def airbyte_server_block(orguser):
 # ================================================================================
 
 
-@patch(
-    "ddpui.ddpairbyte.airbytehelpers.airbyte_service.create_custom_source_definition"
-)
+@patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.create_custom_source_definition")
 def test_add_custom_airbyte_connector(mock_create_custom_source_definition: Mock):
     """very simple test"""
     add_custom_airbyte_connector("wsid", "cname", "cdr", "cdit", "cdurl")
@@ -332,9 +330,7 @@ def test_setup_airbyte_workspace_v1_create_server_block(
     setup_airbyte_workspace_v1("workspace_name", org)
     mock_get_airbyte_server_block_id.assert_called_once_with("org-airbyte-server")
     mock_create_airbyte_server_block.assert_called_once_with("org-airbyte-server")
-    assert (
-        OrgPrefectBlockv1.objects.filter(org=org, block_type=AIRBYTESERVER).count() == 1
-    )
+    assert OrgPrefectBlockv1.objects.filter(org=org, block_type=AIRBYTESERVER).count() == 1
     org.delete()
 
 
@@ -372,9 +368,7 @@ def test_setup_airbyte_workspace_v1_server_block_exists(
     response = setup_airbyte_workspace_v1("workspace_name", org)
     mock_get_airbyte_server_block_id.assert_called_once_with("org-airbyte-server")
     mock_create_airbyte_server_block.assert_not_called()
-    assert (
-        OrgPrefectBlockv1.objects.filter(org=org, block_type=AIRBYTESERVER).count() == 1
-    )
+    assert OrgPrefectBlockv1.objects.filter(org=org, block_type=AIRBYTESERVER).count() == 1
     assert response.name == "wsname"
     assert response.workspaceId == "wsid"
     assert response.initialSetupComplete is False
@@ -401,9 +395,7 @@ def test_get_job_info_for_connection_job_dne(
 ):
     """tests get_job_info_for_connection"""
     org = Org.objects.create(name="org", slug="org")
-    task = Task.objects.create(
-        type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync"
-    )
+    task = Task.objects.create(type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync")
     OrgTask.objects.create(org=org, task=task, connection_id="connection_id")
 
     mock_get_jobs_for_connection.return_value = {"jobs": []}
@@ -432,9 +424,7 @@ def test_get_job_info_for_connection(
 ):
     """tests get_job_info_for_connection"""
     org = Org.objects.create(name="org", slug="org")
-    task = Task.objects.create(
-        type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync"
-    )
+    task = Task.objects.create(type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync")
     OrgTask.objects.create(org=org, task=task, connection_id="connection_id")
 
     mock_get_jobs_for_connection.return_value = {
@@ -486,9 +476,7 @@ def test_get_job_info_for_connection(
 def test_get_sync_history_for_connection_no_jobs():
     """tests get_sync_job_history_for_connection for success"""
     org = Org.objects.create(name="org", slug="org")
-    synctask = Task.objects.create(
-        type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync"
-    )
+    synctask = Task.objects.create(type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync")
     OrgTask.objects.create(org=org, task=synctask, connection_id="connection_id")
 
     result, error = get_sync_job_history_for_connection(org, "connection_id")
@@ -499,9 +487,7 @@ def test_get_sync_history_for_connection_no_jobs():
 def test_get_sync_history_for_connection_success():
     """tests get_sync_job_history_for_connection for the case when the connection has no syncs created yet"""
     org = Org.objects.create(name="org", slug="org")
-    synctask = Task.objects.create(
-        type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync"
-    )
+    synctask = Task.objects.create(type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync")
     OrgTask.objects.create(org=org, task=synctask, connection_id="connection_id")
     started_at = datetime(2025, 1, 1, 0, 0, 0, tzinfo=pytz.UTC)
     ended_at = datetime(2025, 1, 1, 0, 10, 0, tzinfo=pytz.UTC)
@@ -575,14 +561,10 @@ def test_create_airbyte_deployment(
         org=org_with_workspace,
         block_type=AIRBYTESERVER,
     ).first()
-    result = create_airbyte_deployment(
-        org_with_workspace, org_task, org_airbyte_server_block
-    )
+    result = create_airbyte_deployment(org_with_workspace, org_task, org_airbyte_server_block)
 
     mock_generate_hash_id.assert_called_once_with(8)
-    mock_logger.info.assert_called_once_with(
-        "using the hash code 12345678 for the deployment name"
-    )
+    mock_logger.info.assert_called_once_with("using the hash code 12345678 for the deployment name")
 
     # Check that create_dataflow_v1 was called with the correct arguments
     mock_create_dataflow.assert_called_once()
@@ -595,9 +577,7 @@ def test_create_airbyte_deployment(
     assert hasattr(queue_details, "workpool")
     assert queue_details.workpool == "test_workpool"
 
-    mock_org_dataflow.objects.filter.assert_called_once_with(
-        deployment_id="deployment-id"
-    )
+    mock_org_dataflow.objects.filter.assert_called_once_with(deployment_id="deployment-id")
     mock_org_dataflow.objects.create.assert_called_once_with(
         org=org_with_workspace,
         name="manual-test-org-test-task-12345678",
@@ -651,9 +631,7 @@ def test_create_connection(
 
     assert error is None
 
-    mock_create_connection.assert_called_once_with(
-        org_with_workspace.airbyte_workspace_id, payload
-    )
+    mock_create_connection.assert_called_once_with(org_with_workspace.airbyte_workspace_id, payload)
 
     assert result["name"] == "test-connection"
     assert result["connectionId"] == "connection-id"
@@ -1023,12 +1001,8 @@ def test_delete_source(
 
     mock_get_connections.return_value = {"connections": connections}
 
-    synctask = Task.objects.create(
-        type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync"
-    )
-    orgtask = OrgTask.objects.create(
-        org=org, task=synctask, connection_id="connection_id"
-    )
+    synctask = Task.objects.create(type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync")
+    orgtask = OrgTask.objects.create(org=org, task=synctask, connection_id="connection_id")
     OrgTask.objects.create(org=org, task=synctask, connection_id="connection_id2")
 
     dataflow = OrgDataFlowv1.objects.create(
@@ -1243,9 +1217,7 @@ def test_fetch_and_update_airbyte_job_details_updates_existing_job(
     }
     mock_get_job_info_without_logs.return_value = job_info
 
-    with patch(
-        "ddpui.ddpairbyte.airbytehelpers.from_timestamp", side_effect=lambda x: x
-    ):
+    with patch("ddpui.ddpairbyte.airbytehelpers.from_timestamp", side_effect=lambda x: x):
         result = fetch_and_update_airbyte_job_details(job_id)
 
     job = AirbyteJob.objects.get(job_id=job_id)
@@ -1320,9 +1292,7 @@ def test_fetch_and_update_airbyte_jobs_for_all_connections(
 ):
     """tests fetch_and_update_airbyte_jobs_for_all_connections"""
     org = Org.objects.create(name="org", slug="org")
-    synctask = Task.objects.create(
-        type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync"
-    )
+    synctask = Task.objects.create(type=TaskType.AIRBYTE, slug="airbyte-sync", label="AIRBYTE sync")
     OrgTask.objects.create(org=org, task=synctask, connection_id="connection_id")
 
     mock_get_jobs_for_connection.return_value = {
@@ -1457,9 +1427,7 @@ def test_fetch_and_update_org_schema_changes_auto_accept_failure_falls_back(
     mock_apply_schema_change.side_effect = Exception("airbyte down")
     OrgSchemaChange.objects.filter(connection_id=connection_id).delete()
 
-    _, _, auto_accept_err = fetch_and_update_org_schema_changes(
-        org_with_workspace, connection_id
-    )
+    _, _, auto_accept_err = fetch_and_update_org_schema_changes(org_with_workspace, connection_id)
 
     mock_apply_schema_change.assert_called_once()
     mock_create_audit_log.assert_not_called()
@@ -1526,9 +1494,7 @@ def test_fetch_and_update_org_schema_changes_invalid_change_type(
         "catalogDiff": {},
     }
 
-    catalog, err, _ = fetch_and_update_org_schema_changes(
-        org_with_workspace, connection_id
-    )
+    catalog, err, _ = fetch_and_update_org_schema_changes(org_with_workspace, connection_id)
     assert catalog is None
     assert "Something went wrong" in err
 
@@ -1627,9 +1593,7 @@ POST_SYNC_TRANSFORM = {
 }
 
 
-@patch(
-    "ddpui.ddpairbyte.airbytehelpers.prefect_service.upsert_airbyte_connection_block"
-)
+@patch("ddpui.ddpairbyte.airbytehelpers.prefect_service.upsert_airbyte_connection_block")
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.create_connection")
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.delete_connection")
 @patch("ddpui.ddpairbyte.airbytehelpers.create_airbyte_deployment")
@@ -1688,9 +1652,7 @@ def test_create_connection_saves_post_sync_transform(
     assert "extra" in call_kwargs
 
 
-@patch(
-    "ddpui.ddpairbyte.airbytehelpers.prefect_service.upsert_airbyte_connection_block"
-)
+@patch("ddpui.ddpairbyte.airbytehelpers.prefect_service.upsert_airbyte_connection_block")
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.create_connection")
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.delete_connection")
 @patch("ddpui.ddpairbyte.airbytehelpers.create_airbyte_deployment")
@@ -1737,9 +1699,7 @@ def test_create_connection_no_transform_still_upserts(
     assert call_kwargs["extra"] == {"env": {}, "post_sync_ops": []}
 
 
-@patch(
-    "ddpui.ddpairbyte.airbytehelpers.prefect_service.upsert_airbyte_connection_block"
-)
+@patch("ddpui.ddpairbyte.airbytehelpers.prefect_service.upsert_airbyte_connection_block")
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.update_connection")
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.get_connection")
 def test_update_connection_saves_post_sync_transform(
@@ -1791,9 +1751,7 @@ def test_update_connection_saves_post_sync_transform(
     sync_orgtask.delete()
 
 
-@patch(
-    "ddpui.ddpairbyte.airbytehelpers.prefect_service.upsert_airbyte_connection_block"
-)
+@patch("ddpui.ddpairbyte.airbytehelpers.prefect_service.upsert_airbyte_connection_block")
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.update_connection")
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.get_connection")
 def test_update_connection_in_multiple_pipelines_upserts_block_once(
@@ -1872,9 +1830,7 @@ def test_update_connection_in_multiple_pipelines_upserts_block_once(
     sync_orgtask.delete()
 
 
-@patch(
-    "ddpui.ddpairbyte.airbytehelpers.prefect_service.upsert_airbyte_connection_block"
-)
+@patch("ddpui.ddpairbyte.airbytehelpers.prefect_service.upsert_airbyte_connection_block")
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.update_connection")
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.get_connection")
 def test_update_connection_clears_casts_upserts_empty_extra(
@@ -1892,9 +1848,7 @@ def test_update_connection_clears_casts_upserts_empty_extra(
         task=sync_task,
         connection_id="conn-id",
         post_sync_transform={
-            "ops": [
-                {"type": "cast", "schema": "s", "table": "t", "config": {"a": "int"}}
-            ]
+            "ops": [{"type": "cast", "schema": "s", "table": "t", "config": {"a": "int"}}]
         },
     )
     mock_get_connection.return_value = {

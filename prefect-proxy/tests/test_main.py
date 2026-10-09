@@ -82,9 +82,7 @@ def test_dbtrun_v1():
         # Runner is invoked with the serialized payload + slug — the runner
         # decorator provides its own flow_name/flow_run_name so the caller's
         # values are intentionally ignored.
-        mock_dbtjob_v2_runner.assert_called_once_with(
-            task_config.model_dump(), task_config.slug
-        )
+        mock_dbtjob_v2_runner.assert_called_once_with(task_config.model_dump(), task_config.slug)
 
 
 def test_dbtrun_v1_rejects_invalid_payload():
@@ -132,9 +130,7 @@ def test_shelloprun_success():
         mock_shellopjob.return_value = expected_result
         result = shelloprun(task_config)
         assert result == expected_result
-        mock_shellopjob.assert_called_once_with(
-            task_config.model_dump(), task_config.slug
-        )
+        mock_shellopjob.assert_called_once_with(task_config.model_dump(), task_config.slug)
 
 
 def test_shelloprun_failure():
@@ -200,9 +196,7 @@ async def test_post_airbyte_server_success():
         serverPort="8000",
         apiVersion="v1",
     )
-    with patch(
-        "proxy.main.create_airbyte_server_block", return_value=("12345", "testserver")
-    ):
+    with patch("proxy.main.create_airbyte_server_block", return_value=("12345", "testserver")):
         response = await post_airbyte_server(payload)
         assert response == {"block_id": "12345", "cleaned_block_name": "testserver"}
 
@@ -215,9 +209,7 @@ async def test_post_airbyte_server_failure():
         serverPort="8000",
         apiVersion="v1",
     )
-    with patch(
-        "proxy.main.create_airbyte_server_block", side_effect=Exception("test error")
-    ):
+    with patch("proxy.main.create_airbyte_server_block", side_effect=Exception("test error")):
         with pytest.raises(HTTPException) as excinfo:
             await post_airbyte_server(payload)
         assert excinfo.value.status_code == 400
@@ -248,9 +240,7 @@ async def test_put_airbyte_server_exception():
         serverPort="8000",
         apiVersion="v1",
     )
-    with patch(
-        "proxy.main.update_airbyte_server_block", side_effect=Exception("test error")
-    ):
+    with patch("proxy.main.update_airbyte_server_block", side_effect=Exception("test error")):
         with pytest.raises(HTTPException) as excinfo:
             await put_airbyte_server(payload)
         assert excinfo.value.status_code == 400
@@ -265,9 +255,7 @@ async def test_put_airbyte_server_success():
         serverPort="8000",
         apiVersion="v1",
     )
-    with patch(
-        "proxy.main.update_airbyte_server_block", return_value=("12345", "testserver")
-    ):
+    with patch("proxy.main.update_airbyte_server_block", return_value=("12345", "testserver")):
         response = await put_airbyte_server(payload)
         assert response == {"block_id": "12345", "cleaned_block_name": "testserver"}
 
@@ -286,9 +274,7 @@ async def test_put_airbyte_connection_exception():
         connectionId="conn-uuid",
         connectionBlockName="conn-uuid",
     )
-    with patch(
-        "proxy.main.upsert_airbyte_connection_block", side_effect=Exception("boom")
-    ):
+    with patch("proxy.main.upsert_airbyte_connection_block", side_effect=Exception("boom")):
         with pytest.raises(HTTPException) as excinfo:
             await put_airbyte_connection(payload)
         assert excinfo.value.status_code == 400
@@ -493,9 +479,7 @@ async def test_get_flowrun_success():
     payload = FlowRunRequest(name="test_flow_run")
     with patch(
         "proxy.main.get_flow_runs_by_name",
-        return_value=[
-            {"id": "12345", "state": {"type": "COMPLETED"}, "status": "COMPLETED"}
-        ],
+        return_value=[{"id": "12345", "state": {"type": "COMPLETED"}, "status": "COMPLETED"}],
     ):
         response = await get_flowrun(payload)
         assert response == {
@@ -531,15 +515,11 @@ def test_get_flow_runs_success():
         return_value=[{"id": "12345", "state": {"type": "COMPLETED"}}],
     ):
         response = get_flow_runs("67890")
-        assert response == {
-            "flow_runs": [{"id": "12345", "state": {"type": "COMPLETED"}}]
-        }
+        assert response == {"flow_runs": [{"id": "12345", "state": {"type": "COMPLETED"}}]}
 
 
 def test_get_flow_runs_failure():
-    with patch(
-        "proxy.main.get_flow_runs_by_deployment_id", side_effect=Exception("test error")
-    ):
+    with patch("proxy.main.get_flow_runs_by_deployment_id", side_effect=Exception("test error")):
         with pytest.raises(HTTPException) as excinfo:
             get_flow_runs("67890")
         assert excinfo.value.status_code == 400
@@ -573,9 +553,7 @@ def test_post_deployments_success():
 
 def test_post_deployments_failure():
     payload = DeploymentFetch(org_slug="test_org", deployment_ids=["12345"])
-    with patch(
-        "proxy.main.get_deployments_by_filter", side_effect=Exception("test error")
-    ):
+    with patch("proxy.main.get_deployments_by_filter", side_effect=Exception("test error")):
         with pytest.raises(HTTPException) as excinfo:
             post_deployments(payload)
         assert excinfo.value.status_code == 400
@@ -701,9 +679,7 @@ async def test_post_create_deployment_flow_run_success():
 
 @pytest.mark.asyncio
 async def test_post_create_deployment_flow_run_failure():
-    with patch(
-        "proxy.main.post_deployment_flow_run", side_effect=Exception("test error")
-    ):
+    with patch("proxy.main.post_deployment_flow_run", side_effect=Exception("test error")):
         with pytest.raises(HTTPException) as excinfo:
             await post_create_deployment_flow_run("12345")
         assert excinfo.value.status_code == 400
@@ -902,9 +878,7 @@ def test_get_flow_run_by_id_poll_skips_task_run_state_derive(mock_get: Mock):
     triggers a full task-run graph fetch and the UI slows to a crawl."""
     mock_get.return_value = {"id": "f-run-1", "state_type": "RUNNING"}
     result = get_flow_run_by_id_poll("f-run-1")
-    mock_get.assert_called_once_with(
-        flow_run_id="f-run-1", update_state_from_task_runs=False
-    )
+    mock_get.assert_called_once_with(flow_run_id="f-run-1", update_state_from_task_runs=False)
     assert result == {"id": "f-run-1", "state_type": "RUNNING"}
 
 
@@ -927,9 +901,7 @@ async def test_post_schedule_deployment_flow_run_forwards_time_and_params():
     scheduledTime drops, the run happens immediately instead of at the scheduled
     time — a user-visible surprise."""
     payload = ScheduleFlowRunRequest(runParams={"a": 1}, scheduledTime=None)
-    with patch(
-        "proxy.main.post_deployment_flow_run", new_callable=AsyncMock
-    ) as mock_run:
+    with patch("proxy.main.post_deployment_flow_run", new_callable=AsyncMock) as mock_run:
         mock_run.return_value = {"flow_run_id": "fr-1"}
         result = await post_schedule_deployment_flow_run("dep-1", payload)
         mock_run.assert_awaited_once_with("dep-1", {"a": 1}, None)
@@ -939,9 +911,7 @@ async def test_post_schedule_deployment_flow_run_forwards_time_and_params():
 @pytest.mark.asyncio
 async def test_post_schedule_deployment_flow_run_wraps_service_error():
     payload = ScheduleFlowRunRequest(runParams={}, scheduledTime=None)
-    with patch(
-        "proxy.main.post_deployment_flow_run", new_callable=AsyncMock
-    ) as mock_run:
+    with patch("proxy.main.post_deployment_flow_run", new_callable=AsyncMock) as mock_run:
         mock_run.side_effect = Exception("boom")
         with pytest.raises(HTTPException) as excinfo:
             await post_schedule_deployment_flow_run("dep-1", payload)

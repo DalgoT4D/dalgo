@@ -50,18 +50,14 @@ Welcome to Dalgo! Please verify your email address by clicking the link below
 verification_url
 
     """
-        mock_send_text_message.assert_called_once_with(
-            "to_email", "Welcome to Dalgo", message
-        )
+        mock_send_text_message.assert_called_once_with("to_email", "Welcome to Dalgo", message)
 
 
 def test_send_invite_user_default_wording():
     """Fresh invite (no group context) uses the plain 'invited to Dalgo' wording,
     the trailing invite_url becomes the CTA, and the CTA label is 'Accept Invitation'.
     """
-    with patch(
-        "ddpui.core.notifications.triggers.user.send_html_message"
-    ) as mock_send_html:
+    with patch("ddpui.core.notifications.triggers.user.send_html_message") as mock_send_html:
         send_invite_user("to_email", "inviter@x.org", "https://dalgo/accept/abc")
 
     to_email, subject, plain, html_body = mock_send_html.call_args[0]
@@ -76,9 +72,7 @@ def test_send_invite_user_default_wording():
 
 def test_send_invite_user_group_wording():
     """Group-flow invite names the group in the headline + body."""
-    with patch(
-        "ddpui.core.notifications.triggers.user.send_html_message"
-    ) as mock_send_html:
+    with patch("ddpui.core.notifications.triggers.user.send_html_message") as mock_send_html:
         send_invite_user(
             "to_email",
             "inviter@x.org",
@@ -98,9 +92,7 @@ def test_send_added_to_org_default_wording():
     points at FRONTEND_URL."""
     with patch(
         "ddpui.core.notifications.triggers.user.send_html_message"
-    ) as mock_send_html, patch.dict(
-        os.environ, {"FRONTEND_URL": "https://test-frontend.com"}
-    ):
+    ) as mock_send_html, patch.dict(os.environ, {"FRONTEND_URL": "https://test-frontend.com"}):
         send_added_to_org("to_email", "adder@x.org", "AcmeOrg")
 
     _, subject, plain, html_body = mock_send_html.call_args[0]
@@ -115,9 +107,7 @@ def test_send_added_to_org_group_wording():
     """Existing user added via group create/edit — names the group + inherit-access copy."""
     with patch(
         "ddpui.core.notifications.triggers.user.send_html_message"
-    ) as mock_send_html, patch.dict(
-        os.environ, {"FRONTEND_URL": "https://test-frontend.com"}
-    ):
+    ) as mock_send_html, patch.dict(os.environ, {"FRONTEND_URL": "https://test-frontend.com"}):
         send_added_to_org("to_email", "adder@x.org", "AcmeOrg", group_name="Funders")
 
     _, subject, plain, html_body = mock_send_html.call_args[0]

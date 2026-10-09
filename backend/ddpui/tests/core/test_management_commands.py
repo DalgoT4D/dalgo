@@ -107,9 +107,7 @@ class TestCreateOrgAndUserCommand:
     def test_invalid_role_fails(self, seed_db):
         """Test command fails with invalid role"""
         with pytest.raises(SystemExit):
-            call_command(
-                "createorganduser", "Test Org", "test@example.com", role="invalid-role"
-            )
+            call_command("createorganduser", "Test Org", "test@example.com", role="invalid-role")
 
     @patch("ddpui.core.orgfunctions.create_organization")
     def test_no_role_parameter_error_regression(self, mock_create_org, seed_db):

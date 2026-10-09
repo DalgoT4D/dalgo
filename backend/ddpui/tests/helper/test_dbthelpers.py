@@ -71,9 +71,7 @@ def test_create_or_update_dbt_profile_secret_blk_reuses_row(mock_upsert: Mock):
 
     mock_upsert.return_value = {"block_id": "sec-id-2", "block_name": "dbt-profile-org"}
 
-    create_or_update_dbt_profile_secret_blk(
-        org, warehouse, {"username": "u", "password": "pw2"}
-    )
+    create_or_update_dbt_profile_secret_blk(org, warehouse, {"username": "u", "password": "pw2"})
 
     # Still only one row for this org (same name → update_or_create reused it)
     assert OrgPrefectBlockv1.objects.filter(org=org, block_type=SECRET).count() == 1

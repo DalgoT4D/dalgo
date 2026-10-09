@@ -22,9 +22,7 @@ def make_orguser(email: str, work_domain: str | None) -> OrgUser:
 
 def run(dry_run: bool = False) -> str:
     out = StringIO()
-    call_command(
-        "migrate_work_domains", stdout=out, **({"dry_run": True} if dry_run else {})
-    )
+    call_command("migrate_work_domains", stdout=out, **({"dry_run": True} if dry_run else {}))
     return out.getvalue()
 
 

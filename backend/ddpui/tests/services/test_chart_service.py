@@ -144,9 +144,7 @@ def sample_chart(orguser, org):
 class TestDeleteChartPermissions:
     """Tests for ChartService.delete_chart() permission logic"""
 
-    def test_delete_chart_permission_denied_not_creator(
-        self, orguser, orguser2, org, seed_db
-    ):
+    def test_delete_chart_permission_denied_not_creator(self, orguser, orguser2, org, seed_db):
         """Test that only creator can delete chart"""
         # Create chart by orguser
         chart = Chart.objects.create(
@@ -165,9 +163,7 @@ class TestDeleteChartPermissions:
             ChartService.delete_chart(chart.id, org, orguser2)
 
         assert excinfo.value.error_code == "PERMISSION_DENIED"
-        assert (
-            "Only the owner or an admin can delete this chart." in excinfo.value.message
-        )
+        assert "Only the owner or an admin can delete this chart." in excinfo.value.message
 
         # Cleanup
         chart.delete()
@@ -191,9 +187,7 @@ class TestDeleteChartPermissions:
         assert result == "My Chart"
         assert not Chart.objects.filter(id=chart_id).exists()
 
-    def test_delete_chart_non_admin_creator_can_delete_own(
-        self, orguser2, org, seed_db
-    ):
+    def test_delete_chart_non_admin_creator_can_delete_own(self, orguser2, org, seed_db):
         """A non-admin (analyst) can delete a chart they created — ownership is keyed off
         created_by, so the creator never loses delete rights on their own content."""
         chart = Chart.objects.create(
@@ -213,9 +207,7 @@ class TestDeleteChartPermissions:
         assert result == "Analyst Chart"
         assert not Chart.objects.filter(id=chart_id).exists()
 
-    def test_delete_chart_admin_can_delete_others(
-        self, orguser, orguser2, org, seed_db
-    ):
+    def test_delete_chart_admin_can_delete_others(self, orguser, orguser2, org, seed_db):
         """An admin can delete a chart created by someone else (org-level override)."""
         chart = Chart.objects.create(
             title="Someone Else's Chart",
@@ -245,9 +237,7 @@ class TestBulkDeleteCharts:
 
     def test_bulk_delete_all_missing(self, orguser, seed_db):
         """Test bulk delete when all charts are missing"""
-        result = ChartService.bulk_delete_charts(
-            [99997, 99998, 99999], orguser.org, orguser
-        )
+        result = ChartService.bulk_delete_charts([99997, 99998, 99999], orguser.org, orguser)
 
         assert result["deleted_count"] == 0
         assert result["requested_count"] == 3
@@ -314,9 +304,7 @@ class TestBulkDeleteCharts:
             org=org,
         )
 
-        result = ChartService.bulk_delete_charts(
-            [own_chart.id, others_chart.id], org, orguser2
-        )
+        result = ChartService.bulk_delete_charts([own_chart.id, others_chart.id], org, orguser2)
 
         assert result["deleted_count"] == 1
         assert result["forbidden_ids"] == [others_chart.id]
@@ -326,9 +314,7 @@ class TestBulkDeleteCharts:
         # Cleanup
         others_chart.delete()
 
-    def test_bulk_delete_admin_can_delete_others_charts(
-        self, orguser, orguser2, org, seed_db
-    ):
+    def test_bulk_delete_admin_can_delete_others_charts(self, orguser, orguser2, org, seed_db):
         """An admin can bulk-delete charts created by other users (effective owner)."""
         chart = Chart.objects.create(
             title="Analyst Chart",

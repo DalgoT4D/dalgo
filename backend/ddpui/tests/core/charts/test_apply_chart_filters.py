@@ -23,43 +23,34 @@ def get_where_sql(filters):
     qb = AggQueryBuilder()
     apply_chart_filters(qb, filters)
     return [
-        str(clause.compile(compile_kwargs={"literal_binds": True}))
-        for clause in qb.where_clauses
+        str(clause.compile(compile_kwargs={"literal_binds": True})) for clause in qb.where_clauses
     ]
 
 
 class TestApplyChartFilters:
     def test_equals_timestamp_generates_day_range(self):
         """timestamp equals must match full day using >= start AND < next day"""
-        sql = get_where_sql(
-            [make_filter("created_at", "equals", "2026-06-15", "timestamp")]
-        )
+        sql = get_where_sql([make_filter("created_at", "equals", "2026-06-15", "timestamp")])
         assert len(sql) == 1
         assert "2026-06-15" in sql[0]
         assert "2026-06-16" in sql[0]
 
     def test_not_equals_timestamp_excludes_full_day(self):
         """timestamp not_equals must exclude entire day using OR range"""
-        sql = get_where_sql(
-            [make_filter("created_at", "not_equals", "2026-06-15", "timestamp")]
-        )
+        sql = get_where_sql([make_filter("created_at", "not_equals", "2026-06-15", "timestamp")])
         assert len(sql) == 1
         assert "2026-06-15" in sql[0]
         assert "2026-06-16" in sql[0]
 
     def test_greater_than_timestamp_starts_from_next_day(self):
         """timestamp greater_than must start from next day to exclude the selected day"""
-        sql = get_where_sql(
-            [make_filter("created_at", "greater_than", "2026-06-15", "timestamp")]
-        )
+        sql = get_where_sql([make_filter("created_at", "greater_than", "2026-06-15", "timestamp")])
         assert len(sql) == 1
         assert "2026-06-16" in sql[0]
 
     def test_less_than_timestamp_no_shift_needed(self):
         """timestamp less_than works correctly — midnight is already the right boundary"""
-        sql = get_where_sql(
-            [make_filter("created_at", "less_than", "2026-06-15", "timestamp")]
-        )
+        sql = get_where_sql([make_filter("created_at", "less_than", "2026-06-15", "timestamp")])
         assert len(sql) == 1
         assert "2026-06-15" in sql[0]
         assert "2026-06-16" not in sql[0]
@@ -110,9 +101,7 @@ class TestApplyChartFilters:
     def test_timestamptz_also_uses_range(self):
         """timestamptz and datetime columns also use day-range logic"""
         for dtype in ["timestamptz", "datetime", "timestamp with time zone"]:
-            sql = get_where_sql(
-                [make_filter("created_at", "equals", "2026-06-15", dtype)]
-            )
+            sql = get_where_sql([make_filter("created_at", "equals", "2026-06-15", dtype)])
             assert len(sql) == 1
             assert "2026-06-16" in sql[0], f"Failed for data_type={dtype}"
 

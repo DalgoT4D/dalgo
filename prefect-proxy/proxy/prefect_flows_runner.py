@@ -120,12 +120,8 @@ def _build_postgres_cast_sql(schema: str, table: str, column_casts: dict) -> str
             raise ValueError(f"Unsupported cast type for Postgres: {cast_type!r}")
         sql_type = POSTGRES_CAST_TYPE_MAP[cast_type]
         col_q = _pg_quote(col)
-        clauses.append(
-            f"ALTER COLUMN {col_q} TYPE {sql_type} USING {col_q}::{sql_type}"
-        )
-    return f"ALTER TABLE {_pg_quote(schema)}.{_pg_quote(table)}\n  " + ",\n  ".join(
-        clauses
-    )
+        clauses.append(f"ALTER COLUMN {col_q} TYPE {sql_type} USING {col_q}::{sql_type}")
+    return f"ALTER TABLE {_pg_quote(schema)}.{_pg_quote(table)}\n  " + ",\n  ".join(clauses)
 
 
 def _build_bigquery_cast_sql(
@@ -144,9 +140,7 @@ def _build_bigquery_cast_sql(
     for col, cast_type in column_casts.items():
         # column_casts already carries Airbyte-normalized names (backend does this)
         col_q = _bq_quote(col)
-        replace_cols.append(
-            f"CAST({col_q} AS {BIGQUERY_CAST_TYPE_MAP[cast_type]}) AS {col_q}"
-        )
+        replace_cols.append(f"CAST({col_q} AS {BIGQUERY_CAST_TYPE_MAP[cast_type]}) AS {col_q}")
 
     parts = [f"CREATE OR REPLACE TABLE {full_table}"]
 
@@ -155,9 +149,7 @@ def _build_bigquery_cast_sql(
     if partitioning and partitioning.field:
         expr_tmpl = _BQ_PARTITION_EXPR.get(partitioning.type_)
         if expr_tmpl:
-            parts.append(
-                f"PARTITION BY {expr_tmpl.format(field=_bq_quote(partitioning.field))}"
-            )
+            parts.append(f"PARTITION BY {expr_tmpl.format(field=_bq_quote(partitioning.field))}")
 
     # Cluster BY — Airbyte always clusters on `_airbyte_extracted_at` first, then any PKs.
     cluster_fields = getattr(table_meta, "clustering_fields", None) or []
@@ -190,9 +182,7 @@ async def _run_post_sync_ops(env: dict, ops: list) -> None:
 
     block_name = env.get("dbt-profile-secret-block")
     if not block_name:
-        run_logger.error(
-            "post_sync_ops present but no dbt-profile-secret-block in env — skipping"
-        )
+        run_logger.error("post_sync_ops present but no dbt-profile-secret-block in env — skipping")
         return
 
     secret = await Secret.aload(block_name)
@@ -221,9 +211,7 @@ async def _run_post_sync_ops(env: dict, ops: list) -> None:
             with conn.cursor() as cur:
                 for op in cast_ops:
                     target = f"{op['schema']}.{op['table']}"
-                    sql = _build_postgres_cast_sql(
-                        op["schema"], op["table"], op["column_casts"]
-                    )
+                    sql = _build_postgres_cast_sql(op["schema"], op["table"], op["column_casts"])
                     run_logger.info(
                         "postgres cast starting on %s (columns=%s)",
                         target,
@@ -232,12 +220,8 @@ async def _run_post_sync_ops(env: dict, ops: list) -> None:
                     run_logger.info("postgres SQL:\n%s", sql)
                     try:
                         cur.execute(sql)
-                    except (
-                        Exception
-                    ) as sql_err:  # pylint: disable=broad-exception-caught
-                        run_logger.error(
-                            "postgres cast FAILED on %s: %s", target, sql_err
-                        )
+                    except Exception as sql_err:  # pylint: disable=broad-exception-caught
+                        run_logger.error("postgres cast FAILED on %s: %s", target, sql_err)
                         raise
                     run_logger.info("postgres cast succeeded on %s", target)
         finally:
@@ -276,9 +260,7 @@ async def _run_post_sync_ops(env: dict, ops: list) -> None:
                     run_logger.info("bigquery SQL:\n%s", sql)
                     client.query(sql).result()
                 except Exception as sql_err:  # pylint: disable=broad-exception-caught
-                    run_logger.error(
-                        "bigquery cast FAILED on %s: %s", table_ref, sql_err
-                    )
+                    run_logger.error("bigquery cast FAILED on %s: %s", table_ref, sql_err)
                     raise
                 run_logger.info("bigquery cast succeeded on %s", table_ref)
         finally:
@@ -286,9 +268,7 @@ async def _run_post_sync_ops(env: dict, ops: list) -> None:
             run_logger.info("bigquery client closed")
 
     else:
-        run_logger.error(
-            "_run_post_sync_ops: unsupported wtype=%s — skipping ops", wtype
-        )
+        run_logger.error("_run_post_sync_ops: unsupported wtype=%s — skipping ops", wtype)
 
 
 @flow(flow_run_name="airbyte-sync-trigger")
@@ -302,9 +282,7 @@ async def run_airbyte_connection_flow_v1(payload: dict):
     # config never have a block, and the flow should still work.
     try:
         connection_block = await AirbyteConnection.aload(connection_id)
-        run_logger.info(
-            "loaded AirbyteConnection block for connection %s", connection_id
-        )
+        run_logger.info("loaded AirbyteConnection block for connection %s", connection_id)
     except ValueError:
         run_logger.info(
             "no AirbyteConnection block found for connection %s — building inline (no post-sync ops)",
@@ -348,13 +326,11 @@ def run_airbyte_conn_clear(payload: dict):
             timeout=payload["timeout"] or 15,
         )
         if "streams" in payload and payload["streams"]:
-            result = clear_connection_streams.with_options(
-                flow_run_name="airbyte-clear-streams"
-            )(connection_block, payload["streams"])
-        else:
-            result = clear_connection.with_options(flow_run_name="airbyte-clear")(
-                connection_block
+            result = clear_connection_streams.with_options(flow_run_name="airbyte-clear-streams")(
+                connection_block, payload["streams"]
             )
+        else:
+            result = clear_connection.with_options(flow_run_name="airbyte-clear")(connection_block)
         logger.info("airbyte connection clear result=")
         logger.info(result)
         return result
@@ -373,9 +349,9 @@ async def run_refresh_schema_flow(payload: dict, catalog_diff: dict):
             connection_id=payload["connection_id"],
             timeout=max(payload.get("timeout", 0), 100),
         )
-        await update_connection_schema.with_options(
-            flow_run_name="airbyte-update-schema"
-        )(connection_block, catalog_diff=catalog_diff)
+        await update_connection_schema.with_options(flow_run_name="airbyte-update-schema")(
+            connection_block, catalog_diff=catalog_diff
+        )
         return True
     except Exception as error:  # pylint: disable=broad-exception-caught
         logger.error(str(error))
@@ -400,9 +376,7 @@ def _read_profile_name(project_dir: str) -> str:
         return yaml.safe_load(f)["profile"]
 
 
-def _build_output(
-    wtype: str, schema: str, creds: dict, extras: dict, threads: int
-) -> dict:
+def _build_output(wtype: str, schema: str, creds: dict, extras: dict, threads: int) -> dict:
     """Inner `outputs.<target>` dict for postgres or bigquery."""
     if wtype == "postgres":
         # airbyte spec calls it "username"; dbt-postgres wants "user"
@@ -467,9 +441,7 @@ def build_profile_dict(
 
 
 @flow(name="dbtjob_v2_runner", flow_run_name="dbtjob-{task_slug}")
-def dbtjob_v2_runner(
-    task_config: dict, task_slug: str
-):  # pylint: disable=unused-argument
+def dbtjob_v2_runner(task_config: dict, task_slug: str):  # pylint: disable=unused-argument
     """Run dbt commands via ShellOperation. Reads the dbt-profile Secret block
     at flow-run start, writes a resolved profiles.yml to the worker's filesystem,
     then runs each dbt command as a subprocess.
@@ -593,9 +565,7 @@ def _extract_elementary_profile_from_macro_output(lines: list[str]) -> dict:
     return yaml.safe_load(buffer)
 
 
-def _prepare_elementary_profile(
-    working_dir: str, dbt_profile_secret_block_name: str
-) -> None:
+def _prepare_elementary_profile(working_dir: str, dbt_profile_secret_block_name: str) -> None:
     """Generate <working_dir>/elementary_profiles/profiles.yml at flow-run time.
 
     Self-contained — does NOT assume any prior task has written profiles.yml
@@ -660,9 +630,9 @@ def _prepare_elementary_profile(
     # from dbt's graph for any other target, causing the macro to return
     # schema: null or raise an error. Running as 'prod' keeps elementary
     # enabled without executing any models.
-    profile_dict[dbt_profile_name]["outputs"]["prod"] = profile_dict[dbt_profile_name][
-        "outputs"
-    ][DBT_TARGET].copy()
+    profile_dict[dbt_profile_name]["outputs"]["prod"] = profile_dict[dbt_profile_name]["outputs"][
+        DBT_TARGET
+    ].copy()
     (profiles_dir / "profiles.yml").write_text(yaml.safe_dump(profile_dict))
     logger.info(f"wrote {profiles_dir / 'profiles.yml'}")
 
@@ -701,13 +671,9 @@ def _prepare_elementary_profile(
 
     # BQ emits the schema under `dataset` — normalize to `schema`.
     if elementary_profile["elementary"]["outputs"][output_key]["type"] == "bigquery":
-        elementary_schema = elementary_profile["elementary"]["outputs"][output_key][
-            "dataset"
-        ]
+        elementary_schema = elementary_profile["elementary"]["outputs"][output_key]["dataset"]
     else:
-        elementary_schema = elementary_profile["elementary"]["outputs"][output_key][
-            "schema"
-        ]
+        elementary_schema = elementary_profile["elementary"]["outputs"][output_key]["schema"]
 
     if elementary_schema is None:
         raise RuntimeError(
@@ -731,9 +697,7 @@ def _prepare_elementary_profile(
     # 8. Write.
     elementary_profiles_dir = project_dir / "elementary_profiles"
     elementary_profiles_dir.mkdir(exist_ok=True)
-    (elementary_profiles_dir / "profiles.yml").write_text(
-        yaml.safe_dump(elementary_profile)
-    )
+    (elementary_profiles_dir / "profiles.yml").write_text(yaml.safe_dump(elementary_profile))
     logger.info(f"wrote {elementary_profiles_dir / 'profiles.yml'}")
 
 
@@ -806,11 +770,7 @@ def shellopjob(task_config: dict, task_slug: str):  # pylint: disable=unused-arg
     shell_op = ShellOperation(
         commands=task_config["commands"],
         working_dir=task_config["working_dir"],
-        shell=(
-            task_config["env"]["shell"]
-            if "shell" in task_config["env"]
-            else "/bin/bash"
-        ),
+        shell=(task_config["env"]["shell"] if "shell" in task_config["env"] else "/bin/bash"),
         env=job_env,
     )
     return shell_op.run()
@@ -831,10 +791,7 @@ def shellopjob(task_config: dict, task_slug: str):  # pylint: disable=unused-arg
 
 def _is_airbyte_sync_task(task_config: dict) -> bool:
     """Check if a task is an airbyte sync task"""
-    return (
-        task_config["type"] == AIRBYTECONNECTION
-        and task_config["slug"] == "airbyte-sync"
-    )
+    return task_config["type"] == AIRBYTECONNECTION and task_config["slug"] == "airbyte-sync"
 
 
 def _run_task_runner(task_config: dict):
@@ -862,9 +819,7 @@ def _run_task_runner(task_config: dict):
                 )
             )
         else:
-            raise ValueError(
-                f"Unsupported AIRBYTECONNECTION slug: {task_config['slug']}"
-            )
+            raise ValueError(f"Unsupported AIRBYTECONNECTION slug: {task_config['slug']}")
 
     else:
         raise ValueError(f"Unknown task type: {task_config['type']}")
@@ -901,8 +856,7 @@ def _run_tasks_with_sync_tolerance(tasks: list):
 
     if sync_errors:
         raise RuntimeError(
-            f"{len(sync_errors)} airbyte sync(s) failed: "
-            + "; ".join(str(e) for e in sync_errors)
+            f"{len(sync_errors)} airbyte sync(s) failed: " + "; ".join(str(e) for e in sync_errors)
         )
 
     try:

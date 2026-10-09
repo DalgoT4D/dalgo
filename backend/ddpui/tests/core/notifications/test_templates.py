@@ -196,9 +196,7 @@ def test_notification_email_escapes_subject_and_message():
     _, html_ = render_notification_email("<script>", "Hi <b>you</b>")
     assert (
         "<script>"
-        not in html_.replace(
-            "<script>", ""
-        )  # sanity: after escape the raw sequence is gone
+        not in html_.replace("<script>", "")  # sanity: after escape the raw sequence is gone
         or "&lt;script&gt;" in html_
     )
     assert "<b>you</b>" not in html_

@@ -57,12 +57,8 @@ def hermetic_router(monkeypatch):
 
 @pytest.fixture
 def orguser(seed_db):
-    user = User.objects.create(
-        username="cwdrunner", email="cwdrunner@test.com", password="x"
-    )
-    org = Org.objects.create(
-        name="Runner Org", slug="runner-org", airbyte_workspace_id="w"
-    )
+    user = User.objects.create(username="cwdrunner", email="cwdrunner@test.com", password="x")
+    org = Org.objects.create(name="Runner Org", slug="runner-org", airbyte_workspace_id="w")
     ou = OrgUser.objects.create(
         user=user,
         org=org,
@@ -128,24 +124,16 @@ def test_run_turn_streams_events_and_writes_audit(orguser, session):
             AIMessage(content="You ran 1,284 surveys."),
         ]
     )
-    agent = build_agent(
-        checkpointer=InMemorySaver(), model=model, human_in_the_loop=False
-    )
+    agent = build_agent(checkpointer=InMemorySaver(), model=model, human_in_the_loop=False)
 
-    events = collect_events(
-        agent, session, orguser, "how many surveys?", make_context(warehouse)
-    )
+    events = collect_events(agent, session, orguser, "how many surveys?", make_context(warehouse))
 
     types = [e["type"] for e in events]
     # one tool round-trip then the final message
     assert types.count("tool_start") == 1
     assert types.count("tool_end") == 1
     assert types[-1] == "message_complete"
-    assert (
-        types.index("tool_start")
-        < types.index("tool_end")
-        < types.index("message_complete")
-    )
+    assert types.index("tool_start") < types.index("tool_end") < types.index("message_complete")
 
     tool_start = events[types.index("tool_start")]
     assert tool_start["tool"] == "execute_sql"
@@ -195,9 +183,7 @@ def test_small_talk_short_circuits_the_agent(orguser, session, monkeypatch):
     # the exchange is recorded in the thread so follow-ups keep context
     import asyncio
 
-    state = asyncio.run(
-        agent.aget_state({"configurable": {"thread_id": str(session.thread_id)}})
-    )
+    state = asyncio.run(agent.aget_state({"configurable": {"thread_id": str(session.thread_id)}}))
     contents = [m.content for m in state.values["messages"]]
     assert "thanks!" in contents
     assert any("ask me anything" in str(c).lower() for c in contents)
@@ -208,9 +194,7 @@ def test_data_question_records_intent_on_audit(orguser, session, monkeypatch):
     from ddpui.core.ai.llm_calls.router import RouteResult
 
     async def fake_route(question, model=None, history=None):
-        return RouteResult(
-            intent="data_question", complexity="complex", entities=["surveys"]
-        )
+        return RouteResult(intent="data_question", complexity="complex", entities=["surveys"])
 
     monkeypatch.setattr(runner_module, "route_question", fake_route)
 
@@ -251,12 +235,8 @@ def test_validation_event_follows_message_complete(orguser, session, monkeypatch
             AIMessage(content="1,284 surveys."),
         ]
     )
-    agent = build_agent(
-        checkpointer=InMemorySaver(), model=model, human_in_the_loop=False
-    )
-    events = collect_events(
-        agent, session, orguser, "how many farmers?", make_context(warehouse)
-    )
+    agent = build_agent(checkpointer=InMemorySaver(), model=model, human_in_the_loop=False)
+    events = collect_events(agent, session, orguser, "how many farmers?", make_context(warehouse))
 
     types = [e["type"] for e in events]
     assert types.index("message_complete") < types.index("validation")
@@ -292,9 +272,7 @@ def test_clarification_never_short_circuits_a_follow_up(orguser, session, monkey
 
     agent = build_agent(
         checkpointer=InMemorySaver(),
-        model=ScriptedChatModel(
-            script=[AIMessage(content="Here is the chart answer.")]
-        ),
+        model=ScriptedChatModel(script=[AIMessage(content="Here is the chart answer.")]),
     )
     config = {"configurable": {"thread_id": str(session.thread_id)}}
     # a prior exchange exists in the thread
@@ -321,16 +299,12 @@ def test_clarification_never_short_circuits_a_follow_up(orguser, session, monkey
     assert any("top donors" in line.lower() for line in seen_history["history"])
 
 
-def test_clarification_still_short_circuits_the_first_turn(
-    orguser, session, monkeypatch
-):
+def test_clarification_still_short_circuits_the_first_turn(orguser, session, monkeypatch):
     from ddpui.core.ai.chat import turn_runner as runner_module
     from ddpui.core.ai.llm_calls.router import RouteResult
 
     async def fake_route(question, model=None, history=None):
-        return RouteResult(
-            intent="needs_clarification", clarification="Compare what to what?"
-        )
+        return RouteResult(intent="needs_clarification", clarification="Compare what to what?")
 
     monkeypatch.setattr(runner_module, "route_question", fake_route)
 
@@ -344,9 +318,7 @@ def test_clarification_still_short_circuits_the_first_turn(
     assert "Compare what to what?" in events[0]["message"]
 
 
-def test_run_turn_attaches_created_charts_via_guide_agent(
-    orguser, session, monkeypatch
-):
+def test_run_turn_attaches_created_charts_via_guide_agent(orguser, session, monkeypatch):
     """Creation lives on the guide agent now: a platform_help route runs the
     guide subgraph, and its create_chart call surfaces the chart chip on
     message_complete — same wire shape as before the split."""
@@ -397,9 +369,7 @@ def test_run_turn_attaches_created_charts_via_guide_agent(
     sql_agent = build_agent(
         checkpointer=saver, model=ScriptedChatModel(script=[]), human_in_the_loop=False
     )
-    guide_agent = build_guide_agent(
-        checkpointer=saver, model=model, human_in_the_loop=False
-    )
+    guide_agent = build_guide_agent(checkpointer=saver, model=model, human_in_the_loop=False)
 
     events = collect_events(
         sql_agent,
@@ -445,13 +415,9 @@ def test_run_turn_extracts_text_from_content_blocks(orguser, session):
             ),
         ]
     )
-    agent = build_agent(
-        checkpointer=InMemorySaver(), model=model, human_in_the_loop=False
-    )
+    agent = build_agent(checkpointer=InMemorySaver(), model=model, human_in_the_loop=False)
 
-    events = collect_events(
-        agent, session, orguser, "how many surveys?", make_context()
-    )
+    events = collect_events(agent, session, orguser, "how many surveys?", make_context())
 
     complete = events[-1]
     assert complete["type"] == "message_complete"

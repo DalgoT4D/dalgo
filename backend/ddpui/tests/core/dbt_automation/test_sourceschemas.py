@@ -60,9 +60,5 @@ def test_get_source(sources_yaml, tmpdir):
     source = get_source(sources_file, schema)
     assert source["name"] == sources_yaml["sources"][0]["name"]
     assert source["schema"] == sources_yaml["sources"][0]["schema"]
-    assert (
-        source["tables"][0]["name"] == sources_yaml["sources"][0]["tables"][0]["name"]
-    )
-    assert (
-        source["tables"][1]["name"] == sources_yaml["sources"][0]["tables"][1]["name"]
-    )
+    assert source["tables"][0]["name"] == sources_yaml["sources"][0]["tables"][0]["name"]
+    assert source["tables"][1]["name"] == sources_yaml["sources"][0]["tables"][1]["name"]

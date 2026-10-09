@@ -6,25 +6,21 @@ from ddpui.utils.warehouse.old_client.bigquery import BigQueryClient
 
 @pytest.fixture
 def mock_bigquery_client():
-    with patch(
-        "ddpui.utils.warehouse.old_client.bigquery.bigquery.Client"
-    ) as mock_client:
+    with patch("ddpui.utils.warehouse.old_client.bigquery.bigquery.Client") as mock_client:
         yield mock_client
 
 
 @pytest.fixture
 def mock_open_env():
-    with patch(
-        "builtins.open", mock_open(read_data='{"project_id": "test_project"}')
-    ), patch.dict(os.environ, {"GOOGLE_APPLICATION_CREDENTIALS": "fake_path"}):
+    with patch("builtins.open", mock_open(read_data='{"project_id": "test_project"}')), patch.dict(
+        os.environ, {"GOOGLE_APPLICATION_CREDENTIALS": "fake_path"}
+    ):
         yield
 
 
 @pytest.fixture
 def mock_from_service_account_info():
-    with patch(
-        "google.oauth2.service_account.Credentials.from_service_account_info"
-    ) as mock_creds:
+    with patch("google.oauth2.service_account.Credentials.from_service_account_info") as mock_creds:
         yield mock_creds
 
 
@@ -55,9 +51,7 @@ def test_get_table_data_default(
             
             LIMIT 10 OFFSET 0
             """
-    mock_client_instance.query.assert_called_once_with(
-        expected_sql, location="asia-south1"
-    )
+    mock_client_instance.query.assert_called_once_with(expected_sql, location="asia-south1")
 
 
 def test_get_table_data_with_order(
@@ -72,9 +66,7 @@ def test_get_table_data_with_order(
     mock_client_instance.query.return_value = mock_query_job
 
     bq_client = BigQueryClient()
-    result = bq_client.get_table_data(
-        "test_schema", "test_table", 10, order_by="column1", order=1
-    )
+    result = bq_client.get_table_data("test_schema", "test_table", 10, order_by="column1", order=1)
 
     assert len(result) == 2
     assert result[0]["column1"] == "value1"
@@ -91,9 +83,7 @@ def test_get_table_data_with_order(
             
             LIMIT 10 OFFSET 0
             """
-    mock_client_instance.query.assert_called_once_with(
-        expected_sql, location="asia-south1"
-    )
+    mock_client_instance.query.assert_called_once_with(expected_sql, location="asia-south1")
 
 
 def test_get_table_data_with_pagination(
@@ -123,6 +113,4 @@ def test_get_table_data_with_pagination(
             
             LIMIT 10 OFFSET 10
             """
-    mock_client_instance.query.assert_called_once_with(
-        expected_sql, location="asia-south1"
-    )
+    mock_client_instance.query.assert_called_once_with(expected_sql, location="asia-south1")

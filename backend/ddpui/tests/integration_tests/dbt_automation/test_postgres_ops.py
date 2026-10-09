@@ -48,9 +48,7 @@ class TestPostgresOperations:
             "password": os.environ.get("TEST_PG_DBPASSWORD"),
         },
     )
-    schema = os.environ.get(
-        "TEST_PG_DBSCHEMA_SRC"
-    )  # source schema where the raw data lies
+    schema = os.environ.get("TEST_PG_DBSCHEMA_SRC")  # source schema where the raw data lies
 
     @staticmethod
     def execute_dbt(cmd: str, select_model: str = None):
@@ -58,10 +56,7 @@ class TestPostgresOperations:
             select_cli = ["--select", select_model] if select_model is not None else []
             subprocess.check_call(
                 [
-                    Path(TestPostgresOperations.test_project_dir)
-                    / "venv"
-                    / "bin"
-                    / "dbt",
+                    Path(TestPostgresOperations.test_project_dir) / "venv" / "bin" / "dbt",
                     cmd,
                 ]
                 + select_cli
@@ -126,9 +121,7 @@ class TestPostgresOperations:
         TestPostgresOperations.execute_dbt("run", "_airbyte_raw_Sheet1")
         TestPostgresOperations.execute_dbt("run", "_airbyte_raw_Sheet2")
         logger.info("inside test flatten")
-        logger.info(
-            f"inside project directory : {TestPostgresOperations.test_project_dir}"
-        )
+        logger.info(f"inside project directory : {TestPostgresOperations.test_project_dir}")
         assert "_airbyte_raw_Sheet1" in TestPostgresOperations.wc_client.get_tables(
             "pytest_intermediate"
         )
@@ -162,9 +155,7 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "ngo" in cols
         assert "month" in cols
@@ -198,9 +189,7 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "MONTH" not in cols
 
@@ -232,9 +221,7 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "coalesce" in cols
         col_data = wc_client.get_table_data("pytest_intermediate", output_name, 1)
@@ -297,9 +284,7 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "concat_col" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 1)
@@ -343,9 +328,7 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "measure1" in cols
         assert "measure2" in cols
@@ -386,16 +369,11 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "add_col" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 1)
-        assert (
-            table_data[0]["add_col"]
-            == table_data[0]["measure1"] + table_data[0]["measure2"]
-        )
+        assert table_data[0]["add_col"] == table_data[0]["measure1"] + table_data[0]["measure2"]
 
     def test_arithmetic_sub(self):
         """test arithmetic subtraction"""
@@ -429,16 +407,11 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "sub_col" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 1)
-        assert (
-            table_data[0]["sub_col"]
-            == table_data[0]["measure1"] - table_data[0]["measure2"]
-        )
+        assert table_data[0]["sub_col"] == table_data[0]["measure1"] - table_data[0]["measure2"]
 
     def test_arithmetic_mul(self):
         """test arithmetic multiplication"""
@@ -472,16 +445,11 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "mul_col" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 1)
-        assert (
-            table_data[0]["mul_col"]
-            == table_data[0]["measure1"] * table_data[0]["measure2"]
-        )
+        assert table_data[0]["mul_col"] == table_data[0]["measure1"] * table_data[0]["measure2"]
 
     def test_arithmetic_div(self):
         """test arithmetic division"""
@@ -515,9 +483,7 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "div_col" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 1)
@@ -559,9 +525,7 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "NGO" in cols
         table_data_org = wc_client.get_table_data(
@@ -570,15 +534,11 @@ class TestPostgresOperations:
             10,
         )
         table_data_org.sort(key=lambda x: x["Month"])
-        table_data_regex = wc_client.get_table_data(
-            "pytest_intermediate", output_name, 10
-        )
+        table_data_regex = wc_client.get_table_data("pytest_intermediate", output_name, 10)
         table_data_regex.sort(key=lambda x: x["Month"])
         for regex, org in zip(table_data_regex, table_data_org):
             assert (
-                regex["NGO"] == org["NGO"]
-                if org["NGO"].startswith("C")
-                else (regex["NGO"] is None)
+                regex["NGO"] == org["NGO"] if org["NGO"].startswith("C") else (regex["NGO"] is None)
             )
 
     def test_aggregate(self):
@@ -618,15 +578,11 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "agg1" in cols
         assert "agg2" in cols
-        table_data_agg = wc_client.get_table_data(
-            "pytest_intermediate", output_name, 10
-        )
+        table_data_agg = wc_client.get_table_data("pytest_intermediate", output_name, 10)
         assert len(table_data_agg) == 5
 
     def test_casewhen(self):
@@ -677,9 +633,7 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "spoc_category_renamed" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 10)
@@ -725,13 +679,9 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
-        assert sorted(cols) == sorted(
-            config["pivot_column_values"] + config["groupby_columns"]
-        )
+        assert sorted(cols) == sorted(config["pivot_column_values"] + config["groupby_columns"])
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 10)
         assert len(table_data) == 3
 
@@ -773,14 +723,10 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert len(cols) == 2
-        assert sorted(cols) == sorted(
-            [config["unpivot_field_name"], config["unpivot_value_name"]]
-        )
+        assert sorted(cols) == sorted([config["unpivot_field_name"], config["unpivot_value_name"]])
 
     def test_mergetables(self):
         """test merge tables"""
@@ -832,9 +778,7 @@ class TestPostgresOperations:
             "_airbyte_raw_Sheet2",
             10,
         )
-        table_data_union = wc_client.get_table_data(
-            "pytest_intermediate", output_name, 10
-        )
+        table_data_union = wc_client.get_table_data("pytest_intermediate", output_name, 10)
 
         assert len(table_data1) + len(table_data2) == len(table_data_union)
 
@@ -873,9 +817,7 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "_airbyte_data_NGO" in cols
         assert "_airbyte_data_Month" in cols
@@ -1048,9 +990,7 @@ class TestPostgresOperations:
                             {
                                 "col_name": "ngo",
                                 "output_column_name": "ngo_replaced",
-                                "replace_ops": [
-                                    {"find": "CRC", "replace": "NGO_REPLACED_NAME"}
-                                ],
+                                "replace_ops": [{"find": "CRC", "replace": "NGO_REPLACED_NAME"}],
                             }
                         ],
                     },
@@ -1074,9 +1014,7 @@ class TestPostgresOperations:
         TestPostgresOperations.execute_dbt("run", output_name)
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
         assert "ngo" in cols
         assert "measure1" in cols
@@ -1093,10 +1031,7 @@ class TestPostgresOperations:
         assert type(table_data[0]["measure2"]) == int
         assert "NGO_REPLACED_NAME" in [row["ngo_replaced"] for row in table_data]
 
-        assert (
-            table_data[0]["add_col"]
-            == table_data[0]["measure1"] + table_data[0]["measure2"]
-        )
+        assert table_data[0]["add_col"] == table_data[0]["measure1"] + table_data[0]["measure2"]
 
         initial_raw_data = wc_client.get_table_data(
             "pytest_intermediate", "_airbyte_raw_Sheet1", 10
@@ -1105,9 +1040,7 @@ class TestPostgresOperations:
         assert (
             len(
                 set([row["concat_col"] for row in table_data])
-                - set(
-                    [row["NGO"] + row["Indicator"] + "test" for row in initial_raw_data]
-                )
+                - set([row["NGO"] + row["Indicator"] + "test" for row in initial_raw_data])
             )
             == 0
         )
@@ -1152,9 +1085,7 @@ class TestPostgresOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns(
-                "pytest_intermediate", output_name
-            )
+            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
         ]
 
         assert "NGO" in cols
@@ -1163,9 +1094,7 @@ class TestPostgresOperations:
         ngo_column = [row["ngo_lower"] for row in table_data]
 
         for value in ngo_column:
-            assert (
-                value == value.lower()
-            ), f"Value {value} in 'NGO' column is not lowercase"
+            assert value == value.lower(), f"Value {value} in 'NGO' column is not lowercase"
 
     def test_generic_sql_function(self):
         """test generic raw sql"""

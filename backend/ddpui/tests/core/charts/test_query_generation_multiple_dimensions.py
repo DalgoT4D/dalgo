@@ -35,9 +35,7 @@ class TestQueryGenerationMultipleDimensions:
             schema_name="public",
             table_name="test_table",
             dimensions=["KEY", "region"],
-            metrics=[
-                ChartMetric(aggregation="count", column=None, alias="Total Count")
-            ],
+            metrics=[ChartMetric(aggregation="count", column=None, alias="Total Count")],
         )
 
         mock_warehouse = MagicMock(spec=OrgWarehouse)
@@ -46,9 +44,7 @@ class TestQueryGenerationMultipleDimensions:
         query_builder = charts_service.build_chart_query(payload, mock_warehouse)
 
         # Get the compiled SQL query
-        compiled_query = str(
-            query_builder.build().compile(compile_kwargs={"literal_binds": True})
-        )
+        compiled_query = str(query_builder.build().compile(compile_kwargs={"literal_binds": True}))
         print(f"\n=== TEST: test_query_two_dimensions_one_metric ===")
         print(f"Compiled Query:\n{compiled_query}\n")
 
@@ -60,9 +56,7 @@ class TestQueryGenerationMultipleDimensions:
         assert "count" in compiled_query.lower()
 
         # Verify GROUP BY includes both dimensions
-        assert (
-            "GROUP BY" in compiled_query.upper() or "group by" in compiled_query.lower()
-        )
+        assert "GROUP BY" in compiled_query.upper() or "group by" in compiled_query.lower()
 
         # Count GROUP BY columns - should have at least 2
         group_by_section = (
@@ -92,9 +86,7 @@ class TestQueryGenerationMultipleDimensions:
 
         query_builder = charts_service.build_chart_query(payload, mock_warehouse)
 
-        compiled_query = str(
-            query_builder.build().compile(compile_kwargs={"literal_binds": True})
-        )
+        compiled_query = str(query_builder.build().compile(compile_kwargs={"literal_binds": True}))
         print(f"\n=== TEST: test_query_three_dimensions_two_metrics ===")
         print(f"Compiled Query:\n{compiled_query}\n")
 
@@ -137,9 +129,7 @@ class TestQueryGenerationMultipleDimensions:
 
         query_builder = charts_service.build_chart_query(payload, mock_warehouse)
 
-        compiled_query = str(
-            query_builder.build().compile(compile_kwargs={"literal_binds": True})
-        )
+        compiled_query = str(query_builder.build().compile(compile_kwargs={"literal_binds": True}))
         print(f"\n=== TEST: test_query_four_dimensions_three_metrics ===")
         print(f"Compiled Query:\n{compiled_query}\n")
 
@@ -186,9 +176,7 @@ class TestQueryGenerationMultipleDimensions:
 
         query_builder = charts_service.build_chart_query(payload, mock_warehouse)
 
-        compiled_query = str(
-            query_builder.build().compile(compile_kwargs={"literal_binds": True})
-        )
+        compiled_query = str(query_builder.build().compile(compile_kwargs={"literal_binds": True}))
         print(f"\n=== TEST: test_query_dimensions_only_no_metrics ===")
         print(f"Compiled Query:\n{compiled_query}\n")
 
@@ -199,10 +187,7 @@ class TestQueryGenerationMultipleDimensions:
 
         # Verify no GROUP BY (non-aggregated query)
         # For non-aggregated queries, there should be no GROUP BY
-        assert (
-            "GROUP BY" not in compiled_query.upper()
-            or "group by" not in compiled_query.lower()
-        )
+        assert "GROUP BY" not in compiled_query.upper() or "group by" not in compiled_query.lower()
 
 
 class TestQueryBuilderMultipleDimensions:
@@ -227,17 +212,13 @@ class TestQueryBuilderMultipleDimensions:
         query_builder = AggQueryBuilder()
         query_builder.fetch_from(payload.table_name, payload.schema_name)
 
-        result = charts_service.build_multi_metric_query(
-            payload, query_builder, mock_warehouse
-        )
+        result = charts_service.build_multi_metric_query(payload, query_builder, mock_warehouse)
 
         # Verify query builder was modified
         assert result is not None
 
         # Get compiled query to verify structure
-        compiled_query = str(
-            result.build().compile(compile_kwargs={"literal_binds": True})
-        )
+        compiled_query = str(result.build().compile(compile_kwargs={"literal_binds": True}))
         print(f"\n=== TEST: test_build_multi_metric_query_adds_all_dimensions ===")
         print(f"Compiled Query:\n{compiled_query}\n")
 
@@ -258,9 +239,7 @@ class TestQueryBuilderMultipleDimensions:
             schema_name="public",
             table_name="test_table",
             dimensions=["KEY", "region"],
-            metrics=[
-                ChartMetric(aggregation="count", column=None, alias="Total Count")
-            ],
+            metrics=[ChartMetric(aggregation="count", column=None, alias="Total Count")],
         )
 
         mock_warehouse = MagicMock(spec=OrgWarehouse)
@@ -269,9 +248,7 @@ class TestQueryBuilderMultipleDimensions:
         query_builder = charts_service.build_chart_query(payload, mock_warehouse)
 
         # Verify query builder has columns with labels
-        compiled_query = str(
-            query_builder.build().compile(compile_kwargs={"literal_binds": True})
-        )
+        compiled_query = str(query_builder.build().compile(compile_kwargs={"literal_binds": True}))
         print(f"\n=== TEST: test_query_builder_labels_dimensions_correctly ===")
         print(f"Compiled Query:\n{compiled_query}\n")
 
@@ -299,9 +276,7 @@ class TestQueryGenerationEdgeCases:
 
         query_builder = charts_service.build_chart_query(payload, mock_warehouse)
 
-        compiled_query = str(
-            query_builder.build().compile(compile_kwargs={"literal_binds": True})
-        )
+        compiled_query = str(query_builder.build().compile(compile_kwargs={"literal_binds": True}))
         print(f"\n=== TEST: test_query_filters_empty_dimensions ===")
         print(f"Compiled Query:\n{compiled_query}\n")
 
@@ -328,9 +303,7 @@ class TestQueryGenerationEdgeCases:
 
         query_builder = charts_service.build_chart_query(payload, mock_warehouse)
 
-        compiled_query = str(
-            query_builder.build().compile(compile_kwargs={"literal_binds": True})
-        )
+        compiled_query = str(query_builder.build().compile(compile_kwargs={"literal_binds": True}))
         print(f"\n=== TEST: test_query_with_time_grain_and_multiple_dimensions ===")
         print(f"Compiled Query:\n{compiled_query}\n")
 
@@ -355,10 +328,7 @@ class TestQueryGenerationEdgeCases:
             if "GROUP BY" in compiled_query.upper()
             else ""
         )
-        assert (
-            "date_column" in group_by_section.lower()
-            or "DATE_COLUMN" in group_by_section
-        )
+        assert "date_column" in group_by_section.lower() or "DATE_COLUMN" in group_by_section
         assert "region" in group_by_section.lower() or "REGION" in group_by_section
 
 
@@ -383,9 +353,7 @@ class TestQueryColumnOrdering:
 
         query_builder = charts_service.build_chart_query(payload, mock_warehouse)
 
-        compiled_query = str(
-            query_builder.build().compile(compile_kwargs={"literal_binds": True})
-        )
+        compiled_query = str(query_builder.build().compile(compile_kwargs={"literal_binds": True}))
         print(f"\n=== TEST: test_dimensions_before_metrics_in_select ===")
         print(f"Compiled Query:\n{compiled_query}\n")
 
@@ -406,9 +374,7 @@ class TestQueryColumnOrdering:
         count_index = select_section.lower().find("count")
 
         if key_index != -1 and count_index != -1:
-            assert (
-                key_index < count_index
-            ), "Dimensions should appear before metrics in SELECT"
+            assert key_index < count_index, "Dimensions should appear before metrics in SELECT"
 
 
 @pytest.fixture
@@ -460,9 +426,7 @@ class TestMetricKindsPerChartType:
         """Build the metrics list for a kind. Saved kinds create a Metric row and resolve
         it through _resolve_saved_metrics, exactly like the chart-render path does."""
         if kind == "simple":
-            return [
-                ChartMetric(column="population", aggregation="sum", alias="Total Pop")
-            ]
+            return [ChartMetric(column="population", aggregation="sum", alias="Total Pop")]
         if kind == "calculated":
             return [
                 ChartMetric(
@@ -482,9 +446,7 @@ class TestMetricKindsPerChartType:
                 org=org,
                 created_by=orguser,
             )
-            return charts_service._resolve_saved_metrics(
-                [{"saved_metric_id": metric.id}]
-            )
+            return charts_service._resolve_saved_metrics([{"saved_metric_id": metric.id}])
         if kind == "saved_calculated":
             metric = Metric.objects.create(
                 name="saved calculated",
@@ -494,9 +456,7 @@ class TestMetricKindsPerChartType:
                 org=org,
                 created_by=orguser,
             )
-            return charts_service._resolve_saved_metrics(
-                [{"saved_metric_id": metric.id}]
-            )
+            return charts_service._resolve_saved_metrics([{"saved_metric_id": metric.id}])
         raise ValueError(f"unknown metric kind {kind}")
 
     def _build(self, chart_type, metrics, warehouse):
@@ -526,9 +486,7 @@ class TestMetricKindsPerChartType:
 
     @pytest.mark.parametrize("metric_kind", METRIC_KINDS)
     @pytest.mark.parametrize("chart_type", CHART_TYPES)
-    def test_metric_kind_per_chart_type(
-        self, chart_type, metric_kind, metric_org, metric_orguser
-    ):
+    def test_metric_kind_per_chart_type(self, chart_type, metric_kind, metric_org, metric_orguser):
         metrics = self._metrics(metric_kind, metric_org, metric_orguser)
 
         query_builder = self._build(chart_type, metrics, self._warehouse())

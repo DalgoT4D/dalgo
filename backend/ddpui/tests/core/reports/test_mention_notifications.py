@@ -170,9 +170,7 @@ class TestMentionNotifications:
         assert recipient.read_status is False
 
     @patch("ddpui.core.notifications.triggers.mention.send_html_message")
-    def test_self_mention_creates_notification(
-        self, mock_send, snapshot, author_orguser, org
-    ):
+    def test_self_mention_creates_notification(self, mock_send, snapshot, author_orguser, org):
         """Author mentioning themselves still creates a notification."""
         comment = Comment.objects.create(
             target_type=CommentTargetType.SUMMARY,
@@ -182,9 +180,7 @@ class TestMentionNotifications:
             org=org,
         )
 
-        MentionService.process_mentions(
-            comment, org, author_orguser, [author_orguser.user.email]
-        )
+        MentionService.process_mentions(comment, org, author_orguser, [author_orguser.user.email])
 
         assert Notification.objects.count() == 1
         recipient = NotificationRecipient.objects.first()
@@ -220,9 +216,7 @@ class TestMentionNotifications:
 
         # Both mentioned users should get notifications
         assert Notification.objects.count() == 2
-        recipients = set(
-            NotificationRecipient.objects.values_list("recipient_id", flat=True)
-        )
+        recipients = set(NotificationRecipient.objects.values_list("recipient_id", flat=True))
         assert mentioned_orguser.id in recipients
         assert second_mentioned_orguser.id in recipients
 
@@ -280,9 +274,7 @@ class TestMentionNotifications:
         assert Notification.objects.count() == 2
         assert NotificationRecipient.objects.count() == 2
 
-        recipients = set(
-            NotificationRecipient.objects.values_list("recipient_id", flat=True)
-        )
+        recipients = set(NotificationRecipient.objects.values_list("recipient_id", flat=True))
         assert recipients == {mentioned_orguser.id, second_mentioned_orguser.id}
 
         comment.delete()
@@ -583,9 +575,7 @@ class TestResolveChartName:
 class TestNotifyMentionedTrigger:
     """The trigger extracted from MentionService — dual-write in-app + email."""
 
-    def test_creates_notification_and_recipient(
-        self, author_orguser, mentioned_orguser
-    ):
+    def test_creates_notification_and_recipient(self, author_orguser, mentioned_orguser):
         """In-app row is created for the mentioned user regardless of email preference."""
         from ddpui.core.notifications.triggers.mention import notify_mentioned
 
@@ -658,9 +648,7 @@ class TestNotifyMentionedTrigger:
         "ddpui.core.notifications.triggers.mention.send_html_message",
         side_effect=Exception("SES down"),
     )
-    def test_email_failure_logged_not_raised(
-        self, mock_send, author_orguser, mentioned_orguser
-    ):
+    def test_email_failure_logged_not_raised(self, mock_send, author_orguser, mentioned_orguser):
         """Email failure is caught and logged, never raised."""
         from ddpui.core.notifications.triggers.mention import notify_mentioned
 

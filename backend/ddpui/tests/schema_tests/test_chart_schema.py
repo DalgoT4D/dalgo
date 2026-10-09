@@ -261,9 +261,7 @@ class TestPivotTableChartCreate:
         base = {
             "row_dimensions": ["ngo_name"],
             "column_dimensions": ["date"],
-            "metrics": [
-                {"column": None, "aggregation": "count", "alias": "Total Count"}
-            ],
+            "metrics": [{"column": None, "aggregation": "count", "alias": "Total Count"}],
         }
         base.update(overrides)
         return base
@@ -718,9 +716,7 @@ class TestChartFilterSortPagination:
     def test_empty_filters_sort_pagination_accepted(self):
         """The UI commonly sends `filters: [], sort: [], pagination: {...}` even
         when the user hasn't configured any. Must not error."""
-        chart = self._build(
-            filters=[], sort=[], pagination={"enabled": False, "page_size": 50}
-        )
+        chart = self._build(filters=[], sort=[], pagination={"enabled": False, "page_size": 50})
         dumped = chart.extra_config.model_dump()
         assert dumped["filters"] == []
         assert dumped["sort"] == []
@@ -793,9 +789,7 @@ class TestRealWorldTableChartPayload:
                 "year",
                 "month",
             ],
-            "metrics": [
-                {"alias": "Total Count", "column": None, "aggregation": "count"}
-            ],
+            "metrics": [{"alias": "Total Count", "column": None, "aggregation": "count"}],
             "dimensions": [
                 {"column": "granularity", "enable_drill_down": False},
                 {"column": "date_day", "enable_drill_down": False},
@@ -848,10 +842,7 @@ class TestRealWorldTableChartPayload:
             "column": "granularity",
             "enable_drill_down": False,
         }
-        assert (
-            persisted["dimension_columns"]
-            == self.PAYLOAD["extra_config"]["dimension_columns"]
-        )
+        assert persisted["dimension_columns"] == self.PAYLOAD["extra_config"]["dimension_columns"]
         assert persisted["pagination"] == {"enabled": False, "page_size": 50}
         assert persisted["aggregate_function"] == "count"
         assert persisted["dimension_column"] == "granularity"
@@ -1102,39 +1093,27 @@ class TestRealUIPayloadRoundTrip:
 
 
 def _bar(**cust):
-    return dict(
-        BAR_BASE, extra_config={**BAR_BASE["extra_config"], "customizations": cust}
-    )
+    return dict(BAR_BASE, extra_config={**BAR_BASE["extra_config"], "customizations": cust})
 
 
 def _line(**cust):
-    return dict(
-        LINE_BASE, extra_config={**LINE_BASE["extra_config"], "customizations": cust}
-    )
+    return dict(LINE_BASE, extra_config={**LINE_BASE["extra_config"], "customizations": cust})
 
 
 def _pie(**cust):
-    return dict(
-        PIE_BASE, extra_config={**PIE_BASE["extra_config"], "customizations": cust}
-    )
+    return dict(PIE_BASE, extra_config={**PIE_BASE["extra_config"], "customizations": cust})
 
 
 def _number(**cust):
-    return dict(
-        NUM_BASE, extra_config={**NUM_BASE["extra_config"], "customizations": cust}
-    )
+    return dict(NUM_BASE, extra_config={**NUM_BASE["extra_config"], "customizations": cust})
 
 
 def _map(**cust):
-    return dict(
-        MAP_BASE, extra_config={**MAP_BASE["extra_config"], "customizations": cust}
-    )
+    return dict(MAP_BASE, extra_config={**MAP_BASE["extra_config"], "customizations": cust})
 
 
 def _table(**cust):
-    return dict(
-        TABLE_BASE, extra_config={**TABLE_BASE["extra_config"], "customizations": cust}
-    )
+    return dict(TABLE_BASE, extra_config={**TABLE_BASE["extra_config"], "customizations": cust})
 
 
 # Minimal valid bases — just enough to satisfy required fields per type.
@@ -1264,11 +1243,7 @@ class TestCustomizationEnumRejection:
 
     def test_table_rejects_invalid_nested_dateFormat(self):
         with pytest.raises(ValidationError):
-            ChartCreate(
-                **_table(
-                    dateColumnFormatting={"col": {"dateFormat": "not_a_real_format"}}
-                )
-            )
+            ChartCreate(**_table(dateColumnFormatting={"col": {"dateFormat": "not_a_real_format"}}))
 
 
 # ================================================================================

@@ -139,9 +139,7 @@ def test_get_recipients_all_users_no_user_found():
 
 def test_get_recipients_all_org_users(orguser):
     """test success get all users of an org as recipients"""
-    error, recipients = get_recipients(
-        SentToEnum.ALL_ORG_USERS, "test-org-slug", None, False
-    )
+    error, recipients = get_recipients(SentToEnum.ALL_ORG_USERS, "test-org-slug", None, False)
     assert error is None
     assert len(recipients) > 0
 
@@ -155,9 +153,7 @@ def test_get_recipients_no_org_slug():
 
 def test_get_recipients_single_user(orguser):
     """test success get single user as recipient"""
-    error, recipients = get_recipients(
-        SentToEnum.SINGLE_USER, None, "tempuseremail", False
-    )
+    error, recipients = get_recipients(SentToEnum.SINGLE_USER, None, "tempuseremail", False)
     assert error is None
     assert len(recipients) == 1
 
@@ -171,9 +167,7 @@ def test_get_recipients_single_user_no_email(orguser):
 
 def test_get_recipients_invalid_user_email():
     """test failure get single user as recipient when user email is invalid"""
-    error, recipients = get_recipients(
-        SentToEnum.SINGLE_USER, None, "invalid@example.com", False
-    )
+    error, recipients = get_recipients(SentToEnum.SINGLE_USER, None, "invalid@example.com", False)
     assert error is not None
     assert recipients is None
 
@@ -192,9 +186,7 @@ def test_handle_recipient_email_uses_html_template(orguser):
     UserPreferences.objects.get_or_create(
         orguser=orguser, defaults={"enable_email_notifications": True}
     )
-    UserPreferences.objects.filter(orguser=orguser).update(
-        enable_email_notifications=True
-    )
+    UserPreferences.objects.filter(orguser=orguser).update(enable_email_notifications=True)
 
     notification = Notification.objects.create(
         author="sharer@example.com",
@@ -226,9 +218,7 @@ def test_handle_recipient_skip_email_writes_in_app_row_only(orguser):
     """
     from unittest.mock import patch
 
-    UserPreferences.objects.filter(orguser=orguser).update(
-        enable_email_notifications=True
-    )
+    UserPreferences.objects.filter(orguser=orguser).update(enable_email_notifications=True)
 
     notification = Notification.objects.create(
         author="sharer@example.com",
@@ -255,13 +245,9 @@ def test_create_notification_skip_email_flag_flows_through(orguser):
     """Passing skip_email=True on NotificationDataSchema suppresses the email side."""
     from unittest.mock import patch
 
-    UserPreferences.objects.filter(orguser=orguser).update(
-        enable_email_notifications=True
-    )
+    UserPreferences.objects.filter(orguser=orguser).update(enable_email_notifications=True)
 
-    with patch(
-        "ddpui.core.notifications.notifications_functions.send_html_message"
-    ) as mock_send:
+    with patch("ddpui.core.notifications.notifications_functions.send_html_message") as mock_send:
         error, result = create_notification(
             NotificationDataSchema(
                 author="sender@example.com",
@@ -327,9 +313,7 @@ def test_get_user_notifications(orguser):
 
 
 def test_mark_notification_as_read(orguser, unsent_notification):
-    error, result = mark_notification_as_read_or_unread(
-        orguser.id, unsent_notification.id, True
-    )
+    error, result = mark_notification_as_read_or_unread(orguser.id, unsent_notification.id, True)
     assert error is None
     assert result["success"] is True
 
@@ -406,8 +390,6 @@ def test_mark_all_notifications_as_read_no_unread_notifications(orguser):
 def test_mark_all_notifications_as_read_user_not_exist():
     """test failure mark all notifications as read when user doesn't exist"""
     error, result = mark_all_notifications_as_read(9999)
-    assert (
-        error is None
-    )  # Function doesn't check if user exists, just updates matching records
+    assert error is None  # Function doesn't check if user exists, just updates matching records
     assert result["success"] is True
     assert result["updated_count"] == 0

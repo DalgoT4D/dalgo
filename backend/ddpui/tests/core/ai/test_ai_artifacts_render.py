@@ -52,9 +52,7 @@ AI_CHART_PAYLOADS = {
         "dimension_column": "region",
         "metrics": [{"column": "amount", "aggregation": "sum", "alias": "total"}],
     },
-    "number": {
-        "metrics": [{"column": "amount", "aggregation": "sum", "alias": "total"}]
-    },
+    "number": {"metrics": [{"column": "amount", "aggregation": "sum", "alias": "total"}]},
 }
 
 WAREHOUSE_ROWS = {
@@ -112,9 +110,7 @@ def dashboard_with(orguser, components: dict) -> Dashboard:
         title="AI Dashboard",
         dashboard_type="native",
         grid_columns=12,
-        tabs=[
-            {"id": "tab-1", "title": "T", "layout_config": [], "components": components}
-        ],
+        tabs=[{"id": "tab-1", "title": "T", "layout_config": [], "components": components}],
         created_by=orguser,
         org=orguser.org,
     )
@@ -142,9 +138,7 @@ def test_ai_chart_renders_in_report(orguser, org_warehouse, seed_db, chart_type)
 
     with patch(f"{CHARTS_SERVICE}.get_warehouse_client"), patch(
         f"{CHARTS_SERVICE}.build_chart_query"
-    ), patch(
-        f"{CHARTS_SERVICE}.execute_chart_query", return_value=WAREHOUSE_ROWS[chart_type]
-    ):
+    ), patch(f"{CHARTS_SERVICE}.execute_chart_query", return_value=WAREHOUSE_ROWS[chart_type]):
         result = ReportService.get_report_chart_data(snapshot.id, chart.id, orguser.org)
 
     assert result["echarts_config"]
@@ -183,9 +177,7 @@ PERIODS = [{"period": "2025-01", "value": 30}]
 
 def test_ai_kpi_renders_live(orguser, org_warehouse, ai_kpi):
     with patch.object(KPIService, "_compute_trend", return_value=PERIODS):
-        result = KPIService.compute_kpi_data(
-            KPIService.kpi_to_response(ai_kpi), orguser.org
-        )
+        result = KPIService.compute_kpi_data(KPIService.kpi_to_response(ai_kpi), orguser.org)
 
     assert result["data"]["current_value"] == 30
     assert result["data"]["customizations"] is None

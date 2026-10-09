@@ -92,28 +92,19 @@ class TestBuildPivotQuery:
 
     def _has_rollup(self, payload):
         qb = build_chart_query(payload, self._make_org_warehouse())
-        return (
-            "ROLLUP"
-            in str(qb.build().compile(compile_kwargs={"literal_binds": True})).upper()
-        )
+        return "ROLLUP" in str(qb.build().compile(compile_kwargs={"literal_binds": True})).upper()
 
     def test_row_rollup_off_when_no_totals(self):
-        payload = self._rollup_payload(
-            show_row_subtotals=False, show_column_grand_total=False
-        )
+        payload = self._rollup_payload(show_row_subtotals=False, show_column_grand_total=False)
         assert self._has_rollup(payload) is False
 
     def test_row_rollup_on_for_column_grand_total(self):
-        payload = self._rollup_payload(
-            show_row_subtotals=False, show_column_grand_total=True
-        )
+        payload = self._rollup_payload(show_row_subtotals=False, show_column_grand_total=True)
         assert self._has_rollup(payload) is True
 
     def test_row_rollup_on_for_row_subtotals_only(self):
         # Row subtotals alone force the rollup even when column grand total is off
-        payload = self._rollup_payload(
-            show_row_subtotals=True, show_column_grand_total=False
-        )
+        payload = self._rollup_payload(show_row_subtotals=True, show_column_grand_total=False)
         assert self._has_rollup(payload) is True
 
     def test_pivot_query_multiple_column_dimensions(self):
@@ -207,9 +198,7 @@ class TestBuildPivotQuery:
         )
         qb = build_chart_query(payload, self._make_org_warehouse(wtype="bigquery"))
         compiled = str(
-            qb.build().compile(
-                dialect=BigQueryDialect(), compile_kwargs={"literal_binds": True}
-            )
+            qb.build().compile(dialect=BigQueryDialect(), compile_kwargs={"literal_binds": True})
         )
         sql_upper = compiled.upper()
 
@@ -272,9 +261,7 @@ class TestBuildPivotQuery:
                 ChartMetric(column="id", aggregation="count", alias="Count"),
             ],
             extra_config={
-                "filters": [
-                    {"column": "status", "operator": "equals", "value": "active"}
-                ]
+                "filters": [{"column": "status", "operator": "equals", "value": "active"}]
             },
         )
         ow = self._make_org_warehouse()

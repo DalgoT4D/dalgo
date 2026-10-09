@@ -25,11 +25,7 @@ def seed_db(django_db_setup, django_db_blocker):
 def slugs_for(role_slug: str) -> set[str]:
     """Return the set of permission slugs granted to the role."""
     role = Role.objects.get(slug=role_slug)
-    return set(
-        RolePermission.objects.filter(role=role).values_list(
-            "permission__slug", flat=True
-        )
-    )
+    return set(RolePermission.objects.filter(role=role).values_list("permission__slug", flat=True))
 
 
 # the four content resources that members may view and analysts may fully manage

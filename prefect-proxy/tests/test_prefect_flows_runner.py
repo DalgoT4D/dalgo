@@ -187,9 +187,7 @@ def test_dbtjob_v2_runner_block_value_as_dict(mock_secret, mock_shell_cls, tmp_p
 
 @patch("proxy.prefect_flows_runner.ShellOperation")
 @patch("proxy.prefect_flows_runner.Secret")
-def test_dbtjob_v2_runner_block_value_as_json_string(
-    mock_secret, mock_shell_cls, tmp_path
-):
+def test_dbtjob_v2_runner_block_value_as_json_string(mock_secret, mock_shell_cls, tmp_path):
     """Same runner path must also work when .get() returns a JSON string."""
     block_value = _make_block_value(wtype="bigquery", schema="warehouse")
     mock_secret.load.return_value.get.return_value = json.dumps(block_value)  # string
@@ -204,9 +202,7 @@ def test_dbtjob_v2_runner_block_value_as_json_string(
 
 @patch("proxy.prefect_flows_runner.ShellOperation")
 @patch("proxy.prefect_flows_runner.Secret")
-def test_dbtjob_v2_runner_writes_ssl_cert_and_rewrites_path(
-    mock_secret, mock_shell_cls, tmp_path
-):
+def test_dbtjob_v2_runner_writes_ssl_cert_and_rewrites_path(mock_secret, mock_shell_cls, tmp_path):
     """postgres SSL: cert content lives inside creds.sslrootcert_content;
     runner writes it to creds.sslrootcert path, then rewrites the profile
     output's `sslrootcert` field to that path."""
@@ -253,9 +249,7 @@ def test_dbtjob_v2_runner_dbt_test_failure_returns_completed_state(
 
 @patch("proxy.prefect_flows_runner.ShellOperation")
 @patch("proxy.prefect_flows_runner.Secret")
-def test_dbtjob_v2_runner_non_test_failure_reraises(
-    mock_secret, mock_shell_cls, tmp_path
-):
+def test_dbtjob_v2_runner_non_test_failure_reraises(mock_secret, mock_shell_cls, tmp_path):
     """Non-test failures must propagate — silently swallowing them would hide
     real dbt run/seed/snapshot errors."""
     mock_secret.load.return_value.get.return_value = _make_block_value()
@@ -277,11 +271,9 @@ def _mock_flow_deps():
 
     Yields a dict so tests can adjust individual mocks (e.g. make aload raise
     ValueError to trigger the fallback branch)."""
-    with patch(
-        "proxy.prefect_flows_runner.get_run_logger", return_value=MagicMock()
-    ), patch("proxy.prefect_flows_runner.AirbyteConnection") as ab_conn_cls, patch(
-        "proxy.prefect_flows_runner.AirbyteServer"
-    ) as ab_server_cls, patch(
+    with patch("proxy.prefect_flows_runner.get_run_logger", return_value=MagicMock()), patch(
+        "proxy.prefect_flows_runner.AirbyteConnection"
+    ) as ab_conn_cls, patch("proxy.prefect_flows_runner.AirbyteServer") as ab_server_cls, patch(
         "proxy.prefect_flows_runner.run_connection_sync"
     ) as run_sync, patch(
         "proxy.prefect_flows_runner._run_post_sync_ops", new_callable=AsyncMock
@@ -378,9 +370,7 @@ async def test_flow_swallows_post_sync_errors_and_returns_sync_result(_mock_flow
         "env": {"dbt-profile-secret-block": "sec-blk"},
         "post_sync_ops": [{"type": "cast"}],
     }
-    _mock_flow_deps["ab_conn_cls"].aload = AsyncMock(
-        return_value=MagicMock(extra=extra)
-    )
+    _mock_flow_deps["ab_conn_cls"].aload = AsyncMock(return_value=MagicMock(extra=extra))
     _mock_flow_deps["post_sync"].side_effect = RuntimeError("cast SQL failed")
 
     payload = {
@@ -549,9 +539,7 @@ def test_run_tasks_with_sync_tolerance_collects_sync_errors_then_skips_transform
 
 @patch("proxy.prefect_flows_runner.sleep")
 @patch("proxy.prefect_flows_runner._run_task_runner")
-def test_run_tasks_with_sync_tolerance_happy_path_runs_transforms(
-    mock_runner, _mock_sleep
-):
+def test_run_tasks_with_sync_tolerance_happy_path_runs_transforms(mock_runner, _mock_sleep):
     """All syncs succeed → transforms run after."""
     sync1 = {"type": AIRBYTECONNECTION, "slug": "airbyte-sync", "connection_id": "c1"}
     dbt_run = {"type": DBTCORE, "slug": "dbt-run"}
@@ -593,9 +581,7 @@ def test_deployment_schedule_flow_sorts_tasks_by_seq(mock_tolerant, mock_sequent
 
 @patch("proxy.prefect_flows_runner._run_tasks_sequentially")
 @patch("proxy.prefect_flows_runner._run_tasks_with_sync_tolerance")
-def test_deployment_schedule_flow_picks_tolerance_mode_from_flag(
-    mock_tolerant, mock_sequential
-):
+def test_deployment_schedule_flow_picks_tolerance_mode_from_flag(mock_tolerant, mock_sequential):
     """continue_on_sync_failure=True dispatches to the tolerant runner. Feature
     flag must actually gate behavior — silently ignoring it means users who
     opted in still fail-fast on sync errors."""
@@ -618,9 +604,7 @@ def test_deployment_schedule_flow_picks_tolerance_mode_from_flag(
 def test_shellopjob_git_pull_appends_secret_url(mock_secret, mock_shell_cls):
     """git-pull commands must be rewritten to include the secret block's URL.
     Without this, git-pull auth fails and dbt runs on stale code."""
-    mock_secret.load.return_value.get.return_value = (
-        "https://oauth2:TOKEN@github.com/org/repo"
-    )
+    mock_secret.load.return_value.get.return_value = "https://oauth2:TOKEN@github.com/org/repo"
 
     task_config = {
         "slug": "git-pull",

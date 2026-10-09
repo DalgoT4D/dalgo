@@ -271,9 +271,7 @@ def test_clone_dashboards_remaps_ids_preserves_public_state_with_fresh_token_and
     metric_map = viz_clone._clone_metrics(template_org, trial_org, trial_user)
     kpi_map = viz_clone._clone_kpis(template_org, trial_org, trial_user, metric_map)
     chart_map = viz_clone._clone_charts(template_org, trial_org, trial_user, metric_map)
-    dash_map = viz_clone._clone_dashboards(
-        template_org, trial_org, trial_user, chart_map, kpi_map
-    )
+    dash_map = viz_clone._clone_dashboards(template_org, trial_org, trial_user, chart_map, kpi_map)
 
     new_d = dash_map[d.id]
     new_chart_id = new_d.tabs[0]["components"]["comp1"]["config"]["chartId"]
@@ -287,12 +285,8 @@ def test_clone_dashboards_remaps_ids_preserves_public_state_with_fresh_token_and
     assert new_d.public_share_token != "abc123"
     assert new_d.public_shared_at is not None
     assert new_d.public_access_count == 0  # analytics start clean
-    assert (
-        new_d.is_org_default is True
-    )  # org-default PRESERVED so the Impact page shows it
-    assert (
-        new_d.is_published is True
-    )  # publish state preserved (drives the "Published" badge)
+    assert new_d.is_org_default is True  # org-default PRESERVED so the Impact page shows it
+    assert new_d.is_published is True  # publish state preserved (drives the "Published" badge)
 
     # template dashboard untouched
     d.refresh_from_db()
@@ -339,9 +333,7 @@ def test_clone_dashboards_gives_widget_image_its_own_s3_copy(monkeypatch):
         "ddpui.services.dashboard_service.copy_file",
         return_value="https://test-bucket.s3.amazonaws.com/orgs/trial-img/dashboards/images/new.png",
     ) as mock_copy:
-        dash_map = viz_clone._clone_dashboards(
-            template_org, trial_org, trial_user, {}, {}
-        )
+        dash_map = viz_clone._clone_dashboards(template_org, trial_org, trial_user, {}, {})
 
     new_config = dash_map[d.id].tabs[0]["components"]["text-1"]["config"]
     assert new_config["imageKey"] != original_image_key
@@ -438,10 +430,7 @@ def test_clone_dashboard_filters_remaps_filter_ids_inside_tabs():
     assert tab["layout_config"][0]["i"] == f"filter-{new_filter.id}"
     # component key + config.filterId remapped; old key gone
     assert f"filter-{f.id}" not in tab["components"]
-    assert (
-        tab["components"][f"filter-{new_filter.id}"]["config"]["filterId"]
-        == new_filter.id
-    )
+    assert tab["components"][f"filter-{new_filter.id}"]["config"]["filterId"] == new_filter.id
 
     # template dashboard untouched
     d.refresh_from_db()
@@ -597,15 +586,9 @@ def test_clone_alerts_does_not_fire_before_next_scheduled_tick():
     # the dispatcher's very next 60s tick must not pick it up
     assert scheduling.is_due(new_alert, cloned_at + timedelta(seconds=60)) is False
     # nor at any point before tomorrow's 09:00
-    assert (
-        scheduling.is_due(new_alert, datetime(2026, 8, 19, 8, 59, tzinfo=timezone.utc))
-        is False
-    )
+    assert scheduling.is_due(new_alert, datetime(2026, 8, 19, 8, 59, tzinfo=timezone.utc)) is False
     # but it does fire at its real scheduled time
-    assert (
-        scheduling.is_due(new_alert, datetime(2026, 8, 19, 9, 1, tzinfo=timezone.utc))
-        is True
-    )
+    assert scheduling.is_due(new_alert, datetime(2026, 8, 19, 9, 1, tzinfo=timezone.utc)) is True
 
 
 # ---------------------------------------------------------------------------
@@ -666,9 +649,7 @@ def test_clone_report_snapshots_remaps_frozen_saved_metric_ids():
     assert count == 1
     cloned = ReportSnapshot.objects.get(org=trial_org)
     assert (
-        cloned.frozen_chart_configs["10"]["extra_config"]["metrics"][0][
-            "saved_metric_id"
-        ]
+        cloned.frozen_chart_configs["10"]["extra_config"]["metrics"][0]["saved_metric_id"]
         == new_metric.id
     )
     assert cloned.frozen_chart_configs["kpi-3"] == {
@@ -746,9 +727,7 @@ def test_clone_preserves_list_order_by_copying_timestamps():
             created_by=template_user,
             last_modified_by=template_user,
         )
-        Chart.objects.filter(pk=c.pk).update(
-            created_at=stamps[title], updated_at=stamps[title]
-        )
+        Chart.objects.filter(pk=c.pk).update(created_at=stamps[title], updated_at=stamps[title])
 
     template_order = list(
         Chart.objects.filter(org=template_org)
@@ -764,17 +743,13 @@ def test_clone_preserves_list_order_by_copying_timestamps():
     viz_clone._clone_charts(template_org, trial_org, trial_user, {})
 
     trial_order = list(
-        Chart.objects.filter(org=trial_org)
-        .order_by("-updated_at")
-        .values_list("title", flat=True)
+        Chart.objects.filter(org=trial_org).order_by("-updated_at").values_list("title", flat=True)
     )
     assert trial_order == template_order  # arrangement preserved
 
     for title in ("Alpha", "Bravo", "Charlie"):
         trial_chart = Chart.objects.get(org=trial_org, title=title)
-        assert (
-            trial_chart.updated_at == stamps[title]
-        )  # real template stamp, not clone-time
+        assert trial_chart.updated_at == stamps[title]  # real template stamp, not clone-time
         assert trial_chart.created_at == stamps[title]
 
 

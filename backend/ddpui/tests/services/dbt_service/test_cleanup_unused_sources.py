@@ -94,9 +94,7 @@ def test_cleanup_unused_sources_with_manifest_provided():
         "child_map": {},
     }
 
-    with patch(
-        "ddpui.core.dbtautomation_service.delete_dbt_source_in_project"
-    ) as mock_delete:
+    with patch("ddpui.core.dbtautomation_service.delete_dbt_source_in_project") as mock_delete:
         result = cleanup_unused_sources(org, orgdbt, manifest_json=mock_manifest)
 
     # Verify results
@@ -191,9 +189,7 @@ def test_cleanup_unused_sources_with_edges_skipped():
         "child_map": {},
     }
 
-    with patch(
-        "ddpui.core.dbtautomation_service.delete_dbt_source_in_project"
-    ) as mock_delete:
+    with patch("ddpui.core.dbtautomation_service.delete_dbt_source_in_project") as mock_delete:
         result = cleanup_unused_sources(org, orgdbt, manifest_json=mock_manifest)
 
     # Verify results - source should be skipped due to edges
@@ -247,9 +243,7 @@ def test_cleanup_unused_sources_no_canvas_node():
         "child_map": {},
     }
 
-    with patch(
-        "ddpui.core.dbtautomation_service.delete_dbt_source_in_project"
-    ) as mock_delete:
+    with patch("ddpui.core.dbtautomation_service.delete_dbt_source_in_project") as mock_delete:
         result = cleanup_unused_sources(org, orgdbt, manifest_json=mock_manifest)
 
     # Verify results - source should be removed even without CanvasNode
@@ -279,9 +273,7 @@ def test_cleanup_unused_sources_generate_manifest():
     # Mock generated manifest
     mock_manifest = {"sources": {}, "nodes": {}, "child_map": {}}
 
-    with patch(
-        "ddpui.ddpdbt.dbt_service.generate_manifest_json_for_dbt_project"
-    ) as mock_generate:
+    with patch("ddpui.ddpdbt.dbt_service.generate_manifest_json_for_dbt_project") as mock_generate:
         mock_generate.return_value = mock_manifest
 
         result = cleanup_unused_sources(org, orgdbt)  # manifest_json=None
@@ -362,9 +354,7 @@ def test_cleanup_unused_sources_child_map_dependencies():
         },
     }
 
-    with patch(
-        "ddpui.core.dbtautomation_service.delete_dbt_source_in_project"
-    ) as mock_delete:
+    with patch("ddpui.core.dbtautomation_service.delete_dbt_source_in_project") as mock_delete:
         result = cleanup_unused_sources(org, orgdbt, manifest_json=mock_manifest)
 
     # Verify results - source should NOT be removed due to child_map dependency
@@ -394,9 +384,7 @@ def test_cleanup_unused_sources_error_handling():
     org.save()
 
     # Mock manifest generation failure
-    with patch(
-        "ddpui.ddpdbt.dbt_service.generate_manifest_json_for_dbt_project"
-    ) as mock_generate:
+    with patch("ddpui.ddpdbt.dbt_service.generate_manifest_json_for_dbt_project") as mock_generate:
         mock_generate.side_effect = Exception("Manifest generation failed")
 
         result = cleanup_unused_sources(org, orgdbt)  # manifest_json=None
@@ -455,9 +443,7 @@ def test_cleanup_unused_sources_canvas_only_cleanup():
     mock_manifest = {"sources": {}, "nodes": {}, "child_map": {}}
 
     # Mock the delete function
-    with patch(
-        "ddpui.core.dbtautomation_service.delete_dbt_source_in_project"
-    ) as mock_delete:
+    with patch("ddpui.core.dbtautomation_service.delete_dbt_source_in_project") as mock_delete:
         result = cleanup_unused_sources(org, orgdbt, mock_manifest)
 
     # Should find and remove the orphaned canvas node

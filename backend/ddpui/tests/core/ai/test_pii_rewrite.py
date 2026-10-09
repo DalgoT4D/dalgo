@@ -43,10 +43,7 @@ def test_select_star_expands_to_real_columns():
 
 
 def test_unqualified_column_resolves_via_the_schema_map():
-    sql = (
-        "SELECT name FROM prod.people p "
-        "JOIN prod.beneficiaries b ON b.person_id = p.id"
-    )
+    sql = "SELECT name FROM prod.people p " "JOIN prod.beneficiaries b ON b.person_id = p.id"
     assert keys(sql) == ["prod.people.name"]
 
 
@@ -99,10 +96,7 @@ def test_in_list_is_flagged():
 
 
 def test_having_count_literal_is_not_a_column_literal():
-    sql = (
-        "SELECT phone, COUNT(*) FROM prod.beneficiaries "
-        "GROUP BY phone HAVING COUNT(*) > 1"
-    )
+    sql = "SELECT phone, COUNT(*) FROM prod.beneficiaries " "GROUP BY phone HAVING COUNT(*) > 1"
     assert flags(sql) == {"prod.beneficiaries.phone": False}
 
 
@@ -153,25 +147,15 @@ def test_unexpandable_star_is_rejected_rather_than_yielding_an_empty_card():
 
 def test_qualified_star_is_rejected_rather_than_producing_a_star_column_key():
     with pytest.raises(UnresolvableProjection):
-        resolve_projection(
-            "SELECT p.* FROM prod.people p", "postgres", {"prod": {"people": {}}}
-        )
+        resolve_projection("SELECT p.* FROM prod.people p", "postgres", {"prod": {"people": {}}})
 
 
 def test_count_star_is_not_mistaken_for_an_unexpanded_star():
     # COUNT(*) projects no physical column but is perfectly reviewable
     assert (
-        resolve_projection(
-            "SELECT COUNT(*) AS n FROM prod.beneficiaries", "postgres", SCHEMA
-        )
-        == []
+        resolve_projection("SELECT COUNT(*) AS n FROM prod.beneficiaries", "postgres", SCHEMA) == []
     )
-    assert (
-        resolve_projection(
-            "SELECT COUNT(*) FROM prod.beneficiaries", "postgres", SCHEMA
-        )
-        == []
-    )
+    assert resolve_projection("SELECT COUNT(*) FROM prod.beneficiaries", "postgres", SCHEMA) == []
 
 
 def rewrite(sql, ticked, dialect="postgres"):
@@ -216,9 +200,7 @@ def test_where_and_join_are_untouched_by_the_rewrite():
         "JOIN prod.beneficiaries b ON b.person_id = p.id "
         "WHERE b.phone = '9876543210'"
     )
-    hashed = sqlglot.parse_one(
-        rewrite(sql, {"prod.beneficiaries.phone"}), dialect="postgres"
-    )
+    hashed = sqlglot.parse_one(rewrite(sql, {"prod.beneficiaries.phone"}), dialect="postgres")
     plain = _qualified_tree(sql, "postgres", SCHEMA)
 
     assert hashed.args["where"].sql() == plain.args["where"].sql()

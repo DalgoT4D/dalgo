@@ -168,9 +168,7 @@ class TestOrgQueueConfig:
         queue_config = {
             "scheduled_pipeline_queue": 123,  # invalid type (number)
             "connection_sync_queue": [],  # invalid type (list)
-            "transform_task_queue": {
-                "invalid": "structure"
-            },  # invalid structure (missing name)
+            "transform_task_queue": {"invalid": "structure"},  # invalid structure (missing name)
         }
         org = Org(name="Test Org", queue_config=queue_config)
 
