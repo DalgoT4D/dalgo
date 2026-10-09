@@ -71,7 +71,9 @@ class TestCreateOrgAndUserCommand:
         # Create existing org and user
         org = Org.objects.create(name="Existing Org", slug="existing-org")
         user = User.objects.create_user(
-            username="existing@example.com", email="existing@example.com", password="password"
+            username="existing@example.com",
+            email="existing@example.com",
+            password="password",
         )
 
         # Ensure no OrgUser exists yet
@@ -89,7 +91,9 @@ class TestCreateOrgAndUserCommand:
         # Create existing org, user, and orguser
         org = Org.objects.create(name="Existing Org", slug="existing-org")
         user = User.objects.create_user(
-            username="existing@example.com", email="existing@example.com", password="password"
+            username="existing@example.com",
+            email="existing@example.com",
+            password="password",
         )
         role = Role.objects.get(slug="admin")
         OrgUser.objects.create(org=org, user=user, new_role=role)
@@ -103,7 +107,9 @@ class TestCreateOrgAndUserCommand:
     def test_invalid_role_fails(self, seed_db):
         """Test command fails with invalid role"""
         with pytest.raises(SystemExit):
-            call_command("createorganduser", "Test Org", "test@example.com", role="invalid-role")
+            call_command(
+                "createorganduser", "Test Org", "test@example.com", role="invalid-role"
+            )
 
     @patch("ddpui.core.orgfunctions.create_organization")
     def test_no_role_parameter_error_regression(self, mock_create_org, seed_db):

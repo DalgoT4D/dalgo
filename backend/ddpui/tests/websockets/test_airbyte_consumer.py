@@ -53,7 +53,9 @@ def test_polling_celery_no_stp():
     polling_celery(consumer, task_key)
     consumer.respond.assert_called_once_with(
         WebsocketResponse(
-            data={}, message="No Task of this task_key found", status=WebsocketResponseStatus.ERROR
+            data={},
+            message="No Task of this task_key found",
+            status=WebsocketResponseStatus.ERROR,
         )
     )
 
@@ -67,7 +69,9 @@ def test_polling_celery_failed():
     polling_celery(consumer, task_key)
     consumer.respond.assert_called_once_with(
         WebsocketResponse(
-            data={}, message="Failed to get schema catalog", status=WebsocketResponseStatus.ERROR
+            data={},
+            message="Failed to get schema catalog",
+            status=WebsocketResponseStatus.ERROR,
         )
     )
 
@@ -99,7 +103,12 @@ def test_source_check_connection_update_success(mock_airbyte_service):
         "jobInfo": {"succeeded": True, "logs": {"logLines": ["log1", "log2"]}}
     }
 
-    payload = {"sourceId": "some-id", "name": "test", "sourceDefId": "def-id", "config": {}}
+    payload = {
+        "sourceId": "some-id",
+        "name": "test",
+        "sourceDefId": "def-id",
+        "config": {},
+    }
     message = {"text": json.dumps(payload)}
 
     consumer.websocket_receive(message)
@@ -151,7 +160,12 @@ def test_source_check_connection_failed(mock_airbyte_service):
         "jobInfo": {"succeeded": False, "logs": {"logLines": ["error log"]}}
     }
 
-    payload = {"sourceId": "some-id", "name": "test", "sourceDefId": "def-id", "config": {}}
+    payload = {
+        "sourceId": "some-id",
+        "name": "test",
+        "sourceDefId": "def-id",
+        "config": {},
+    }
     message = {"text": json.dumps(payload)}
 
     consumer.websocket_receive(message)
@@ -176,7 +190,12 @@ def test_source_check_connection_exception(mock_airbyte_service):
         "Something went wrong"
     )
 
-    payload = {"sourceId": "some-id", "name": "test", "sourceDefId": "def-id", "config": {}}
+    payload = {
+        "sourceId": "some-id",
+        "name": "test",
+        "sourceDefId": "def-id",
+        "config": {},
+    }
     message = {"text": json.dumps(payload)}
 
     consumer.websocket_receive(message)
@@ -196,7 +215,9 @@ def test_source_check_connection_demo_org(mock_airbyte_service, mock_airbyte_hel
     """tests source check connection for demo org"""
     consumer = SourceCheckConnectionConsumer()
     consumer.respond = Mock()
-    consumer.orguser = Mock(org=Mock(base_plan=lambda: OrgType.DEMO, airbyte_workspace_id="ws-id"))
+    consumer.orguser = Mock(
+        org=Mock(base_plan=lambda: OrgType.DEMO, airbyte_workspace_id="ws-id")
+    )
 
     mock_airbyte_service.get_source_definition.return_value = {"name": "Postgres"}
     mock_airbyte_helpers.get_demo_whitelisted_source_config.return_value = (
@@ -213,7 +234,9 @@ def test_source_check_connection_demo_org(mock_airbyte_service, mock_airbyte_hel
     consumer.websocket_receive(message)
 
     mock_airbyte_service.get_source_definition.assert_called_once()
-    mock_airbyte_helpers.get_demo_whitelisted_source_config.assert_called_once_with("Postgres")
+    mock_airbyte_helpers.get_demo_whitelisted_source_config.assert_called_once_with(
+        "Postgres"
+    )
     mock_airbyte_service.check_source_connection.assert_called_once()
     # check that payload.config was updated
     called_payload = mock_airbyte_service.check_source_connection.call_args[0][1]
@@ -236,7 +259,9 @@ def test_source_check_connection_demo_org_whitelist_error(
     """tests source check connection for demo org with whitelist error"""
     consumer = SourceCheckConnectionConsumer()
     consumer.respond = Mock()
-    consumer.orguser = Mock(org=Mock(base_plan=lambda: OrgType.DEMO, airbyte_workspace_id="ws-id"))
+    consumer.orguser = Mock(
+        org=Mock(base_plan=lambda: OrgType.DEMO, airbyte_workspace_id="ws-id")
+    )
 
     mock_airbyte_service.get_source_definition.return_value = {"name": "Postgres"}
     mock_airbyte_helpers.get_demo_whitelisted_source_config.return_value = (
@@ -352,8 +377,8 @@ def test_destination_check_connection_exception(mock_airbyte_service):
     consumer.respond = Mock()
     consumer.orguser = Mock(org=Mock())
 
-    mock_airbyte_service.check_destination_connection_for_update.side_effect = Exception(
-        "Something went wrong"
+    mock_airbyte_service.check_destination_connection_for_update.side_effect = (
+        Exception("Something went wrong")
     )
 
     payload = {

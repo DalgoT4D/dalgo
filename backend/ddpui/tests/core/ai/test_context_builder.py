@@ -71,7 +71,9 @@ def org_setup(monkeypatch):
     """Org + warehouse + one orguser, with a fake two-schema warehouse."""
     org = Org.objects.create(name="Ctx Test Org", slug="ctx-test")
     OrgWarehouse.objects.create(org=org, wtype="postgres")
-    user = User.objects.create(username="ctxuser", email="ctxuser@test.com", password="x")
+    user = User.objects.create(
+        username="ctxuser", email="ctxuser@test.com", password="x"
+    )
     orguser = OrgUser.objects.create(user=user, org=org)
     monkeypatch.setattr(
         context_module.WarehouseFactory,
@@ -120,7 +122,9 @@ def test_org_config_row_overrides_schemas_and_limits(org_setup):
 def test_memory_row_reaches_the_context(org_setup):
     orguser = org_setup
     ChatWithDataOrgConfig.objects.create(
-        org=orguser.org, memory_text="'SHG' means self-help group.", memory_updated_by=orguser
+        org=orguser.org,
+        memory_text="'SHG' means self-help group.",
+        memory_updated_by=orguser,
     )
     ctx = build_run_context(orguser)
     assert ctx.org_memory == "'SHG' means self-help group."
@@ -134,6 +138,8 @@ def test_no_memory_row_means_empty_org_memory(org_setup):
 
 @pytest.mark.django_db
 def test_memory_over_cap_is_rejected_at_save_time(org_setup):
-    config = ChatWithDataOrgConfig(org=org_setup.org, memory_text="x" * (MAX_ORG_MEMORY_CHARS + 1))
+    config = ChatWithDataOrgConfig(
+        org=org_setup.org, memory_text="x" * (MAX_ORG_MEMORY_CHARS + 1)
+    )
     with pytest.raises(ValidationError):
         config.full_clean()

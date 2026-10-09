@@ -13,7 +13,11 @@ from langchain_core.messages import AIMessage
 
 from ddpui.core.ai.evals import runner as eval_runner
 from ddpui.schemas.chat_with_data_schemas import EvalItem, RouteResult
-from ddpui.tests.core.ai.test_agent_loop import ScriptedChatModel, make_context, sql_call
+from ddpui.tests.core.ai.test_agent_loop import (
+    ScriptedChatModel,
+    make_context,
+    sql_call,
+)
 from ddpui.tests.core.ai.test_tools import FakeWarehouse
 
 
@@ -39,7 +43,9 @@ def run(item, *, script, warehouse=None, intent=None, routed=None):
     model = ScriptedChatModel(script=script)
     context = make_context(warehouse or FakeWarehouse(rows=[{"n": 171}]))
     return asyncio.run(
-        eval_runner.run_item(EvalItem(**item), context=context, model=model, judge=False)
+        eval_runner.run_item(
+            EvalItem(**item), context=context, model=model, judge=False
+        )
     )
 
 
@@ -58,7 +64,9 @@ def test_gold_sql_match_passes(routed_as):
         item,
         warehouse=warehouse,
         script=[
-            sql_call("SELECT COUNT(DISTINCT beneficiary_id) AS n FROM prod.enrollments", "c1"),
+            sql_call(
+                "SELECT COUNT(DISTINCT beneficiary_id) AS n FROM prod.enrollments", "c1"
+            ),
             AIMessage(content="**171** beneficiaries are enrolled."),
         ],
     )
@@ -109,14 +117,21 @@ def test_expected_value_fallback(routed_as):
 
 def test_routing_mismatch_fails(routed_as):
     item = {"question": "compare them", "expected_intent": "needs_clarification"}
-    result = run(item, script=[AIMessage(content="ok")], intent="data_question", routed=routed_as)
+    result = run(
+        item, script=[AIMessage(content="ok")], intent="data_question", routed=routed_as
+    )
     assert result.routing_ok is False
     assert not result.hard_pass
 
 
 def test_small_talk_routes_and_passes(routed_as):
     item = {"question": "hello!", "expected_intent": "small_talk"}
-    result = run(item, script=[AIMessage(content="unused")], intent="small_talk", routed=routed_as)
+    result = run(
+        item,
+        script=[AIMessage(content="unused")],
+        intent="small_talk",
+        routed=routed_as,
+    )
     assert result.routing_ok is True
     assert result.sql_ok is None  # nothing to compare — hard_pass still true
     assert result.hard_pass

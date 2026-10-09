@@ -22,7 +22,9 @@ pytestmark = pytest.mark.django_db
 
 def _grant(role, *slugs):
     for slug in slugs:
-        RolePermission.objects.create(role=role, permission=Permission.objects.get(slug=slug))
+        RolePermission.objects.create(
+            role=role, permission=Permission.objects.get(slug=slug)
+        )
 
 
 @pytest.fixture
@@ -34,7 +36,9 @@ def old_world():
     call_command("loaddata", "002_permissions.json")
 
     roles = {
-        "super-admin": Role.objects.create(slug="super-admin", name="Super User", level=5),
+        "super-admin": Role.objects.create(
+            slug="super-admin", name="Super User", level=5
+        ),
         "account-manager": Role.objects.create(
             slug="account-manager", name="Account Manager", level=4
         ),
@@ -58,7 +62,12 @@ def old_world():
         "can_delete_charts",  # kept
     )
     # guest: a write slug 0137 grants in prod (must be stripped) + a view + infra-view
-    _grant(roles["guest"], "can_create_dashboards", "can_view_dashboards", "can_view_warehouses")
+    _grant(
+        roles["guest"],
+        "can_create_dashboards",
+        "can_view_dashboards",
+        "can_view_warehouses",
+    )
 
     org = Org.objects.create(name="Org", slug="org")
 
@@ -87,7 +96,11 @@ def _run():
 
 def slugs_for(role_slug):
     role = Role.objects.get(slug=role_slug)
-    return set(RolePermission.objects.filter(role=role).values_list("permission__slug", flat=True))
+    return set(
+        RolePermission.objects.filter(role=role).values_list(
+            "permission__slug", flat=True
+        )
+    )
 
 
 def test_collapses_to_three_customer_roles(old_world):
@@ -113,7 +126,9 @@ def test_repoints_users_and_invites(old_world):
 def test_strips_analyst_infra_write_keeps_view(old_world):
     _run()
     analyst = slugs_for("analyst")
-    assert not ({"can_sync_sources", "can_run_orgtask", "can_create_dbt_model"} & analyst)
+    assert not (
+        {"can_sync_sources", "can_run_orgtask", "can_create_dbt_model"} & analyst
+    )
     assert "can_view_warehouses" in analyst
     assert {"can_create_dashboards", "can_delete_charts"} <= analyst
 

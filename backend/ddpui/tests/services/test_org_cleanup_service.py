@@ -10,7 +10,9 @@ pytestmark = pytest.mark.django_db
 
 def test_delete_warehouse_full_flow():
     # Setup Org
-    org = Org.objects.create(name="TestOrg", airbyte_workspace_id="workspace123", slug="test-slug")
+    org = Org.objects.create(
+        name="TestOrg", airbyte_workspace_id="workspace123", slug="test-slug"
+    )
 
     # Setup OrgWarehouse
     warehouse = OrgWarehouse.objects.create(
@@ -39,13 +41,22 @@ def test_delete_warehouse_full_flow():
 
     # Setup orchestrate pipeline with both sync and dbt tasks
     dataflow_orchestrate = OrgDataFlowv1.objects.create(
-        org=org, dataflow_type="orchestrate", deployment_id="deploy2", deployment_name="df2"
+        org=org,
+        dataflow_type="orchestrate",
+        deployment_id="deploy2",
+        deployment_name="df2",
     )
-    dfo_sync = DataflowOrgTask.objects.create(dataflow=dataflow_orchestrate, orgtask=orgtask_sync)
-    dfo_dbt = DataflowOrgTask.objects.create(dataflow=dataflow_orchestrate, orgtask=orgtask_dbt)
+    dfo_sync = DataflowOrgTask.objects.create(
+        dataflow=dataflow_orchestrate, orgtask=orgtask_sync
+    )
+    dfo_dbt = DataflowOrgTask.objects.create(
+        dataflow=dataflow_orchestrate, orgtask=orgtask_dbt
+    )
 
     # Patch airbyte_service, secretsmanager, prefect_service
-    with patch("ddpui.services.org_cleanup_service.airbyte_service") as airbyte_service, patch(
+    with patch(
+        "ddpui.services.org_cleanup_service.airbyte_service"
+    ) as airbyte_service, patch(
         "ddpui.services.org_cleanup_service.secretsmanager"
     ) as secretsmanager, patch(
         "ddpui.services.org_cleanup_service.prefect_service"
@@ -60,7 +71,9 @@ def test_delete_warehouse_full_flow():
         service.delete_warehouse()
 
         # Assert manual pipeline deleted
-        prefect_service.delete_deployment_by_id.assert_any_call(dataflow_manual.deployment_id)
+        prefect_service.delete_deployment_by_id.assert_any_call(
+            dataflow_manual.deployment_id
+        )
         assert OrgDataFlowv1.objects.filter(id=dataflow_manual.id).count() == 0
 
         # Assert orchestrate pipeline still exists
@@ -181,7 +194,10 @@ def test_delete_transformation_layer_task_in_orchestrate(
     org, orgtask_dbt, orgtask_git = org_with_transform_tasks
     # Create orchestrate pipeline using orgtask_dbt
     dataflow_orchestrate = OrgDataFlowv1.objects.create(
-        org=org, dataflow_type="orchestrate", deployment_id="deployX", deployment_name="dfX"
+        org=org,
+        dataflow_type="orchestrate",
+        deployment_id="deployX",
+        deployment_name="dfX",
     )
     DataflowOrgTask.objects.create(dataflow=dataflow_orchestrate, orgtask=orgtask_dbt)
     service = OrgCleanupService(org, dry_run=False)
@@ -195,16 +211,24 @@ def org_with_orchestrate_pipelines():
         name="TestOrgOrch", airbyte_workspace_id="workspace789", slug="test-slug-orch"
     )
     dataflow1 = OrgDataFlowv1.objects.create(
-        org=org, dataflow_type="orchestrate", deployment_id="dep1", deployment_name="orch1"
+        org=org,
+        dataflow_type="orchestrate",
+        deployment_id="dep1",
+        deployment_name="orch1",
     )
     dataflow2 = OrgDataFlowv1.objects.create(
-        org=org, dataflow_type="orchestrate", deployment_id="dep2", deployment_name="orch2"
+        org=org,
+        dataflow_type="orchestrate",
+        deployment_id="dep2",
+        deployment_name="orch2",
     )
     return org, [dataflow1, dataflow2]
 
 
 @patch("ddpui.services.org_cleanup_service.prefect_service")
-def test_delete_orchestrate_pipelines_dry_run(mock_prefect_service, org_with_orchestrate_pipelines):
+def test_delete_orchestrate_pipelines_dry_run(
+    mock_prefect_service, org_with_orchestrate_pipelines
+):
     org, dataflows = org_with_orchestrate_pipelines
     service = OrgCleanupService(org, dry_run=True)
     service.delete_orchestrate_pipelines()
@@ -215,7 +239,9 @@ def test_delete_orchestrate_pipelines_dry_run(mock_prefect_service, org_with_orc
 
 
 @patch("ddpui.services.org_cleanup_service.prefect_service")
-def test_delete_orchestrate_pipelines_delete(mock_prefect_service, org_with_orchestrate_pipelines):
+def test_delete_orchestrate_pipelines_delete(
+    mock_prefect_service, org_with_orchestrate_pipelines
+):
     org, dataflows = org_with_orchestrate_pipelines
     service = OrgCleanupService(org, dry_run=False)
     service.delete_orchestrate_pipelines()
@@ -228,10 +254,14 @@ def test_delete_orchestrate_pipelines_delete(mock_prefect_service, org_with_orch
 @patch("ddpui.services.org_cleanup_service.prefect_service")
 def test_delete_orchestrate_pipelines_none(mock_prefect_service):
     org = Org.objects.create(
-        name="TestOrgOrchNone", airbyte_workspace_id="workspace000", slug="test-slug-orch-none"
+        name="TestOrgOrchNone",
+        airbyte_workspace_id="workspace000",
+        slug="test-slug-orch-none",
     )
     service = OrgCleanupService(org, dry_run=False)
     service.delete_orchestrate_pipelines()
     # No orchestrate pipelines, nothing should be deleted
-    assert OrgDataFlowv1.objects.filter(org=org, dataflow_type="orchestrate").count() == 0
+    assert (
+        OrgDataFlowv1.objects.filter(org=org, dataflow_type="orchestrate").count() == 0
+    )
     mock_prefect_service.delete_deployment_by_id.assert_not_called()

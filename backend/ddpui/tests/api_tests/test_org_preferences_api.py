@@ -46,7 +46,10 @@ def org():
 def orguser(org, seed_db):  # pylint: disable=redefined-outer-name, unused-argument
     """an admin org-user — the role that holds can_initiate_org_plan_upgrade"""
     user = User.objects.create(
-        username="subuser", email="subuser@example.com", password="pwd", first_name="Sub"
+        username="subuser",
+        email="subuser@example.com",
+        password="pwd",
+        first_name="Sub",
     )
     orguser = OrgUser.objects.create(
         user=user,
@@ -66,7 +69,9 @@ def org_plan(org):  # pylint: disable=redefined-outer-name
     plan.delete()
 
 
-def test_upgrade_raises_when_org_has_no_plan(orguser):  # pylint: disable=redefined-outer-name
+def test_upgrade_raises_when_org_has_no_plan(
+    orguser,
+):  # pylint: disable=redefined-outer-name
     with pytest.raises(HttpError) as excinfo:
         initiate_upgrade_dalgo_plan(mock_request(orguser))
     assert str(excinfo.value) == "Org's Plan not found"

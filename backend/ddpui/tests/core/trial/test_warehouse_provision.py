@@ -49,7 +49,8 @@ def test_ft_role_name_is_deterministic_and_safe():
 
 def test_ft_names_differ_when_sanitized_local_parts_collide():
     """'a.b@x.com' and 'a_b@x.com' both sanitize to local part 'a_b', but the emails differ
-    so the hash suffix must differ, keeping the derived names distinct (collision-safety)."""
+    so the hash suffix must differ, keeping the derived names distinct (collision-safety).
+    """
     email1 = "a.b@x.com"
     email2 = "a_b@x.com"
 
@@ -100,13 +101,19 @@ def test_provision_creates_database_and_dedicated_role(mock_settings, mock_psyco
     admin_conn.close.assert_called_once()
     ft_db_conn.close.assert_called_once()
 
-    admin_statements = " ".join(str(c.args[0]) for c in admin_cursor.execute.call_args_list)
+    admin_statements = " ".join(
+        str(c.args[0]) for c in admin_cursor.execute.call_args_list
+    )
     assert f'CREATE DATABASE "{expected_db}"' in admin_statements
     assert f'CREATE ROLE "{expected_role}" LOGIN PASSWORD' in admin_statements
     assert f'GRANT "{expected_role}" TO CURRENT_USER' in admin_statements
-    assert f'ALTER DATABASE "{expected_db}" OWNER TO "{expected_role}"' in admin_statements
+    assert (
+        f'ALTER DATABASE "{expected_db}" OWNER TO "{expected_role}"' in admin_statements
+    )
 
-    ft_db_statements = " ".join(str(c.args[0]) for c in ft_db_cursor.execute.call_args_list)
+    ft_db_statements = " ".join(
+        str(c.args[0]) for c in ft_db_cursor.execute.call_args_list
+    )
     assert f'GRANT ALL ON SCHEMA public TO "{expected_role}"' in ft_db_statements
     assert f'ALTER SCHEMA public OWNER TO "{expected_role}"' in ft_db_statements
 
@@ -131,9 +138,13 @@ def test_provision_server_side_copy_from_template(mock_settings, mock_psycopg2):
     mock_psycopg2.connect.return_value = conn
     from ddpui.core.trial import warehouse_provision
 
-    params = warehouse_provision.provision_trial_database("a@b.org", template_db="himanshu_wh")
+    params = warehouse_provision.provision_trial_database(
+        "a@b.org", template_db="himanshu_wh"
+    )
     executed = " ".join(str(c.args[0]) for c in cursor.execute.call_args_list)
-    assert "TEMPLATE" in executed and "himanshu_wh" in executed  # server-side copy issued
+    assert (
+        "TEMPLATE" in executed and "himanshu_wh" in executed
+    )  # server-side copy issued
     assert params.database.startswith("ft_")
 
 
@@ -150,7 +161,8 @@ def test_template_copy_terminates_blocking_sessions_before_create(
     mock_settings, mock_psycopg2, _mock_sleep
 ):
     """The copy must terminate other sessions on the template db first, else Postgres raises
-    ObjectInUse on `CREATE DATABASE ... TEMPLATE` (the real-world step-2 failure this fixes)."""
+    ObjectInUse on `CREATE DATABASE ... TEMPLATE` (the real-world step-2 failure this fixes).
+    """
     mock_settings.TRIALS_RDS_HOST = "rds"
     mock_settings.TRIALS_RDS_PORT = 5432
     mock_settings.TRIALS_RDS_ADMIN_USER = "admin"
@@ -163,7 +175,9 @@ def test_template_copy_terminates_blocking_sessions_before_create(
     warehouse_provision.provision_trial_database("a@b.org", template_db="himanshu_wh")
 
     executed = [str(c.args[0]) for c in cursor.execute.call_args_list]
-    terminate_idx = next(i for i, s in enumerate(executed) if "pg_terminate_backend" in s)
+    terminate_idx = next(
+        i for i, s in enumerate(executed) if "pg_terminate_backend" in s
+    )
     create_idx = next(
         i for i, s in enumerate(executed) if "CREATE DATABASE" in s and "TEMPLATE" in s
     )
@@ -214,7 +228,9 @@ def test_template_copy_retries_when_a_session_races_back_in(
 @patch("ddpui.core.trial.warehouse_provision.drop_trial_database")
 @patch("ddpui.core.trial.warehouse_provision.psycopg2")
 @patch("ddpui.core.trial.warehouse_provision.settings")
-def test_provision_rolls_back_on_partial_failure(mock_settings, mock_psycopg2, mock_drop):
+def test_provision_rolls_back_on_partial_failure(
+    mock_settings, mock_psycopg2, mock_drop
+):
     """A failure AFTER CREATE DATABASE (here: the public-schema grant on the ft db) must drop
     the half-created db+role before re-raising, else it leaks and blocks every retry for the
     email (CREATE DATABASE has no IF NOT EXISTS)."""
@@ -282,7 +298,8 @@ def test_drop_trial_database(mock_settings, mock_psycopg2):
 @patch("ddpui.core.trial.warehouse_provision.settings")
 def test_drop_terminates_active_sessions_before_dropping(mock_settings, mock_psycopg2):
     """When the db still exists, block new connections + terminate live sessions BEFORE the
-    DROP, so an in-use db (recent clone / pooled connection) can't strand the db+role."""
+    DROP, so an in-use db (recent clone / pooled connection) can't strand the db+role.
+    """
     mock_settings.TRIALS_RDS_HOST = "rds-host"
     mock_settings.TRIALS_RDS_PORT = 5432
     mock_settings.TRIALS_RDS_ADMIN_USER = "admin"
@@ -305,7 +322,9 @@ def test_drop_terminates_active_sessions_before_dropping(mock_settings, mock_psy
     assert f'REVOKE CONNECT ON DATABASE "{expected_db}" FROM PUBLIC' in joined
     assert "pg_terminate_backend" in joined
     # terminate must happen before the DROP DATABASE
-    terminate_idx = next(i for i, s in enumerate(executed) if "pg_terminate_backend" in s)
+    terminate_idx = next(
+        i for i, s in enumerate(executed) if "pg_terminate_backend" in s
+    )
     drop_idx = next(i for i, s in enumerate(executed) if "DROP DATABASE" in s)
     assert terminate_idx < drop_idx
 
@@ -374,7 +393,8 @@ def test_reassign_copied_objects_transfers_only_non_system_owners():
 def test_reassign_survives_a_concurrent_clone_winning_the_grant():
     """Cold-start race: two clones both find no membership and both GRANT; the loser gets
     UniqueViolation on pg_auth_members. The membership it wanted now exists (the winner made it),
-    so the loser must swallow the error and still REASSIGN — not fail the whole clone."""
+    so the loser must swallow the error and still REASSIGN — not fail the whole clone.
+    """
     ft_role = "ft_x_user"
     cursor = MagicMock()
     cursor.fetchall.return_value = [("template_wh",)]
@@ -410,7 +430,8 @@ def test_reassign_copied_objects_noop_when_no_foreign_owners():
 def test_reassign_copied_objects_never_reassigns_the_admin_user(mock_settings):
     """REASSIGN OWNED BY <admin> would transfer cluster-wide shared objects the admin owns —
     including the TEMPLATE database — onto the trial role (hijacking the template and breaking
-    the trial role's teardown). The connecting admin must be skipped like postgres/pg_*."""
+    the trial role's teardown). The connecting admin must be skipped like postgres/pg_*.
+    """
     mock_settings.TRIALS_RDS_ADMIN_USER = "dalgo_admin"
     ft_role = "ft_x_user"
     cursor = MagicMock()

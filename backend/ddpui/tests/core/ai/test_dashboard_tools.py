@@ -91,7 +91,9 @@ def test_create_dashboard_with_charts(monkeypatch):
 
     monkeypatch.setattr(dashboard_tools, "_load_orguser", lambda ctx: object())
     monkeypatch.setattr(dashboard_tools, "_create_dashboard", fake_create)
-    monkeypatch.setattr(dashboard_tools, "_org_chart_ids", lambda orguser, ids: set(ids))
+    monkeypatch.setattr(
+        dashboard_tools, "_org_chart_ids", lambda orguser, ids: set(ids)
+    )
 
     content, artifact = run_tool(
         dashboard_tools.create_dashboard,
@@ -138,7 +140,9 @@ def test_add_charts_to_existing_dashboard(monkeypatch):
 
     monkeypatch.setattr(dashboard_tools, "_load_orguser", lambda ctx: object())
     monkeypatch.setattr(dashboard_tools, "_add_charts", fake_add)
-    monkeypatch.setattr(dashboard_tools, "_org_chart_ids", lambda orguser, ids: set(ids))
+    monkeypatch.setattr(
+        dashboard_tools, "_org_chart_ids", lambda orguser, ids: set(ids)
+    )
 
     content, artifact = run_tool(
         dashboard_tools.add_charts_to_dashboard,
@@ -157,7 +161,9 @@ def test_add_charts_reports_missing_dashboard(monkeypatch):
 
     monkeypatch.setattr(dashboard_tools, "_load_orguser", lambda ctx: object())
     monkeypatch.setattr(dashboard_tools, "_add_charts", fake_add)
-    monkeypatch.setattr(dashboard_tools, "_org_chart_ids", lambda orguser, ids: set(ids))
+    monkeypatch.setattr(
+        dashboard_tools, "_org_chart_ids", lambda orguser, ids: set(ids)
+    )
 
     content, artifact = run_tool(
         dashboard_tools.add_charts_to_dashboard,

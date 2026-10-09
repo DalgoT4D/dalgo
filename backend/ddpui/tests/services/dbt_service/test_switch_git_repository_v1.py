@@ -60,9 +60,11 @@ def test_switch_git_repository_v1_managed_to_external_empty_success(setup_data):
         "ddpui.ddpdbt.dbt_service.GitManager.check_remote_repository_empty_static",
         return_value=True,
     ) as mock_empty_check, patch(
-        "ddpui.ddpdbt.dbt_service.secretsmanager.save_github_pat", return_value="pat-secret-key"
+        "ddpui.ddpdbt.dbt_service.secretsmanager.save_github_pat",
+        return_value="pat-secret-key",
     ), patch(
-        "ddpui.ddpdbt.dbt_service.update_github_pat_storage", return_value="updated-pat-secret"
+        "ddpui.ddpdbt.dbt_service.update_github_pat_storage",
+        return_value="updated-pat-secret",
     ), patch(
         "ddpui.ddpdbt.dbt_service.CanvasNode.objects.filter"
     ) as mock_canvas_filter, patch(
@@ -88,7 +90,9 @@ def test_switch_git_repository_v1_managed_to_external_empty_success(setup_data):
         assert "Successfully switched to new git repository" in result["message"]
 
         # Verify repository access was validated (should happen in every scenario)
-        mock_validate.assert_called_once_with("https://github.com/user/new-repo", "ghp_token123")
+        mock_validate.assert_called_once_with(
+            "https://github.com/user/new-repo", "ghp_token123"
+        )
 
         # Verify empty check was performed
         mock_empty_check.assert_called_once()
@@ -114,7 +118,8 @@ def test_switch_git_repository_v1_managed_to_external_nonempty_success(setup_dat
     org.save()
 
     payload = OrgDbtConnectGitRemote(
-        gitrepoUrl="https://github.com/user/existing-repo", gitrepoAccessToken="ghp_token123"
+        gitrepoUrl="https://github.com/user/existing-repo",
+        gitrepoAccessToken="ghp_token123",
     )
 
     with patch(
@@ -133,9 +138,11 @@ def test_switch_git_repository_v1_managed_to_external_nonempty_success(setup_dat
     ) as mock_clone, patch(
         "ddpui.ddpdbt.dbt_service.shutil.rmtree"
     ) as mock_rmtree, patch(
-        "ddpui.ddpdbt.dbt_service.secretsmanager.save_github_pat", return_value="pat-secret-key"
+        "ddpui.ddpdbt.dbt_service.secretsmanager.save_github_pat",
+        return_value="pat-secret-key",
     ), patch(
-        "ddpui.ddpdbt.dbt_service.update_github_pat_storage", return_value="updated-pat-secret"
+        "ddpui.ddpdbt.dbt_service.update_github_pat_storage",
+        return_value="updated-pat-secret",
     ), patch(
         "ddpui.ddpdbt.dbt_service.CanvasNode.objects.filter"
     ) as mock_canvas_filter, patch(

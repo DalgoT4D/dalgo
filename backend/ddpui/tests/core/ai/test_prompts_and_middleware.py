@@ -20,8 +20,12 @@ def test_count_failed_sql_attempts_counts_since_last_user_message():
         AIMessage("trying"),
         failed_tool_msg(),
         failed_tool_msg("SQL rejected: no writes"),
-        ToolMessage(content="Query returned 3 rows.", name="execute_sql", tool_call_id="y"),
-        ToolMessage(content="Table not found", name="get_table_details", tool_call_id="z"),
+        ToolMessage(
+            content="Query returned 3 rows.", name="execute_sql", tool_call_id="y"
+        ),
+        ToolMessage(
+            content="Table not found", name="get_table_details", tool_call_id="z"
+        ),
     ]
     # 2 failures after the last HumanMessage; success and other tools don't count
     assert count_failed_sql_attempts(messages) == 2
@@ -43,7 +47,9 @@ def test_system_prompt_names_dialect_schemas_and_rules():
     prompt = build_system_prompt(make_ctx())
     assert "PostgreSQL" in prompt
     assert "prod" in prompt and "staging" in prompt
-    assert "lookup_column_values" in prompt  # instructs value-validation before filtering
+    assert (
+        "lookup_column_values" in prompt
+    )  # instructs value-validation before filtering
     assert "read-only" in prompt.lower()
 
 
@@ -58,7 +64,13 @@ def test_system_prompt_allows_exactly_the_markdown_subset_the_ui_renders():
     what that renderer styles (bold, bullets, numbered lists, ### headings,
     > callouts) and must ban the rest."""
     prompt = build_system_prompt(make_ctx())
-    for allowed in ["**bold**", '"- " bullets', '"1." numbered lists', '"### "', '"> "']:
+    for allowed in [
+        "**bold**",
+        '"- " bullets',
+        '"1." numbered lists',
+        '"### "',
+        '"> "',
+    ]:
         assert allowed in prompt
     assert "no code blocks, no links, no markdown tables" in prompt
 
@@ -91,7 +103,9 @@ def test_no_memory_means_no_section_and_an_unchanged_prompt():
             assert "<org_memory>" not in prompt
             assert "About this organization" not in prompt
     # whitespace-only memory renders byte-identical to no memory at all
-    assert build_system_prompt(make_ctx(org_memory="  ")) == build_system_prompt(make_ctx())
+    assert build_system_prompt(make_ctx(org_memory="  ")) == build_system_prompt(
+        make_ctx()
+    )
 
 
 def test_over_cap_memory_is_sliced_at_render_time():

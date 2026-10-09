@@ -159,7 +159,9 @@ def test_copy_dbt_dag_copies_canvas():
     assert new_op_node.operation_config == {"operation_type": "rename"}
     assert new_src_node.uuid != src_node.uuid
 
-    trial_edges = list(CanvasEdge.objects.filter(from_node__orgdbt=trial_dbt).order_by("seq"))
+    trial_edges = list(
+        CanvasEdge.objects.filter(from_node__orgdbt=trial_dbt).order_by("seq")
+    )
     assert len(trial_edges) == 2
     assert trial_edges[0].from_node_id == new_src_node.id
     assert trial_edges[0].to_node_id == new_op_node.id
@@ -256,13 +258,17 @@ def test_regenerate_and_push_regenerates_sources_and_models(
     git_call_args = mock_git_manager_cls.call_args.args
     assert git_call_args[0] == DbtProjectManager.get_dbt_project_dir(trial_dbt)
     assert git_call_args[1] == mock_git_manager_cls.get_org_admin_pat.return_value
-    mock_git_instance.commit_changes.assert_called_once_with("clone template dbt models")
+    mock_git_instance.commit_changes.assert_called_once_with(
+        "clone template dbt models"
+    )
     mock_git_instance.push_changes.assert_called_once()
 
 
 @patch("ddpui.core.trial.dbt_clone.GitManager")
 @patch("ddpui.core.trial.dbt_clone.create_or_update_dbt_model_in_project_v2")
-def test_regenerate_and_push_raises_without_warehouse(mock_regen_model, mock_git_manager_cls):
+def test_regenerate_and_push_raises_without_warehouse(
+    mock_regen_model, mock_git_manager_cls
+):
     trial_org = Org.objects.create(name="trial-nowh", slug="trial-nowh")
     trial_dbt = _make_orgdbt(trial_org)
 
@@ -376,7 +382,9 @@ def test_regenerate_and_push_regenerates_models_in_topological_order(
 
 @patch("ddpui.core.trial.dbt_clone.GitManager")
 @patch("ddpui.core.trial.dbt_clone.create_or_update_dbt_model_in_project_v2")
-def test_regenerate_and_push_raises_on_ambiguous_terminal(mock_regen_model, mock_git_manager_cls):
+def test_regenerate_and_push_raises_on_ambiguous_terminal(
+    mock_regen_model, mock_git_manager_cls
+):
     """A MODEL canvas node with TWO incoming CanvasEdges (e.g. a stale edge left behind by
     re-terminating the model from a different operation chain during editing) must raise a
     loud, clear error rather than silently regenerating from whichever edge `.first()` happens
@@ -476,7 +484,9 @@ def test_regenerate_and_push_skips_sources_not_on_canvas(
 
 
 @patch("ddpui.core.trial.dbt_clone.GitManager")
-def test_copy_repo_models_from_template_copies_verbatim_and_pushes(mock_git_manager_cls, tmp_path):
+def test_copy_repo_models_from_template_copies_verbatim_and_pushes(
+    mock_git_manager_cls, tmp_path
+):
     """models/ dir (sql + sources.yml + docs) copied byte-identical from a FRESH CLONE of the
     template's remote repo (never the template's local working dir) into the trial repo;
     commit + push with the org-admin PAT; file count returned."""
@@ -493,7 +503,9 @@ def test_copy_repo_models_from_template_copies_verbatim_and_pushes(mock_git_mana
     # the template's LOCAL working dir gets a decoy file — proves it's never read
     template_dir = Path(DbtProjectManager.get_dbt_project_dir(template_dbt))
     (template_dir / "models" / "staging").mkdir(parents=True)
-    (template_dir / "models" / "staging" / "decoy_local_only.sql").write_text("select 999")
+    (template_dir / "models" / "staging" / "decoy_local_only.sql").write_text(
+        "select 999"
+    )
 
     trial_dir = Path(DbtProjectManager.get_dbt_project_dir(trial_dbt))
     (trial_dir / "models").mkdir(parents=True)  # empty scaffold
@@ -513,8 +525,12 @@ def test_copy_repo_models_from_template_copies_verbatim_and_pushes(mock_git_mana
     count = dbt_clone.copy_repo_models_from_template(template_dbt, trial_dbt)
 
     assert count == 2
-    assert (trial_dir / "models" / "staging" / "casted_pivottest.sql").read_text() == "select 1"
-    assert (trial_dir / "models" / "staging" / "sources.yml").read_text() == "sources: []"
+    assert (
+        trial_dir / "models" / "staging" / "casted_pivottest.sql"
+    ).read_text() == "select 1"
+    assert (
+        trial_dir / "models" / "staging" / "sources.yml"
+    ).read_text() == "sources: []"
     assert not (trial_dir / "models" / "staging" / "decoy_local_only.sql").exists()
     mock_git_manager_cls.assert_called_once_with(str(trial_dir), "admin-pat")
     push_instance = mock_git_manager_cls.return_value
@@ -523,7 +539,9 @@ def test_copy_repo_models_from_template_copies_verbatim_and_pushes(mock_git_mana
 
 
 @patch("ddpui.core.trial.dbt_clone.GitManager")
-def test_copy_repo_models_from_template_raises_when_no_models_dir(mock_git_manager_cls, tmp_path):
+def test_copy_repo_models_from_template_raises_when_no_models_dir(
+    mock_git_manager_cls, tmp_path
+):
     """template's remote clone has no models/ dir (e.g. an empty repo) — fails loud."""
     import os
 

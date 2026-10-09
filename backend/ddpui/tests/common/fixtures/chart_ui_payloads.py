@@ -173,7 +173,14 @@ TABLE_UI_PAYLOAD = {
         "dimensions": [{"column": "granularity", "enable_drill_down": False}],
         "dimension_column": "granularity",
         "dimension_columns": ["granularity"],
-        "table_columns": ["date_day", "granularity", "period_start", "period_end", "year", "month"],
+        "table_columns": [
+            "date_day",
+            "granularity",
+            "period_start",
+            "period_end",
+            "year",
+            "month",
+        ],
         "metrics": [
             {"alias": "Total Count", "column": None, "aggregation": "count"},
         ],

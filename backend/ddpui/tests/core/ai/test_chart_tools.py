@@ -36,7 +36,9 @@ def saved(monkeypatch):
 
 
 def run_tool(ctx, **kwargs):
-    return chart_tools.create_chart.func(runtime=type("R", (), {"context": ctx})(), **kwargs)
+    return chart_tools.create_chart.func(
+        runtime=type("R", (), {"context": ctx})(), **kwargs
+    )
 
 
 def make_chart_context(**overrides):
@@ -54,7 +56,10 @@ def test_creates_bar_chart_with_metric(saved):
         chart_type="bar",
         schema_name="prod",
         table_name="surveys",
-        extra_config={"dimension_column": "district", "metrics": [{"aggregation": "count"}]},
+        extra_config={
+            "dimension_column": "district",
+            "metrics": [{"aggregation": "count"}],
+        },
     )
 
     assert "Surveys by district" in content
@@ -80,10 +85,19 @@ def test_stored_extra_config_matches_the_charts_api_shape(saved):
         chart_type="bar",
         schema_name="prod",
         table_name="surveys",
-        extra_config={"dimension_column": "district", "metrics": [{"aggregation": "count"}]},
+        extra_config={
+            "dimension_column": "district",
+            "metrics": [{"aggregation": "count"}],
+        },
     )
     extra_config = saved["data"].extra_config.model_dump()
-    for key in ("customizations", "filters", "pagination", "sort", "extra_dimension_column"):
+    for key in (
+        "customizations",
+        "filters",
+        "pagination",
+        "sort",
+        "extra_dimension_column",
+    ):
         assert key in extra_config
 
 
@@ -156,7 +170,10 @@ def test_rejects_disallowed_schema(saved):
         chart_type="bar",
         schema_name="secret_schema",
         table_name="surveys",
-        extra_config={"dimension_column": "district", "metrics": [{"aggregation": "count"}]},
+        extra_config={
+            "dimension_column": "district",
+            "metrics": [{"aggregation": "count"}],
+        },
     )
     assert artifact["status"] == "rejected"
     assert "data" not in saved
@@ -169,7 +186,10 @@ def test_rejects_bad_chart_type_and_missing_dimension(saved):
         chart_type="map",  # not offered to the agent in v1
         schema_name="prod",
         table_name="surveys",
-        extra_config={"dimension_column": "district", "metrics": [{"aggregation": "count"}]},
+        extra_config={
+            "dimension_column": "district",
+            "metrics": [{"aggregation": "count"}],
+        },
     )
     assert artifact["status"] == "rejected"
 
@@ -179,7 +199,9 @@ def test_rejects_bad_chart_type_and_missing_dimension(saved):
         chart_type="bar",
         schema_name="prod",
         table_name="surveys",
-        extra_config={"metrics": [{"aggregation": "count"}]},  # no dimension_column for bar
+        extra_config={
+            "metrics": [{"aggregation": "count"}]
+        },  # no dimension_column for bar
     )
     assert artifact["status"] == "rejected"
     assert "data" not in saved

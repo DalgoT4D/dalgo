@@ -72,7 +72,9 @@ def test_repeat_signup_updates_the_open_record_instead_of_adding_a_row():
 def test_record_tnc_accepted_creates_the_record_when_the_signup_write_was_lost():
     """`record_signup` is best-effort, so its row may never have been written. Rebuild it from the
     activation token instead of losing every later write point for this trial."""
-    record_tnc_accepted(token_data(email="lost@b.org", org_name="Acme", role="leadership"))
+    record_tnc_accepted(
+        token_data(email="lost@b.org", org_name="Acme", role="leadership")
+    )
 
     record = TrialSignup.objects.get(email="lost@b.org")
     assert record.tnc_accepted is True
@@ -179,4 +181,6 @@ def test_record_deletion_closes_every_open_record_for_the_email():
     TrialSignup.objects.create(email="a@b.org", signed_up_at=now)
 
     assert record_deletion("a@b.org") == 2
-    assert not TrialSignup.objects.filter(email="a@b.org", deleted_at__isnull=True).exists()
+    assert not TrialSignup.objects.filter(
+        email="a@b.org", deleted_at__isnull=True
+    ).exists()

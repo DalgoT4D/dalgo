@@ -23,7 +23,8 @@ def test_sources_filename(tmpdir):  # pytest tmpdir fixture
     """test the sources_filename method"""
     project = dbtProject(tmpdir)
     assert (
-        project.sources_filename("test_schema") == tmpdir / "models" / "test_schema" / "sources.yml"
+        project.sources_filename("test_schema")
+        == tmpdir / "models" / "test_schema" / "sources.yml"
     )
 
 
@@ -85,7 +86,9 @@ def test_write_model_config(tmpdir):  # pytest tmpdir fixture
     ]
     yaml_filename = project.write_model_config("test_schema", models_input)
     assert os.path.exists(tmpdir / "models" / schema / "models.yml") is True
-    with open(tmpdir / "models" / schema / "models.yml", "r", encoding="utf-8") as models_file:
+    with open(
+        tmpdir / "models" / schema / "models.yml", "r", encoding="utf-8"
+    ) as models_file:
         models_yaml = yaml.safe_load(models_file)
 
     assert len(models_yaml["models"]) == 1

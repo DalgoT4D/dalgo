@@ -16,9 +16,15 @@ from ddpui.core.datainsights.insights.insight_interface import (
     TranslateColDataType,
     DataTypeColInsights,
 )
-from ddpui.core.datainsights.insights.numeric_type.numeric_insight import NumericColInsights
-from ddpui.core.datainsights.insights.string_type.string_insights import StringColInsights
-from ddpui.core.datainsights.insights.boolean_type.boolean_insights import BooleanColInsights
+from ddpui.core.datainsights.insights.numeric_type.numeric_insight import (
+    NumericColInsights,
+)
+from ddpui.core.datainsights.insights.string_type.string_insights import (
+    StringColInsights,
+)
+from ddpui.core.datainsights.insights.boolean_type.boolean_insights import (
+    BooleanColInsights,
+)
 from ddpui.core.datainsights.insights.datetime_type.datetime_insight import (
     DatetimeColInsights,
 )
@@ -98,5 +104,6 @@ def test_insight_factory(dummy_insight_payload):
 
     with pytest.raises(ValueError):
         InsightsFactory.initiate_insight(
-            **dummy_insight_payload, col_type=TranslateColDataType("some-unsupported-type")
+            **dummy_insight_payload,
+            col_type=TranslateColDataType("some-unsupported-type")
         )

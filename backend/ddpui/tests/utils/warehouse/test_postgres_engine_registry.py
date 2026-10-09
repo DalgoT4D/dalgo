@@ -210,7 +210,9 @@ def test_idle_engine_running_a_query_is_not_retired():
     looks abandoned. A checked-out connection means the pool is still in service.
     """
     key = postgres_engine_registry.fingerprint("postgres", PG_CREDS)
-    engine = postgres_engine_registry.get_or_create_engine(key, make("busy", checkedout=1))
+    engine = postgres_engine_registry.get_or_create_engine(
+        key, make("busy", checkedout=1)
+    )
 
     age_entry(key, postgres_engine_registry.ENGINE_IDLE_TTL_SECONDS + 1)
 
@@ -243,7 +245,9 @@ def test_caching_an_engine_starts_the_sweeper_thread():
 
 def add_engine(name, checkedout=0):
     """Cache one engine under a distinct warehouse and return (key, engine)."""
-    key = postgres_engine_registry.fingerprint("postgres", dict(PG_CREDS, database=name))
+    key = postgres_engine_registry.fingerprint(
+        "postgres", dict(PG_CREDS, database=name)
+    )
     engine = postgres_engine_registry.get_or_create_engine(key, make(name, checkedout))
     return key, engine
 
@@ -254,7 +258,10 @@ def test_nothing_caps_how_many_warehouses_are_cached():
         add_engine(name)
 
     assert len(postgres_engine_registry._engines) == 5
-    assert all(not entry.engine.disposed for entry in postgres_engine_registry._engines.values())
+    assert all(
+        not entry.engine.disposed
+        for entry in postgres_engine_registry._engines.values()
+    )
 
 
 def test_registry_stats_reports_the_connection_ceiling():

@@ -65,7 +65,10 @@ def sample_manifest():
                 "path": "models/model2.sql",
                 "original_file_path": "models/model2.sql",
                 "depends_on": {
-                    "nodes": ["model.my_project.model1", "source.my_project.source1.table2"]
+                    "nodes": [
+                        "model.my_project.model1",
+                        "source.my_project.source1.table2",
+                    ]
                 },
                 "columns": {
                     "user_id": {"name": "user_id", "data_type": "integer"},
@@ -102,10 +105,14 @@ def org_with_dbt_workspace():
 
 
 @pytest.mark.django_db
-def test_parse_dbt_manifest_to_canvas_success(sample_manifest, org_with_dbt_workspace: Org):
+def test_parse_dbt_manifest_to_canvas_success(
+    sample_manifest, org_with_dbt_workspace: Org
+):
     """Test successful parsing of manifest to canvas nodes"""
 
-    warehouse = OrgWarehouse.objects.create(org=org_with_dbt_workspace, wtype="postgres")
+    warehouse = OrgWarehouse.objects.create(
+        org=org_with_dbt_workspace, wtype="postgres"
+    )
     orgdbt = org_with_dbt_workspace.dbt
 
     # Mock warehouse connection to return column info
@@ -135,16 +142,22 @@ def test_parse_dbt_manifest_to_canvas_success(sample_manifest, org_with_dbt_work
 
         # Verify sources were created
         assert result["sources_processed"] == 2
-        source_nodes = CanvasNode.objects.filter(orgdbt=orgdbt, node_type=CanvasNodeType.SOURCE)
+        source_nodes = CanvasNode.objects.filter(
+            orgdbt=orgdbt, node_type=CanvasNodeType.SOURCE
+        )
         assert source_nodes.count() == 2
 
         # Verify models were created (excluding package models)
         assert result["models_processed"] == 2
-        model_nodes = CanvasNode.objects.filter(orgdbt=orgdbt, node_type=CanvasNodeType.MODEL)
+        model_nodes = CanvasNode.objects.filter(
+            orgdbt=orgdbt, node_type=CanvasNodeType.MODEL
+        )
         assert model_nodes.count() == 2
 
         # Verify edges were created
-        assert result["edges_created"] == 3  # model1 -> table1, model2 -> model1, model2 -> table2
+        assert (
+            result["edges_created"] == 3
+        )  # model1 -> table1, model2 -> model1, model2 -> table2
         edges = CanvasEdge.objects.filter(from_node__orgdbt=orgdbt)
         assert edges.count() == 3
 
@@ -155,7 +168,9 @@ def test_parse_dbt_manifest_to_canvas_warehouse_columns(
 ):
     """Test parsing with warehouse column fetching and fallback to manifest"""
 
-    warehouse = OrgWarehouse.objects.create(org=org_with_dbt_workspace, wtype="postgres")
+    warehouse = OrgWarehouse.objects.create(
+        org=org_with_dbt_workspace, wtype="postgres"
+    )
     orgdbt = org_with_dbt_workspace.dbt
 
     # Mock warehouse connection that fails for some tables
@@ -206,10 +221,14 @@ def test_parse_dbt_manifest_to_canvas_warehouse_columns(
 
 
 @pytest.mark.django_db
-def test_parse_dbt_manifest_to_canvas_update_existing(org_with_dbt_workspace: Org, sample_manifest):
+def test_parse_dbt_manifest_to_canvas_update_existing(
+    org_with_dbt_workspace: Org, sample_manifest
+):
     """Test updating existing canvas nodes when they already exist"""
 
-    warehouse = OrgWarehouse.objects.create(org=org_with_dbt_workspace, wtype="postgres")
+    warehouse = OrgWarehouse.objects.create(
+        org=org_with_dbt_workspace, wtype="postgres"
+    )
     orgdbt = org_with_dbt_workspace.dbt
 
     existing_orgdbt_model = OrgDbtModel.objects.create(
@@ -252,7 +271,9 @@ def test_parse_dbt_manifest_to_canvas_update_existing(org_with_dbt_workspace: Or
         assert "sources_processed" in result
 
         # Verify existing node was updated, not duplicated
-        source_nodes = CanvasNode.objects.filter(orgdbt=orgdbt, node_type=CanvasNodeType.SOURCE)
+        source_nodes = CanvasNode.objects.filter(
+            orgdbt=orgdbt, node_type=CanvasNodeType.SOURCE
+        )
         assert source_nodes.count() == 2  # Still only 2 source nodes
 
         # Verify the existing node was updated
@@ -273,7 +294,9 @@ def test_parse_dbt_manifest_to_canvas_preserves_uuid_on_resync(
     any uuid a client already holds (most visibly right after an org clone,
     whose first canvas load triggers an immediate resync)."""
 
-    warehouse = OrgWarehouse.objects.create(org=org_with_dbt_workspace, wtype="postgres")
+    warehouse = OrgWarehouse.objects.create(
+        org=org_with_dbt_workspace, wtype="postgres"
+    )
     orgdbt = org_with_dbt_workspace.dbt
 
     existing_source = OrgDbtModel.objects.create(
@@ -322,7 +345,9 @@ def operation_chain_graph(org_with_dbt_workspace: Org):
     Creates a canvas graph with operation chain: model1 -> op1 -> op2 -> model2
     Returns dict with all nodes for easy access in tests.
     """
-    warehouse = OrgWarehouse.objects.create(org=org_with_dbt_workspace, wtype="postgres")
+    warehouse = OrgWarehouse.objects.create(
+        org=org_with_dbt_workspace, wtype="postgres"
+    )
     orgdbt = org_with_dbt_workspace.dbt
 
     # Create OrgDbtModel instances for model nodes (required for MODEL/SOURCE types)
@@ -406,7 +431,9 @@ def direct_edge_with_operation_chain_graph(org_with_dbt_workspace: Org):
     - Chain: model1 -> op1 -> op2 -> model2
     Used to test that direct edge gets deleted when operation chain exists.
     """
-    warehouse = OrgWarehouse.objects.create(org=org_with_dbt_workspace, wtype="postgres")
+    warehouse = OrgWarehouse.objects.create(
+        org=org_with_dbt_workspace, wtype="postgres"
+    )
     orgdbt = org_with_dbt_workspace.dbt
 
     # Create OrgDbtModel instances
@@ -533,7 +560,9 @@ def test_parse_dbt_manifest_preserves_operation_chains(operation_chain_graph):
                 "database": "test_db",
                 "schema": "analytics",
                 "path": "models/model2.sql",
-                "depends_on": {"nodes": ["model.test_project.model1"]},  # Depends on model1
+                "depends_on": {
+                    "nodes": ["model.test_project.model1"]
+                },  # Depends on model1
                 "columns": {
                     "id": {"name": "id", "data_type": "integer"},
                     "final_name": {"name": "final_name", "data_type": "text"},
@@ -558,7 +587,11 @@ def test_parse_dbt_manifest_preserves_operation_chains(operation_chain_graph):
     ):
         # Parse the manifest - this should detect the operation chain and NOT create direct edge
         result = parse_dbt_manifest_to_canvas(
-            org_with_dbt_workspace, orgdbt, warehouse, manifest_with_operation_chain, refresh=False
+            org_with_dbt_workspace,
+            orgdbt,
+            warehouse,
+            manifest_with_operation_chain,
+            refresh=False,
         )
 
         # Verify that no additional edges were created
@@ -568,9 +601,13 @@ def test_parse_dbt_manifest_preserves_operation_chains(operation_chain_graph):
         ), "Operation chain should be preserved, no direct edge should be added"
 
         # Verify the operation chain still exists intact
-        assert CanvasEdge.objects.filter(from_node=model1_node, to_node=op1_node).exists()
+        assert CanvasEdge.objects.filter(
+            from_node=model1_node, to_node=op1_node
+        ).exists()
         assert CanvasEdge.objects.filter(from_node=op1_node, to_node=op2_node).exists()
-        assert CanvasEdge.objects.filter(from_node=op2_node, to_node=model2_node).exists()
+        assert CanvasEdge.objects.filter(
+            from_node=op2_node, to_node=model2_node
+        ).exists()
 
         # Verify NO direct edge was created from model1 to model2
         direct_edge_exists = CanvasEdge.objects.filter(
@@ -617,7 +654,9 @@ def test_parse_dbt_manifest_deletes_existing_direct_edge_when_operation_chain_ex
     assert initial_edge_count == 4
 
     # Verify direct edge exists initially
-    assert CanvasEdge.objects.filter(from_node=model1_node, to_node=model2_node).exists()
+    assert CanvasEdge.objects.filter(
+        from_node=model1_node, to_node=model2_node
+    ).exists()
 
     # Create manifest that would create the direct dependency
     manifest = {
@@ -646,7 +685,9 @@ def test_parse_dbt_manifest_deletes_existing_direct_edge_when_operation_chain_ex
                 "database": "test_db",
                 "schema": "analytics",
                 "path": "models/model2.sql",
-                "depends_on": {"nodes": ["model.test_project.model1"]},  # This dependency exists
+                "depends_on": {
+                    "nodes": ["model.test_project.model1"]
+                },  # This dependency exists
                 "columns": {
                     "id": {"name": "id", "data_type": "integer"},
                     "processed_name": {"name": "processed_name", "data_type": "text"},
@@ -677,13 +718,21 @@ def test_parse_dbt_manifest_deletes_existing_direct_edge_when_operation_chain_ex
         direct_edge_exists = CanvasEdge.objects.filter(
             from_node=model1_node, to_node=model2_node
         ).exists()
-        assert not direct_edge_exists, "Direct edge should be DELETED when operation chain exists"
+        assert (
+            not direct_edge_exists
+        ), "Direct edge should be DELETED when operation chain exists"
 
         # Verify operation chain is intact
-        assert CanvasEdge.objects.filter(from_node=model1_node, to_node=op1_node).exists()
+        assert CanvasEdge.objects.filter(
+            from_node=model1_node, to_node=op1_node
+        ).exists()
         assert CanvasEdge.objects.filter(from_node=op1_node, to_node=op2_node).exists()
-        assert CanvasEdge.objects.filter(from_node=op2_node, to_node=model2_node).exists()
+        assert CanvasEdge.objects.filter(
+            from_node=op2_node, to_node=model2_node
+        ).exists()
 
         # Final edge count should be 3 (operation chain only, direct edge deleted)
         final_edge_count = CanvasEdge.objects.filter(from_node__orgdbt=orgdbt).count()
-        assert final_edge_count == 3, "Should only have operation chain edges, direct edge deleted"
+        assert (
+            final_edge_count == 3
+        ), "Should only have operation chain edges, direct edge deleted"

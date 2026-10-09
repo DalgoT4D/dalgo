@@ -120,7 +120,9 @@ def shelloprun(task_config: RunShellOperation):
         return result
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to run shell operation flow") from error
+        raise HTTPException(
+            status_code=400, detail="failed to run shell operation flow"
+        ) from error
 
 
 # =============================================================================
@@ -261,7 +263,9 @@ async def get_secret_block(blockname: str):
         raise HTTPException(status_code=404, detail=str(error)) from error
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to fetch secret block") from error
+        raise HTTPException(
+            status_code=400, detail="failed to fetch secret block"
+        ) from error
     return result
 
 
@@ -275,7 +279,9 @@ async def post_secret_block(payload: PrefectSecretBlockCreate):
         block_id, cleaned_blockname = await create_secret_block(payload)
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to prefect secret block") from error
+        raise HTTPException(
+            status_code=400, detail="failed to prefect secret block"
+        ) from error
     logger.info(
         "Created new secret block with ID: %s and name: %s",
         block_id,
@@ -294,7 +300,9 @@ async def put_secret_block(payload: PrefectSecretBlockEdit):
         block_id, cleaned_blockname = await upsert_secret_block(payload)
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to prefect secret block") from error
+        raise HTTPException(
+            status_code=400, detail="failed to prefect secret block"
+        ) from error
     logger.info(
         "Edited secret block with ID: %s and name: %s",
         block_id,
@@ -365,7 +373,9 @@ def post_dataflow_v1(payload: DeploymentCreate2):
         deployment = post_deployment_v1(payload)
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to create deployment") from error
+        raise HTTPException(
+            status_code=400, detail="failed to create deployment"
+        ) from error
     logger.info("Created new deployment: %s", deployment)
     return {"deployment": deployment}
 
@@ -381,7 +391,9 @@ def put_dataflow_v1(deployment_id, payload: DeploymentUpdate2):
         put_deployment_v1(deployment_id, payload)
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to update the deployment") from error
+        raise HTTPException(
+            status_code=400, detail="failed to update the deployment"
+        ) from error
     logger.info("Updated the deployment: %s", deployment_id)
     return {"success": 1}
 
@@ -428,7 +440,9 @@ async def get_flowrun(payload: FlowRunRequest):
         flow_runs = get_flow_runs_by_name(payload.name)
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to fetch flow_runs by name") from error
+        raise HTTPException(
+            status_code=400, detail="failed to fetch flow_runs by name"
+        ) from error
     if flow_runs:
         if len(flow_runs) > 1:
             logger.error("multiple flow names having name %s", payload.name)
@@ -463,7 +477,9 @@ def post_late_flow_runs(query: FilterLateFlowRuns):
         flow_runs = filter_late_flow_runs(query)
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to fetch late flow runs") from error
+        raise HTTPException(
+            status_code=400, detail="failed to fetch late flow runs"
+        ) from error
     return {"flow_runs": flow_runs}
 
 
@@ -491,7 +507,9 @@ def get_flow_run_by_id_poll(flow_run_id):
         raise TypeError("Flow run id must be a string")
 
     try:
-        flow_run = get_flow_run(flow_run_id=flow_run_id, update_state_from_task_runs=False)
+        flow_run = get_flow_run(
+            flow_run_id=flow_run_id, update_state_from_task_runs=False
+        )
     except Exception as error:
         logger.exception(error)
         raise HTTPException(
@@ -544,7 +562,9 @@ def post_deployments(payload: DeploymentFetch):
         )
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to filter deployments") from error
+        raise HTTPException(
+            status_code=400, detail="failed to filter deployments"
+        ) from error
     logger.info("Found deployments with payload: %s", payload)
     return {"deployments": deployments}
 
@@ -580,7 +600,9 @@ def get_flow_run_logs_paginated(
         return get_flow_run_logs(flow_run_id, task_run_id, limit, offset)
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to fetch logs for flow_run") from error
+        raise HTTPException(
+            status_code=400, detail="failed to fetch logs for flow_run"
+        ) from error
 
 
 @app.get("/proxy/flow_runs/v1/logs/{flow_run_id}")
@@ -593,7 +615,9 @@ def get_flow_run_logs_grouped(flow_run_id: str):
         return get_flow_run_logs_v2(flow_run_id)
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to fetch logs for flow_run") from error
+        raise HTTPException(
+            status_code=400, detail="failed to fetch logs for flow_run"
+        ) from error
 
 
 @app.get("/proxy/flow_runs/graph/{flow_run_id}")
@@ -606,7 +630,9 @@ def get_flow_run_graph(flow_run_id: str):
         return get_flow_run_tasks(flow_run_id)
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to fetch graph for flow_run") from error
+        raise HTTPException(
+            status_code=400, detail="failed to fetch graph for flow_run"
+        ) from error
 
 
 @app.get("/proxy/deployments/{deployment_id}")
@@ -663,7 +689,9 @@ async def post_create_deployment_flow_run(deployment_id, payload: dict = None):
 
 
 @app.post("/proxy/deployments/{deployment_id}/flow_run/schedule")
-async def post_schedule_deployment_flow_run(deployment_id, payload: ScheduleFlowRunRequest):
+async def post_schedule_deployment_flow_run(
+    deployment_id, payload: ScheduleFlowRunRequest
+):
     """Create a flow run from deployment"""
     if not isinstance(deployment_id, str):
         raise TypeError("deployment_id must be a string")
@@ -745,5 +773,7 @@ def post_filter_prefect_workers(payload: FilterPrefectWorkers):
         logger.info(f"Found {count} workers")
     except Exception as error:
         logger.exception(error)
-        raise HTTPException(status_code=400, detail="failed to fetch prefect workers") from error
+        raise HTTPException(
+            status_code=400, detail="failed to fetch prefect workers"
+        ) from error
     return {"count": count}

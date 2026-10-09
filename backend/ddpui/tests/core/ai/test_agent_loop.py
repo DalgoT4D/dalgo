@@ -33,7 +33,9 @@ class ScriptedChatModel(BaseChatModel):
         self.calls += 1
         response = AIMessage(
             content=template.content,
-            tool_calls=[{**tc, "id": f"{tc['id']}-{self.calls}"} for tc in template.tool_calls],
+            tool_calls=[
+                {**tc, "id": f"{tc['id']}-{self.calls}"} for tc in template.tool_calls
+            ],
         )
         return ChatResult(generations=[ChatGeneration(message=response)])
 
@@ -76,14 +78,20 @@ def test_realistic_discovery_turn_fits_in_the_recursion_limit():
     from langgraph.types import Command
 
     def tool_call(name, args, call_id):
-        return AIMessage(content="", tool_calls=[{"name": name, "args": args, "id": call_id}])
+        return AIMessage(
+            content="", tool_calls=[{"name": name, "args": args, "id": call_id}]
+        )
 
     model = ScriptedChatModel(
         script=[
             tool_call("list_schemas", {}, "c1"),
             tool_call("list_tables", {"schema_name": "prod"}, "c2"),
-            tool_call("get_table_details", {"schema_name": "prod", "table_name": "t"}, "c3"),
-            tool_call("get_table_details", {"schema_name": "prod", "table_name": "t"}, "c4"),
+            tool_call(
+                "get_table_details", {"schema_name": "prod", "table_name": "t"}, "c3"
+            ),
+            tool_call(
+                "get_table_details", {"schema_name": "prod", "table_name": "t"}, "c4"
+            ),
             tool_call(
                 "lookup_column_values",
                 {"schema_name": "prod", "table_name": "t", "column_name": "c"},
@@ -135,7 +143,9 @@ def test_sql_error_recovery_second_attempt_succeeds():
     model = ScriptedChatModel(
         script=[
             sql_call("SELECT districtname FROM prod.surveys", "c1"),  # fails
-            sql_call("SELECT district, COUNT(*) AS n FROM prod.surveys GROUP BY 1", "c2"),
+            sql_call(
+                "SELECT district, COUNT(*) AS n FROM prod.surveys GROUP BY 1", "c2"
+            ),
             AIMessage(content="Most surveys were in Pune."),
         ]
     )

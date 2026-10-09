@@ -155,7 +155,9 @@ class TestUpdateComment:
         comment.delete()
 
     @patch("ddpui.core.reports.mention_service.MentionService.process_mentions")
-    def test_clears_old_mentions(self, mock_mentions, snapshot, author_orguser, other_orguser, org):
+    def test_clears_old_mentions(
+        self, mock_mentions, snapshot, author_orguser, other_orguser, org
+    ):
         comment = Comment.objects.create(
             target_type=CommentTargetType.SUMMARY,
             snapshot=snapshot,
@@ -302,7 +304,9 @@ class TestDeleteComment:
         assert my_comment.content == ""
         assert my_comment.mentioned_emails == []
 
-    def test_view_holder_non_author_raises_P04(self, snapshot, author_orguser, view_only_user, org):
+    def test_view_holder_non_author_raises_P04(
+        self, snapshot, author_orguser, view_only_user, org
+    ):
         """Spec §"Story 15" P04: View-holder cannot delete another user's comment.
         (Was formerly test_non_author_raises using an Admin — that no longer
         raises because Edit-holders can now moderate per P03.)"""
@@ -321,7 +325,9 @@ class TestDeleteComment:
             )
         comment.delete()
 
-    def test_edit_holder_can_moderate_P03(self, snapshot, author_orguser, other_orguser, org):
+    def test_edit_holder_can_moderate_P03(
+        self, snapshot, author_orguser, other_orguser, org
+    ):
         """Spec §"Story 15" P03: Edit-holder (moderator) deletes another user's
         comment. other_orguser is an Admin (implicit Edit) → succeeds."""
         comment = Comment.objects.create(

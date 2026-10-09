@@ -41,7 +41,9 @@ def test_returns_verdict_with_caveat():
     result = run(
         audit_turn(
             question="how many farmers enrolled?",
-            sql_queries=[{"sql": "SELECT COUNT(*) FROM prod.visits", "status": "success"}],
+            sql_queries=[
+                {"sql": "SELECT COUNT(*) FROM prod.visits", "status": "success"}
+            ],
             result_table={"columns": ["count"], "rows": [["1284"]], "row_count": 1},
             answer="1,284 farmers enrolled.",
             model=model,
@@ -51,7 +53,9 @@ def test_returns_verdict_with_caveat():
     assert "unique farmers" in result["caveat"]
     # the judge saw the SQL, the result, and the answer
     prompt = model.prompts[0]
-    assert "SELECT COUNT(*)" in prompt and "1284" in prompt and "1,284 farmers" in prompt
+    assert (
+        "SELECT COUNT(*)" in prompt and "1284" in prompt and "1,284 farmers" in prompt
+    )
 
 
 def test_ok_verdict_passes_through():
@@ -69,7 +73,10 @@ def test_ok_verdict_passes_through():
 
 
 def test_skips_when_no_sql_ran():
-    assert run(audit_turn(question="q", sql_queries=[], result_table=None, answer="a")) is None
+    assert (
+        run(audit_turn(question="q", sql_queries=[], result_table=None, answer="a"))
+        is None
+    )
 
 
 def test_never_raises_on_garbage_or_errors():

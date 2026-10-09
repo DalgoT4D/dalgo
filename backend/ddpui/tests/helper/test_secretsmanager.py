@@ -46,7 +46,9 @@ def test_save_github_pat(mock_getclient: Mock):
     createsecret_mock = Mock(return_value={"Name": "secretname"})
     mock_getclient.return_value = Mock(create_secret=createsecret_mock)
     response = save_github_pat("newtoken")
-    createsecret_mock.assert_called_once_with(Name="secretname", SecretString="newtoken")
+    createsecret_mock.assert_called_once_with(
+        Name="secretname", SecretString="newtoken"
+    )
     assert response == "secretname"
 
 
@@ -64,7 +66,9 @@ def test_update_github_pat(mock_getclient: Mock):
     update_secret_mock = Mock(return_value={"Name": "secretname"})
     mock_getclient.return_value = Mock(update_secret=update_secret_mock)
     update_github_pat("access-token", "newtoken")
-    update_secret_mock.assert_called_once_with(SecretId="access-token", SecretString="newtoken")
+    update_secret_mock.assert_called_once_with(
+        SecretId="access-token", SecretString="newtoken"
+    )
 
 
 @patch("ddpui.utils.secretsmanager.get_client")

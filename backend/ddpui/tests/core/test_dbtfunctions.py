@@ -48,7 +48,8 @@ def test_map_airbyte_destination_spec_to_dbtcli_profile_success_tunnel_params(tm
     assert res["ssh_username"] == conn_info["tunnel_method"]["tunnel_user"]
     assert res["ssh_pkey"] == conn_info["tunnel_method"]["ssh_key"]
     assert (
-        res["ssh_private_key_password"] == conn_info["tunnel_method"]["tunnel_private_key_password"]
+        res["ssh_private_key_password"]
+        == conn_info["tunnel_method"]["tunnel_private_key_password"]
     )
 
     # SSH_PASSWORD_AUTH

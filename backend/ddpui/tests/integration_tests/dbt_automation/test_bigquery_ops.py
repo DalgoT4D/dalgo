@@ -6,7 +6,10 @@ import math
 import json
 import subprocess
 from logging import basicConfig, getLogger, INFO
-from ddpui.core.dbt_automation.operations.droprenamecolumns import rename_columns, drop_columns
+from ddpui.core.dbt_automation.operations.droprenamecolumns import (
+    rename_columns,
+    drop_columns,
+)
 from ddpui.core.dbt_automation.operations.flattenjson import flattenjson
 from ddpui.core.dbt_automation.operations.generic import generic_function
 from ddpui.core.dbt_automation.operations.mergeoperations import (
@@ -44,7 +47,9 @@ class TestBigqueryOperations:
         json.loads(os.getenv("TEST_BG_SERVICEJSON")),
         os.environ.get("TEST_BG_LOCATION"),
     )
-    schema = os.environ.get("TEST_BG_DATASET_SRC")  # source schema where the raw data lies
+    schema = os.environ.get(
+        "TEST_BG_DATASET_SRC"
+    )  # source schema where the raw data lies
 
     @staticmethod
     def execute_dbt(cmd: str, select_model: str = None):
@@ -52,7 +57,10 @@ class TestBigqueryOperations:
             select_cli = ["--select", select_model] if select_model is not None else []
             subprocess.check_call(
                 [
-                    Path(TestBigqueryOperations.test_project_dir) / "venv" / "bin" / "dbt",
+                    Path(TestBigqueryOperations.test_project_dir)
+                    / "venv"
+                    / "bin"
+                    / "dbt",
                     cmd,
                 ]
                 + select_cli
@@ -117,7 +125,9 @@ class TestBigqueryOperations:
         TestBigqueryOperations.execute_dbt("run", "_airbyte_raw_Sheet1")
         TestBigqueryOperations.execute_dbt("run", "_airbyte_raw_Sheet2")
         logger.info("inside test flatten")
-        logger.info(f"inside project directory : {TestBigqueryOperations.test_project_dir}")
+        logger.info(
+            f"inside project directory : {TestBigqueryOperations.test_project_dir}"
+        )
         assert "_airbyte_raw_Sheet1" in TestBigqueryOperations.wc_client.get_tables(
             "pytest_intermediate"
         )
@@ -151,7 +161,9 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "ngo" in cols
         assert "month" in cols
@@ -185,7 +197,9 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "MONTH" not in cols
 
@@ -217,7 +231,9 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "coalesce" in cols
         col_data = wc_client.get_table_data("pytest_intermediate", output_name, 5)
@@ -274,7 +290,9 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "concat_col" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 1)
@@ -318,7 +336,9 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "measure1" in cols
         assert "measure2" in cols
@@ -359,11 +379,16 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "add_col" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 1)
-        assert table_data[0]["add_col"] == table_data[0]["measure1"] + table_data[0]["measure2"]
+        assert (
+            table_data[0]["add_col"]
+            == table_data[0]["measure1"] + table_data[0]["measure2"]
+        )
 
     def test_arithmetic_sub(self):
         """test arithmetic subtraction"""
@@ -397,11 +422,16 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "sub_col" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 1)
-        assert table_data[0]["sub_col"] == table_data[0]["measure1"] - table_data[0]["measure2"]
+        assert (
+            table_data[0]["sub_col"]
+            == table_data[0]["measure1"] - table_data[0]["measure2"]
+        )
 
     def test_arithmetic_mul(self):
         """test arithmetic multiplication"""
@@ -435,11 +465,16 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "mul_col" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 1)
-        assert table_data[0]["mul_col"] == table_data[0]["measure1"] * table_data[0]["measure2"]
+        assert (
+            table_data[0]["mul_col"]
+            == table_data[0]["measure1"] * table_data[0]["measure2"]
+        )
 
     def test_arithmetic_div(self):
         """test arithmetic division"""
@@ -473,7 +508,9 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "div_col" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 1)
@@ -481,7 +518,11 @@ class TestBigqueryOperations:
             math.ceil(table_data[0]["measure1"] / table_data[0]["measure2"])
             if table_data[0]["measure2"] != 0
             else None
-        ) == (math.ceil(table_data[0]["div_col"]) if table_data[0]["div_col"] is not None else None)
+        ) == (
+            math.ceil(table_data[0]["div_col"])
+            if table_data[0]["div_col"] is not None
+            else None
+        )
 
     def test_regexextract(self):
         """test regex extraction"""
@@ -510,16 +551,24 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "NGO" in cols
-        table_data_org = wc_client.get_table_data("pytest_intermediate", "_airbyte_raw_Sheet1", 10)
+        table_data_org = wc_client.get_table_data(
+            "pytest_intermediate", "_airbyte_raw_Sheet1", 10
+        )
         table_data_org.sort(key=lambda x: x["Month"])
-        table_data_regex = wc_client.get_table_data("pytest_intermediate", output_name, 10)
+        table_data_regex = wc_client.get_table_data(
+            "pytest_intermediate", output_name, 10
+        )
         table_data_regex.sort(key=lambda x: x["Month"])
         for regex, org in zip(table_data_regex, table_data_org):
             assert (
-                regex["NGO"] == org["NGO"] if org["NGO"].startswith("C") else (regex["NGO"] is None)
+                regex["NGO"] == org["NGO"]
+                if org["NGO"].startswith("C")
+                else (regex["NGO"] is None)
             )
 
     def test_aggregate(self):
@@ -559,11 +608,15 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "agg1" in cols
         assert "agg2" in cols
-        table_data_agg = wc_client.get_table_data("pytest_intermediate", output_name, 10)
+        table_data_agg = wc_client.get_table_data(
+            "pytest_intermediate", output_name, 10
+        )
         assert len(table_data_agg) == 5
 
     def test_casewhen(self):
@@ -614,7 +667,9 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "spoc_category_renamed" in cols
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 10)
@@ -637,7 +692,14 @@ class TestBigqueryOperations:
             },
             "dest_schema": "pytest_intermediate",
             "output_name": output_name,
-            "source_columns": ["NGO", "Month", "measure1", "measure2", "Indicator", "SPOC"],
+            "source_columns": [
+                "NGO",
+                "Month",
+                "measure1",
+                "measure2",
+                "Indicator",
+                "SPOC",
+            ],
             "groupby_columns": ["SPOC"],
             "pivot_column_name": "NGO",
             "pivot_column_values": ["IMAGE", "FDSR", "CRC", "BAMANEH", "JTS"],
@@ -653,9 +715,13 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
-        assert sorted(cols) == sorted(config["pivot_column_values"] + config["groupby_columns"])
+        assert sorted(cols) == sorted(
+            config["pivot_column_values"] + config["groupby_columns"]
+        )
         table_data = wc_client.get_table_data("pytest_intermediate", output_name, 10)
         assert len(table_data) == 3
 
@@ -699,9 +765,15 @@ class TestBigqueryOperations:
 
         TestBigqueryOperations.execute_dbt("run", output_name)
 
-        table_data1 = wc_client.get_table_data("pytest_intermediate", "_airbyte_raw_Sheet1", 10)
-        table_data2 = wc_client.get_table_data("pytest_intermediate", "_airbyte_raw_Sheet2", 10)
-        table_data_union = wc_client.get_table_data("pytest_intermediate", output_name, 10)
+        table_data1 = wc_client.get_table_data(
+            "pytest_intermediate", "_airbyte_raw_Sheet1", 10
+        )
+        table_data2 = wc_client.get_table_data(
+            "pytest_intermediate", "_airbyte_raw_Sheet2", 10
+        )
+        table_data_union = wc_client.get_table_data(
+            "pytest_intermediate", output_name, 10
+        )
 
         assert len(table_data1) + len(table_data2) == len(table_data_union)
 
@@ -744,10 +816,14 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert len(cols) == 2
-        assert sorted(cols) == sorted([config["unpivot_field_name"], config["unpivot_value_name"]])
+        assert sorted(cols) == sorted(
+            [config["unpivot_field_name"], config["unpivot_value_name"]]
+        )
 
     def test_merge_operation(self):
         """test merge_operation"""
@@ -915,7 +991,9 @@ class TestBigqueryOperations:
                             {
                                 "col_name": "ngo",
                                 "output_column_name": "ngo_replaced",
-                                "replace_ops": [{"find": "CRC", "replace": "NGO_REPLACED_NAME"}],
+                                "replace_ops": [
+                                    {"find": "CRC", "replace": "NGO_REPLACED_NAME"}
+                                ],
                             }
                         ],
                     },
@@ -939,7 +1017,9 @@ class TestBigqueryOperations:
         TestBigqueryOperations.execute_dbt("run", output_name)
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "ngo" in cols
         assert "measure1" in cols
@@ -956,7 +1036,10 @@ class TestBigqueryOperations:
         assert type(table_data[0]["measure2"]) == int
         assert "NGO_REPLACED_NAME" in [row["ngo_replaced"] for row in table_data]
 
-        assert table_data[0]["add_col"] == table_data[0]["measure1"] + table_data[0]["measure2"]
+        assert (
+            table_data[0]["add_col"]
+            == table_data[0]["measure1"] + table_data[0]["measure2"]
+        )
 
         initial_raw_data = wc_client.get_table_data(
             "pytest_intermediate", "_airbyte_raw_Sheet1", 10
@@ -965,7 +1048,9 @@ class TestBigqueryOperations:
         assert (
             len(
                 set([row["concat_col"] for row in table_data])
-                - set([row["NGO"] + row["Indicator"] + "test" for row in initial_raw_data])
+                - set(
+                    [row["NGO"] + row["Indicator"] + "test" for row in initial_raw_data]
+                )
             )
             == 0
         )
@@ -1008,7 +1093,9 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
 
         assert "_airbyte_data_NGO" in cols
@@ -1050,7 +1137,9 @@ class TestBigqueryOperations:
 
         cols = [
             col_dict["name"]
-            for col_dict in wc_client.get_table_columns("pytest_intermediate", output_name)
+            for col_dict in wc_client.get_table_columns(
+                "pytest_intermediate", output_name
+            )
         ]
         assert "NGO" in cols
         assert "Indicator" in cols
@@ -1058,7 +1147,9 @@ class TestBigqueryOperations:
         ngo_column = [row["ngo_lower"] for row in table_data]
 
         for value in ngo_column:
-            assert value == value.lower(), f"Value {value} in 'NGO' column is not lowercase"
+            assert (
+                value == value.lower()
+            ), f"Value {value} in 'NGO' column is not lowercase"
 
     def test_generic_sql_function(self):
         """test generic raw sql"""

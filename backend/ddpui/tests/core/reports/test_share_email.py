@@ -335,7 +335,9 @@ class TestSendReportEmailTask:
         snapshot.save(update_fields=["is_public", "public_share_token"])
 
         mock_private_url.return_value = "https://app.dalgo.org/reports/1"
-        mock_public_url.return_value = "https://app.dalgo.org/share/report/public-token-abc"
+        mock_public_url.return_value = (
+            "https://app.dalgo.org/share/report/public-token-abc"
+        )
         mock_ensure_token.return_value = "public-token-abc"
         mock_generate_pdf.return_value = b"%PDF-1.4 content"
 

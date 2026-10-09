@@ -80,7 +80,9 @@ def seed_master_tasks():
 def test_get_message_type():
     """tests the get_message_type function"""
     assert (
-        get_message_type({"state": {"state_details": {"flow_run_id": "THEID"}}, "id": "THEID"})
+        get_message_type(
+            {"state": {"state_details": {"flow_run_id": "THEID"}}, "id": "THEID"}
+        )
         == FLOW_RUN
     )
     assert get_message_type({"state": {"state_details": {}}, "id": "THEID"}) is None
@@ -124,7 +126,9 @@ def test_post_notification_v1_orchestrate():
     deployment_id = "test-deployment-id"
     connection_id = "test-connection_id"
     connection_name = "test-connection_name"
-    ConnectionMeta.objects.create(connection_id=connection_id, connection_name=connection_name)
+    ConnectionMeta.objects.create(
+        connection_id=connection_id, connection_name=connection_name
+    )
     flow_run = {
         "parameters": {
             "config": {"org_slug": org.slug, "connection_id": connection_id},
@@ -139,9 +143,14 @@ def test_post_notification_v1_orchestrate():
         "state_name": FLOW_RUN_FAILED_STATE_NAME,
     }
     odf = OrgDataFlowv1.objects.create(
-        org=org, name=deployment_id, dataflow_type="orchestrate", deployment_id=deployment_id
+        org=org,
+        name=deployment_id,
+        dataflow_type="orchestrate",
+        deployment_id=deployment_id,
     )
-    with patch("ddpui.ddpprefect.prefect_service.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.ddpprefect.prefect_service.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.core.webhooks.webhook_functions.notify_users_about_failed_run"
     ) as mock_notify_users_about_failed_run:
         mock_get_flow_run.return_value = flow_run
@@ -161,7 +170,9 @@ def test_post_notification_v1_manual_with_connection_id():
     deployment_id = "test-deployment-id"
     connection_id = "test-connection_id"
     connection_name = "test-connection_name"
-    ConnectionMeta.objects.create(connection_id=connection_id, connection_name=connection_name)
+    ConnectionMeta.objects.create(
+        connection_id=connection_id, connection_name=connection_name
+    )
     flow_run = {
         "parameters": {
             "config": {"org_slug": org.slug, "connection_id": connection_id},
@@ -178,7 +189,9 @@ def test_post_notification_v1_manual_with_connection_id():
     odf = OrgDataFlowv1.objects.create(
         org=org, name=deployment_id, dataflow_type="manual", deployment_id=deployment_id
     )
-    with patch("ddpui.ddpprefect.prefect_service.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.ddpprefect.prefect_service.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.core.webhooks.webhook_functions.notify_users_about_failed_run"
     ) as mock_notify_users_about_failed_run:
         mock_get_flow_run.return_value = flow_run
@@ -215,7 +228,9 @@ def test_post_notification_v1_manual_with_orgtask_id(seed_master_tasks):
     odf = OrgDataFlowv1.objects.create(
         org=org, name=deployment_id, dataflow_type="manual", deployment_id=deployment_id
     )
-    with patch("ddpui.ddpprefect.prefect_service.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.ddpprefect.prefect_service.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.core.webhooks.webhook_functions.notify_users_about_failed_run"
     ) as mock_notify_users_about_failed_run:
         mock_get_flow_run.return_value = flow_run
@@ -250,9 +265,14 @@ def test_post_notification_v1_email_supersadmins():
     }
     # Create OrgDataFlowv1 to match webhook logic
     odf = OrgDataFlowv1.objects.create(
-        org=org, name=deployment_id, dataflow_type="orchestrate", deployment_id=deployment_id
+        org=org,
+        name=deployment_id,
+        dataflow_type="orchestrate",
+        deployment_id=deployment_id,
     )
-    with patch("ddpui.ddpprefect.prefect_service.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.ddpprefect.prefect_service.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.core.webhooks.webhook_functions.notify_users_about_failed_run"
     ) as mock_notify_users_about_failed_run:
         mock_get_flow_run.return_value = flow_run
@@ -313,7 +333,9 @@ def test_post_notification_v1_webhook_scheduled_pipeline(seed_master_tasks):
     call_command("create-system-orguser")
 
     # Pending; first message from prefect; deployment has just been triggered
-    with patch("ddpui.ddpprefect.prefect_service.get_flow_run_poll") as mock_get_flow_run:
+    with patch(
+        "ddpui.ddpprefect.prefect_service.get_flow_run_poll"
+    ) as mock_get_flow_run:
         mock_get_flow_run.return_value = flow_run
         do_handle_prefect_webhook(flow_run["id"], flow_run["state_name"])
         assert (
@@ -324,12 +346,16 @@ def test_post_notification_v1_webhook_scheduled_pipeline(seed_master_tasks):
         )
         # the dataflow & its orgtasks should be locked
         assert (
-            TaskLock.objects.filter(locking_dataflow=dataflow, flow_run_id=flow_run["id"]).count()
+            TaskLock.objects.filter(
+                locking_dataflow=dataflow, flow_run_id=flow_run["id"]
+            ).count()
             == 2
         )
 
     # Running; second message from prefect; deployment is running
-    with patch("ddpui.ddpprefect.prefect_service.get_flow_run_poll") as mock_get_flow_run:
+    with patch(
+        "ddpui.ddpprefect.prefect_service.get_flow_run_poll"
+    ) as mock_get_flow_run:
         flow_run["status"] = FLOW_RUN_RUNNING_STATE_TYPE
         flow_run["state_name"] = FLOW_RUN_RUNNING_STATE_NAME
         mock_get_flow_run.return_value = flow_run
@@ -337,12 +363,16 @@ def test_post_notification_v1_webhook_scheduled_pipeline(seed_master_tasks):
         assert PrefectFlowRun.objects.filter(flow_run_id=flow_run["id"]).count() == 1
         # the dataflow & its orgtasks should still be locked
         assert (
-            TaskLock.objects.filter(locking_dataflow=dataflow, flow_run_id=flow_run["id"]).count()
+            TaskLock.objects.filter(
+                locking_dataflow=dataflow, flow_run_id=flow_run["id"]
+            ).count()
             == 2
         )
 
     # Failed (any terminal state); third message from prefect; deployment has failed
-    with patch("ddpui.ddpprefect.prefect_service.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.ddpprefect.prefect_service.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.core.webhooks.webhook_functions.notify_users_about_failed_run"
     ) as mock_notify_users_about_failed_run:
         flow_run["status"] = FLOW_RUN_FAILED_STATE_TYPE
@@ -356,7 +386,9 @@ def test_post_notification_v1_webhook_scheduled_pipeline(seed_master_tasks):
             == 1
         )
         assert (
-            TaskLock.objects.filter(locking_dataflow=dataflow, flow_run_id=flow_run["id"]).count()
+            TaskLock.objects.filter(
+                locking_dataflow=dataflow, flow_run_id=flow_run["id"]
+            ).count()
             == 0
         )
         mock_notify_users_about_failed_run.assert_called_once_with(
@@ -364,7 +396,9 @@ def test_post_notification_v1_webhook_scheduled_pipeline(seed_master_tasks):
         )
 
     # Failed (crashed); with retry logic
-    with patch("ddpui.ddpprefect.prefect_service.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.ddpprefect.prefect_service.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.ddpprefect.prefect_service.retry_flow_run"
     ) as mock_retry_flow_run:
         flow_run["status"] = FLOW_RUN_CRASHED_STATE_TYPE
@@ -393,7 +427,9 @@ def test_post_notification_v1_webhook_scheduled_pipeline(seed_master_tasks):
     PrefectFlowRun.objects.filter(flow_run_id=flow_run["id"]).update(
         status=FLOW_RUN_PENDING_STATE_TYPE, state_name=FLOW_RUN_PENDING_STATE_NAME
     )
-    with patch("ddpui.ddpprefect.prefect_service.get_flow_run_poll") as mock_get_flow_run:
+    with patch(
+        "ddpui.ddpprefect.prefect_service.get_flow_run_poll"
+    ) as mock_get_flow_run:
         flow_run["status"] = FLOW_RUN_COMPLETED_STATE_TYPE
         flow_run["state_name"] = FLOW_RUN_COMPLETED_STATE_NAME
         mock_get_flow_run.return_value = flow_run
@@ -405,7 +441,9 @@ def test_post_notification_v1_webhook_scheduled_pipeline(seed_master_tasks):
             == 1
         )
         assert (
-            TaskLock.objects.filter(locking_dataflow=dataflow, flow_run_id=flow_run["id"]).count()
+            TaskLock.objects.filter(
+                locking_dataflow=dataflow, flow_run_id=flow_run["id"]
+            ).count()
             == 0
         )
 

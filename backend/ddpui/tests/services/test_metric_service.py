@@ -35,7 +35,9 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture
 def authuser():
     user = User.objects.create(
-        username="metricserviceuser", email="metricserviceuser@test.com", password="testpassword"
+        username="metricserviceuser",
+        email="metricserviceuser@test.com",
+        password="testpassword",
     )
     yield user
     user.delete()
@@ -77,7 +79,9 @@ def orguser(authuser, org):
 @pytest.fixture
 def analyst_orguser(org):
     """A second user in the same org with the (non-admin) analyst role."""
-    user = User.objects.create(username="metricsvcanalyst", email="metricsvcanalyst@test.com")
+    user = User.objects.create(
+        username="metricsvcanalyst", email="metricsvcanalyst@test.com"
+    )
     orguser = OrgUser.objects.create(
         user=user,
         org=org,
@@ -134,14 +138,20 @@ class TestMetricValidation:
     def test_validate_simple_valid(self):
         MetricService.validate_metric_payload(
             MetricPayload(
-                name="test", schema_name="s", table_name="t", column="amount", aggregation="sum"
+                name="test",
+                schema_name="s",
+                table_name="t",
+                column="amount",
+                aggregation="sum",
             )
         )
 
     def test_validate_count_star(self):
         """COUNT(*) — column is None, aggregation is count"""
         MetricService.validate_metric_payload(
-            MetricPayload(name="test", schema_name="s", table_name="t", aggregation="count")
+            MetricPayload(
+                name="test", schema_name="s", table_name="t", aggregation="count"
+            )
         )
 
     def test_validate_expression_valid(self):
@@ -176,7 +186,12 @@ class TestMetricValidation:
     def test_validate_empty_expression_rejected(self):
         with pytest.raises(MetricValidationError, match="Provide either"):
             MetricService.validate_metric_payload(
-                MetricPayload(name="test", schema_name="s", table_name="t", column_expression="   ")
+                MetricPayload(
+                    name="test",
+                    schema_name="s",
+                    table_name="t",
+                    column_expression="   ",
+                )
             )
 
     def test_validate_invalid_aggregation(self):
@@ -194,13 +209,17 @@ class TestMetricValidation:
     def test_validate_missing_aggregation(self):
         with pytest.raises(MetricValidationError, match="aggregation is required"):
             MetricService.validate_metric_payload(
-                MetricPayload(name="test", schema_name="s", table_name="t", column="amount")
+                MetricPayload(
+                    name="test", schema_name="s", table_name="t", column="amount"
+                )
             )
 
     def test_validate_missing_column_for_non_count(self):
         with pytest.raises(MetricValidationError, match="column is required"):
             MetricService.validate_metric_payload(
-                MetricPayload(name="test", schema_name="s", table_name="t", aggregation="sum")
+                MetricPayload(
+                    name="test", schema_name="s", table_name="t", aggregation="sum"
+                )
             )
 
     def test_validate_expression_rejects_select_statement(self):
@@ -322,7 +341,9 @@ class TestMetricCRUD:
         metric.delete()
 
     @patch("ddpui.core.metric.metric_service.MetricService.validate_metric_query")
-    def test_create_duplicate_name_rejected(self, mock_validate, orguser, sample_metric, seed_db):
+    def test_create_duplicate_name_rejected(
+        self, mock_validate, orguser, sample_metric, seed_db
+    ):
         with pytest.raises(MetricValidationError, match="already exists"):
             MetricService.create_metric(
                 name="Test Metric",
@@ -369,7 +390,9 @@ class TestMetricCRUD:
         assert total == 0
 
     @patch("ddpui.core.metric.metric_service.MetricService.validate_metric_query")
-    def test_update_metric_name(self, mock_validate, orguser, org, sample_metric, seed_db):
+    def test_update_metric_name(
+        self, mock_validate, orguser, org, sample_metric, seed_db
+    ):
         updated = MetricService.update_metric(
             sample_metric.id,
             org,
@@ -385,7 +408,9 @@ class TestMetricCRUD:
         assert updated.name == "Renamed Metric"
 
     @patch("ddpui.core.metric.metric_service.MetricService.validate_metric_query")
-    def test_update_metric_definition(self, mock_validate, orguser, org, sample_metric, seed_db):
+    def test_update_metric_definition(
+        self, mock_validate, orguser, org, sample_metric, seed_db
+    ):
         OrgWarehouse.objects.create(org=org, wtype="postgres", credentials={})
         updated = MetricService.update_metric(
             sample_metric.id,
@@ -500,7 +525,9 @@ class TestMetricCRUD:
         finally:
             kpi.delete()
 
-    def test_delete_metric_non_admin_creator_can_delete_own(self, analyst_orguser, org, seed_db):
+    def test_delete_metric_non_admin_creator_can_delete_own(
+        self, analyst_orguser, org, seed_db
+    ):
         """A non-admin (analyst) can delete a metric they created."""
         metric = Metric.objects.create(
             name="Analyst Metric",

@@ -35,7 +35,9 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture
 def authuser():
     user = User.objects.create(
-        username="kpiserviceuser", email="kpiserviceuser@test.com", password="testpassword"
+        username="kpiserviceuser",
+        email="kpiserviceuser@test.com",
+        password="testpassword",
     )
     yield user
     user.delete()
@@ -215,7 +217,9 @@ class TestKPICRUD:
         assert response.extra_config.customizations.numberPrefix == "₹"
         kpi.delete()
 
-    def test_update_kpi_replaces_customizations(self, orguser, org, sample_kpi, seed_db):
+    def test_update_kpi_replaces_customizations(
+        self, orguser, org, sample_kpi, seed_db
+    ):
         """Updating a KPI with a new customizations payload replaces the stored config."""
         from ddpui.schemas.chart_schemas.customizations import NumberChartCustomizations
 
@@ -228,7 +232,9 @@ class TestKPICRUD:
             ),
         )
         updated = KPIService.update_kpi(sample_kpi.id, org, orguser, payload)
-        assert updated.extra_config["customizations"]["numberFormat"] == "adaptive_indian"
+        assert (
+            updated.extra_config["customizations"]["numberFormat"] == "adaptive_indian"
+        )
         assert updated.extra_config["customizations"]["decimalPlaces"] == 2
 
     def test_create_kpi_custom_name(self, orguser, sample_metric, seed_db):
@@ -267,7 +273,9 @@ class TestKPICRUD:
         with pytest.raises(KPIValidationError, match="Invalid time_grain"):
             KPIService.create_kpi(payload, orguser)
 
-    def test_create_kpi_invalid_thresholds_increase(self, orguser, sample_metric, seed_db):
+    def test_create_kpi_invalid_thresholds_increase(
+        self, orguser, sample_metric, seed_db
+    ):
         payload = KPICreate(
             metric_id=sample_metric.id,
             direction="increase",
@@ -279,7 +287,9 @@ class TestKPICRUD:
         with pytest.raises(KPIValidationError, match="green_threshold_pct"):
             KPIService.create_kpi(payload, orguser)
 
-    def test_create_kpi_invalid_thresholds_decrease(self, orguser, sample_metric, seed_db):
+    def test_create_kpi_invalid_thresholds_decrease(
+        self, orguser, sample_metric, seed_db
+    ):
         payload = KPICreate(
             metric_id=sample_metric.id,
             direction="decrease",
@@ -324,7 +334,9 @@ class TestKPICRUD:
         _, total = KPIService.list_kpis(org, orguser, search="nonexistent_xyz")
         assert total == 0
 
-    def test_list_kpis_search_by_program_tag(self, orguser, org, sample_metric, seed_db):
+    def test_list_kpis_search_by_program_tag(
+        self, orguser, org, sample_metric, seed_db
+    ):
         """Search should match program_tags as well as name."""
         kpi = KPI.objects.create(
             name="Enrollment KPI",
@@ -347,7 +359,9 @@ class TestKPICRUD:
             kpi.delete()
 
     def test_update_kpi(self, orguser, org, sample_kpi, seed_db):
-        payload = KPIUpdate(name="Updated KPI", target_value=2000.0, extra_config=KPIExtraConfig())
+        payload = KPIUpdate(
+            name="Updated KPI", target_value=2000.0, extra_config=KPIExtraConfig()
+        )
         updated = KPIService.update_kpi(sample_kpi.id, org, orguser, payload)
         assert updated.name == "Updated KPI"
         assert updated.target_value == 2000.0
@@ -363,7 +377,9 @@ class TestKPICRUD:
         with pytest.raises(KPINotFoundError):
             KPIService.get_kpi(kpi_id, org)
 
-    def test_delete_kpi_non_owner_analyst_denied(self, analyst_orguser, org, sample_kpi, seed_db):
+    def test_delete_kpi_non_owner_analyst_denied(
+        self, analyst_orguser, org, sample_kpi, seed_db
+    ):
         """A non-admin who didn't create the KPI cannot delete it."""
         with pytest.raises(KPIPermissionError):
             KPIService.delete_kpi(sample_kpi.id, org, analyst_orguser)
@@ -478,7 +494,9 @@ class TestKPIData:
             KPIService.get_kpi_data(99999, org)
 
     @patch("ddpui.core.kpi.kpi_service.KPIService._compute_trend")
-    def test_data_current_value_from_trend(self, mock_trend, orguser, org, sample_kpi, seed_db):
+    def test_data_current_value_from_trend(
+        self, mock_trend, orguser, org, sample_kpi, seed_db
+    ):
         """Current value is the last trend period's value."""
         mock_trend.return_value = [
             {"period": "Jan 2026", "value": 700.0},
@@ -497,7 +515,9 @@ class TestKPIData:
         OrgWarehouse.objects.filter(org=org).delete()
 
     @patch("ddpui.core.kpi.kpi_service.KPIService._compute_trend")
-    def test_data_no_trend_no_value(self, mock_trend, orguser, org, sample_kpi, seed_db):
+    def test_data_no_trend_no_value(
+        self, mock_trend, orguser, org, sample_kpi, seed_db
+    ):
         """No trend → current_value is None, data_last_date is None, empty echarts."""
         mock_trend.return_value = []
         OrgWarehouse.objects.create(org=org, wtype="postgres", credentials={})
@@ -586,7 +606,10 @@ class TestAnnotations:
         self._clear_annotations(sample_kpi)
 
     def test_update_annotation(self, orguser, org, sample_kpi, seed_db):
-        from ddpui.schemas.kpi_schema import AnnotationEntryCreate, AnnotationEntryUpdate
+        from ddpui.schemas.kpi_schema import (
+            AnnotationEntryCreate,
+            AnnotationEntryUpdate,
+        )
 
         self._clear_annotations(sample_kpi)
         create_payload = AnnotationEntryCreate(
@@ -594,7 +617,9 @@ class TestAnnotations:
             period_key="Mar 01, 2026",
             content="Original note.",
         )
-        created = KPIService.create_annotation(sample_kpi.id, org, orguser, create_payload)
+        created = KPIService.create_annotation(
+            sample_kpi.id, org, orguser, create_payload
+        )
 
         update_payload = AnnotationEntryUpdate(
             content="Updated note content.",

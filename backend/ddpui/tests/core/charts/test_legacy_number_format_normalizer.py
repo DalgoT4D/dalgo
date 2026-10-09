@@ -136,7 +136,12 @@ class TestTableColumnFormatting:
         assert normalize_customizations(cust, "table") == []
 
     def test_malformed_column_entry_skipped(self):
-        cust = {"columnFormatting": {"col": "not-a-dict", "ok": {"numberFormat": "currency"}}}
+        cust = {
+            "columnFormatting": {
+                "col": "not-a-dict",
+                "ok": {"numberFormat": "currency"},
+            }
+        }
         log = normalize_customizations(cust, "table")
         assert cust["columnFormatting"]["col"] == "not-a-dict"
         assert cust["columnFormatting"]["ok"]["numberFormat"] == "default"

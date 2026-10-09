@@ -16,7 +16,9 @@ from ddpui.core.datainsights.insights.insight_interface import (
     MAP_TRANSLATE_TYPES,
     TranslateColDataType,
 )
-from ddpui.core.datainsights.insights.numeric_type.numeric_insight import NumericColInsights
+from ddpui.core.datainsights.insights.numeric_type.numeric_insight import (
+    NumericColInsights,
+)
 
 
 @pytest.fixture

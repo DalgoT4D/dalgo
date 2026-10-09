@@ -81,7 +81,11 @@ def test_authenticate_success(
     permissions_json = json.dumps({str(mock_org_user.new_role.id): ["perm1", "perm2"]})
     # call 1: JTI blacklist check → None (not blacklisted)
     # call 2: orguser_role_map, call 3: permissions_map
-    mock_redis_client.return_value.get.side_effect = [None, permissions_json, permissions_json]
+    mock_redis_client.return_value.get.side_effect = [
+        None,
+        permissions_json,
+        permissions_json,
+    ]
     mock_request.headers["x-dalgo-org"] = "test-org"
     token = str(AccessToken.for_user(mock_user))
 

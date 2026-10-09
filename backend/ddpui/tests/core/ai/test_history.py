@@ -39,11 +39,16 @@ def test_non_sql_tools_and_empty_ai_messages_are_hidden():
     messages = [
         HumanMessage("q"),
         AIMessage("", tool_calls=[{"name": "list_tables", "args": {}, "id": "c1"}]),
-        ToolMessage(content="Tables in prod: ...", name="list_tables", tool_call_id="c1"),
+        ToolMessage(
+            content="Tables in prod: ...", name="list_tables", tool_call_id="c1"
+        ),
         AIMessage("Answer."),
     ]
     out = map_messages(messages)
-    assert [(m.role, m.content) for m in out] == [("user", "q"), ("assistant", "Answer.")]
+    assert [(m.role, m.content) for m in out] == [
+        ("user", "q"),
+        ("assistant", "Answer."),
+    ]
     assert out[1].sql_attachments == []
 
 
@@ -71,7 +76,9 @@ def test_legacy_dashboard_artifacts_replay_on_the_answer():
     reloading those sessions must still show the chip."""
     messages = [
         HumanMessage("put it on a new dashboard"),
-        AIMessage("", tool_calls=[{"name": "create_dashboard", "args": {}, "id": "d1"}]),
+        AIMessage(
+            "", tool_calls=[{"name": "create_dashboard", "args": {}, "id": "d1"}]
+        ),
         ToolMessage(
             content="Done — dashboard 'Field Ops' (id 7).",
             name="create_dashboard",
@@ -87,7 +94,12 @@ def test_legacy_dashboard_artifacts_replay_on_the_answer():
     ]
     out = map_messages(messages)
     assert [a.model_dump() for a in out[1].artifacts] == [
-        {"type": "dashboard", "object_id": 7, "title": "Field Ops", "url_path": "/dashboards/7"}
+        {
+            "type": "dashboard",
+            "object_id": 7,
+            "title": "Field Ops",
+            "url_path": "/dashboards/7",
+        }
     ]
 
 
@@ -126,7 +138,12 @@ def test_legacy_chart_artifacts_replay_on_the_answer():
     ]
     out = map_messages(messages)
     assert [a.model_dump() for a in out[1].artifacts] == [
-        {"type": "chart", "object_id": 42, "title": "Surveys by district", "url_path": "/charts/42"}
+        {
+            "type": "chart",
+            "object_id": 42,
+            "title": "Surveys by district",
+            "url_path": "/charts/42",
+        }
     ]
 
 
@@ -150,7 +167,12 @@ def test_created_metrics_replay_with_their_type():
     ]
     out = map_messages(messages)
     assert [a.model_dump() for a in out[1].artifacts] == [
-        {"type": "metric", "object_id": 5, "title": "Total surveys", "url_path": "/metrics"}
+        {
+            "type": "metric",
+            "object_id": 5,
+            "title": "Total surveys",
+            "url_path": "/metrics",
+        }
     ]
 
 
@@ -180,7 +202,10 @@ def test_a_message_typed_instead_of_approving_replays_as_the_users_bubble():
 
 def _ask(call_id: str, question: str) -> AIMessage:
     return AIMessage(
-        "", tool_calls=[{"name": "ask_user", "args": {"question": question}, "id": call_id}]
+        "",
+        tool_calls=[
+            {"name": "ask_user", "args": {"question": question}, "id": call_id}
+        ],
     )
 
 
@@ -210,7 +235,11 @@ def test_an_unanswered_question_shows_no_placeholder_reply():
         AIMessage("Here are all programs."),
     ]
 
-    assert [m.role for m in map_messages(messages)] == ["user", "assistant", "assistant"]
+    assert [m.role for m in map_messages(messages)] == [
+        "user",
+        "assistant",
+        "assistant",
+    ]
 
 
 def test_one_message_resolving_a_question_and_a_step_replays_once():

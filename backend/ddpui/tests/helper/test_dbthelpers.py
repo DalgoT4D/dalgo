@@ -71,7 +71,9 @@ def test_create_or_update_dbt_profile_secret_blk_reuses_row(mock_upsert: Mock):
 
     mock_upsert.return_value = {"block_id": "sec-id-2", "block_name": "dbt-profile-org"}
 
-    create_or_update_dbt_profile_secret_blk(org, warehouse, {"username": "u", "password": "pw2"})
+    create_or_update_dbt_profile_secret_blk(
+        org, warehouse, {"username": "u", "password": "pw2"}
+    )
 
     # Still only one row for this org (same name → update_or_create reused it)
     assert OrgPrefectBlockv1.objects.filter(org=org, block_type=SECRET).count() == 1
@@ -83,7 +85,8 @@ def test_create_or_update_dbt_profile_secret_blk_reuses_row(mock_upsert: Mock):
 def test_create_or_update_dbt_profile_secret_blk_no_orgdbt(mock_upsert: Mock):
     """When org.dbt is None: still upserts the block; default_schema is derived
     from airbyte_creds (postgres → creds['schema'], bigquery → creds['dataset_id']).
-    warehouse.dbt_profile_secret_block is still set; org.dbt.* is skipped (no orgdbt)."""
+    warehouse.dbt_profile_secret_block is still set; org.dbt.* is skipped (no orgdbt).
+    """
     org = Org.objects.create(name="org", slug="org")
     warehouse = OrgWarehouse.objects.create(org=org, wtype="postgres", name="wh")
 

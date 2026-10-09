@@ -69,7 +69,9 @@ def _make_public_request(body=None, query_params=None):
 @pytest.fixture
 def authuser():
     user = User.objects.create(
-        username="pubreportuser", email="pubreportuser@test.com", password="testpassword"
+        username="pubreportuser",
+        email="pubreportuser@test.com",
+        password="testpassword",
     )
     yield user
     user.delete()
@@ -190,7 +192,9 @@ def public_snapshot(orguser, org, sample_dashboard, sample_filter, sample_chart)
     )
 
     request = mock_request(orguser)
-    update_general_access(request, "report", str(snapshot.id), GeneralAccessPayload(mode="public"))
+    update_general_access(
+        request, "report", str(snapshot.id), GeneralAccessPayload(mode="public")
+    )
     snapshot.refresh_from_db()
 
     yield snapshot
@@ -232,7 +236,9 @@ def private_snapshot(orguser, org, sample_dashboard, sample_filter, sample_chart
 class TestGetPublicReport:
     """Tests for get_public_report endpoint"""
 
-    @patch("ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs")
+    @patch(
+        "ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs"
+    )
     def test_valid_token(self, mock_inject, public_snapshot, seed_db):
         """Valid public token returns report view data"""
         request = _make_public_request()
@@ -244,7 +250,9 @@ class TestGetPublicReport:
         assert "report_metadata" in response
         assert response["report_metadata"]["title"] == "Public Report"
 
-    @patch("ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs")
+    @patch(
+        "ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs"
+    )
     def test_returns_org_slug(self, mock_inject, public_snapshot, seed_db):
         """The response carries the org's stable slug, not just its display name.
 
@@ -308,7 +316,9 @@ class TestGetPublicReportChartData:
     def test_invalid_token(self, seed_db):
         """Invalid token returns 404"""
         request = _make_public_request()
-        status, response = get_public_report_chart_data(request, "bad-token", chart_id=1)
+        status, response = get_public_report_chart_data(
+            request, "bad-token", chart_id=1
+        )
 
         assert status == 404
         assert response.is_valid is False
@@ -361,7 +371,9 @@ class TestGetPublicReportTableData:
     def test_invalid_token(self, seed_db):
         """Invalid token returns 404"""
         request = _make_public_request()
-        status, response = get_public_report_table_data(request, "bad-token", chart_id=1)
+        status, response = get_public_report_table_data(
+            request, "bad-token", chart_id=1
+        )
 
         assert status == 404
         assert response.is_valid is False
@@ -436,7 +448,9 @@ class TestGetPublicReportTableData:
 
             mock_resolve.assert_called_once()
 
-    def test_non_dict_json_dashboard_filters_skips_resolution(self, public_snapshot, seed_db):
+    def test_non_dict_json_dashboard_filters_skips_resolution(
+        self, public_snapshot, seed_db
+    ):
         """dashboard_filters='[1,2,3]' is valid JSON but not a dict — treated
         as no filters, same as the private report endpoints."""
         with patch("ddpui.api.public_api.OrgWarehouse.objects") as mock_ow, patch(
@@ -475,7 +489,9 @@ class TestGetPublicReportTableTotalRows:
     def test_invalid_token(self, seed_db):
         """Invalid token returns 404"""
         request = _make_public_request()
-        status, response = get_public_report_table_total_rows(request, "bad-token", chart_id=1)
+        status, response = get_public_report_table_total_rows(
+            request, "bad-token", chart_id=1
+        )
 
         assert status == 404
         assert response.is_valid is False
@@ -520,7 +536,9 @@ class TestGetPublicReportTableTotalRows:
 
             mock_resolve.assert_called_once()
 
-    def test_non_dict_json_dashboard_filters_skips_resolution(self, public_snapshot, seed_db):
+    def test_non_dict_json_dashboard_filters_skips_resolution(
+        self, public_snapshot, seed_db
+    ):
         with patch("ddpui.api.public_api.OrgWarehouse.objects") as mock_ow, patch(
             "ddpui.api.public_api.DashboardService.resolve_dashboard_filters_for_chart"
         ) as mock_resolve, patch(
@@ -550,7 +568,9 @@ class TestGetPublicReportMapData:
 
     def test_invalid_token(self, seed_db):
         """Invalid token returns 404"""
-        request = _make_public_request(body={"schema_name": "public", "table_name": "orders"})
+        request = _make_public_request(
+            body={"schema_name": "public", "table_name": "orders"}
+        )
         status, response = get_public_report_map_data(request, "bad-token", chart_id=1)
 
         assert status == 404
@@ -745,7 +765,10 @@ class TestGetPublicFilterPreview:
 
     def test_dashboard_token_value_filter(self, public_dashboard, seed_db):
         """Public dashboard token resolves org and returns value filter options"""
-        mock_results = [{"value": "shipped", "count": 10}, {"value": "pending", "count": 5}]
+        mock_results = [
+            {"value": "shipped", "count": 10},
+            {"value": "pending", "count": 5},
+        ]
 
         with patch("ddpui.api.public_api.OrgWarehouse.objects") as mock_ow, patch(
             "ddpui.api.public_api.execute_query"
@@ -771,7 +794,10 @@ class TestGetPublicFilterPreview:
 
     def test_report_token_value_filter(self, public_snapshot, seed_db):
         """Public report snapshot token resolves org and returns value filter options"""
-        mock_results = [{"value": "active", "count": 20}, {"value": "inactive", "count": 3}]
+        mock_results = [
+            {"value": "active", "count": 20},
+            {"value": "inactive", "count": 3},
+        ]
 
         with patch("ddpui.api.public_api.OrgWarehouse.objects") as mock_ow, patch(
             "ddpui.api.public_api.execute_query"
@@ -797,7 +823,12 @@ class TestGetPublicFilterPreview:
     def test_report_token_numerical_filter(self, public_snapshot, seed_db):
         """Public report token works for numerical filter type"""
         mock_results = [
-            {"min_value": 10.0, "max_value": 500.0, "avg_value": 120.5, "distinct_count": 45}
+            {
+                "min_value": 10.0,
+                "max_value": 500.0,
+                "avg_value": 120.5,
+                "distinct_count": 45,
+            }
         ]
 
         with patch("ddpui.api.public_api.OrgWarehouse.objects") as mock_ow, patch(
@@ -945,7 +976,9 @@ class TestAllowPublicSharingGate:
         settings.RENDER_SECRET = "test-secret"
         request = _make_public_request()
         request.META["HTTP_X_RENDER_SECRET"] = "test-secret"
-        result = _get_public_report_snapshot(public_snapshot.public_share_token, request=request)
+        result = _get_public_report_snapshot(
+            public_snapshot.public_share_token, request=request
+        )
         assert result.id == public_snapshot.id
 
 
@@ -968,9 +1001,13 @@ class TestPublicLinkStory7:
         OrgPreferences.objects.create(org=org, allow_public_sharing=True)
         request = _make_public_request()
         result = get_public_dashboard(request, public_dashboard.public_share_token)
-        assert not isinstance(result, tuple)  # success is the response object, not (status, body)
+        assert not isinstance(
+            result, tuple
+        )  # success is the response object, not (status, body)
 
-    def test_O02_dashboard_public_link_disabled_returns_not_found(self, orguser, org, seed_db):
+    def test_O02_dashboard_public_link_disabled_returns_not_found(
+        self, orguser, org, seed_db
+    ):
         """Resource-level is_public=False → anonymous GET returns 404."""
         from ddpui.api.public_api import get_public_dashboard
 
@@ -990,7 +1027,9 @@ class TestPublicLinkStory7:
         finally:
             d.delete()
 
-    def test_O04_org_toggle_off_then_on_token_still_valid(self, public_dashboard, org, seed_db):
+    def test_O04_org_toggle_off_then_on_token_still_valid(
+        self, public_dashboard, org, seed_db
+    ):
         """Toggle allow_public_sharing off → 404, then back on → same token works again."""
         from ddpui.models.org_preferences import OrgPreferences
         from ddpui.api.public_api import get_public_dashboard

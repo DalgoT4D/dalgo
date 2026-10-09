@@ -77,7 +77,9 @@ def test_upload_logo_from_file_success(org):
         org.logo_url
         == "https://test-bucket.s3.ap-south-1.amazonaws.com/orgs/logo-test-org/logo/new.png"
     )
-    assert org.logo_s3_key is not None and org.logo_s3_key.startswith("orgs/logo-test-org/logo/")
+    assert org.logo_s3_key is not None and org.logo_s3_key.startswith(
+        "orgs/logo-test-org/logo/"
+    )
     assert org.logo_filename == "logo.png"
 
 
@@ -143,7 +145,9 @@ def test_upload_logo_from_url_deletes_old_s3_key(org_with_logo):
     ):
         orgfunctions.upload_logo_from_url("https://example.com/new.png", org_with_logo)
 
-    mock_delete.assert_called_once_with("test-bucket", "orgs/logo-test-org/logo/abc.png")
+    mock_delete.assert_called_once_with(
+        "test-bucket", "orgs/logo-test-org/logo/abc.png"
+    )
     org_with_logo.refresh_from_db()
     assert org_with_logo.logo_url == "https://example.com/new.png"
     assert org_with_logo.logo_s3_key is None
@@ -182,7 +186,9 @@ def test_delete_logo_success(org_with_logo):
     ):
         orgfunctions.delete_logo(org_with_logo)
 
-    mock_delete.assert_called_once_with("test-bucket", "orgs/logo-test-org/logo/abc.png")
+    mock_delete.assert_called_once_with(
+        "test-bucket", "orgs/logo-test-org/logo/abc.png"
+    )
     org_with_logo.refresh_from_db()
     assert org_with_logo.logo_url is None
     assert org_with_logo.logo_s3_key is None

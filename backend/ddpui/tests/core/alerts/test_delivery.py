@@ -160,7 +160,9 @@ def test_deliver_all_wraps_email_body_and_keeps_slack_raw(monkeypatch):
     monkeypatch.setattr(delivery.requests, "post", fake_post)
 
     deliveries = delivery.deliver_all(
-        alert, subject="[Dalgo alert] High errors", body="Current value 42 crossed threshold."
+        alert,
+        subject="[Dalgo alert] High errors",
+        body="Current value 42 crossed threshold.",
     )
 
     # Email side — recipient got the shell-wrapped HTML body
@@ -229,7 +231,9 @@ def test_group_recipient_expands_to_active_members(seed_db, monkeypatch, deliver
     OrgUserGroupMember.objects.create(group=group, orguser=ou2)
 
     sent = _patch_ses(monkeypatch)
-    alert = _fake_alert(delivery_org, [{"type": "user_group", "user_group_id": group.id}])
+    alert = _fake_alert(
+        delivery_org, [{"type": "user_group", "user_group_id": group.id}]
+    )
     deliveries = alert_trigger.notify_alert_recipients(alert, subject="s", body="b")
 
     assert sorted(sent) == ["gd1@example.com", "gd2@example.com"]
@@ -252,7 +256,9 @@ def test_pending_members_skipped(seed_db, monkeypatch, delivery_org):
     OrgUserGroupMember.objects.create(group=group, orguser=None)  # pending
 
     sent = _patch_ses(monkeypatch)
-    alert = _fake_alert(delivery_org, [{"type": "user_group", "user_group_id": group.id}])
+    alert = _fake_alert(
+        delivery_org, [{"type": "user_group", "user_group_id": group.id}]
+    )
     deliveries = alert_trigger.notify_alert_recipients(alert, subject="s", body="b")
 
     assert sent == ["pd1@example.com"]
@@ -269,7 +275,9 @@ def test_deduplication_orguser_and_group(seed_db, monkeypatch, delivery_org):
     ou1, u1 = _make_orguser(delivery_org, "dd_u1", "dd1@example.com")
     ou2, u2 = _make_orguser(delivery_org, "dd_u2", "dd2@example.com")
     group = OrgUserGroup.objects.create(name="G3", org=delivery_org, created_by=ou1)
-    OrgUserGroupMember.objects.create(group=group, orguser=ou1)  # ou1 also named directly
+    OrgUserGroupMember.objects.create(
+        group=group, orguser=ou1
+    )  # ou1 also named directly
     OrgUserGroupMember.objects.create(group=group, orguser=ou2)
 
     sent = _patch_ses(monkeypatch)
@@ -277,7 +285,10 @@ def test_deduplication_orguser_and_group(seed_db, monkeypatch, delivery_org):
         delivery_org,
         [
             {"type": "orguser", "orguser_id": ou1.id},  # named directly
-            {"type": "user_group", "user_group_id": group.id},  # group also contains ou1
+            {
+                "type": "user_group",
+                "user_group_id": group.id,
+            },  # group also contains ou1
         ],
     )
     deliveries = alert_trigger.notify_alert_recipients(alert, subject="s", body="b")
@@ -301,7 +312,9 @@ def test_empty_group_no_deliveries(seed_db, monkeypatch, delivery_org):
     group = OrgUserGroup.objects.create(name="G4", org=delivery_org, created_by=ou1)
 
     sent = _patch_ses(monkeypatch)
-    alert = _fake_alert(delivery_org, [{"type": "user_group", "user_group_id": group.id}])
+    alert = _fake_alert(
+        delivery_org, [{"type": "user_group", "user_group_id": group.id}]
+    )
     deliveries = alert_trigger.notify_alert_recipients(alert, subject="s", body="b")
 
     assert sent == []

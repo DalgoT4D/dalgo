@@ -57,9 +57,18 @@ class TestOrgQueueConfig:
     def test_get_queue_config_with_complete_nested_format(self):
         """Test get_queue_config with complete nested format data."""
         queue_config = {
-            "scheduled_pipeline_queue": {"name": "custom-sync", "workpool": "custom-workpool"},
-            "connection_sync_queue": {"name": "custom-connection", "workpool": "another-workpool"},
-            "transform_task_queue": {"name": "custom-transform", "workpool": "transform-workpool"},
+            "scheduled_pipeline_queue": {
+                "name": "custom-sync",
+                "workpool": "custom-workpool",
+            },
+            "connection_sync_queue": {
+                "name": "custom-connection",
+                "workpool": "another-workpool",
+            },
+            "transform_task_queue": {
+                "name": "custom-transform",
+                "workpool": "transform-workpool",
+            },
         }
         org = Org(name="Test Org", queue_config=queue_config)
 
@@ -84,7 +93,10 @@ class TestOrgQueueConfig:
                 "name": "custom-connection",
                 "workpool": None,
             },  # None workpool
-            "transform_task_queue": {"name": "custom-transform", "workpool": "transform-workpool"},
+            "transform_task_queue": {
+                "name": "custom-transform",
+                "workpool": "transform-workpool",
+            },
         }
         org = Org(name="Test Org", queue_config=queue_config)
 
@@ -128,7 +140,10 @@ class TestOrgQueueConfig:
     def test_get_queue_config_with_mixed_formats(self):
         """Test get_queue_config with mixed format data."""
         queue_config = {
-            "scheduled_pipeline_queue": {"name": "nested-sync", "workpool": "custom-workpool"},
+            "scheduled_pipeline_queue": {
+                "name": "nested-sync",
+                "workpool": "custom-workpool",
+            },
             "connection_sync_queue": "flat-connection",  # legacy flat format
             # transform_task_queue missing entirely
         }
@@ -153,7 +168,9 @@ class TestOrgQueueConfig:
         queue_config = {
             "scheduled_pipeline_queue": 123,  # invalid type (number)
             "connection_sync_queue": [],  # invalid type (list)
-            "transform_task_queue": {"invalid": "structure"},  # invalid structure (missing name)
+            "transform_task_queue": {
+                "invalid": "structure"
+            },  # invalid structure (missing name)
         }
         org = Org(name="Test Org", queue_config=queue_config)
 
@@ -205,7 +222,10 @@ class TestOrgQueueConfig:
     def test_get_queue_config_partial_nested_data(self):
         """Test get_queue_config with partial nested data for some queues."""
         queue_config = {
-            "scheduled_pipeline_queue": {"name": "custom-sync", "workpool": "custom-workpool"},
+            "scheduled_pipeline_queue": {
+                "name": "custom-sync",
+                "workpool": "custom-workpool",
+            },
         }
         org = Org(name="Test Org", queue_config=queue_config)
 
@@ -308,7 +328,11 @@ class TestGetDefaultQueueConfig:
                 "workpool": "default",
                 "is_workpool_eks": False,
             },
-            "edr_queue": {"name": EDR_WORK_QUEUE, "workpool": "default", "is_workpool_eks": False},
+            "edr_queue": {
+                "name": EDR_WORK_QUEUE,
+                "workpool": "default",
+                "is_workpool_eks": False,
+            },
         }
 
         assert config == expected

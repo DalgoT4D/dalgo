@@ -118,7 +118,9 @@ def test_bigquery_with_partition_and_cluster():
         partition_type="DAY",
         cluster_fields=["_airbyte_extracted_at"],
     )
-    sql = _build_bigquery_cast_sql("my-project", "dest", "orders", {"amount": "numeric"}, meta)
+    sql = _build_bigquery_cast_sql(
+        "my-project", "dest", "orders", {"amount": "numeric"}, meta
+    )
     assert "PARTITION BY DATE(`_airbyte_extracted_at`)" in sql
     assert "CLUSTER BY `_airbyte_extracted_at`" in sql
     assert "CAST(`amount` AS NUMERIC) AS `amount`" in sql
@@ -130,7 +132,9 @@ def test_bigquery_cluster_with_primary_keys():
         partition_type="DAY",
         cluster_fields=["_airbyte_extracted_at", "id", "order_id"],
     )
-    sql = _build_bigquery_cast_sql("my-project", "dest", "orders", {"amount": "numeric"}, meta)
+    sql = _build_bigquery_cast_sql(
+        "my-project", "dest", "orders", {"amount": "numeric"}, meta
+    )
     assert "CLUSTER BY `_airbyte_extracted_at`, `id`, `order_id`" in sql
 
 
@@ -149,7 +153,9 @@ def test_bigquery_unknown_partition_type_skipped():
 
 def test_bigquery_uses_column_name_as_is():
     """Backend normalizes; builder passes column names through untouched."""
-    sql = _build_bigquery_cast_sql("proj", "s", "t", {"Measure_7": "numeric"}, _bq_table_meta())
+    sql = _build_bigquery_cast_sql(
+        "proj", "s", "t", {"Measure_7": "numeric"}, _bq_table_meta()
+    )
     assert "CAST(`Measure_7` AS NUMERIC) AS `Measure_7`" in sql
 
 
@@ -177,7 +183,14 @@ async def test_noop_when_no_secret_block_in_env():
         mock_secret.aload = AsyncMock()
         await _run_post_sync_ops.fn(
             env={},
-            ops=[{"type": "cast", "schema": "s", "table": "t", "column_casts": {"c": "numeric"}}],
+            ops=[
+                {
+                    "type": "cast",
+                    "schema": "s",
+                    "table": "t",
+                    "column_casts": {"c": "numeric"},
+                }
+            ],
         )
         mock_secret.aload.assert_not_called()
 
@@ -188,7 +201,9 @@ async def test_noop_when_no_cast_ops():
     with patch("proxy.prefect_flows_runner.Secret") as mock_secret, patch(
         "psycopg2.connect"
     ) as mock_connect:
-        mock_secret.aload = AsyncMock(return_value=_secret_block("postgres", POSTGRES_CREDS))
+        mock_secret.aload = AsyncMock(
+            return_value=_secret_block("postgres", POSTGRES_CREDS)
+        )
         await _run_post_sync_ops.fn(
             env={"dbt-profile-secret-block": "my-block"},
             ops=[{"type": "unknown", "sql": "SELECT 1"}],
@@ -208,7 +223,14 @@ async def test_raises_on_malformed_secret_json():
         with pytest.raises(json.JSONDecodeError):
             await _run_post_sync_ops.fn(
                 env={"dbt-profile-secret-block": "my-block"},
-                ops=[{"type": "cast", "schema": "s", "table": "t", "column_casts": {"c": "int"}}],
+                ops=[
+                    {
+                        "type": "cast",
+                        "schema": "s",
+                        "table": "t",
+                        "column_casts": {"c": "int"},
+                    }
+                ],
             )
 
 
@@ -219,13 +241,22 @@ async def test_raises_on_missing_wtype_or_creds_in_secret():
     line names the missing field."""
     incomplete_secret = MagicMock()
     # Valid JSON but no wtype/creds keys
-    incomplete_secret.get.return_value = json.dumps({"default_schema": "s", "extras": {}})
+    incomplete_secret.get.return_value = json.dumps(
+        {"default_schema": "s", "extras": {}}
+    )
     with patch("proxy.prefect_flows_runner.Secret") as mock_secret:
         mock_secret.aload = AsyncMock(return_value=incomplete_secret)
         with pytest.raises(KeyError):
             await _run_post_sync_ops.fn(
                 env={"dbt-profile-secret-block": "my-block"},
-                ops=[{"type": "cast", "schema": "s", "table": "t", "column_casts": {"c": "int"}}],
+                ops=[
+                    {
+                        "type": "cast",
+                        "schema": "s",
+                        "table": "t",
+                        "column_casts": {"c": "int"},
+                    }
+                ],
             )
 
 
@@ -244,7 +275,9 @@ async def test_postgres_executes_generated_sql():
     with patch("proxy.prefect_flows_runner.Secret") as mock_secret, patch(
         "psycopg2.connect", return_value=mock_conn
     ) as mock_connect:
-        mock_secret.aload = AsyncMock(return_value=_secret_block("postgres", POSTGRES_CREDS))
+        mock_secret.aload = AsyncMock(
+            return_value=_secret_block("postgres", POSTGRES_CREDS)
+        )
         await _run_post_sync_ops.fn(
             env={"dbt-profile-secret-block": "my-block"},
             ops=[
@@ -284,7 +317,9 @@ async def test_postgres_closes_connection_on_error():
     with patch("proxy.prefect_flows_runner.Secret") as mock_secret, patch(
         "psycopg2.connect", return_value=mock_conn
     ):
-        mock_secret.aload = AsyncMock(return_value=_secret_block("postgres", POSTGRES_CREDS))
+        mock_secret.aload = AsyncMock(
+            return_value=_secret_block("postgres", POSTGRES_CREDS)
+        )
         with pytest.raises(Exception, match="syntax error"):
             await _run_post_sync_ops.fn(
                 env={"dbt-profile-secret-block": "my-block"},
@@ -322,7 +357,9 @@ async def test_bigquery_fetches_metadata_and_executes():
     with patch("proxy.prefect_flows_runner.Secret") as mock_secret, patch(
         "google.oauth2.service_account.Credentials.from_service_account_info"
     ), patch("google.cloud.bigquery.Client", return_value=mock_client):
-        mock_secret.aload = AsyncMock(return_value=_secret_block("bigquery", BIGQUERY_CREDS))
+        mock_secret.aload = AsyncMock(
+            return_value=_secret_block("bigquery", BIGQUERY_CREDS)
+        )
         await _run_post_sync_ops.fn(
             env={"dbt-profile-secret-block": "my-block"},
             ops=[
@@ -356,7 +393,9 @@ async def test_bigquery_closes_client_on_error():
     with patch("proxy.prefect_flows_runner.Secret") as mock_secret, patch(
         "google.oauth2.service_account.Credentials.from_service_account_info"
     ), patch("google.cloud.bigquery.Client", return_value=mock_client):
-        mock_secret.aload = AsyncMock(return_value=_secret_block("bigquery", BIGQUERY_CREDS))
+        mock_secret.aload = AsyncMock(
+            return_value=_secret_block("bigquery", BIGQUERY_CREDS)
+        )
         with pytest.raises(Exception, match="quota exceeded"):
             await _run_post_sync_ops.fn(
                 env={"dbt-profile-secret-block": "my-block"},
@@ -382,7 +421,9 @@ async def test_bigquery_closes_client_when_get_table_fails():
     with patch("proxy.prefect_flows_runner.Secret") as mock_secret, patch(
         "google.oauth2.service_account.Credentials.from_service_account_info"
     ), patch("google.cloud.bigquery.Client", return_value=mock_client):
-        mock_secret.aload = AsyncMock(return_value=_secret_block("bigquery", BIGQUERY_CREDS))
+        mock_secret.aload = AsyncMock(
+            return_value=_secret_block("bigquery", BIGQUERY_CREDS)
+        )
         with pytest.raises(Exception, match="table not found"):
             await _run_post_sync_ops.fn(
                 env={"dbt-profile-secret-block": "my-block"},

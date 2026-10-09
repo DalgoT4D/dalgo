@@ -22,8 +22,12 @@ def test_clear_github_pat_storage_both_storage_types():
     )
 
     with (
-        patch("ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block") as mock_delete_block,
-        patch("ddpui.ddpdbt.dbt_service.secretsmanager.delete_github_pat") as mock_delete_pat,
+        patch(
+            "ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block"
+        ) as mock_delete_block,
+        patch(
+            "ddpui.ddpdbt.dbt_service.secretsmanager.delete_github_pat"
+        ) as mock_delete_pat,
     ):
         # Execute
         clear_github_pat_storage(org, "test-pat-secret-key")
@@ -51,8 +55,12 @@ def test_clear_github_pat_storage_only_secret_block():
     )
 
     with (
-        patch("ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block") as mock_delete_block,
-        patch("ddpui.ddpdbt.dbt_service.secretsmanager.delete_github_pat") as mock_delete_pat,
+        patch(
+            "ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block"
+        ) as mock_delete_block,
+        patch(
+            "ddpui.ddpdbt.dbt_service.secretsmanager.delete_github_pat"
+        ) as mock_delete_pat,
     ):
         # Execute without PAT secret key
         clear_github_pat_storage(org, None)
@@ -72,8 +80,12 @@ def test_clear_github_pat_storage_no_secret_block():
     org = Org.objects.create(name="test-org", slug="test-org")
 
     with (
-        patch("ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block") as mock_delete_block,
-        patch("ddpui.ddpdbt.dbt_service.secretsmanager.delete_github_pat") as mock_delete_pat,
+        patch(
+            "ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block"
+        ) as mock_delete_block,
+        patch(
+            "ddpui.ddpdbt.dbt_service.secretsmanager.delete_github_pat"
+        ) as mock_delete_pat,
     ):
         # Execute
         clear_github_pat_storage(org, "test-pat-secret-key")
@@ -100,8 +112,12 @@ def test_clear_github_pat_storage_prefect_error():
     )
 
     with (
-        patch("ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block") as mock_delete_block,
-        patch("ddpui.ddpdbt.dbt_service.secretsmanager.delete_github_pat") as mock_delete_pat,
+        patch(
+            "ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block"
+        ) as mock_delete_block,
+        patch(
+            "ddpui.ddpdbt.dbt_service.secretsmanager.delete_github_pat"
+        ) as mock_delete_pat,
         patch("ddpui.ddpdbt.dbt_service.logger.warning") as mock_log_warning,
     ):
         # Mock Prefect error
@@ -134,7 +150,9 @@ def test_clear_github_pat_storage_secrets_manager_error():
     )
 
     with (
-        patch("ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block") as mock_delete_block,
+        patch(
+            "ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block"
+        ) as mock_delete_block,
         patch(
             "ddpui.ddpdbt.dbt_service.secretsmanager.delete_github_pat",
             side_effect=Exception("Secrets manager error"),
@@ -166,8 +184,12 @@ def test_clear_github_pat_storage_both_errors():
     )
 
     with (
-        patch("ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block") as mock_delete_block,
-        patch("ddpui.ddpdbt.dbt_service.secretsmanager.delete_github_pat") as mock_delete_pat,
+        patch(
+            "ddpui.ddpdbt.dbt_service.prefect_service.delete_secret_block"
+        ) as mock_delete_block,
+        patch(
+            "ddpui.ddpdbt.dbt_service.secretsmanager.delete_github_pat"
+        ) as mock_delete_pat,
         patch("ddpui.ddpdbt.dbt_service.logger.warning") as mock_log_warning,
     ):
         # Mock both errors

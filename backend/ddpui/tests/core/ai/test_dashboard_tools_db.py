@@ -53,7 +53,9 @@ def run_tool(tool, orguser, **kwargs):
 
 def _chart_share_exists(chart, principal) -> bool:
     return ResourceShare.objects.filter(
-        resource_type=ResourceType.CHART, resource_id=str(chart.id), principal_id=principal.id
+        resource_type=ResourceType.CHART,
+        resource_id=str(chart.id),
+        principal_id=principal.id,
     ).exists()
 
 
@@ -68,7 +70,10 @@ def test_create_dashboard_runs_the_api_side_effects(mock_audit_log, org, admin):
     dashboard = Dashboard.objects.get(id=artifact["object_id"])
     assert f"chart-{chart.id}" in dashboard.tabs[0]["components"]
     # same default footprint the dashboard builder gives a new chart
-    assert {k: dashboard.tabs[0]["layout_config"][0][k] for k in ("w", "h")} == {"w": 12, "h": 18}
+    assert {k: dashboard.tabs[0]["layout_config"][0][k] for k in ("w", "h")} == {
+        "w": 12,
+        "h": 18,
+    }
     assert dashboard.is_org_default  # admin + org had no default yet
     assert ResourceShare.objects.filter(  # owner's self-share materialised
         resource_type=ResourceType.DASHBOARD,
@@ -81,7 +86,9 @@ def test_create_dashboard_runs_the_api_side_effects(mock_audit_log, org, admin):
 
 
 @patch("ddpui.services.dashboard_service.create_audit_log")
-def test_charts_added_to_a_shared_dashboard_are_shared_too(mock_audit_log, org, admin, member):
+def test_charts_added_to_a_shared_dashboard_are_shared_too(
+    mock_audit_log, org, admin, member
+):
     """The bug: the tool saved tabs itself and skipped sync_dashboard_cascade,
     so people the dashboard was shared with could not see the new chart."""
     first, added = _chart(org, admin, "First"), _chart(org, admin, "Added")

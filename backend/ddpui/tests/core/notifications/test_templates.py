@@ -196,7 +196,9 @@ def test_notification_email_escapes_subject_and_message():
     _, html_ = render_notification_email("<script>", "Hi <b>you</b>")
     assert (
         "<script>"
-        not in html_.replace("<script>", "")  # sanity: after escape the raw sequence is gone
+        not in html_.replace(
+            "<script>", ""
+        )  # sanity: after escape the raw sequence is gone
         or "&lt;script&gt;" in html_
     )
     assert "<b>you</b>" not in html_
@@ -238,7 +240,12 @@ def test_shell_is_single_source_of_truth():
     # Every render_* function in a file that uses the notification shell must
     # delegate to _render_email_shell (i.e. never inline it). Files belonging
     # to a different shell family (trial_shell / trial / biz_dev) are skipped.
-    notification_shell_files = {"alert.py", "mention.py", "report_share.py", "generic.py"}
+    notification_shell_files = {
+        "alert.py",
+        "mention.py",
+        "report_share.py",
+        "generic.py",
+    }
     for path in py_files:
         if path.name not in notification_shell_files:
             continue

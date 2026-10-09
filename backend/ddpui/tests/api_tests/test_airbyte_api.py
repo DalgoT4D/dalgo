@@ -91,7 +91,9 @@ def org_without_workspace():
 @pytest.fixture
 def org_with_workspace():
     """a pytest fixture which creates an Org having an airbyte workspace"""
-    org = Org.objects.create(airbyte_workspace_id="FAKE-WORKSPACE-ID", slug="test-org-slug")
+    org = Org.objects.create(
+        airbyte_workspace_id="FAKE-WORKSPACE-ID", slug="test-org-slug"
+    )
     yield org
     org.delete()
 
@@ -123,7 +125,9 @@ def orguser_workspace(authuser, org_with_workspace):
 @pytest.fixture
 def org_with_workspace_b():
     """a pytest fixture which creates a second Org (org B) having its own airbyte workspace"""
-    org = Org.objects.create(airbyte_workspace_id="FAKE-WORKSPACE-ID-B", slug="test-org-b-slug")
+    org = Org.objects.create(
+        airbyte_workspace_id="FAKE-WORKSPACE-ID-B", slug="test-org-b-slug"
+    )
     yield org
     org.delete()
 
@@ -222,7 +226,9 @@ def test_post_airbyte_source_without_workspace(orguser):
     """tests GET /source_definitions"""
     request = mock_request(orguser)
 
-    fake_payload = AirbyteSourceCreate(name="temp-name", sourceDefId="fake-id", config={})
+    fake_payload = AirbyteSourceCreate(
+        name="temp-name", sourceDefId="fake-id", config={}
+    )
     with pytest.raises(HttpError) as excinfo:
         post_airbyte_source(request, fake_payload)
 
@@ -237,7 +243,9 @@ def test_post_airbyte_source_success(orguser_workspace):
     """tests GET /source_definitions"""
     request = mock_request(orguser_workspace)
 
-    fake_payload = AirbyteSourceCreate(name="temp-name", sourceDefId="fake-id", config={})
+    fake_payload = AirbyteSourceCreate(
+        name="temp-name", sourceDefId="fake-id", config={}
+    )
     source = post_airbyte_source(request, fake_payload)
 
     assert source["sourceId"] == "fake-source-id"
@@ -322,7 +330,8 @@ def _oauth_env(monkeypatch):
 def _use_fake_redis(monkeypatch):
     fake_redis = FakeRedis()
     monkeypatch.setattr(
-        "ddpui.core.oauth.google_oauth_service.RedisClient.get_instance", lambda: fake_redis
+        "ddpui.core.oauth.google_oauth_service.RedisClient.get_instance",
+        lambda: fake_redis,
     )
     return fake_redis
 
@@ -334,13 +343,18 @@ def test_post_source_oauth_consent_without_workspace(seed_db, orguser):
 
     with pytest.raises(HttpError) as excinfo:
         post_source_oauth_consent(
-            request, SourceGoogleOAuthConsentCreate(sourceDefId="fake-id", sourceName="fake-name")
+            request,
+            SourceGoogleOAuthConsentCreate(
+                sourceDefId="fake-id", sourceName="fake-name"
+            ),
         )
 
     assert str(excinfo.value) == "create an airbyte workspace first"
 
 
-def test_post_source_oauth_consent_builds_google_url(seed_db, orguser_workspace, monkeypatch):
+def test_post_source_oauth_consent_builds_google_url(
+    seed_db, orguser_workspace, monkeypatch
+):
     """consent builds the Google consent URL itself and mints a state nonce, keyed off the
     client-supplied sourceName (the frontend already has this from the same workspace
     catalog it got sourceDefId from)"""
@@ -349,7 +363,10 @@ def test_post_source_oauth_consent_builds_google_url(seed_db, orguser_workspace,
     request = mock_request(orguser_workspace)
 
     result = post_source_oauth_consent(
-        request, SourceGoogleOAuthConsentCreate(sourceDefId=GSHEETS_DEF_ID, sourceName=GSHEETS_NAME)
+        request,
+        SourceGoogleOAuthConsentCreate(
+            sourceDefId=GSHEETS_DEF_ID, sourceName=GSHEETS_NAME
+        ),
     )
 
     parsed = urlparse(result["authUrl"])
@@ -357,7 +374,9 @@ def test_post_source_oauth_consent_builds_google_url(seed_db, orguser_workspace,
     assert parsed.path == "/o/oauth2/v2/auth"
     q = parse_qs(parsed.query)
     assert q["client_id"] == ["cid"]
-    assert q["redirect_uri"] == ["https://api.dalgo.org/api/airbyte/sources/oauth/callback"]
+    assert q["redirect_uri"] == [
+        "https://api.dalgo.org/api/airbyte/sources/oauth/callback"
+    ]
     assert q["response_type"] == ["code"]
     assert q["access_type"] == ["offline"]
     assert q["prompt"] == ["consent"]
@@ -391,7 +410,9 @@ def test_oauth_callback_happy_path(seed_db, orguser_workspace, monkeypatch):
     state = _seed_state(fake_redis, orguser_workspace, GSHEETS_NAME)
     monkeypatch.setattr(
         "ddpui.core.oauth.google_oauth_service.requests.post",
-        lambda *a, **k: FakeResponse(200, {"refresh_token": "rt-123", "access_token": "at"}),
+        lambda *a, **k: FakeResponse(
+            200, {"refresh_token": "rt-123", "access_token": "at"}
+        ),
     )
     request = mock_request(orguser_workspace)
 
@@ -406,7 +427,9 @@ def test_oauth_callback_happy_path(seed_db, orguser_workspace, monkeypatch):
     assert "rt-123" not in response.url  # the refresh_token is NOT in the redirect
     refresh_token_ref = parse_qs(location.query)["refresh_token_ref"][0]
     # the ref maps (server-side) to the refresh_token + the state's orguser
-    stored = json.loads(fake_redis.store[f"airbyte_oauth_refresh_token_ref:{refresh_token_ref}"])
+    stored = json.loads(
+        fake_redis.store[f"airbyte_oauth_refresh_token_ref:{refresh_token_ref}"]
+    )
     assert stored["refresh_token"] == "rt-123"
     assert stored["orguser_id"] == orguser_workspace.id
     assert stored["source_name"] == GSHEETS_NAME
@@ -418,7 +441,9 @@ def test_oauth_callback_happy_path(seed_db, orguser_workspace, monkeypatch):
     assert f"airbyte_oauth_state:{state}" in fake_redis.store
 
 
-def test_oauth_callback_bad_state_redirects_error(seed_db, orguser_workspace, monkeypatch):
+def test_oauth_callback_bad_state_redirects_error(
+    seed_db, orguser_workspace, monkeypatch
+):
     """an unknown/expired/reused state redirects with ?error and never exchanges"""
     _oauth_env(monkeypatch)
     _use_fake_redis(monkeypatch)
@@ -438,7 +463,9 @@ def test_oauth_callback_bad_state_redirects_error(seed_db, orguser_workspace, mo
     assert called["post"] is False  # no token exchange attempted on a bad state
 
 
-def test_oauth_callback_user_denied_redirects_error(seed_db, orguser_workspace, monkeypatch):
+def test_oauth_callback_user_denied_redirects_error(
+    seed_db, orguser_workspace, monkeypatch
+):
     """Google denial (?error, no code) redirects with the error, no exchange"""
     _oauth_env(monkeypatch)
     _use_fake_redis(monkeypatch)
@@ -450,7 +477,9 @@ def test_oauth_callback_user_denied_redirects_error(seed_db, orguser_workspace, 
     assert "error=access_denied" in response.url
 
 
-def test_oauth_callback_no_refresh_token_redirects_error(seed_db, orguser_workspace, monkeypatch):
+def test_oauth_callback_no_refresh_token_redirects_error(
+    seed_db, orguser_workspace, monkeypatch
+):
     """if Google returns no refresh_token, callback redirects with an error, stores no ref"""
     _oauth_env(monkeypatch)
     fake_redis = _use_fake_redis(monkeypatch)
@@ -466,10 +495,14 @@ def test_oauth_callback_no_refresh_token_redirects_error(seed_db, orguser_worksp
     assert response.status_code == 302
     assert "error=" in response.url
     # no ref stashed
-    assert not any(k.startswith("airbyte_oauth_refresh_token_ref:") for k in fake_redis.store)
+    assert not any(
+        k.startswith("airbyte_oauth_refresh_token_ref:") for k in fake_redis.store
+    )
 
 
-def test_oauth_callback_request_timeout_redirects_error(seed_db, orguser_workspace, monkeypatch):
+def test_oauth_callback_request_timeout_redirects_error(
+    seed_db, orguser_workspace, monkeypatch
+):
     """a network timeout reaching Google redirects with an error, not an uncaught 500"""
     _oauth_env(monkeypatch)
     fake_redis = _use_fake_redis(monkeypatch)
@@ -478,25 +511,8 @@ def test_oauth_callback_request_timeout_redirects_error(seed_db, orguser_workspa
     def _raise_timeout(*a, **k):
         raise requests.exceptions.Timeout("google is slow")
 
-    monkeypatch.setattr("ddpui.core.oauth.google_oauth_service.requests.post", _raise_timeout)
-    request = mock_request(orguser_workspace)
-
-    response = get_source_oauth_callback(request, state=state, code="c")
-
-    assert response.status_code == 302
-    assert "error=oauth_failed" in response.url
-    # exchange failed before stashing anything — no ref stashed
-    assert not any(k.startswith("airbyte_oauth_refresh_token_ref:") for k in fake_redis.store)
-
-
-def test_oauth_callback_non_json_response_redirects_error(seed_db, orguser_workspace, monkeypatch):
-    """a 200 with a non-JSON body redirects with an error, not an uncaught 500"""
-    _oauth_env(monkeypatch)
-    fake_redis = _use_fake_redis(monkeypatch)
-    state = _seed_state(fake_redis, orguser_workspace, GSHEETS_NAME)
     monkeypatch.setattr(
-        "ddpui.core.oauth.google_oauth_service.requests.post",
-        lambda *a, **k: FakeResponse(200, text="<html>gateway error</html>", json_raises=True),
+        "ddpui.core.oauth.google_oauth_service.requests.post", _raise_timeout
     )
     request = mock_request(orguser_workspace)
 
@@ -504,7 +520,34 @@ def test_oauth_callback_non_json_response_redirects_error(seed_db, orguser_works
 
     assert response.status_code == 302
     assert "error=oauth_failed" in response.url
-    assert not any(k.startswith("airbyte_oauth_refresh_token_ref:") for k in fake_redis.store)
+    # exchange failed before stashing anything — no ref stashed
+    assert not any(
+        k.startswith("airbyte_oauth_refresh_token_ref:") for k in fake_redis.store
+    )
+
+
+def test_oauth_callback_non_json_response_redirects_error(
+    seed_db, orguser_workspace, monkeypatch
+):
+    """a 200 with a non-JSON body redirects with an error, not an uncaught 500"""
+    _oauth_env(monkeypatch)
+    fake_redis = _use_fake_redis(monkeypatch)
+    state = _seed_state(fake_redis, orguser_workspace, GSHEETS_NAME)
+    monkeypatch.setattr(
+        "ddpui.core.oauth.google_oauth_service.requests.post",
+        lambda *a, **k: FakeResponse(
+            200, text="<html>gateway error</html>", json_raises=True
+        ),
+    )
+    request = mock_request(orguser_workspace)
+
+    response = get_source_oauth_callback(request, state=state, code="c")
+
+    assert response.status_code == 302
+    assert "error=oauth_failed" in response.url
+    assert not any(
+        k.startswith("airbyte_oauth_refresh_token_ref:") for k in fake_redis.store
+    )
 
 
 # ---- create: redeem the ref, inject creds, save the source ------------------
@@ -530,9 +573,12 @@ def _seed_ref(
 
 
 # ---- picker config: hand the browser a Drive-scoped access token ------------
-def test_post_source_oauth_picker_config_success(seed_db, orguser_workspace, monkeypatch):
+def test_post_source_oauth_picker_config_success(
+    seed_db, orguser_workspace, monkeypatch
+):
     """the picker endpoint hands the browser the access_token for the ref it owns, plus the
-    Picker's own API key and app id — so the user can pick the spreadsheet being granted"""
+    Picker's own API key and app id — so the user can pick the spreadsheet being granted
+    """
     _oauth_env(monkeypatch)
     fake_redis = _use_fake_redis(monkeypatch)
     ref = _seed_ref(fake_redis, orguser_workspace, GSHEETS_NAME)
@@ -540,7 +586,9 @@ def test_post_source_oauth_picker_config_success(seed_db, orguser_workspace, mon
 
     result = post_source_oauth_picker_config(
         request,
-        SourceGoogleOAuthPickerConfigFetch(sourceName=GSHEETS_NAME, refresh_token_ref=ref),
+        SourceGoogleOAuthPickerConfigFetch(
+            sourceName=GSHEETS_NAME, refresh_token_ref=ref
+        ),
     )
 
     assert result.accessToken == "at-123"
@@ -559,13 +607,17 @@ def test_post_source_oauth_picker_config_foreign_ref_rejected(
     org's Drive in this caller's browser"""
     _oauth_env(monkeypatch)
     fake_redis = _use_fake_redis(monkeypatch)
-    ref = _seed_ref(fake_redis, orguser_workspace_b, GSHEETS_NAME, access_token="at-org-b")
+    ref = _seed_ref(
+        fake_redis, orguser_workspace_b, GSHEETS_NAME, access_token="at-org-b"
+    )
     request = mock_request(orguser_workspace)
 
     with pytest.raises(HttpError) as excinfo:
         post_source_oauth_picker_config(
             request,
-            SourceGoogleOAuthPickerConfigFetch(sourceName=GSHEETS_NAME, refresh_token_ref=ref),
+            SourceGoogleOAuthPickerConfigFetch(
+                sourceName=GSHEETS_NAME, refresh_token_ref=ref
+            ),
         )
 
     assert str(excinfo.value) == "oauth session does not match this request"
@@ -575,7 +627,8 @@ def test_post_source_oauth_picker_config_ref_without_access_token(
     seed_db, orguser_workspace, monkeypatch
 ):
     """a ref stashed by the pre-Picker release carries no access_token — treated as an expired
-    session, so the frontend sends the user back through consent to mint a complete one"""
+    session, so the frontend sends the user back through consent to mint a complete one
+    """
     _oauth_env(monkeypatch)
     fake_redis = _use_fake_redis(monkeypatch)
     ref = _seed_ref(fake_redis, orguser_workspace, GSHEETS_NAME, access_token=None)
@@ -584,7 +637,9 @@ def test_post_source_oauth_picker_config_ref_without_access_token(
     with pytest.raises(HttpError) as excinfo:
         post_source_oauth_picker_config(
             request,
-            SourceGoogleOAuthPickerConfigFetch(sourceName=GSHEETS_NAME, refresh_token_ref=ref),
+            SourceGoogleOAuthPickerConfigFetch(
+                sourceName=GSHEETS_NAME, refresh_token_ref=ref
+            ),
         )
 
     assert str(excinfo.value) == "invalid or expired oauth session"
@@ -604,7 +659,9 @@ def test_post_source_oauth_picker_config_missing_picker_env(
     with pytest.raises(HttpError) as excinfo:
         post_source_oauth_picker_config(
             request,
-            SourceGoogleOAuthPickerConfigFetch(sourceName=GSHEETS_NAME, refresh_token_ref=ref),
+            SourceGoogleOAuthPickerConfigFetch(
+                sourceName=GSHEETS_NAME, refresh_token_ref=ref
+            ),
         )
 
     assert str(excinfo.value) == "google picker api key is not configured"
@@ -700,10 +757,15 @@ def test_put_source_oauth_update_reauth(seed_db, orguser_workspace, monkeypatch)
     "ddpui.ddpairbyte.airbyte_service",
     update_source=Mock(return_value={"sourceId": "foreign-src-id"}),
     get_source=Mock(
-        return_value={"sourceId": "foreign-src-id", "workspaceId": "SOME-OTHER-WORKSPACE"}
+        return_value={
+            "sourceId": "foreign-src-id",
+            "workspaceId": "SOME-OTHER-WORKSPACE",
+        }
     ),
 )
-def test_put_source_oauth_update_foreign_source_rejected(seed_db, orguser_workspace, monkeypatch):
+def test_put_source_oauth_update_foreign_source_rejected(
+    seed_db, orguser_workspace, monkeypatch
+):
     """a source_id living in another org's workspace cannot be updated (Airbyte's
     sources/update is not workspace-scoped, so the service guards ownership)"""
     _oauth_env(monkeypatch)
@@ -773,7 +835,9 @@ def test_post_source_oauth_create_foreign_ref_rejected(
     assert str(excinfo.value) == "oauth session does not match this request"
 
 
-def test_post_source_oauth_create_wrong_sourcedef_rejected(seed_db, orguser_workspace, monkeypatch):
+def test_post_source_oauth_create_wrong_sourcedef_rejected(
+    seed_db, orguser_workspace, monkeypatch
+):
     """a ref minted for one connector cannot create a source of another connector"""
     _oauth_env(monkeypatch)
     fake_redis = _use_fake_redis(monkeypatch)
@@ -806,7 +870,9 @@ def test_post_source_oauth_consent_unsupported_source_rejected(
     with pytest.raises(HttpError) as excinfo:
         post_source_oauth_consent(
             request,
-            SourceGoogleOAuthConsentCreate(sourceDefId=GSHEETS_DEF_ID, sourceName="Postgres"),
+            SourceGoogleOAuthConsentCreate(
+                sourceDefId=GSHEETS_DEF_ID, sourceName="Postgres"
+            ),
         )
 
     assert str(excinfo.value) == "oauth is not supported for this source"
@@ -817,7 +883,9 @@ def test_put_airbyte_source_without_workspace(orguser):
     """tests GET /source_definitions"""
     request = mock_request(orguser)
 
-    fake_payload = AirbyteSourceUpdate(name="temp-name", sourceDefId="fake-id", config={})
+    fake_payload = AirbyteSourceUpdate(
+        name="temp-name", sourceDefId="fake-id", config={}
+    )
     with pytest.raises(HttpError) as excinfo:
         put_airbyte_source(request, "fake-source-id", fake_payload)
 
@@ -832,7 +900,9 @@ def test_put_airbyte_source_success(orguser_workspace):
     """tests GET /source_definitions"""
     request = mock_request(orguser_workspace)
 
-    fake_payload = AirbyteSourceUpdate(name="temp-name", sourceDefId="fake-id", config={})
+    fake_payload = AirbyteSourceUpdate(
+        name="temp-name", sourceDefId="fake-id", config={}
+    )
     source = put_airbyte_source(request, "fake-source-id", fake_payload)
 
     assert source["sourceId"] == "fake-source-id"
@@ -843,7 +913,9 @@ def test_post_airbyte_check_source_with_workspace(orguser):
     """tests GET /source_definitions"""
     request = mock_request(orguser)
 
-    fake_payload = AirbyteSourceUpdate(name="temp-name", sourceDefId="fake-id", config={})
+    fake_payload = AirbyteSourceUpdate(
+        name="temp-name", sourceDefId="fake-id", config={}
+    )
     with pytest.raises(HttpError) as excinfo:
         post_airbyte_check_source(request, fake_payload)
 
@@ -860,7 +932,9 @@ def test_post_airbyte_check_source_failure(orguser_workspace):
     """tests GET /source_definitions"""
     request = mock_request(orguser_workspace)
 
-    fake_payload = AirbyteSourceUpdate(name="temp-name", sourceDefId="fake-id", config={})
+    fake_payload = AirbyteSourceUpdate(
+        name="temp-name", sourceDefId="fake-id", config={}
+    )
     result = post_airbyte_check_source(request, fake_payload)
 
     assert result["status"] == "failed"
@@ -877,7 +951,9 @@ def test_post_airbyte_check_source_success(orguser_workspace):
     """tests GET /source_definitions"""
     request = mock_request(orguser_workspace)
 
-    fake_payload = AirbyteSourceUpdate(name="temp-name", sourceDefId="fake-id", config={})
+    fake_payload = AirbyteSourceUpdate(
+        name="temp-name", sourceDefId="fake-id", config={}
+    )
     result = post_airbyte_check_source(request, fake_payload)
 
     assert result["status"] == "succeeded"
@@ -911,7 +987,9 @@ def test_post_airbyte_check_source_for_update_failure(orguser_workspace):
     fake_payload = AirbyteSourceUpdateCheckConnection(
         name="temp-name", sourceDefId="fake-id", config={}
     )
-    result = post_airbyte_check_source_for_update(request, "fake-source-id", fake_payload)
+    result = post_airbyte_check_source_for_update(
+        request, "fake-source-id", fake_payload
+    )
 
     assert result["status"] == "failed"
     assert len(result["logs"]) == 1
@@ -930,7 +1008,9 @@ def test_post_airbyte_check_source_for_update_success(orguser_workspace):
     fake_payload = AirbyteSourceUpdateCheckConnection(
         name="temp-name", sourceDefId="fake-id", config={}
     )
-    result = post_airbyte_check_source_for_update(request, "fake-source-id", fake_payload)
+    result = post_airbyte_check_source_for_update(
+        request, "fake-source-id", fake_payload
+    )
 
     assert result["status"] == "succeeded"
     assert len(result["logs"]) == 2
@@ -1064,7 +1144,9 @@ def test_get_airbyte_destination_definition_specifications_success(orguser_works
     request = mock_request(orguser_workspace)
 
     os.environ["AIRBYTE_DESTINATION_TYPES"] = "dest1,dest2"
-    result = get_airbyte_destination_definition_specifications(request, "fake-dest-def-id")
+    result = get_airbyte_destination_definition_specifications(
+        request, "fake-dest-def-id"
+    )
 
     assert result["fake-key"] == "fake-val"
 
@@ -1143,7 +1225,9 @@ def test_post_airbyte_check_destination_success(orguser_workspace):
 @patch.multiple(
     "ddpui.ddpairbyte.airbyte_service",
     check_destination_connection=Mock(
-        return_value={"jobInfo": {"succeeded": False, "logs": {"logLines": [1, 2, 3, 4]}}}
+        return_value={
+            "jobInfo": {"succeeded": False, "logs": {"logLines": [1, 2, 3, 4]}}
+        }
     ),
 )
 def test_post_airbyte_check_destination_failure(orguser_workspace):
@@ -1201,7 +1285,9 @@ def test_post_airbyte_check_destination_for_update_success(orguser_workspace):
 @patch.multiple(
     "ddpui.ddpairbyte.airbyte_service",
     check_destination_connection_for_update=Mock(
-        return_value={"jobInfo": {"succeeded": False, "logs": {"logLines": [1, 2, 3, 4]}}}
+        return_value={
+            "jobInfo": {"succeeded": False, "logs": {"logLines": [1, 2, 3, 4]}}
+        }
     ),
 )
 def test_post_airbyte_check_destination_for_update_failure(orguser_workspace):
@@ -1324,9 +1410,13 @@ from ddpui.models.audit_log import AuditLogResourceType, AuditLogAction
 @patch("ddpui.api.airbyte_api.create_audit_log")
 @patch.multiple(
     "ddpui.ddpairbyte.airbyte_service",
-    create_source=Mock(return_value={"sourceId": "new-source-id", "sourceName": "Test Source"}),
+    create_source=Mock(
+        return_value={"sourceId": "new-source-id", "sourceName": "Test Source"}
+    ),
 )
-def test_post_airbyte_source_creates_audit_log(mock_audit_log, orguser_workspace, seed_db):
+def test_post_airbyte_source_creates_audit_log(
+    mock_audit_log, orguser_workspace, seed_db
+):
     """Test that creating a source creates an audit log entry"""
     request = mock_request(orguser_workspace)
 
@@ -1355,9 +1445,13 @@ def test_post_airbyte_source_creates_audit_log(mock_audit_log, orguser_workspace
 @patch.multiple(
     "ddpui.ddpairbyte.airbyte_service",
     get_source=Mock(return_value={"name": "Old Source"}),
-    update_source=Mock(return_value={"sourceId": "existing-source-id", "name": "Updated Source"}),
+    update_source=Mock(
+        return_value={"sourceId": "existing-source-id", "name": "Updated Source"}
+    ),
 )
-def test_put_airbyte_source_creates_audit_log(mock_audit_log, orguser_workspace, seed_db):
+def test_put_airbyte_source_creates_audit_log(
+    mock_audit_log, orguser_workspace, seed_db
+):
     """Test that updating a source creates an audit log entry when name changes"""
     request = mock_request(orguser_workspace)
 
@@ -1386,10 +1480,15 @@ def test_put_airbyte_source_creates_audit_log(mock_audit_log, orguser_workspace,
 @patch.multiple(
     "ddpui.ddpairbyte.airbyte_service",
     create_destination=Mock(
-        return_value={"destinationId": "new-dest-id", "destinationName": "Test Warehouse"}
+        return_value={
+            "destinationId": "new-dest-id",
+            "destinationName": "Test Warehouse",
+        }
     ),
 )
-def test_post_airbyte_destination_creates_audit_log(mock_audit_log, orguser_workspace, seed_db):
+def test_post_airbyte_destination_creates_audit_log(
+    mock_audit_log, orguser_workspace, seed_db
+):
     """Test that creating a warehouse/destination creates an audit log entry"""
     request = mock_request(orguser_workspace)
 

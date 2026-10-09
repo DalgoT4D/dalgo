@@ -69,7 +69,9 @@ pytestmark = pytest.mark.django_db
 def authuser():
     """A django User object"""
     user = User.objects.create(
-        username="reportapiuser", email="reportapiuser@test.com", password="testpassword"
+        username="reportapiuser",
+        email="reportapiuser@test.com",
+        password="testpassword",
     )
     yield user
     user.delete()
@@ -103,7 +105,9 @@ def orguser(authuser, org):
 def other_authuser():
     """A second django User for permission tests"""
     user = User.objects.create(
-        username="otherreportuser", email="otherreportuser@test.com", password="testpassword"
+        username="otherreportuser",
+        email="otherreportuser@test.com",
+        password="testpassword",
     )
     yield user
     user.delete()
@@ -138,7 +142,11 @@ def sample_dashboard(orguser, org):
                     "chart-123": {
                         "id": "chart-123",
                         "type": "chart",
-                        "config": {"chartId": 1, "chartType": "bar", "title": "Test Bar Chart"},
+                        "config": {
+                            "chartId": 1,
+                            "chartType": "bar",
+                            "title": "Test Bar Chart",
+                        },
                     }
                 },
             }
@@ -458,7 +466,9 @@ class TestCreateSnapshot:
 class TestGetSnapshotView:
     """Tests for get_snapshot_view endpoint"""
 
-    @patch("ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs")
+    @patch(
+        "ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs"
+    )
     def test_view_success(self, mock_inject, orguser, sample_snapshot, seed_db):
         """Test successfully viewing a snapshot"""
         request = mock_request(orguser)
@@ -480,8 +490,12 @@ class TestGetSnapshotView:
             get_snapshot_view(request, snapshot_id=99999)
         assert exc_info.value.status_code == 404
 
-    @patch("ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs")
-    def test_view_injects_period_into_filters(self, mock_inject, orguser, sample_snapshot, seed_db):
+    @patch(
+        "ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs"
+    )
+    def test_view_injects_period_into_filters(
+        self, mock_inject, orguser, sample_snapshot, seed_db
+    ):
         """Test that the view response injects period dates into the matching filter"""
         request = mock_request(orguser)
         response = get_snapshot_view(request, snapshot_id=sample_snapshot.id)
@@ -491,7 +505,10 @@ class TestGetSnapshotView:
         filters = data["dashboard_data"].get("filters", [])
         datetime_filter = None
         for f in filters:
-            if f.get("filter_type") == "datetime" and f.get("column_name") == "created_at":
+            if (
+                f.get("filter_type") == "datetime"
+                and f.get("column_name") == "created_at"
+            ):
                 datetime_filter = f
                 break
 
@@ -514,7 +531,9 @@ class TestUpdateSnapshot:
         """Test updating snapshot summary"""
         request = mock_request(orguser)
         payload = SnapshotUpdate(summary="Key findings: revenue up 15%")
-        response = update_snapshot(request, snapshot_id=sample_snapshot.id, payload=payload)
+        response = update_snapshot(
+            request, snapshot_id=sample_snapshot.id, payload=payload
+        )
 
         assert response["success"] is True
         assert response["data"]["summary"] == "Key findings: revenue up 15%"
@@ -555,7 +574,9 @@ class TestDeleteSnapshot:
             delete_snapshot(request, snapshot_id=99999)
         assert exc_info.value.status_code == 404
 
-    def test_delete_by_non_creator_forbidden(self, other_orguser, sample_snapshot, seed_db):
+    def test_delete_by_non_creator_forbidden(
+        self, other_orguser, sample_snapshot, seed_db
+    ):
         """Test that a user who did not create the snapshot cannot delete it"""
         request = mock_request(other_orguser)
         with pytest.raises(HttpError) as exc_info:
@@ -576,12 +597,15 @@ class TestExportReportPdf:
         self, mock_generate_pdf, orguser, sample_snapshot, seed_db
     ):
         """Currently-applied filter values in the request are forwarded to PdfExportService,
-        so the exported PDF reflects what the viewer had selected, not just the defaults."""
+        so the exported PDF reflects what the viewer had selected, not just the defaults.
+        """
         mock_generate_pdf.return_value = b"%PDF-1.4 content"
         request = mock_request(orguser)
         payload = ExportPdfRequest(dashboard_filters={"1": "2025-01-15"})
 
-        response = export_report_pdf(request, snapshot_id=sample_snapshot.id, payload=payload)
+        response = export_report_pdf(
+            request, snapshot_id=sample_snapshot.id, payload=payload
+        )
 
         assert response.status_code == 200
         assert response.content == b"%PDF-1.4 content"
@@ -598,7 +622,8 @@ class TestExportReportPdf:
         self, mock_generate_pdf, orguser, sample_snapshot, seed_db
     ):
         """Omitting the payload (e.g. an older client) still works, with no filters applied —
-        matches the export's original behavior before dashboard_filters support was added."""
+        matches the export's original behavior before dashboard_filters support was added.
+        """
         mock_generate_pdf.return_value = b"%PDF-1.4 content"
         request = mock_request(orguser)
 
@@ -607,7 +632,9 @@ class TestExportReportPdf:
         assert response.status_code == 200
         sample_snapshot.refresh_from_db()  # export_report_pdf generates the share token on first use
         mock_generate_pdf.assert_called_once_with(
-            sample_snapshot.id, sample_snapshot.public_share_token, dashboard_filters=None
+            sample_snapshot.id,
+            sample_snapshot.public_share_token,
+            dashboard_filters=None,
         )
 
     def test_snapshot_not_found(self, orguser, seed_db):
@@ -639,10 +666,14 @@ class TestListDashboardDatetimeColumns:
             list_dashboard_datetime_columns(request, dashboard_id=99999)
         assert exc_info.value.status_code == 404
 
-    def test_no_charts_returns_existing_filters(self, orguser, empty_dashboard, seed_db):
+    def test_no_charts_returns_existing_filters(
+        self, orguser, empty_dashboard, seed_db
+    ):
         """Test dashboard with no charts returns empty list (no filters either)"""
         request = mock_request(orguser)
-        response = list_dashboard_datetime_columns(request, dashboard_id=empty_dashboard.id)
+        response = list_dashboard_datetime_columns(
+            request, dashboard_id=empty_dashboard.id
+        )
         assert response["success"] is True
         assert len(response["data"]) == 0
 
@@ -664,7 +695,9 @@ class TestListDashboardDatetimeColumns:
             mock_get_wc.return_value = mock_warehouse
 
             request = mock_request(orguser)
-            response = list_dashboard_datetime_columns(request, dashboard_id=sample_dashboard.id)
+            response = list_dashboard_datetime_columns(
+                request, dashboard_id=sample_dashboard.id
+            )
 
         data = response["data"]
         # The existing datetime filter should be included and flagged
@@ -678,7 +711,9 @@ class TestListDashboardDatetimeColumns:
         self, orguser, sample_dashboard, sample_chart, sample_filter, seed_db
     ):
         """Test that warehouse datetime columns are discovered"""
-        from ddpui.core.datainsights.insights.insight_interface import TranslateColDataType
+        from ddpui.core.datainsights.insights.insight_interface import (
+            TranslateColDataType,
+        )
 
         mock_warehouse = MagicMock()
         mock_warehouse.get_table_columns.return_value = [
@@ -712,7 +747,9 @@ class TestListDashboardDatetimeColumns:
             mock_get_wc.return_value = mock_warehouse
 
             request = mock_request(orguser)
-            response = list_dashboard_datetime_columns(request, dashboard_id=sample_dashboard.id)
+            response = list_dashboard_datetime_columns(
+                request, dashboard_id=sample_dashboard.id
+            )
 
         data = response["data"]
         # Should find the timestamp columns + existing filter (deduplicated)
@@ -727,14 +764,20 @@ class TestListDashboardDatetimeColumns:
         updated_at_col = next(r for r in data if r.column_name == "updated_at")
         assert updated_at_col.is_dashboard_filter is False
 
-    def test_no_warehouse_configured(self, orguser, sample_dashboard, sample_chart, seed_db):
+    def test_no_warehouse_configured(
+        self, orguser, sample_dashboard, sample_chart, seed_db
+    ):
         """Test error when warehouse is not configured"""
-        with patch("ddpui.core.reports.report_service.OrgWarehouse.objects") as mock_ow_objects:
+        with patch(
+            "ddpui.core.reports.report_service.OrgWarehouse.objects"
+        ) as mock_ow_objects:
             mock_ow_objects.filter.return_value.first.return_value = None
 
             request = mock_request(orguser)
             with pytest.raises(HttpError) as exc_info:
-                list_dashboard_datetime_columns(request, dashboard_id=sample_dashboard.id)
+                list_dashboard_datetime_columns(
+                    request, dashboard_id=sample_dashboard.id
+                )
             assert exc_info.value.status_code == 502
 
 
@@ -747,7 +790,13 @@ from ddpui.models.audit_log import AuditLogResourceType, AuditLogAction
 class TestReportAuditLogs:
     @patch("ddpui.core.reports.report_service.create_audit_log")
     def test_create_snapshot_creates_audit_log(
-        self, mock_audit_log, orguser, sample_dashboard, sample_filter, sample_chart, seed_db
+        self,
+        mock_audit_log,
+        orguser,
+        sample_dashboard,
+        sample_filter,
+        sample_chart,
+        seed_db,
     ):
         """Test that creating a report snapshot creates an audit log entry."""
         request = mock_request(orguser)
@@ -794,7 +843,9 @@ class TestReportAuditLogs:
         request = mock_request(orguser)
         payload = SnapshotUpdate(summary="Updated summary text")
 
-        response = update_snapshot(request, snapshot_id=sample_snapshot.id, payload=payload)
+        response = update_snapshot(
+            request, snapshot_id=sample_snapshot.id, payload=payload
+        )
 
         # Response is wrapped with api_response: {"success": True, "data": {...}}
         assert response["data"]["summary"] == "Updated summary text"
@@ -824,7 +875,9 @@ class TestReportAuditLogs:
         mock_audit_log.assert_not_called()
 
     @patch("ddpui.api.report_api.create_audit_log")
-    def test_delete_snapshot_creates_audit_log(self, mock_audit_log, orguser, org, seed_db):
+    def test_delete_snapshot_creates_audit_log(
+        self, mock_audit_log, orguser, org, seed_db
+    ):
         """Test that deleting a report snapshot creates an audit log entry."""
         snapshot = ReportSnapshot.objects.create(
             title="Report To Delete",
@@ -862,7 +915,9 @@ class TestReportAuditLogs:
     ):
         """Test that creating a comment creates an audit log entry."""
         request = mock_request(orguser)
-        payload = CommentCreate(target_type="summary", content="Nice trend this quarter.")
+        payload = CommentCreate(
+            target_type="summary", content="Nice trend this quarter."
+        )
 
         create_comment(request, snapshot_id=sample_snapshot.id, payload=payload)
 
@@ -920,7 +975,9 @@ class TestReportAuditLogs:
         )
         mock_audit_log.reset_mock()
 
-        delete_comment(request, snapshot_id=sample_snapshot.id, comment_id=comment["data"]["id"])
+        delete_comment(
+            request, snapshot_id=sample_snapshot.id, comment_id=comment["data"]["id"]
+        )
 
         mock_audit_log.assert_called_once()
         call_kwargs = mock_audit_log.call_args[1]
@@ -944,10 +1001,15 @@ class TestGetReportMapData:
 
     @patch("ddpui.api.report_api.ReportService.get_report_map_data")
     def test_success(self, mock_service, orguser, sample_snapshot, seed_db):
-        mock_service.return_value = {"data": [{"name": "Karnataka", "value": 5.0}], "count": 1}
+        mock_service.return_value = {
+            "data": [{"name": "Karnataka", "value": 5.0}],
+            "count": 1,
+        }
         request = mock_request(orguser)
 
-        response = get_report_map_data(request, snapshot_id=sample_snapshot.id, chart_id=1)
+        response = get_report_map_data(
+            request, snapshot_id=sample_snapshot.id, chart_id=1
+        )
 
         assert response == {
             "data": [{"name": "Karnataka", "value": 5.0}],
@@ -957,7 +1019,9 @@ class TestGetReportMapData:
         mock_service.assert_called_once_with(sample_snapshot.id, 1, orguser.org, None)
 
     @patch("ddpui.api.report_api.ReportService.get_report_map_data")
-    def test_passes_parsed_dashboard_filters(self, mock_service, orguser, sample_snapshot, seed_db):
+    def test_passes_parsed_dashboard_filters(
+        self, mock_service, orguser, sample_snapshot, seed_db
+    ):
         mock_service.return_value = {"data": [], "count": 0}
         request = mock_request(orguser)
 
@@ -980,13 +1044,18 @@ class TestGetReportMapData:
         request = mock_request(orguser)
 
         get_report_map_data(
-            request, snapshot_id=sample_snapshot.id, chart_id=1, dashboard_filters="not-json"
+            request,
+            snapshot_id=sample_snapshot.id,
+            chart_id=1,
+            dashboard_filters="not-json",
         )
 
         mock_service.assert_called_once_with(sample_snapshot.id, 1, orguser.org, None)
 
     @patch("ddpui.api.report_api.ReportService.get_report_map_data")
-    def test_snapshot_not_found_returns_404(self, mock_service, orguser, sample_snapshot, seed_db):
+    def test_snapshot_not_found_returns_404(
+        self, mock_service, orguser, sample_snapshot, seed_db
+    ):
         mock_service.side_effect = SnapshotNotFoundError("not found")
         request = mock_request(orguser)
 
@@ -1015,12 +1084,16 @@ class TestGetReportTableData:
         }
         request = mock_request(orguser)
 
-        response = get_report_table_data(request, snapshot_id=sample_snapshot.id, chart_id=1)
+        response = get_report_table_data(
+            request, snapshot_id=sample_snapshot.id, chart_id=1
+        )
 
         assert response.columns == ["region"]
         assert response.data == [{"region": "Karnataka"}]
         assert response.total_rows == 1
-        mock_service.assert_called_once_with(sample_snapshot.id, 1, orguser.org, 0, 100, None)
+        mock_service.assert_called_once_with(
+            sample_snapshot.id, 1, orguser.org, 0, 100, None
+        )
 
     @patch("ddpui.api.report_api.ReportService.get_report_table_data")
     def test_passes_page_limit_and_parsed_filters(
@@ -1052,13 +1125,20 @@ class TestGetReportTableData:
         request = mock_request(orguser)
 
         get_report_table_data(
-            request, snapshot_id=sample_snapshot.id, chart_id=1, dashboard_filters="[1,2,3]"
+            request,
+            snapshot_id=sample_snapshot.id,
+            chart_id=1,
+            dashboard_filters="[1,2,3]",
         )
 
-        mock_service.assert_called_once_with(sample_snapshot.id, 1, orguser.org, 0, 100, None)
+        mock_service.assert_called_once_with(
+            sample_snapshot.id, 1, orguser.org, 0, 100, None
+        )
 
     @patch("ddpui.api.report_api.ReportService.get_report_table_data")
-    def test_snapshot_not_found_returns_404(self, mock_service, orguser, sample_snapshot, seed_db):
+    def test_snapshot_not_found_returns_404(
+        self, mock_service, orguser, sample_snapshot, seed_db
+    ):
         mock_service.side_effect = SnapshotNotFoundError("not found")
         request = mock_request(orguser)
 
@@ -1080,13 +1160,17 @@ class TestGetReportTableTotalRows:
         mock_service.return_value = 42
         request = mock_request(orguser)
 
-        response = get_report_table_total_rows(request, snapshot_id=sample_snapshot.id, chart_id=1)
+        response = get_report_table_total_rows(
+            request, snapshot_id=sample_snapshot.id, chart_id=1
+        )
 
         assert response == 42
         mock_service.assert_called_once_with(sample_snapshot.id, 1, orguser.org, None)
 
     @patch("ddpui.api.report_api.ReportService.get_report_table_total_rows")
-    def test_passes_parsed_dashboard_filters(self, mock_service, orguser, sample_snapshot, seed_db):
+    def test_passes_parsed_dashboard_filters(
+        self, mock_service, orguser, sample_snapshot, seed_db
+    ):
         mock_service.return_value = 7
         request = mock_request(orguser)
 
@@ -1109,16 +1193,23 @@ class TestGetReportTableTotalRows:
         request = mock_request(orguser)
 
         get_report_table_total_rows(
-            request, snapshot_id=sample_snapshot.id, chart_id=1, dashboard_filters="[1,2,3]"
+            request,
+            snapshot_id=sample_snapshot.id,
+            chart_id=1,
+            dashboard_filters="[1,2,3]",
         )
 
         mock_service.assert_called_once_with(sample_snapshot.id, 1, orguser.org, None)
 
     @patch("ddpui.api.report_api.ReportService.get_report_table_total_rows")
-    def test_snapshot_not_found_returns_404(self, mock_service, orguser, sample_snapshot, seed_db):
+    def test_snapshot_not_found_returns_404(
+        self, mock_service, orguser, sample_snapshot, seed_db
+    ):
         mock_service.side_effect = SnapshotNotFoundError("not found")
         request = mock_request(orguser)
 
         with pytest.raises(HttpError) as exc_info:
-            get_report_table_total_rows(request, snapshot_id=sample_snapshot.id, chart_id=1)
+            get_report_table_total_rows(
+                request, snapshot_id=sample_snapshot.id, chart_id=1
+            )
         assert exc_info.value.status_code == 404

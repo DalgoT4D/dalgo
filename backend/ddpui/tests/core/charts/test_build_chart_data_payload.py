@@ -124,7 +124,11 @@ class TestBuildChartDataPayload:
             table_name="orders",
             extra_config={
                 "metrics": [
-                    {"column": "revenue", "aggregation": "sum", "alias": "Total Revenue"},
+                    {
+                        "column": "revenue",
+                        "aggregation": "sum",
+                        "alias": "Total Revenue",
+                    },
                     {"column": None, "aggregation": "count", "alias": "Count"},
                 ],
             },
@@ -195,9 +199,15 @@ class TestBuildChartDataPayload:
             "extra_config": {
                 "x_axis_column": "date",
                 "dimension_column": "source",
-                "metrics": [{"column": "visits", "aggregation": "sum", "alias": "Visits"}],
+                "metrics": [
+                    {"column": "visits", "aggregation": "sum", "alias": "Visits"}
+                ],
                 "filters": [
-                    {"column": "date", "operator": "greater_than_equal", "value": "2025-01-01"}
+                    {
+                        "column": "date",
+                        "operator": "greater_than_equal",
+                        "value": "2025-01-01",
+                    }
                 ],
             },
         }

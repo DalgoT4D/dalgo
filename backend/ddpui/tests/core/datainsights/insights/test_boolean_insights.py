@@ -16,7 +16,9 @@ from ddpui.core.datainsights.insights.insight_interface import (
     MAP_TRANSLATE_TYPES,
     TranslateColDataType,
 )
-from ddpui.core.datainsights.insights.boolean_type.boolean_insights import BooleanColInsights
+from ddpui.core.datainsights.insights.boolean_type.boolean_insights import (
+    BooleanColInsights,
+)
 
 
 @pytest.fixture

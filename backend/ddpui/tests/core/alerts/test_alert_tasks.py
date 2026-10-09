@@ -89,13 +89,17 @@ def _stub_delivery(monkeypatch):
 # ── evaluate_alert ──────────────────────────────────────────────────────────
 
 
-def test_evaluate_alert_writes_log_and_fires(monkeypatch, seed_db, orguser, sample_metric):
+def test_evaluate_alert_writes_log_and_fires(
+    monkeypatch, seed_db, orguser, sample_metric
+):
     """Threshold met → fired=True, deliveries populated, AlertLog written."""
     _stub_warehouse(orguser)
     _patch_query(monkeypatch, value=42.0)
     _stub_delivery(monkeypatch)
 
-    created = create_alert(mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id))
+    created = create_alert(
+        mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id)
+    )
 
     did_work = alert_tasks.evaluate_alert(created.id)
     assert did_work is True
@@ -118,7 +122,9 @@ def test_evaluate_alert_does_not_fire_when_condition_unmet(
     _patch_query(monkeypatch, value=999.0)
     _stub_delivery(monkeypatch)
 
-    created = create_alert(mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id))
+    created = create_alert(
+        mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id)
+    )
 
     alert_tasks.evaluate_alert(created.id)
 
@@ -129,13 +135,17 @@ def test_evaluate_alert_does_not_fire_when_condition_unmet(
     assert "999" in log.message
 
 
-def test_evaluate_alert_idempotent_atomic_claim(monkeypatch, seed_db, orguser, sample_metric):
+def test_evaluate_alert_idempotent_atomic_claim(
+    monkeypatch, seed_db, orguser, sample_metric
+):
     """A second call within the same cron tick must NOT double-write."""
     _stub_warehouse(orguser)
     _patch_query(monkeypatch, value=42.0)
     _stub_delivery(monkeypatch)
 
-    created = create_alert(mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id))
+    created = create_alert(
+        mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id)
+    )
 
     did_1 = alert_tasks.evaluate_alert(created.id)
     did_2 = alert_tasks.evaluate_alert(created.id)
@@ -149,7 +159,9 @@ def test_evaluate_alert_skips_disabled(monkeypatch, seed_db, orguser, sample_met
     _patch_query(monkeypatch, value=42.0)
     _stub_delivery(monkeypatch)
 
-    created = create_alert(mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id))
+    created = create_alert(
+        mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id)
+    )
     Alert.objects.filter(id=created.id).update(is_active=False)
 
     did = alert_tasks.evaluate_alert(created.id)
@@ -168,7 +180,9 @@ def test_evaluate_alert_records_warehouse_error_without_crashing(
 
     monkeypatch.setattr(alert_tasks.alert_query, "compute", boom)
 
-    created = create_alert(mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id))
+    created = create_alert(
+        mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id)
+    )
     alert_tasks.evaluate_alert(created.id)
 
     log = AlertLog.objects.filter(alert_id=created.id).first()
@@ -189,7 +203,9 @@ def test_dispatch_due_alerts_enqueues_active_due_alerts(
         lambda alert_id: enqueued.append(alert_id),
     )
 
-    a1 = create_alert(mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id))
+    a1 = create_alert(
+        mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id)
+    )
     a2 = create_alert(
         mock_request(orguser),
         _base_alert(orguser, metric_id=sample_metric.id, cron="* * * * *"),
@@ -204,7 +220,9 @@ def test_dispatch_due_alerts_enqueues_active_due_alerts(
     assert len(enqueued) == 2
 
 
-def test_dispatch_due_alerts_skips_inactive(monkeypatch, seed_db, orguser, sample_metric):
+def test_dispatch_due_alerts_skips_inactive(
+    monkeypatch, seed_db, orguser, sample_metric
+):
     enqueued: list[int] = []
     monkeypatch.setattr(
         alert_tasks.evaluate_alert,
@@ -212,7 +230,9 @@ def test_dispatch_due_alerts_skips_inactive(monkeypatch, seed_db, orguser, sampl
         lambda alert_id: enqueued.append(alert_id),
     )
 
-    created = create_alert(mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id))
+    created = create_alert(
+        mock_request(orguser), _base_alert(orguser, metric_id=sample_metric.id)
+    )
     Alert.objects.filter(id=created.id).update(is_active=False)
 
     n = alert_tasks.dispatch_due_alerts()

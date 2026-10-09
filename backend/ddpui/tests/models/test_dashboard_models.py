@@ -38,7 +38,9 @@ pytestmark = pytest.mark.django_db
 def authuser():
     """A django User object"""
     user = User.objects.create(
-        username="dashmodeluser", email="dashmodeluser@test.com", password="testpassword"
+        username="dashmodeluser",
+        email="dashmodeluser@test.com",
+        password="testpassword",
     )
     yield user
     user.delete()

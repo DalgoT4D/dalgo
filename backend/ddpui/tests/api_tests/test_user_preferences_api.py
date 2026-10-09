@@ -77,7 +77,9 @@ def test_seed_data(seed_db):
 def test_create_user_preferences_success(orguser):
     """tests the success of creating user preferences for the OrgUser"""
     request = mock_request(orguser)
-    payload = CreateUserPreferencesSchema(enable_email_notifications=True, disclaimer_shown=True)
+    payload = CreateUserPreferencesSchema(
+        enable_email_notifications=True, disclaimer_shown=True
+    )
 
     response = create_user_preferences(request, payload)
 
@@ -184,7 +186,9 @@ def test_create_user_preferences_with_transform_tab(orguser):
     """tests creating user preferences with last_visited_transform_tab"""
     request = mock_request(orguser)
     payload = CreateUserPreferencesSchema(
-        enable_email_notifications=True, disclaimer_shown=True, last_visited_transform_tab="ui"
+        enable_email_notifications=True,
+        disclaimer_shown=True,
+        last_visited_transform_tab="ui",
     )
 
     response = create_user_preferences(request, payload)
@@ -224,13 +228,17 @@ def test_update_trial_walkthrough_skipped(orguser):
     assert response["success"] is True
     assert response["res"] == {"product_tour": {"skipped": True, "completed": False}}
     prefs = UserPreferences.objects.get(orguser=orguser)
-    assert prefs.trial_walkthrough == {"product_tour": {"skipped": True, "completed": False}}
+    assert prefs.trial_walkthrough == {
+        "product_tour": {"skipped": True, "completed": False}
+    }
 
 
 def test_update_trial_walkthrough_completing_after_skip_clears_skipped(orguser):
     """finishing a flow that was previously skipped clears the skipped flag"""
     request = mock_request(orguser)
-    update_trial_walkthrough(request, UpdateTrialWalkthroughSchema(flow="insights", skipped=True))
+    update_trial_walkthrough(
+        request, UpdateTrialWalkthroughSchema(flow="insights", skipped=True)
+    )
 
     response = update_trial_walkthrough(
         request, UpdateTrialWalkthroughSchema(flow="insights", completed=True)
@@ -263,7 +271,9 @@ def test_update_trial_walkthrough_merges_without_clobbering_other_flows(orguser)
 def test_update_trial_walkthrough_feature_nudge_merges_alongside_flows(orguser):
     """dismissing a feature nudge records it under its own key and leaves the flows alone"""
     request = mock_request(orguser)
-    update_trial_walkthrough(request, UpdateTrialWalkthroughSchema(flow="insights", completed=True))
+    update_trial_walkthrough(
+        request, UpdateTrialWalkthroughSchema(flow="insights", completed=True)
+    )
 
     response = update_trial_walkthrough(
         request, UpdateTrialWalkthroughSchema(flow="reports_nudge", completed=True)
@@ -274,7 +284,10 @@ def test_update_trial_walkthrough_feature_nudge_merges_alongside_flows(orguser):
         "reports_nudge": {"skipped": False, "completed": True},
     }
     prefs = UserPreferences.objects.get(orguser=orguser)
-    assert prefs.trial_walkthrough["reports_nudge"] == {"skipped": False, "completed": True}
+    assert prefs.trial_walkthrough["reports_nudge"] == {
+        "skipped": False,
+        "completed": True,
+    }
 
 
 @pytest.mark.parametrize("nudge", ["reports_nudge", "alerts_nudge", "metrics_nudge"])
@@ -325,7 +338,9 @@ def test_update_trial_walkthrough_rejects_explicit_false(orguser, payload):
 def test_update_trial_walkthrough_completed_wins_over_skipped(orguser):
     """a caller sending both must not store a contradiction"""
     request = mock_request(orguser)
-    payload = UpdateTrialWalkthroughSchema(flow="insights", skipped=True, completed=True)
+    payload = UpdateTrialWalkthroughSchema(
+        flow="insights", skipped=True, completed=True
+    )
 
     response = update_trial_walkthrough(request, payload)
 
@@ -336,7 +351,9 @@ def test_get_user_preferences_with_transform_tab(orguser):
     """tests fetching user preferences with transform tab preference set"""
     # Create preferences with transform tab
     UserPreferences.objects.create(
-        orguser=orguser, enable_email_notifications=True, last_visited_transform_tab="github"
+        orguser=orguser,
+        enable_email_notifications=True,
+        last_visited_transform_tab="github",
     )
 
     request = mock_request(orguser)

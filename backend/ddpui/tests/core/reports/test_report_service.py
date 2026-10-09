@@ -50,7 +50,9 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture
 def authuser():
     user = User.objects.create(
-        username="svcreportuser", email="svcreportuser@test.com", password="testpassword"
+        username="svcreportuser",
+        email="svcreportuser@test.com",
+        password="testpassword",
     )
     yield user
     user.delete()
@@ -59,7 +61,9 @@ def authuser():
 @pytest.fixture
 def org():
     org = Org.objects.create(
-        name="Service Test Org", slug="svc-test-org", airbyte_workspace_id="workspace-id"
+        name="Service Test Org",
+        slug="svc-test-org",
+        airbyte_workspace_id="workspace-id",
     )
     yield org
     org.delete()
@@ -79,7 +83,9 @@ def orguser(authuser, org):
 @pytest.fixture
 def other_authuser():
     user = User.objects.create(
-        username="svcotherrptuser", email="svcotherrptuser@test.com", password="testpassword"
+        username="svcotherrptuser",
+        email="svcotherrptuser@test.com",
+        password="testpassword",
     )
     yield user
     user.delete()
@@ -113,7 +119,11 @@ def sample_dashboard(orguser, org):
                     "chart-1": {
                         "id": "chart-1",
                         "type": "chart",
-                        "config": {"chartId": 1, "chartType": "bar", "title": "Bar Chart"},
+                        "config": {
+                            "chartId": 1,
+                            "chartType": "bar",
+                            "title": "Bar Chart",
+                        },
                     },
                     "text-1": {
                         "id": "text-1",
@@ -211,12 +221,17 @@ class TestInjectPeriodIntoFilters:
     def test_matching_filter_is_enriched(self, sample_snapshot):
         """When a datetime filter matches the snapshot's date_column, inject dates + locked"""
         frozen = copy.deepcopy(sample_snapshot.frozen_dashboard)
-        result = ReportService._inject_period_into_dashboard_config(frozen, sample_snapshot)
+        result = ReportService._inject_period_into_dashboard_config(
+            frozen, sample_snapshot
+        )
 
         assert result is True
         dt_filter = None
         for f in frozen["filters"]:
-            if f.get("filter_type") == "datetime" and f.get("column_name") == "created_at":
+            if (
+                f.get("filter_type") == "datetime"
+                and f.get("column_name") == "created_at"
+            ):
                 dt_filter = f
                 break
         assert dt_filter is not None
@@ -243,7 +258,9 @@ class TestInjectPeriodIntoFilters:
         # The datetime filter is now at index 1
         assert frozen["filters"][1]["column_name"] == "created_at"
 
-        result = ReportService._inject_period_into_dashboard_config(frozen, sample_snapshot)
+        result = ReportService._inject_period_into_dashboard_config(
+            frozen, sample_snapshot
+        )
 
         assert result is True
         # The locked datetime filter should now be first
@@ -262,7 +279,9 @@ class TestInjectPeriodIntoFilters:
             "column_name": "event_time",
         }
 
-        result = ReportService._inject_period_into_dashboard_config(frozen, sample_snapshot)
+        result = ReportService._inject_period_into_dashboard_config(
+            frozen, sample_snapshot
+        )
 
         assert result is False
         # A display-only filter should have been inserted at position 0
@@ -277,7 +296,9 @@ class TestInjectPeriodIntoFilters:
         frozen = copy.deepcopy(sample_snapshot.frozen_dashboard)
         sample_snapshot.date_column = {}
 
-        result = ReportService._inject_period_into_dashboard_config(frozen, sample_snapshot)
+        result = ReportService._inject_period_into_dashboard_config(
+            frozen, sample_snapshot
+        )
         assert result is True
 
     def test_null_filters_creates_list(self, sample_snapshot):
@@ -291,7 +312,9 @@ class TestInjectPeriodIntoFilters:
             "column_name": "event_time",
         }
 
-        result = ReportService._inject_period_into_dashboard_config(frozen, sample_snapshot)
+        result = ReportService._inject_period_into_dashboard_config(
+            frozen, sample_snapshot
+        )
 
         assert result is False
         assert "filters" in frozen
@@ -302,12 +325,17 @@ class TestInjectPeriodIntoFilters:
         frozen = copy.deepcopy(sample_snapshot.frozen_dashboard)
         sample_snapshot.period_start = None
 
-        result = ReportService._inject_period_into_dashboard_config(frozen, sample_snapshot)
+        result = ReportService._inject_period_into_dashboard_config(
+            frozen, sample_snapshot
+        )
 
         assert result is True
         dt_filter = None
         for f in frozen["filters"]:
-            if f.get("filter_type") == "datetime" and f.get("column_name") == "created_at":
+            if (
+                f.get("filter_type") == "datetime"
+                and f.get("column_name") == "created_at"
+            ):
                 dt_filter = f
                 break
         assert dt_filter is not None
@@ -329,7 +357,9 @@ class TestInjectPeriodIntoChartConfigs:
         self, mock_org_warehouse_model, mock_factory, sample_snapshot
     ):
         """Injects date filters into charts matching the date column's schema/table"""
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_factory.get_warehouse_client.return_value = MagicMock()
 
         frozen_charts = copy.deepcopy(sample_snapshot.frozen_chart_configs)
@@ -364,7 +394,9 @@ class TestInjectPeriodIntoChartConfigs:
         frozen_charts = copy.deepcopy(sample_snapshot.frozen_chart_configs)
         frozen_charts["1"]["schema_name"] = "other_schema"
 
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_wh_client = MagicMock()
         mock_wh_client.column_exists.return_value = False
         mock_factory.get_warehouse_client.return_value = mock_wh_client
@@ -379,7 +411,9 @@ class TestInjectPeriodIntoChartConfigs:
         self, mock_org_warehouse_model, mock_factory, sample_snapshot
     ):
         """When period_start is None, only the end-date filter is injected"""
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_factory.get_warehouse_client.return_value = MagicMock()
 
         frozen_charts = copy.deepcopy(sample_snapshot.frozen_chart_configs)
@@ -493,7 +527,9 @@ class TestFreezeChartConfigs:
                     "id": "tab-1",
                     "title": "Tab 1",
                     "layout_config": [],
-                    "components": {"chart-1": {"id": "chart-1", "type": "chart", "config": {}}},
+                    "components": {
+                        "chart-1": {"id": "chart-1", "type": "chart", "config": {}}
+                    },
                 }
             ],
             created_by=orguser,
@@ -543,7 +579,9 @@ class TestUpdateSnapshot:
         assert updated.last_modified_by == orguser
         assert updated.last_modified_by.user.email == orguser.user.email
 
-    def test_update_tracks_different_modifier(self, sample_snapshot, org, other_orguser):
+    def test_update_tracks_different_modifier(
+        self, sample_snapshot, org, other_orguser
+    ):
         """last_modified_by reflects the user who made the latest edit"""
         data = SnapshotUpdate(summary="Edited by other user")
         updated = ReportService.update_snapshot(sample_snapshot.id, data, other_orguser)
@@ -551,7 +589,9 @@ class TestUpdateSnapshot:
         assert updated.last_modified_by == other_orguser
         assert updated.last_modified_by.user.email == other_orguser.user.email
 
-    def test_update_none_summary_does_not_set_last_modified_by(self, sample_snapshot, org, orguser):
+    def test_update_none_summary_does_not_set_last_modified_by(
+        self, sample_snapshot, org, orguser
+    ):
         """When summary is None (no change), last_modified_by is not updated"""
         assert sample_snapshot.last_modified_by is None
 
@@ -620,7 +660,14 @@ class TestDeleteSnapshot:
         assert not ReportSnapshot.objects.filter(id=snapshot.id).exists()
 
     def test_delete_admin_can_delete_others_snapshot(
-        self, org, orguser, other_orguser, sample_dashboard, sample_filter, sample_chart, seed_db
+        self,
+        org,
+        orguser,
+        other_orguser,
+        sample_dashboard,
+        sample_filter,
+        sample_chart,
+        seed_db,
     ):
         """An admin can delete a snapshot created by someone else (admin override)"""
         snapshot = ReportService.create_snapshot(
@@ -679,7 +726,9 @@ class TestGetSnapshotViewData:
         self, mock_org_warehouse_model, mock_factory, sample_snapshot, org
     ):
         """get_snapshot_view_data returns dashboard_data, report_metadata, frozen_chart_configs"""
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_factory.get_warehouse_client.return_value = MagicMock()
 
         view_data = ReportService.get_snapshot_view_data(sample_snapshot.id, org)
@@ -692,7 +741,9 @@ class TestGetSnapshotViewData:
         self, mock_org_warehouse_model, mock_factory, sample_snapshot, org
     ):
         """View data has expected keys and values"""
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_factory.get_warehouse_client.return_value = MagicMock()
 
         view_data = ReportService.get_snapshot_view_data(sample_snapshot.id, org)
@@ -718,7 +769,9 @@ class TestGetSnapshotViewData:
         self, mock_org_warehouse_model, mock_factory, sample_snapshot, org
     ):
         """When date_column doesn't match a dashboard filter, chart-level filters are injected"""
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_factory.get_warehouse_client.return_value = MagicMock()
 
         # Change date_column to something not matching any dashboard filter
@@ -744,7 +797,9 @@ class TestGetSnapshotViewData:
         self, mock_org_warehouse_model, mock_factory, sample_snapshot, org
     ):
         """report_metadata includes last_modified_by as None for unedited snapshots"""
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_factory.get_warehouse_client.return_value = MagicMock()
 
         view_data = ReportService.get_snapshot_view_data(sample_snapshot.id, org)
@@ -756,7 +811,9 @@ class TestGetSnapshotViewData:
         self, mock_org_warehouse_model, mock_factory, sample_snapshot, org, orguser
     ):
         """report_metadata includes last_modified_by email after an update"""
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_factory.get_warehouse_client.return_value = MagicMock()
 
         data = SnapshotUpdate(summary="Updated summary")
@@ -878,13 +935,17 @@ class TestListSnapshots:
 
     def test_list_filter_by_dashboard_title(self, org, orguser, sample_snapshot):
         """Filter by dashboard_title matches frozen_dashboard.title"""
-        result = ReportService.list_snapshots(org, orguser, dashboard_title="Test Dashboard")
+        result = ReportService.list_snapshots(
+            org, orguser, dashboard_title="Test Dashboard"
+        )
         assert len(result) == 1
 
         result = ReportService.list_snapshots(org, orguser, dashboard_title="test dash")
         assert len(result) == 1  # icontains
 
-        result = ReportService.list_snapshots(org, orguser, dashboard_title="nonexistent")
+        result = ReportService.list_snapshots(
+            org, orguser, dashboard_title="nonexistent"
+        )
         assert len(result) == 0
 
     def test_list_filter_by_created_by_email(self, org, orguser, sample_snapshot):
@@ -894,21 +955,31 @@ class TestListSnapshots:
         )
         assert len(result) == 1
 
-        result = ReportService.list_snapshots(org, orguser, created_by_email="svcreport")
+        result = ReportService.list_snapshots(
+            org, orguser, created_by_email="svcreport"
+        )
         assert len(result) == 1  # icontains
 
-        result = ReportService.list_snapshots(org, orguser, created_by_email="nobody@test.com")
+        result = ReportService.list_snapshots(
+            org, orguser, created_by_email="nobody@test.com"
+        )
         assert len(result) == 0
 
     def test_list_combined_filters(self, org, orguser, sample_snapshot):
         """Multiple filters are combined with AND"""
         result = ReportService.list_snapshots(
-            org, orguser, search="Jan", dashboard_title="Test", created_by_email="svcreport"
+            org,
+            orguser,
+            search="Jan",
+            dashboard_title="Test",
+            created_by_email="svcreport",
         )
         assert len(result) == 1
 
         # One filter mismatches -> no results
-        result = ReportService.list_snapshots(org, orguser, search="Jan", dashboard_title="wrong")
+        result = ReportService.list_snapshots(
+            org, orguser, search="Jan", dashboard_title="wrong"
+        )
         assert len(result) == 0
 
 
@@ -928,7 +999,9 @@ class TestSnapshotIsolation:
     ):
         """After deleting the original chart, get_snapshot_view_data still returns
         the full frozen chart config."""
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_factory.get_warehouse_client.return_value = MagicMock()
 
         snapshot_id = sample_snapshot.id
@@ -949,11 +1022,18 @@ class TestSnapshotIsolation:
         assert frozen_charts[str(chart_id)]["table_name"] == "orders"
 
     def test_deleting_dashboard_does_not_affect_snapshot(
-        self, mock_org_warehouse_model, mock_factory, sample_snapshot, org, sample_dashboard
+        self,
+        mock_org_warehouse_model,
+        mock_factory,
+        sample_snapshot,
+        org,
+        sample_dashboard,
     ):
         """After deleting the original dashboard, get_snapshot_view_data still
         returns the full frozen dashboard config."""
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_factory.get_warehouse_client.return_value = MagicMock()
 
         snapshot_id = sample_snapshot.id
@@ -980,7 +1060,9 @@ class TestSnapshotIsolation:
         datetime filter, two datetime filters appear in the view data:
         one is the original dashboard filter (untouched) and one is the
         injected display-only filter (locked with the snapshot period)."""
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_factory.get_warehouse_client.return_value = MagicMock()
 
         sample_snapshot.date_column = {
@@ -1050,7 +1132,9 @@ class TestCrossTableFilterInjection:
             },
         }
 
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_wh_client = MagicMock()
         mock_wh_client.column_exists.return_value = True
         mock_factory.get_warehouse_client.return_value = mock_wh_client
@@ -1073,7 +1157,9 @@ class TestCrossTableFilterInjection:
     ):
         """Even when a dashboard datetime filter matches (filter_matched=True),
         chart-level filters should still be injected."""
-        mock_org_warehouse_model.objects.filter.return_value.first.return_value = MagicMock()
+        mock_org_warehouse_model.objects.filter.return_value.first.return_value = (
+            MagicMock()
+        )
         mock_factory.get_warehouse_client.return_value = MagicMock()
 
         view_data = ReportService.get_snapshot_view_data(sample_snapshot.id, org)
@@ -1202,13 +1288,17 @@ class TestExtractChartIds:
                     "id": "tab-1",
                     "title": "T1",
                     "layout_config": [],
-                    "components": {"chart-1": {"type": "chart", "config": {"chartId": 99}}},
+                    "components": {
+                        "chart-1": {"type": "chart", "config": {"chartId": 99}}
+                    },
                 },
                 {
                     "id": "tab-2",
                     "title": "T2",
                     "layout_config": [],
-                    "components": {"chart-1": {"type": "chart", "config": {"chartId": 99}}},
+                    "components": {
+                        "chart-1": {"type": "chart", "config": {"chartId": 99}}
+                    },
                 },
             ],
             created_by=orguser,
@@ -1440,7 +1530,9 @@ class TestFreezeKpiConfigs:
 
         assert kpi_data["rag_status"] == "amber"
 
-    def test_kpi_frozen_red_status(self, mock_kpi_service, mock_org_wh, kpi_dashboard, sample_kpi):
+    def test_kpi_frozen_red_status(
+        self, mock_kpi_service, mock_org_wh, kpi_dashboard, sample_kpi
+    ):
         """KPI at 70% of target with amber=80% should be red"""
         mock_org_wh.objects.filter.return_value.first.return_value = MagicMock()
         mock_kpi_service.kpi_to_response.return_value = MagicMock()
@@ -1520,7 +1612,9 @@ class TestFreezeKpiConfigs:
 
         assert kpi_data["extra_config"] == {}
 
-    def test_kpi_only_dashboard(self, mock_kpi_service, mock_org_wh, orguser, org, sample_kpi):
+    def test_kpi_only_dashboard(
+        self, mock_kpi_service, mock_org_wh, orguser, org, sample_kpi
+    ):
         """Dashboard with only KPI components (no charts)"""
         mock_org_wh.objects.filter.return_value.first.return_value = None
         dashboard = Dashboard.objects.create(
@@ -1548,7 +1642,9 @@ class TestFreezeKpiConfigs:
         assert frozen[str(sample_kpi.id)]["component_type"] == "kpi"
         dashboard.delete()
 
-    def test_kpi_component_without_kpi_id(self, mock_kpi_service, mock_org_wh, orguser, org):
+    def test_kpi_component_without_kpi_id(
+        self, mock_kpi_service, mock_org_wh, orguser, org
+    ):
         """KPI component without kpiId in config is skipped"""
         dashboard = Dashboard.objects.create(
             title="Missing KPI ID",
@@ -1573,7 +1669,9 @@ class TestFreezeKpiConfigs:
         assert frozen == {}
         dashboard.delete()
 
-    def test_kpi_expression_metric_frozen(self, mock_kpi_service, mock_org_wh, orguser, org):
+    def test_kpi_expression_metric_frozen(
+        self, mock_kpi_service, mock_org_wh, orguser, org
+    ):
         """KPI with an expression metric is frozen with column_expression"""
         mock_org_wh.objects.filter.return_value.first.return_value = None
         from ddpui.models.metric import Metric, KPI as KPIModel
@@ -1614,7 +1712,10 @@ class TestFreezeKpiConfigs:
         frozen = ReportService._freeze_chart_configs(dashboard)
         kpi_data = frozen[str(kpi.id)]
 
-        assert kpi_data["metric"]["column_expression"] == "SUM(revenue - cost) / COUNT(DISTINCT id)"
+        assert (
+            kpi_data["metric"]["column_expression"]
+            == "SUM(revenue - cost) / COUNT(DISTINCT id)"
+        )
         assert kpi_data["metric"]["column"] is None
         assert kpi_data["metric"]["aggregation"] is None
 
@@ -1638,7 +1739,9 @@ class TestGetReportKpiData:
             ReportService.get_report_kpi_data(sample_snapshot.id, 99999, org)
 
     @patch("ddpui.core.reports.report_service.KPIService")
-    def test_non_kpi_entry_raises(self, mock_kpi_service, sample_snapshot, org, sample_chart):
+    def test_non_kpi_entry_raises(
+        self, mock_kpi_service, sample_snapshot, org, sample_chart
+    ):
         """Requesting a chart ID via get_report_kpi_data raises SnapshotValidationError"""
         # sample_snapshot has chart with id=sample_chart.id frozen in it
         with pytest.raises(SnapshotValidationError, match="not a KPI"):
@@ -1695,7 +1798,10 @@ class TestGetReportKpiData:
         assert frozen_kpi["component_type"] == "kpi"
 
         # Mock the compute call
-        mock_compute.return_value = {"data": {"current_value": 9500}, "echarts_config": {}}
+        mock_compute.return_value = {
+            "data": {"current_value": 9500},
+            "echarts_config": {},
+        }
 
         result = ReportService.get_report_kpi_data(snapshot.id, sample_kpi.id, org)
 
@@ -1782,7 +1888,9 @@ class TestGetReportKpiData:
         dashboard.delete()
 
     @patch("ddpui.core.kpi.kpi_service.KPIService.compute_kpi_data")
-    def test_kpi_survives_deletion(self, mock_compute, orguser, org, sample_chart, sample_kpi):
+    def test_kpi_survives_deletion(
+        self, mock_compute, orguser, org, sample_chart, sample_kpi
+    ):
         """Frozen KPI data is available even after the original KPI is deleted"""
         dashboard = Dashboard.objects.create(
             title="Deletion Test",
@@ -1893,7 +2001,10 @@ def xsrc_dashboard(orguser, org, xsrc_table_chart, xsrc_map_chart):
                     "chart-table": {
                         "id": "chart-table",
                         "type": "chart",
-                        "config": {"chartId": xsrc_table_chart.id, "chartType": "table"},
+                        "config": {
+                            "chartId": xsrc_table_chart.id,
+                            "chartType": "table",
+                        },
                     },
                     "chart-map": {
                         "id": "chart-map",
@@ -1965,7 +2076,13 @@ class TestReportMapAndTableCrossSourceFilters:
     since these two endpoints resolve against the snapshot's frozen config."""
 
     def test_map_data_filter_applies_across_tables_and_survives_deletion(
-        self, xsrc_snapshot, xsrc_dashboard, xsrc_filter, xsrc_map_chart, xsrc_org_warehouse, org
+        self,
+        xsrc_snapshot,
+        xsrc_dashboard,
+        xsrc_filter,
+        xsrc_map_chart,
+        xsrc_org_warehouse,
+        org,
     ):
         filter_id = xsrc_filter.id
         map_chart_id = xsrc_map_chart.id
@@ -1991,7 +2108,9 @@ class TestReportMapAndTableCrossSourceFilters:
         assert result == {"data": [], "count": 0}
         # Called once for the period lock, once for the live dashboard filter —
         # both check the same (schema, table, column) since date_column is "created_at" too.
-        mock_warehouse_client.column_exists.assert_called_with("public", "line_items", "created_at")
+        mock_warehouse_client.column_exists.assert_called_with(
+            "public", "line_items", "created_at"
+        )
         _, _, _, sent_filters = mock_execute.call_args[0]
         assert sent_filters == [
             {
@@ -2004,7 +2123,13 @@ class TestReportMapAndTableCrossSourceFilters:
         ]
 
     def test_table_data_filter_applies_across_tables_and_survives_deletion(
-        self, xsrc_snapshot, xsrc_dashboard, xsrc_filter, xsrc_table_chart, xsrc_org_warehouse, org
+        self,
+        xsrc_snapshot,
+        xsrc_dashboard,
+        xsrc_filter,
+        xsrc_table_chart,
+        xsrc_org_warehouse,
+        org,
     ):
         filter_id = xsrc_filter.id
         table_chart_id = xsrc_table_chart.id
@@ -2036,7 +2161,9 @@ class TestReportMapAndTableCrossSourceFilters:
             )
 
         assert result["data"] == []
-        mock_warehouse_client.column_exists.assert_called_with("public", "line_items", "created_at")
+        mock_warehouse_client.column_exists.assert_called_with(
+            "public", "line_items", "created_at"
+        )
         _, sent_payload, _, _ = mock_preview.call_args[0]
         assert sent_payload.dashboard_filters == [
             {
@@ -2049,7 +2176,13 @@ class TestReportMapAndTableCrossSourceFilters:
         ]
 
     def test_table_total_rows_filter_applies_across_tables(
-        self, xsrc_snapshot, xsrc_dashboard, xsrc_filter, xsrc_table_chart, xsrc_org_warehouse, org
+        self,
+        xsrc_snapshot,
+        xsrc_dashboard,
+        xsrc_filter,
+        xsrc_table_chart,
+        xsrc_org_warehouse,
+        org,
     ):
         filter_id = xsrc_filter.id
         table_chart_id = xsrc_table_chart.id
@@ -2073,7 +2206,9 @@ class TestReportMapAndTableCrossSourceFilters:
             )
 
         assert result == 7
-        mock_warehouse_client.column_exists.assert_called_with("public", "line_items", "created_at")
+        mock_warehouse_client.column_exists.assert_called_with(
+            "public", "line_items", "created_at"
+        )
         _, sent_payload = mock_total.call_args[0]
         assert sent_payload.dashboard_filters == [
             {
@@ -2163,7 +2298,9 @@ class TestReportMapAndTablePeriodEnforcement:
             "ddpui.core.reports.report_service.charts_service.get_chart_data_total_rows"
         ) as mock_total:
             mock_total.return_value = 3
-            ReportService.get_report_table_total_rows(xsrc_snapshot.id, xsrc_table_chart.id, org)
+            ReportService.get_report_table_total_rows(
+                xsrc_snapshot.id, xsrc_table_chart.id, org
+            )
 
         sent_payload = mock_total.call_args[0][1]
         period_filters = self._period_filters(sent_payload.extra_config)

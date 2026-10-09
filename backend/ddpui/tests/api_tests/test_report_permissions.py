@@ -111,7 +111,9 @@ def _create_orguser(username, email, org, role_slug):
 
 @pytest.fixture
 def super_admin_user(org, seed_db):
-    user, orguser = _create_orguser("superadmin", "superadmin@test.com", org, SUPER_ADMIN_ROLE)
+    user, orguser = _create_orguser(
+        "superadmin", "superadmin@test.com", org, SUPER_ADMIN_ROLE
+    )
     yield orguser
     orguser.delete()
     user.delete()
@@ -119,7 +121,9 @@ def super_admin_user(org, seed_db):
 
 @pytest.fixture
 def account_manager_user(org, seed_db):
-    user, orguser = _create_orguser("acctmgr", "acctmgr@test.com", org, ACCOUNT_MANAGER_ROLE)
+    user, orguser = _create_orguser(
+        "acctmgr", "acctmgr@test.com", org, ACCOUNT_MANAGER_ROLE
+    )
     yield orguser
     orguser.delete()
     user.delete()
@@ -156,7 +160,11 @@ def snapshot(org, account_manager_user):
     """A pre-created snapshot owned by account_manager_user."""
     snapshot = ReportSnapshot.objects.create(
         title="Permission Test Report",
-        date_column={"schema_name": "public", "table_name": "orders", "column_name": "created_at"},
+        date_column={
+            "schema_name": "public",
+            "table_name": "orders",
+            "column_name": "created_at",
+        },
         period_start=date(2026, 1, 1),
         period_end=date(2026, 3, 31),
         frozen_dashboard={
@@ -233,7 +241,9 @@ class TestRolePermissionsLoaded:
         assert "can_delete_dashboards" in request.permissions
         assert "can_share_dashboards" in request.permissions
 
-    def test_pipeline_manager_has_all_dashboard_permissions(self, pipeline_manager_user):
+    def test_pipeline_manager_has_all_dashboard_permissions(
+        self, pipeline_manager_user
+    ):
         request = mock_request(pipeline_manager_user)
         assert "can_view_dashboards" in request.permissions
         assert "can_create_dashboards" in request.permissions
@@ -294,20 +304,28 @@ class TestReportViewPermissions:
         response = list_snapshots(request)
         assert response["success"] is True
 
-    @patch("ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs")
+    @patch(
+        "ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs"
+    )
     def test_guest_can_view_snapshot(self, mock_inject, guest_user, snapshot):
         request = mock_request(guest_user)
         response = get_snapshot_view(request, snapshot_id=snapshot.id)
         assert response["success"] is True
 
-    @patch("ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs")
+    @patch(
+        "ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs"
+    )
     def test_analyst_can_view_snapshot(self, mock_inject, analyst_user, snapshot):
         request = mock_request(analyst_user)
         response = get_snapshot_view(request, snapshot_id=snapshot.id)
         assert response["success"] is True
 
-    @patch("ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs")
-    def test_pipeline_manager_can_view_snapshot(self, mock_inject, pipeline_manager_user, snapshot):
+    @patch(
+        "ddpui.core.reports.report_service.ReportService._inject_period_into_chart_configs"
+    )
+    def test_pipeline_manager_can_view_snapshot(
+        self, mock_inject, pipeline_manager_user, snapshot
+    ):
         request = mock_request(pipeline_manager_user)
         response = get_snapshot_view(request, snapshot_id=snapshot.id)
         assert response["success"] is True
@@ -342,12 +360,16 @@ class TestGuestReportRestrictions:
         )
         with pytest.raises(HttpError) as exc_info:
             create_snapshot(request, payload)
-        assert exc_info.value.status_code == 400  # dashboard not found, not 403 permission denied
+        assert (
+            exc_info.value.status_code == 400
+        )  # dashboard not found, not 403 permission denied
 
     def test_guest_cannot_update_snapshot(self, guest_user, snapshot):
         request = mock_request(guest_user)
         payload = SnapshotUpdate(summary="Guest edit attempt")
-        assert_permission_denied(update_snapshot, request, snapshot_id=snapshot.id, payload=payload)
+        assert_permission_denied(
+            update_snapshot, request, snapshot_id=snapshot.id, payload=payload
+        )
 
     def test_guest_cannot_delete_snapshot(self, guest_user, snapshot):
         request = mock_request(guest_user)
@@ -378,7 +400,9 @@ class TestNonGuestReportAccess:
         response = update_snapshot(request, snapshot_id=snapshot.id, payload=payload)
         assert response["success"] is True
 
-    def test_pipeline_manager_can_update_snapshot(self, pipeline_manager_user, snapshot):
+    def test_pipeline_manager_can_update_snapshot(
+        self, pipeline_manager_user, snapshot
+    ):
         request = mock_request(pipeline_manager_user)
         payload = SnapshotUpdate(summary="PipeMgr update")
         response = update_snapshot(request, snapshot_id=snapshot.id, payload=payload)
@@ -439,7 +463,9 @@ class TestGuestCommentReadAccess:
 
     def test_guest_can_list_comments(self, guest_user, snapshot):
         request = mock_request(guest_user)
-        response = list_comments(request, snapshot_id=snapshot.id, target_type="summary")
+        response = list_comments(
+            request, snapshot_id=snapshot.id, target_type="summary"
+        )
         assert response["success"] is True
 
     def test_guest_can_get_comment_states(self, guest_user, snapshot):
@@ -468,7 +494,9 @@ class TestNonGuestCommentAccess:
     """Test that non-Guest roles can create, update, and delete comments."""
 
     @patch("ddpui.core.reports.mention_service.MentionService.process_mentions")
-    def test_super_admin_can_create_comment(self, mock_mentions, super_admin_user, snapshot):
+    def test_super_admin_can_create_comment(
+        self, mock_mentions, super_admin_user, snapshot
+    ):
         request = mock_request(super_admin_user)
         payload = CommentCreate(target_type="summary", content="Admin comment")
         response = create_comment(request, snapshot_id=snapshot.id, payload=payload)
@@ -553,21 +581,26 @@ class TestPdfExportPermissions:
 
     def test_guest_can_access_pdf_export(self, guest_user, snapshot):
         """Guest has can_view_dashboards, so the permission decorator passes.
-        The actual PDF generation may fail (no Playwright), but permission is granted."""
+        The actual PDF generation may fail (no Playwright), but permission is granted.
+        """
         request = mock_request(guest_user)
         try:
             export_report_pdf(request, snapshot_id=snapshot.id)
         except HttpError as e:
             # 500 = PDF generation failure (expected without Playwright)
             # 403/404 = permission denied (should NOT happen)
-            assert e.status_code == 500, f"Expected 500 (PDF gen failure), got {e.status_code}"
+            assert (
+                e.status_code == 500
+            ), f"Expected 500 (PDF gen failure), got {e.status_code}"
 
     def test_analyst_can_access_pdf_export(self, analyst_user, snapshot):
         request = mock_request(analyst_user)
         try:
             export_report_pdf(request, snapshot_id=snapshot.id)
         except HttpError as e:
-            assert e.status_code == 500, f"Expected 500 (PDF gen failure), got {e.status_code}"
+            assert (
+                e.status_code == 500
+            ), f"Expected 500 (PDF gen failure), got {e.status_code}"
 
 
 # ================================================================================

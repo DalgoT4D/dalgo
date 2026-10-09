@@ -45,10 +45,23 @@ from ddpui.ddpprefect.schema import (
     PrefectDataFlowOrgTasks,
     TaskStateSchema,
 )
-from ddpui.models.org import Org, OrgDbt, OrgPrefectBlockv1, OrgDataFlowv1, ConnectionMeta
+from ddpui.models.org import (
+    Org,
+    OrgDbt,
+    OrgPrefectBlockv1,
+    OrgDataFlowv1,
+    ConnectionMeta,
+)
 from ddpui.models.org_user import OrgUser
 from ddpui.models.role_based_access import Role, RolePermission, Permission
-from ddpui.models.tasks import DataflowOrgTask, OrgDataFlowv1, OrgTask, Task, TaskLock, TaskType
+from ddpui.models.tasks import (
+    DataflowOrgTask,
+    OrgDataFlowv1,
+    OrgTask,
+    Task,
+    TaskLock,
+    TaskType,
+)
 from ddpui.models.org_user import OrgUser
 from ddpui.models.flow_runs import PrefectFlowRun
 from ddpui.utils.constants import TASK_DBTRUN, TASK_DBTCLEAN, TASK_DBTDEPS
@@ -74,9 +87,15 @@ def org_without_dbt_workspace():
     org_slug = "test-org-slug"
 
     queue_config = {
-        "scheduled_pipeline_queue": {"name": DDP_WORK_QUEUE, "workpool": "test_workpool"},
+        "scheduled_pipeline_queue": {
+            "name": DDP_WORK_QUEUE,
+            "workpool": "test_workpool",
+        },
         "connection_sync_queue": {"name": DDP_WORK_QUEUE, "workpool": "test_workpool"},
-        "transform_task_queue": {"name": MANUL_DBT_WORK_QUEUE, "workpool": "test_workpool"},
+        "transform_task_queue": {
+            "name": MANUL_DBT_WORK_QUEUE,
+            "workpool": "test_workpool",
+        },
     }
 
     org = Org.objects.create(
@@ -116,13 +135,21 @@ def org_with_dbt_workspace(tmpdir_factory):
 
     # create dbt_project.yml file
     yml_obj = {"profile": "dummy"}
-    with open(str(org_dir / "dbtrepo" / "dbt_project.yml"), "w", encoding="utf-8") as output:
+    with open(
+        str(org_dir / "dbtrepo" / "dbt_project.yml"), "w", encoding="utf-8"
+    ) as output:
         yaml.safe_dump(yml_obj, output)
 
     queue_config = {
-        "scheduled_pipeline_queue": {"name": DDP_WORK_QUEUE, "workpool": "test_workpool"},
+        "scheduled_pipeline_queue": {
+            "name": DDP_WORK_QUEUE,
+            "workpool": "test_workpool",
+        },
         "connection_sync_queue": {"name": DDP_WORK_QUEUE, "workpool": "test_workpool"},
-        "transform_task_queue": {"name": MANUL_DBT_WORK_QUEUE, "workpool": "test_workpool"},
+        "transform_task_queue": {
+            "name": MANUL_DBT_WORK_QUEUE,
+            "workpool": "test_workpool",
+        },
     }
 
     dbt = OrgDbt.objects.create(
@@ -182,13 +209,21 @@ def org_with_transformation_tasks(tmpdir_factory, seed_master_tasks_db):
 
     # create dbt_project.yml file
     yml_obj = {"profile": "dummy"}
-    with open(str(org_dir / "dbtrepo" / "dbt_project.yml"), "w", encoding="utf-8") as output:
+    with open(
+        str(org_dir / "dbtrepo" / "dbt_project.yml"), "w", encoding="utf-8"
+    ) as output:
         yaml.safe_dump(yml_obj, output)
 
     queue_config = {
-        "scheduled_pipeline_queue": {"name": DDP_WORK_QUEUE, "workpool": "test_workpool"},
+        "scheduled_pipeline_queue": {
+            "name": DDP_WORK_QUEUE,
+            "workpool": "test_workpool",
+        },
         "connection_sync_queue": {"name": DDP_WORK_QUEUE, "workpool": "test_workpool"},
-        "transform_task_queue": {"name": MANUL_DBT_WORK_QUEUE, "workpool": "test_workpool"},
+        "transform_task_queue": {
+            "name": MANUL_DBT_WORK_QUEUE,
+            "workpool": "test_workpool",
+        },
     }
 
     dbt = OrgDbt.objects.create(
@@ -234,7 +269,9 @@ def org_with_transformation_tasks(tmpdir_factory, seed_master_tasks_db):
     dbt.save()
 
     for task in Task.objects.filter(type__in=[TaskType.DBT, TaskType.GIT]).all():
-        org_task = OrgTask.objects.create(org=org, task=task, uuid=uuid.uuid4(), dbt=org.dbt)
+        org_task = OrgTask.objects.create(
+            org=org, task=task, uuid=uuid.uuid4(), dbt=org.dbt
+        )
 
         if task.slug == "dbt-run":
             new_dataflow = OrgDataFlowv1.objects.create(
@@ -433,21 +470,29 @@ def test_post_prefect_dataflow_v1_success2(orguser_transform_tasks):
     # +3 for automatically added git task, dbt-clean, and dbt-deps
     seq = len(connections) + 3
     for i, org_task in enumerate(transform_tasks):
-        dataflow_task = DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask=org_task).first()
+        dataflow_task = DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask=org_task
+        ).first()
         assert dataflow_task is not None
         assert dataflow_task.seq == seq + i
 
     # verify auto-managed tasks (git, dbt-clean, dbt-deps) were added
     assert (
-        DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask__task__type=TaskType.GIT).count()
+        DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask__task__type=TaskType.GIT
+        ).count()
         == 1
     )
     assert (
-        DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask__task__slug=TASK_DBTCLEAN).count()
+        DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask__task__slug=TASK_DBTCLEAN
+        ).count()
         == 1
     )
     assert (
-        DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask__task__slug=TASK_DBTDEPS).count()
+        DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask__task__slug=TASK_DBTDEPS
+        ).count()
         == 1
     )
 
@@ -593,7 +638,9 @@ def test_get_prefect_dataflow_v1_failure3(orguser_transform_tasks):
     assert str(excinfo.value) == "failed to get deployment from prefect-proxy"
 
     # cleanup
-    OrgDataFlowv1.objects.filter(org=request.orguser.org, deployment_id="test-dep-id-1").delete()
+    OrgDataFlowv1.objects.filter(
+        org=request.orguser.org, deployment_id="test-dep-id-1"
+    ).delete()
 
 
 @patch.multiple(
@@ -704,7 +751,9 @@ def test_get_prefect_dataflow_v1_success(orguser_transform_tasks):
     )
 
     # cleanup
-    OrgDataFlowv1.objects.filter(org=request.orguser.org, deployment_id="test-dep-id-1").delete()
+    OrgDataFlowv1.objects.filter(
+        org=request.orguser.org, deployment_id="test-dep-id-1"
+    ).delete()
 
 
 def test_delete_prefect_dataflow_v1_failure(orguser):
@@ -749,7 +798,9 @@ def test_delete_prefect_dataflow_v1_success(orguser_transform_tasks):
     delete_prefect_dataflow_v1(request, "test-dep-id-1")
 
     assert (
-        OrgDataFlowv1.objects.filter(org=request.orguser.org, deployment_id="test-dep-id-1").count()
+        OrgDataFlowv1.objects.filter(
+            org=request.orguser.org, deployment_id="test-dep-id-1"
+        ).count()
         == 0
     )
 
@@ -819,7 +870,9 @@ def test_put_prefect_dataflow_v1_success(orguser_transform_tasks):
         .all()
     )
     for i, transform_task in enumerate(transform_tasks):
-        DataflowOrgTask.objects.create(dataflow=dataflow, orgtask=transform_task, seq=seq + i)
+        DataflowOrgTask.objects.create(
+            dataflow=dataflow, orgtask=transform_task, seq=seq + i
+        )
 
     payload = PrefectDataFlowUpdateSchema3(
         name="put-dataflow",
@@ -840,20 +893,28 @@ def test_put_prefect_dataflow_v1_success(orguser_transform_tasks):
         == 0
     )
     assert (
-        DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask__task__type=TaskType.GIT).count()
+        DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask__task__type=TaskType.GIT
+        ).count()
         == 1
     )
     # verify dbt-clean and dbt-deps are auto-added
     assert (
-        DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask__task__slug=TASK_DBTCLEAN).count()
+        DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask__task__slug=TASK_DBTCLEAN
+        ).count()
         == 1
     )
     assert (
-        DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask__task__slug=TASK_DBTDEPS).count()
+        DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask__task__slug=TASK_DBTDEPS
+        ).count()
         == 1
     )
     assert (
-        DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask__task__type=TaskType.DBT).count()
+        DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask__task__type=TaskType.DBT
+        ).count()
         >= 1
     )
 
@@ -906,7 +967,8 @@ def test_put_prefect_dataflow_v1_success2(orguser_transform_tasks):
     payload = PrefectDataFlowUpdateSchema3(
         name="put-dataflow",
         connections=[
-            PrefectFlowAirbyteConnection2(id=conn.id, seq=i) for i, conn in enumerate(connections)
+            PrefectFlowAirbyteConnection2(id=conn.id, seq=i)
+            for i, conn in enumerate(connections)
         ],
         transformTasks=[
             PrefectDataFlowOrgTasks(uuid=str(org_task.uuid), seq=idx)
@@ -925,20 +987,28 @@ def test_put_prefect_dataflow_v1_success2(orguser_transform_tasks):
     )
 
     assert (
-        DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask__task__type=TaskType.GIT).count()
+        DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask__task__type=TaskType.GIT
+        ).count()
         == 1
     )
     # verify dbt-clean and dbt-deps are auto-added
     assert (
-        DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask__task__slug=TASK_DBTCLEAN).count()
+        DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask__task__slug=TASK_DBTCLEAN
+        ).count()
         == 1
     )
     assert (
-        DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask__task__slug=TASK_DBTDEPS).count()
+        DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask__task__slug=TASK_DBTDEPS
+        ).count()
         == 1
     )
     assert (
-        DataflowOrgTask.objects.filter(dataflow=dataflow, orgtask__task__type=TaskType.DBT).count()
+        DataflowOrgTask.objects.filter(
+            dataflow=dataflow, orgtask__task__type=TaskType.DBT
+        ).count()
         >= 1
     )
 
@@ -991,7 +1061,10 @@ def test_post_deployment_set_schedule_failure3(orguser_transform_tasks):
     org = orguser_transform_tasks.org
 
     dataflow = OrgDataFlowv1.objects.create(
-        org=org, name="test-flow", deployment_name="test-deploy", deployment_id="deployment-id"
+        org=org,
+        name="test-flow",
+        deployment_name="test-deploy",
+        deployment_id="deployment-id",
     )
 
     with pytest.raises(HttpError) as excinfo:
@@ -1011,7 +1084,10 @@ def test_post_deployment_set_schedule_success(orguser_transform_tasks):
     org = orguser_transform_tasks.org
 
     dataflow = OrgDataFlowv1.objects.create(
-        org=org, name="test-flow", deployment_name="test-deploy", deployment_id="deployment-id"
+        org=org,
+        name="test-flow",
+        deployment_name="test-deploy",
+        deployment_id="deployment-id",
     )
 
     res = post_deployment_set_schedule(request, "deployment-id", "active")
@@ -1035,14 +1111,18 @@ def test_post_run_prefect_org_deployment_task_success(orguser_transform_tasks):
     request = mock_request(orguser_transform_tasks)
 
     dataflow_orgtask = None
-    org_task = OrgTask.objects.filter(org=request.orguser.org, task__slug=TASK_DBTRUN).first()
+    org_task = OrgTask.objects.filter(
+        org=request.orguser.org, task__slug=TASK_DBTRUN
+    ).first()
     if org_task:
         dataflow_orgtask = DataflowOrgTask.objects.filter(orgtask=org_task).first()
 
     if dataflow_orgtask is None:
         raise Exception("Deployment not found")
 
-    post_run_prefect_org_deployment_task(request, dataflow_orgtask.dataflow.deployment_id)
+    post_run_prefect_org_deployment_task(
+        request, dataflow_orgtask.dataflow.deployment_id
+    )
 
     assert TaskLock.objects.filter(orgtask=org_task).count() == 1
 
@@ -1065,10 +1145,14 @@ def test_post_run_prefect_org_deployment_task_creates_audit_log(
     OrgDataFlowv1), not just the deployment_id repeated."""
     request = mock_request(orguser_transform_tasks)
 
-    org_task = OrgTask.objects.filter(org=request.orguser.org, task__slug=TASK_DBTRUN).first()
+    org_task = OrgTask.objects.filter(
+        org=request.orguser.org, task__slug=TASK_DBTRUN
+    ).first()
     dataflow_orgtask = DataflowOrgTask.objects.filter(orgtask=org_task).first()
 
-    post_run_prefect_org_deployment_task(request, dataflow_orgtask.dataflow.deployment_id)
+    post_run_prefect_org_deployment_task(
+        request, dataflow_orgtask.dataflow.deployment_id
+    )
 
     mock_audit_log.assert_called_once()
     call_kwargs = mock_audit_log.call_args[1]
@@ -1096,15 +1180,25 @@ def test_get_prefect_flow_runs_log_history_v1(
         {"id": "flow_run_id_2"},
     ]
     mock_get_flow_run_graphs.return_value = [
-        {"id": "run_id_1", "kind": "flow-run", "parameters": {"connection_id": "conn_id_1"}},
-        {"id": "run_id_2", "kind": "flow-run", "parameters": {"connection_id": "conn_id_2"}},
+        {
+            "id": "run_id_1",
+            "kind": "flow-run",
+            "parameters": {"connection_id": "conn_id_1"},
+        },
+        {
+            "id": "run_id_2",
+            "kind": "flow-run",
+            "parameters": {"connection_id": "conn_id_2"},
+        },
     ]
     mock_get_connection.side_effect = lambda workspace_id, connection_id: {
         "name": f"connection_name_{connection_id}"
     }
 
     # Call the function
-    result = get_prefect_flow_runs_log_history_v1(request, "deployment_id", limit=2, offset=0)
+    result = get_prefect_flow_runs_log_history_v1(
+        request, "deployment_id", limit=2, offset=0
+    )
 
     # Assertions
     assert len(result) == 2
@@ -1112,15 +1206,23 @@ def test_get_prefect_flow_runs_log_history_v1(
     assert result[1]["id"] == "flow_run_id_2"
     assert "runs" in result[0]
     assert "runs" in result[1]
-    assert result[0]["runs"][0]["parameters"]["connection_name"] == "connection_name_conn_id_1"
-    assert result[1]["runs"][1]["parameters"]["connection_name"] == "connection_name_conn_id_2"
+    assert (
+        result[0]["runs"][0]["parameters"]["connection_name"]
+        == "connection_name_conn_id_1"
+    )
+    assert (
+        result[1]["runs"][1]["parameters"]["connection_name"]
+        == "connection_name_conn_id_2"
+    )
 
 
 def test_get_prefect_flow_runs_log_history_v1_org_not_found(orguser_transform_tasks):
     orguser_transform_tasks.org = None
     request = mock_request(orguser_transform_tasks)
     with pytest.raises(HttpError) as excinfo:
-        get_prefect_flow_runs_log_history_v1(request, "deployment_id", limit=2, offset=0)
+        get_prefect_flow_runs_log_history_v1(
+            request, "deployment_id", limit=2, offset=0
+        )
     assert excinfo.value.status_code == 404
     assert str(excinfo.value) == "organization not found"
 
@@ -1150,7 +1252,8 @@ def test_cancel_queued_manual_job_success(
 
     assert response == {"success": True}
     mock_cancel_job.assert_called_once_with(
-        flow_run_id, {"state": {"name": "Cancelling", "type": "CANCELLING"}, "force": "True"}
+        flow_run_id,
+        {"state": {"name": "Cancelling", "type": "CANCELLING"}, "force": "True"},
     )
 
 
@@ -1171,7 +1274,9 @@ def test_cancel_queued_manual_job_org_missing(
         cancel_queued_manual_job(
             request,
             flow_run_id,
-            TaskStateSchema(state={"name": "Cancelling", "type": "CANCELLING"}, force=True),
+            TaskStateSchema(
+                state={"name": "Cancelling", "type": "CANCELLING"}, force=True
+            ),
         )
 
     assert exc.value.status_code == 400
@@ -1197,7 +1302,9 @@ def test_cancel_queued_manual_job_flow_run_invalid(
         cancel_queued_manual_job(
             request,
             flow_run_id,
-            TaskStateSchema(state={"name": "Cancelling", "type": "CANCELLING"}, force=True),
+            TaskStateSchema(
+                state={"name": "Cancelling", "type": "CANCELLING"}, force=True
+            ),
         )
 
     assert exc.value.status_code == 400
@@ -1226,7 +1333,9 @@ def test_cancel_queued_manual_job_access_denied(
         cancel_queued_manual_job(
             request,
             flow_run_id,
-            TaskStateSchema(state={"name": "Cancelling", "type": "CANCELLING"}, force=True),
+            TaskStateSchema(
+                state={"name": "Cancelling", "type": "CANCELLING"}, force=True
+            ),
         )
 
     assert exc.value.status_code == 403
@@ -1274,8 +1383,12 @@ def test_post_prefect_dataflow_v1_continue_on_sync_failure(orguser_transform_tas
     assert deployment_params["config"]["continue_on_sync_failure"] is True
 
     # cleanup
-    OrgTask.objects.filter(org=request.orguser.org, connection_id="test-conn-id-1").delete()
-    OrgDataFlowv1.objects.filter(org=request.orguser.org, deployment_id="test-deploy-id").delete()
+    OrgTask.objects.filter(
+        org=request.orguser.org, connection_id="test-conn-id-1"
+    ).delete()
+    OrgDataFlowv1.objects.filter(
+        org=request.orguser.org, deployment_id="test-deploy-id"
+    ).delete()
 
 
 @patch.multiple(
@@ -1313,8 +1426,12 @@ def test_post_prefect_dataflow_v1_continue_on_sync_failure_defaults_false(
     assert deployment_params["config"]["continue_on_sync_failure"] is False
 
     # cleanup
-    OrgTask.objects.filter(org=request.orguser.org, connection_id="test-conn-id-1").delete()
-    OrgDataFlowv1.objects.filter(org=request.orguser.org, deployment_id="test-deploy-id").delete()
+    OrgTask.objects.filter(
+        org=request.orguser.org, connection_id="test-conn-id-1"
+    ).delete()
+    OrgDataFlowv1.objects.filter(
+        org=request.orguser.org, deployment_id="test-deploy-id"
+    ).delete()
 
 
 @patch.multiple(
@@ -1333,7 +1450,9 @@ def test_post_prefect_dataflow_v1_continue_on_sync_failure_defaults_false(
         }
     ),
 )
-def test_get_prefect_dataflow_v1_returns_continue_on_sync_failure(orguser_transform_tasks):
+def test_get_prefect_dataflow_v1_returns_continue_on_sync_failure(
+    orguser_transform_tasks,
+):
     """tests that continueOnSyncFailure is returned from deployment parameters"""
     request = mock_request(orguser_transform_tasks)
 
@@ -1349,7 +1468,9 @@ def test_get_prefect_dataflow_v1_returns_continue_on_sync_failure(orguser_transf
     assert dataflow["continueOnSyncFailure"] is True
 
     # cleanup
-    OrgDataFlowv1.objects.filter(org=request.orguser.org, deployment_id="test-dep-flag").delete()
+    OrgDataFlowv1.objects.filter(
+        org=request.orguser.org, deployment_id="test-dep-flag"
+    ).delete()
 
 
 @patch.multiple(
@@ -1385,14 +1506,18 @@ def test_get_prefect_dataflow_v1_defaults_continue_on_sync_failure_false(
     assert dataflow["continueOnSyncFailure"] is False
 
     # cleanup
-    OrgDataFlowv1.objects.filter(org=request.orguser.org, deployment_id="test-dep-no-flag").delete()
+    OrgDataFlowv1.objects.filter(
+        org=request.orguser.org, deployment_id="test-dep-no-flag"
+    ).delete()
 
 
 @patch.multiple(
     "ddpui.ddpprefect.prefect_service",
     update_dataflow_v1=Mock(return_value=[]),
 )
-def test_put_prefect_dataflow_v1_passes_continue_on_sync_failure(orguser_transform_tasks):
+def test_put_prefect_dataflow_v1_passes_continue_on_sync_failure(
+    orguser_transform_tasks,
+):
     """tests that continueOnSyncFailure flag is passed through on update"""
     request = mock_request(orguser_transform_tasks)
 
@@ -1416,7 +1541,9 @@ def test_put_prefect_dataflow_v1_passes_continue_on_sync_failure(orguser_transfo
 
     call_args = prefect_service.update_dataflow_v1.call_args
     updated_payload = call_args[0][1]
-    assert updated_payload.deployment_params["config"]["continue_on_sync_failure"] is True
+    assert (
+        updated_payload.deployment_params["config"]["continue_on_sync_failure"] is True
+    )
 
     # cleanup
     DataflowOrgTask.objects.filter(dataflow=dataflow).delete()
@@ -1512,7 +1639,9 @@ def test_post_prefect_dataflow_v1_audit_log_resolves_names(
     call_kwargs = mock_audit_log.call_args[1]
     assert call_kwargs["resource_fields"]["cron"] == "0 5 * * *"
     assert call_kwargs["resource_fields"]["connections"] == ["Nice Connection Name"]
-    assert call_kwargs["resource_fields"]["transform_tasks"] == [transform_task.task.label]
+    assert call_kwargs["resource_fields"]["transform_tasks"] == [
+        transform_task.task.label
+    ]
 
     # cleanup
     OrgTask.objects.filter(org=org, connection_id="create-audit-conn-id").delete()
@@ -1610,7 +1739,9 @@ def test_put_prefect_dataflow_v1_creates_audit_log(
     assert call_kwargs["resource_fields"]["name"] == "updated-name"
     assert call_kwargs["resource_fields"]["cron"] == "0 5 * * *"
     assert call_kwargs["resource_fields"]["connections"] == ["Nice Connection Name"]
-    assert call_kwargs["resource_fields"]["transform_tasks"] == [transform_task.task.label]
+    assert call_kwargs["resource_fields"]["transform_tasks"] == [
+        transform_task.task.label
+    ]
 
     dataflow.delete()
 

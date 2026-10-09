@@ -19,7 +19,11 @@ from ddpui.core.trial.constants import TEARDOWN_ATTEMPTS
 from ddpui.core.trial.clone_service import CloneRun
 from ddpui.core.trial.exceptions import TrialAccountExistsError
 from ddpui.core.trial.signup_record import record_signup
-from ddpui.schemas.trial_schema import TrialCloneRequest, TrialDbParams, TrialSignupSchema
+from ddpui.schemas.trial_schema import (
+    TrialCloneRequest,
+    TrialDbParams,
+    TrialSignupSchema,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -138,7 +142,10 @@ def test_clone_passes_org_name_and_role_slug_onto_run(
 
 @patch("ddpui.core.trial.clone_service.drop_trial_database")
 @patch("ddpui.core.trial.clone_service.OrgCleanupService")
-@patch("ddpui.core.trial.clone_service._step_org_and_user", side_effect=RuntimeError("kaboom"))
+@patch(
+    "ddpui.core.trial.clone_service._step_org_and_user",
+    side_effect=RuntimeError("kaboom"),
+)
 def test_clone_reraises_and_skips_teardown_when_step1_fails_immediately(
     mock_s1, mock_cleanup_cls, mock_drop
 ):
@@ -188,7 +195,9 @@ def test_clone_tears_down_created_resources_on_later_failure(
 @patch("ddpui.core.trial.clone_service.drop_trial_database")
 @patch("ddpui.core.trial.clone_service.OrgCleanupService")
 @patch("ddpui.core.trial.clone_service._step_org_and_user")
-def test_clone_teardown_failure_does_not_mask_original_error(mock_s1, mock_cleanup_cls, mock_drop):
+def test_clone_teardown_failure_does_not_mask_original_error(
+    mock_s1, mock_cleanup_cls, mock_drop
+):
     """Teardown itself blowing up must never hide the original exception."""
     template = Org.objects.create(name="tmpl4", slug="tmpl4")
     trial_org = Org.objects.create(name="Trial Y", slug="trial-y")
@@ -198,7 +207,9 @@ def test_clone_teardown_failure_does_not_mask_original_error(mock_s1, mock_clean
         raise RuntimeError("original failure")
 
     mock_s1.side_effect = fake_step1
-    mock_cleanup_cls.return_value.delete_org.side_effect = Exception("teardown exploded")
+    mock_cleanup_cls.return_value.delete_org.side_effect = Exception(
+        "teardown exploded"
+    )
 
     with pytest.raises(RuntimeError, match="original failure"):
         clone_service.clone_template_org(
@@ -206,7 +217,10 @@ def test_clone_teardown_failure_does_not_mask_original_error(mock_s1, mock_clean
         )
 
     # retried TEARDOWN_ATTEMPTS times before giving up, and still didn't mask the original
-    assert mock_cleanup_cls.call_args_list == [call(trial_org, dry_run=False)] * TEARDOWN_ATTEMPTS
+    assert (
+        mock_cleanup_cls.call_args_list
+        == [call(trial_org, dry_run=False)] * TEARDOWN_ATTEMPTS
+    )
     mock_drop.assert_not_called()
 
 
@@ -261,11 +275,18 @@ def test_clone_tears_down_db_on_step2_mid_failure(
     subsequent create_warehouse call fails. FIX 2 requires manifest["trial_warehouse_db"]
     to be set right after provision_trial_database returns, so drop_trial_database still
     fires even though the failure happened later in the same step."""
-    template = Org.objects.create(name="tmpl7", slug="tmpl7", airbyte_workspace_id="ws-tmpl7")
-    OrgWarehouse.objects.create(
-        org=template, wtype="postgres", airbyte_destination_id="dest-tmpl7", credentials="x"
+    template = Org.objects.create(
+        name="tmpl7", slug="tmpl7", airbyte_workspace_id="ws-tmpl7"
     )
-    trial_org = Org.objects.create(name="Trial Z", slug="trial-z", airbyte_workspace_id="ws-z")
+    OrgWarehouse.objects.create(
+        org=template,
+        wtype="postgres",
+        airbyte_destination_id="dest-tmpl7",
+        credentials="x",
+    )
+    trial_org = Org.objects.create(
+        name="Trial Z", slug="trial-z", airbyte_workspace_id="ws-z"
+    )
 
     captured = {}
 
@@ -321,11 +342,18 @@ def test_teardown_rds_drop_independent_of_delete_org_failure(
     """The trial RDS db+role live outside the org/Airbyte graph, so if delete_org() throws
     mid-teardown the RDS drop must STILL run (independent guards) — otherwise the db leaks.
     The original exception must still propagate."""
-    template = Org.objects.create(name="tmpl8", slug="tmpl8", airbyte_workspace_id="ws-tmpl8")
-    OrgWarehouse.objects.create(
-        org=template, wtype="postgres", airbyte_destination_id="dest-tmpl8", credentials="x"
+    template = Org.objects.create(
+        name="tmpl8", slug="tmpl8", airbyte_workspace_id="ws-tmpl8"
     )
-    trial_org = Org.objects.create(name="Trial Q", slug="trial-q", airbyte_workspace_id="ws-q")
+    OrgWarehouse.objects.create(
+        org=template,
+        wtype="postgres",
+        airbyte_destination_id="dest-tmpl8",
+        credentials="x",
+    )
+    trial_org = Org.objects.create(
+        name="Trial Q", slug="trial-q", airbyte_workspace_id="ws-q"
+    )
 
     def fake_step1(run):
         run.trial_org = trial_org
@@ -344,7 +372,9 @@ def test_teardown_rds_drop_independent_of_delete_org_failure(
     # create_warehouse raises on failure — it does not return a (result, error) pair
     mock_create_wh.side_effect = Exception("create_warehouse blew up")
     # delete_org() itself explodes during teardown
-    mock_cleanup_cls.return_value.delete_org.side_effect = Exception("airbyte unreachable")
+    mock_cleanup_cls.return_value.delete_org.side_effect = Exception(
+        "airbyte unreachable"
+    )
 
     with pytest.raises(RuntimeError, match="create_warehouse failed"):
         clone_service.clone_template_org(
@@ -359,12 +389,17 @@ def test_teardown_rds_drop_independent_of_delete_org_failure(
 
 @patch("ddpui.core.trial.clone_service.drop_trial_database")
 @patch("ddpui.core.trial.clone_service.OrgCleanupService")
-@patch("ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom"))
+@patch(
+    "ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom")
+)
 @patch("ddpui.core.trial.clone_service._step_org_and_user")
-def test_teardown_keeps_the_person_for_retry(mock_s1, mock_s2, mock_cleanup_cls, mock_drop):
+def test_teardown_keeps_the_person_for_retry(
+    mock_s1, mock_s2, mock_cleanup_cls, mock_drop
+):
     """On failure, teardown removes the OrgUser (via delete_org) but KEEPS the Django User —
     its password and UserAttributes — so POST /trial/retry can re-clone without re-signup. With
-    the OrgUser gone, account_exists_for_email stays False, so the retry is not blocked."""
+    the OrgUser gone, account_exists_for_email stays False, so the retry is not blocked.
+    """
     template = Org.objects.create(name="tmpl-keep", slug="tmpl-keep")
     trial_org = Org.objects.create(name="Trial Keep", slug="trial-keep")
 
@@ -404,7 +439,9 @@ def test_teardown_keeps_the_person_for_retry(mock_s1, mock_s2, mock_cleanup_cls,
 
 @patch("ddpui.core.trial.clone_service.drop_trial_database")
 @patch("ddpui.core.trial.clone_service.OrgCleanupService")
-@patch("ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom"))
+@patch(
+    "ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom")
+)
 @patch("ddpui.core.trial.clone_service._step_org_and_user")
 def test_teardown_keeps_user_that_still_has_an_orguser(
     mock_s1, mock_s2, mock_cleanup_cls, mock_drop
@@ -459,10 +496,12 @@ def test_timeout_tears_down_keeping_user_and_reraises(
         run.manifest["trial_warehouse_db"] = "ft_x_db"  # so the RDS drop guard fires
 
     mock_s1.side_effect = fake_step1
-    mock_s2.side_effect = SoftTimeLimitExceeded()  # the clone blows the soft time limit at step 2
-    mock_cleanup_cls.return_value.delete_org.side_effect = lambda: OrgUser.objects.filter(
-        org=trial_org
-    ).delete()
+    mock_s2.side_effect = (
+        SoftTimeLimitExceeded()
+    )  # the clone blows the soft time limit at step 2
+    mock_cleanup_cls.return_value.delete_org.side_effect = (
+        lambda: OrgUser.objects.filter(org=trial_org).delete()
+    )
 
     with pytest.raises(SoftTimeLimitExceeded):
         clone_service.clone_template_org(
@@ -480,7 +519,9 @@ def test_timeout_tears_down_keeping_user_and_reraises(
 @patch("ddpui.core.trial.clone_service.create_org_plan")
 @patch("ddpui.core.trial.clone_service.create_organization")
 def test_step_org_and_user_creates_org_and_admin(mock_create_org, mock_create_plan):
-    Role.objects.get_or_create(slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1})
+    Role.objects.get_or_create(
+        slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1}
+    )
     template = Org.objects.create(name="tmpl", slug="tmpl")
     trial_org = Org.objects.create(
         name="Trial 1 tmpl", slug="trial-1-tmpl", airbyte_workspace_id="ws-9"
@@ -514,10 +555,16 @@ def test_step_org_and_user_stores_work_domain_without_touching_role(
     The value passed here is the exact escalation an attacker would attempt — posting
     role="super-admin" on the public signup form.
     """
-    Role.objects.get_or_create(slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1})
-    Role.objects.get_or_create(slug="super-admin", defaults={"name": "Super User", "level": 5})
+    Role.objects.get_or_create(
+        slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1}
+    )
+    Role.objects.get_or_create(
+        slug="super-admin", defaults={"name": "Super User", "level": 5}
+    )
     template = Org.objects.create(name="tmpl-wd", slug="tmpl-wd")
-    trial_org = Org.objects.create(name="Trial wd", slug="trial-wd", airbyte_workspace_id="ws-wd")
+    trial_org = Org.objects.create(
+        name="Trial wd", slug="trial-wd", airbyte_workspace_id="ws-wd"
+    )
     mock_create_org.return_value = (trial_org, None)
     mock_create_plan.return_value = (Mock(), None)
 
@@ -531,12 +578,16 @@ def test_step_org_and_user_stores_work_domain_without_touching_role(
 
 @patch("ddpui.core.trial.clone_service.create_org_plan")
 @patch("ddpui.core.trial.clone_service.create_organization")
-def test_step_org_and_user_sets_trial_plan_validity_window(mock_create_org, mock_create_plan):
+def test_step_org_and_user_sets_trial_plan_validity_window(
+    mock_create_org, mock_create_plan
+):
     """The plan payload must carry a real validity window — start now, end +TRIAL_DURATION_DAYS —
     so the trial actually expires (None/None would mean a forever-trial)."""
     from datetime import datetime
 
-    Role.objects.get_or_create(slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1})
+    Role.objects.get_or_create(
+        slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1}
+    )
     template = Org.objects.create(name="tmpl-exp", slug="tmpl-exp")
     trial_org = Org.objects.create(
         name="Trial exp tmpl", slug="trial-exp-tmpl", airbyte_workspace_id="ws-exp"
@@ -558,13 +609,17 @@ def test_step_org_and_user_sets_trial_plan_validity_window(mock_create_org, mock
 
 @patch("ddpui.core.trial.clone_service.create_org_plan")
 @patch("ddpui.core.trial.clone_service.create_organization")
-def test_step_org_and_user_copies_llm_preferences_not_discord(mock_create_org, mock_create_plan):
+def test_step_org_and_user_copies_llm_preferences_not_discord(
+    mock_create_org, mock_create_plan
+):
     """OrgPreferences llm opt-in must carry over (AI features stay usable on the trial) while
     the discord webhook/notification settings must NOT (a trial must never post to the
     template's Discord). Approver is the trial's own admin, not a template identity."""
     from ddpui.models.org_preferences import OrgPreferences
 
-    Role.objects.get_or_create(slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1})
+    Role.objects.get_or_create(
+        slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1}
+    )
     template = Org.objects.create(name="tmpl-prefs", slug="tmpl-prefs")
     OrgPreferences.objects.create(
         org=template,
@@ -593,10 +648,14 @@ def test_step_org_and_user_copies_llm_preferences_not_discord(mock_create_org, m
 
 @patch("ddpui.core.trial.clone_service.create_org_plan")
 @patch("ddpui.core.trial.clone_service.create_organization")
-def test_step_org_and_user_no_prefs_row_when_template_has_none(mock_create_org, mock_create_plan):
+def test_step_org_and_user_no_prefs_row_when_template_has_none(
+    mock_create_org, mock_create_plan
+):
     from ddpui.models.org_preferences import OrgPreferences
 
-    Role.objects.get_or_create(slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1})
+    Role.objects.get_or_create(
+        slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1}
+    )
     template = Org.objects.create(name="tmpl-noprefs", slug="tmpl-noprefs")
     trial_org = Org.objects.create(
         name="Trial noprefs", slug="trial-noprefs", airbyte_workspace_id="ws-np"
@@ -613,18 +672,27 @@ def test_step_org_and_user_no_prefs_row_when_template_has_none(mock_create_org, 
 
 @patch("ddpui.core.trial.clone_service.create_org_plan")
 @patch("ddpui.core.trial.clone_service.create_organization")
-def test_step_org_and_user_copies_template_feature_flags(mock_create_org, mock_create_plan):
+def test_step_org_and_user_copies_template_feature_flags(
+    mock_create_org, mock_create_plan
+):
     """The trial must inherit the template's feature flags — REPORTS in particular gates the
-    Reports nav in the frontend, so without the copy the cloned report snapshots are invisible."""
+    Reports nav in the frontend, so without the copy the cloned report snapshots are invisible.
+    """
     from ddpui.models.org import OrgFeatureFlag
 
-    Role.objects.get_or_create(slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1})
+    Role.objects.get_or_create(
+        slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1}
+    )
     template = Org.objects.create(name="tmpl-ff", slug="tmpl-ff")
     OrgFeatureFlag.objects.create(org=template, flag_name="REPORTS", flag_value=True)
-    OrgFeatureFlag.objects.create(org=template, flag_name="DATA_QUALITY", flag_value=False)
+    OrgFeatureFlag.objects.create(
+        org=template, flag_name="DATA_QUALITY", flag_value=False
+    )
     # a stale/unknown flag on the template must NOT be copied — the feature_flags helper
     # validates against the FEATURE_FLAGS allowlist
-    OrgFeatureFlag.objects.create(org=template, flag_name="NOT_A_REAL_FLAG", flag_value=True)
+    OrgFeatureFlag.objects.create(
+        org=template, flag_name="NOT_A_REAL_FLAG", flag_value=True
+    )
     trial_org = Org.objects.create(
         name="Trial ff tmpl", slug="trial-ff-tmpl", airbyte_workspace_id="ws-ff"
     )
@@ -634,7 +702,9 @@ def test_step_org_and_user_copies_template_feature_flags(mock_create_org, mock_c
     run = CloneRun(template=template, trial_email="ff@b.org")
     clone_service._step_org_and_user(run)
 
-    trial_flags = {f.flag_name: f.flag_value for f in OrgFeatureFlag.objects.filter(org=trial_org)}
+    trial_flags = {
+        f.flag_name: f.flag_value for f in OrgFeatureFlag.objects.filter(org=trial_org)
+    }
     assert trial_flags == {"REPORTS": True, "DATA_QUALITY": False}
 
 
@@ -645,8 +715,11 @@ def test_step_org_and_user_name_uses_org_name_prefixed_by_email_hash(
 ):
     """Name shape is "Trial {email_hash8} {org_name}". The user-supplied org_name IS used (for
     human readability), but the per-email hash sits right after "Trial" so two users typing the
-    SAME org_name still get unique names/slugs — the backend auto-uniquifies, no frontend error."""
-    Role.objects.get_or_create(slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1})
+    SAME org_name still get unique names/slugs — the backend auto-uniquifies, no frontend error.
+    """
+    Role.objects.get_or_create(
+        slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1}
+    )
     template = Org.objects.create(name="Health Demo", slug="tmpl-orgname")
     expected_hash = clone_service.email_hash8("acme@b.org")
     trial_org = Org.objects.create(
@@ -675,7 +748,9 @@ def test_step_org_and_user_slug_is_email_hash_unique(mock_create_org, mock_creat
     after "Trial " so it always survives the 20-char truncation → the slug stays unique per email
     even when a LONG org_name would otherwise push everything else out of the 20-char window. This
     is why the hash must lead the name and not trail it."""
-    Role.objects.get_or_create(slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1})
+    Role.objects.get_or_create(
+        slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1}
+    )
     template = Org.objects.create(name="Health Demo Org", slug="tmpl-long")
     email = "chf@b.org"
     expected_hash = clone_service.email_hash8(email)
@@ -684,14 +759,18 @@ def test_step_org_and_user_slug_is_email_hash_unique(mock_create_org, mock_creat
 
     def fake_create_org(payload):
         trial_org = Org.objects.create(
-            name=payload.name, slug=slugify(payload.name)[:20], airbyte_workspace_id="ws-chf"
+            name=payload.name,
+            slug=slugify(payload.name)[:20],
+            airbyte_workspace_id="ws-chf",
         )
         return trial_org, None
 
     mock_create_org.side_effect = fake_create_org
     mock_create_plan.return_value = (Mock(), None)
 
-    run = CloneRun(template=template, trial_email=email, org_name="A Very Long Org Name Here")
+    run = CloneRun(
+        template=template, trial_email=email, org_name="A Very Long Org Name Here"
+    )
     clone_service._step_org_and_user(run)
 
     payload = mock_create_org.call_args.args[0]
@@ -708,7 +787,9 @@ def test_step_org_and_user_defaults_to_trial_name_when_no_org_name(
     mock_create_org, mock_create_plan
 ):
     """Without org_name, the name falls back to Trial <hash> <template.name>."""
-    Role.objects.get_or_create(slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1})
+    Role.objects.get_or_create(
+        slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1}
+    )
     template = Org.objects.create(name="tmpl-default-name", slug="tmpl-default-name")
     trial_org = Org.objects.create(
         name="Trial default", slug="trial-default", airbyte_workspace_id="ws-13"
@@ -728,7 +809,9 @@ def test_step_org_and_user_defaults_to_trial_name_when_no_org_name(
 @patch("ddpui.core.trial.clone_service.create_org_plan")
 @patch("ddpui.core.trial.clone_service.create_organization")
 def test_step_org_and_user_uses_given_role_slug(mock_create_org, mock_create_plan):
-    Role.objects.get_or_create(slug="custom-role", defaults={"name": "custom", "level": 2})
+    Role.objects.get_or_create(
+        slug="custom-role", defaults={"name": "custom", "level": 2}
+    )
     template = Org.objects.create(name="tmpl-role", slug="tmpl-role")
     trial_org = Org.objects.create(
         name="Trial 1 tmpl-role", slug="trial-1-tmpl-role", airbyte_workspace_id="ws-12"
@@ -746,25 +829,35 @@ def test_step_org_and_user_uses_given_role_slug(mock_create_org, mock_create_pla
 
 @patch("ddpui.core.trial.clone_service.create_org_plan")
 @patch("ddpui.core.trial.clone_service.create_organization")
-def test_step_org_and_user_raises_when_given_role_slug_not_found(mock_create_org, mock_create_plan):
+def test_step_org_and_user_raises_when_given_role_slug_not_found(
+    mock_create_org, mock_create_plan
+):
     template = Org.objects.create(name="tmpl-role-missing", slug="tmpl-role-missing")
     trial_org = Org.objects.create(
-        name="Trial role missing", slug="trial-role-missing", airbyte_workspace_id="ws-14"
+        name="Trial role missing",
+        slug="trial-role-missing",
+        airbyte_workspace_id="ws-14",
     )
     mock_create_org.return_value = (trial_org, None)
     mock_create_plan.return_value = (Mock(), None)
 
-    run = CloneRun(template=template, trial_email="rolemissing@b.org", role_slug="no-such-role")
+    run = CloneRun(
+        template=template, trial_email="rolemissing@b.org", role_slug="no-such-role"
+    )
     with pytest.raises(RuntimeError, match="role"):
         clone_service._step_org_and_user(run)
 
 
 @patch("ddpui.core.trial.clone_service.create_org_plan")
 @patch("ddpui.core.trial.clone_service.create_organization")
-def test_step_org_and_user_is_idempotent_for_userattributes(mock_create_org, mock_create_plan):
+def test_step_org_and_user_is_idempotent_for_userattributes(
+    mock_create_org, mock_create_plan
+):
     """A recurring trial_email makes User.objects.get_or_create return an existing User —
     UserAttributes.objects.create would then raise/duplicate; get_or_create must not."""
-    Role.objects.get_or_create(slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1})
+    Role.objects.get_or_create(
+        slug=ACCOUNT_MANAGER_ROLE, defaults={"name": "admin", "level": 1}
+    )
     template = Org.objects.create(name="tmpl-idem", slug="tmpl-idem")
     existing_user = User.objects.create(username="repeat@b.org", email="repeat@b.org")
     UserAttributes.objects.create(user=existing_user, email_verified=True)
@@ -793,9 +886,14 @@ def test_step_warehouse_registers_trial_warehouse(
     mock_provision, mock_retrieve, mock_ab, mock_create_wh, mock_settings
 ):
     mock_settings.TRIALS_RDS_HOST = "trials-rds-host"
-    template = Org.objects.create(name="tmpl", slug="tmpl", airbyte_workspace_id="ws-tmpl")
+    template = Org.objects.create(
+        name="tmpl", slug="tmpl", airbyte_workspace_id="ws-tmpl"
+    )
     OrgWarehouse.objects.create(
-        org=template, wtype="postgres", airbyte_destination_id="dest-tmpl", credentials="x"
+        org=template,
+        wtype="postgres",
+        airbyte_destination_id="dest-tmpl",
+        credentials="x",
     )
     trial_org = Org.objects.create(
         name="Trial 1 tmpl", slug="trial-1", airbyte_workspace_id="ws-tr"
@@ -842,9 +940,14 @@ def test_step_warehouse_drops_template_ssh_tunnel_config(
     carried into the trial warehouse's Airbyte destination, which points at the trials-RDS
     host with no such tunnel."""
     mock_settings.TRIALS_RDS_HOST = "tmpl-host"
-    template = Org.objects.create(name="tmpl", slug="tmpl", airbyte_workspace_id="ws-tmpl")
+    template = Org.objects.create(
+        name="tmpl", slug="tmpl", airbyte_workspace_id="ws-tmpl"
+    )
     OrgWarehouse.objects.create(
-        org=template, wtype="postgres", airbyte_destination_id="dest-tmpl", credentials="x"
+        org=template,
+        wtype="postgres",
+        airbyte_destination_id="dest-tmpl",
+        credentials="x",
     )
     trial_org = Org.objects.create(
         name="Trial 1 tmpl", slug="trial-1", airbyte_workspace_id="ws-tr"
@@ -902,7 +1005,10 @@ def test_step_warehouse_uses_server_side_copy_when_same_instance(
         name="tmpl-same", slug="tmpl-same", airbyte_workspace_id="ws-tmpl-same"
     )
     OrgWarehouse.objects.create(
-        org=template, wtype="postgres", airbyte_destination_id="dest-tmpl-same", credentials="x"
+        org=template,
+        wtype="postgres",
+        airbyte_destination_id="dest-tmpl-same",
+        credentials="x",
     )
     trial_org = Org.objects.create(
         name="Trial same", slug="trial-same", airbyte_workspace_id="ws-tr-same"
@@ -941,13 +1047,17 @@ def test_step_warehouse_raises_when_template_on_different_instance(
     mock_provision, mock_retrieve, mock_ab, mock_create_wh, mock_settings
 ):
     """The template warehouse MUST live on the trials-RDS instance — there is no cross-host
-    dump/restore fallback, so a different host must fail loudly before provisioning anything."""
+    dump/restore fallback, so a different host must fail loudly before provisioning anything.
+    """
     mock_settings.TRIALS_RDS_HOST = "trials-rds-host"
     template = Org.objects.create(
         name="tmpl-diff", slug="tmpl-diff", airbyte_workspace_id="ws-tmpl-diff"
     )
     OrgWarehouse.objects.create(
-        org=template, wtype="postgres", airbyte_destination_id="dest-tmpl-diff", credentials="x"
+        org=template,
+        wtype="postgres",
+        airbyte_destination_id="dest-tmpl-diff",
+        credentials="x",
     )
     trial_org = Org.objects.create(
         name="Trial diff", slug="trial-diff", airbyte_workspace_id="ws-tr-diff"
@@ -1008,12 +1118,18 @@ def test_clone_rejects_existing_account(mock_step1):
     assert Org.objects.exclude(id__in=[template.id, org.id]).count() == 0
 
 
-@patch("ddpui.core.trial.clone_service.validate_template_source_configs", return_value=[])
+@patch(
+    "ddpui.core.trial.clone_service.validate_template_source_configs", return_value=[]
+)
 @patch("ddpui.core.trial.clone_service.load_template_source_config")
 @patch("ddpui.core.trial.clone_service.airbyte_service")
 def test_step_sources_recreates_from_config(mock_ab, mock_load, mock_validate):
-    template = Org.objects.create(name="tmpl-src", slug="tmpl-src", airbyte_workspace_id="ws-t")
-    trial_org = Org.objects.create(name="Trial src", slug="trial-src", airbyte_workspace_id="ws-r")
+    template = Org.objects.create(
+        name="tmpl-src", slug="tmpl-src", airbyte_workspace_id="ws-t"
+    )
+    trial_org = Org.objects.create(
+        name="Trial src", slug="trial-src", airbyte_workspace_id="ws-r"
+    )
     mock_ab.get_sources.return_value = {
         "sources": [
             {"sourceId": "old-1", "name": "PG", "sourceDefinitionId": "def-pg"},
@@ -1023,12 +1139,18 @@ def test_step_sources_recreates_from_config(mock_ab, mock_load, mock_validate):
     mock_ab.get_source_definitions.side_effect = lambda ws: {
         "ws-t": {
             "sourceDefinitions": [
-                {"sourceDefinitionId": "def-pg", "dockerRepository": "airbyte/source-postgres"}
+                {
+                    "sourceDefinitionId": "def-pg",
+                    "dockerRepository": "airbyte/source-postgres",
+                }
             ]
         },
         "ws-r": {
             "sourceDefinitions": [
-                {"sourceDefinitionId": "def-pg", "dockerRepository": "airbyte/source-postgres"}
+                {
+                    "sourceDefinitionId": "def-pg",
+                    "dockerRepository": "airbyte/source-postgres",
+                }
             ]
         },
     }[ws]
@@ -1043,7 +1165,9 @@ def test_step_sources_recreates_from_config(mock_ab, mock_load, mock_validate):
     assert run.manifest["source_map"] == {"old-1": "new-1"}
 
 
-@patch("ddpui.core.trial.clone_service.validate_template_source_configs", return_value=[])
+@patch(
+    "ddpui.core.trial.clone_service.validate_template_source_configs", return_value=[]
+)
 @patch("ddpui.core.trial.clone_service.load_template_source_config")
 @patch("ddpui.core.trial.clone_service.airbyte_service")
 def test_step_sources_remaps_custom_definitions(mock_ab, mock_load, mock_validate):
@@ -1052,12 +1176,24 @@ def test_step_sources_remaps_custom_definitions(mock_ab, mock_load, mock_validat
       task registered it) -> reuse the trial's id, no create;
     - def-commcare doesn't exist in the trial workspace at all -> create it synchronously from
       the template definition's own repo/tag and use the fresh id."""
-    template = Org.objects.create(name="tmpl-cst", slug="tmpl-cst", airbyte_workspace_id="ws-t")
-    trial_org = Org.objects.create(name="Trial cst", slug="trial-cst", airbyte_workspace_id="ws-r")
+    template = Org.objects.create(
+        name="tmpl-cst", slug="tmpl-cst", airbyte_workspace_id="ws-t"
+    )
+    trial_org = Org.objects.create(
+        name="Trial cst", slug="trial-cst", airbyte_workspace_id="ws-r"
+    )
     mock_ab.get_sources.return_value = {
         "sources": [
-            {"sourceId": "old-k", "name": "Kobo", "sourceDefinitionId": "def-kobo-tmpl"},
-            {"sourceId": "old-c", "name": "CommCare", "sourceDefinitionId": "def-cc-tmpl"},
+            {
+                "sourceId": "old-k",
+                "name": "Kobo",
+                "sourceDefinitionId": "def-kobo-tmpl",
+            },
+            {
+                "sourceId": "old-c",
+                "name": "CommCare",
+                "sourceDefinitionId": "def-cc-tmpl",
+            },
         ]
     }
     mock_ab.get_source_definitions.side_effect = lambda ws: {
@@ -1093,7 +1229,9 @@ def test_step_sources_remaps_custom_definitions(mock_ab, mock_load, mock_validat
         },
     }[ws]
     mock_load.return_value = {"token": "x"}
-    mock_ab.create_custom_source_definition.return_value = {"sourceDefinitionId": "def-cc-trial"}
+    mock_ab.create_custom_source_definition.return_value = {
+        "sourceDefinitionId": "def-cc-trial"
+    }
     mock_ab.create_source.side_effect = [{"sourceId": "new-k"}, {"sourceId": "new-c"}]
 
     run = CloneRun(template=template, trial_email="a@b.org", trial_org=trial_org)
@@ -1121,10 +1259,15 @@ def test_step_sources_remaps_custom_definitions(mock_ab, mock_load, mock_validat
     assert run.manifest["source_map"] == {"old-k": "new-k", "old-c": "new-c"}
 
 
-@patch("ddpui.core.trial.clone_service.validate_template_source_configs", return_value=["PG"])
+@patch(
+    "ddpui.core.trial.clone_service.validate_template_source_configs",
+    return_value=["PG"],
+)
 @patch("ddpui.core.trial.clone_service.airbyte_service")
 def test_step_sources_fails_on_missing_config(mock_ab, mock_validate):
-    template = Org.objects.create(name="tmpl-src2", slug="tmpl-src2", airbyte_workspace_id="ws-t")
+    template = Org.objects.create(
+        name="tmpl-src2", slug="tmpl-src2", airbyte_workspace_id="ws-t"
+    )
     trial_org = Org.objects.create(
         name="Trial src2", slug="trial-src2", airbyte_workspace_id="ws-r"
     )
@@ -1145,7 +1288,9 @@ def test_step_connections_mirrors_template_stream_selection(mock_ab, mock_create
     discovered catalog contains both — a clone must mirror the template's scope, not over-sync
     the source's whole schema. Selected streams are still normalized to full_refresh/overwrite,
     and connection_map is built from the (res, err) tuple."""
-    template = Org.objects.create(name="tmpl-conn", slug="tmpl-conn", airbyte_workspace_id="ws-t")
+    template = Org.objects.create(
+        name="tmpl-conn", slug="tmpl-conn", airbyte_workspace_id="ws-t"
+    )
     trial_org = Org.objects.create(
         name="Trial conn", slug="trial-conn", airbyte_workspace_id="ws-r"
     )
@@ -1232,10 +1377,14 @@ def test_step_connections_falls_back_to_all_streams_when_template_has_no_selecti
     fall back to selecting every discovered stream so a clone never ends up with zero
     streams selected."""
     template = Org.objects.create(
-        name="tmpl-conn-noselect", slug="tmpl-conn-noselect", airbyte_workspace_id="ws-t"
+        name="tmpl-conn-noselect",
+        slug="tmpl-conn-noselect",
+        airbyte_workspace_id="ws-t",
     )
     trial_org = Org.objects.create(
-        name="Trial conn noselect", slug="trial-conn-noselect", airbyte_workspace_id="ws-r"
+        name="Trial conn noselect",
+        slug="trial-conn-noselect",
+        airbyte_workspace_id="ws-r",
     )
     mock_ab.get_webbackend_connections.return_value = [
         {
@@ -1275,12 +1424,18 @@ def test_step_connections_falls_back_to_all_streams_when_template_has_no_selecti
 @patch("ddpui.core.trial.clone_service.ab_create_connection")
 @patch("ddpui.core.trial.clone_service.airbyte_service")
 def test_step_connections_raises_when_source_not_remapped(mock_ab, mock_create_conn):
-    template = Org.objects.create(name="tmpl-conn2", slug="tmpl-conn2", airbyte_workspace_id="ws-t")
+    template = Org.objects.create(
+        name="tmpl-conn2", slug="tmpl-conn2", airbyte_workspace_id="ws-t"
+    )
     trial_org = Org.objects.create(
         name="Trial conn2", slug="trial-conn2", airbyte_workspace_id="ws-r"
     )
     mock_ab.get_webbackend_connections.return_value = [
-        {"connectionId": "old-conn-1", "name": "PG -> wh", "source": {"sourceId": "unmapped"}}
+        {
+            "connectionId": "old-conn-1",
+            "name": "PG -> wh",
+            "source": {"sourceId": "unmapped"},
+        }
     ]
     run = CloneRun(template=template, trial_email="a@b.org", trial_org=trial_org)
     run.manifest["source_map"] = {}
@@ -1316,7 +1471,8 @@ def test_step_dbt_sets_up_workspace_and_copies_ui4t_rows_only(
     cli block), copies the template's UI4T DAG rows via copy_dbt_dag, then REGENERATES the trial
     repo's content by copying the template repo's models/ directory verbatim
     (copy_repo_models_from_template) so the trial user can create/edit/run models.
-    transform_type mirrors the template ('ui'), and the dbt system OrgTasks are still created."""
+    transform_type mirrors the template ('ui'), and the dbt system OrgTasks are still created.
+    """
     template = Org.objects.create(name="tmpl-dbt", slug="tmpl-dbt")
     trial_org = Org.objects.create(name="Trial dbt", slug="trial-dbt")
 
@@ -1344,7 +1500,9 @@ def test_step_dbt_sets_up_workspace_and_copies_ui4t_rows_only(
     # deliberately NO cli_profile_block — that field is legacy (only migration 0143 wrote it) and
     # setup_managed_git_workspace does not set it. _step_dbt must not depend on it.
     trial_dbt = _make_orgdbt("trial-dbt")
-    trial_dbt.transform_type = "github"  # setup hardcodes GIT; _step_dbt must mirror 'ui'
+    trial_dbt.transform_type = (
+        "github"  # setup hardcodes GIT; _step_dbt must mirror 'ui'
+    )
     trial_dbt.save()
 
     def fake_setup(org, project_name, default_schema):
@@ -1375,7 +1533,9 @@ def test_step_dbt_sets_up_workspace_and_copies_ui4t_rows_only(
 
     mock_regen.assert_called_once_with(template_dbt, trial_dbt)
 
-    mock_dbt_project_manager.gather_dbt_project_params.assert_called_once_with(trial_org, trial_dbt)
+    mock_dbt_project_manager.gather_dbt_project_params.assert_called_once_with(
+        trial_org, trial_dbt
+    )
     mock_create_transform_tasks.assert_called_once_with(trial_org, gathered_params)
 
 
@@ -1455,7 +1615,10 @@ def test_step_viz_delegates_to_clone_viz(mock_clone_viz):
     mock_clone_viz.return_value = {"metrics": 2, "kpis": 1}
 
     run = CloneRun(
-        template=template, trial_email="a@b.org", trial_org=trial_org, trial_orguser=trial_user
+        template=template,
+        trial_email="a@b.org",
+        trial_org=trial_org,
+        trial_orguser=trial_user,
     )
     clone_service._step_viz(run)
 
@@ -1469,7 +1632,9 @@ def test_step_viz_delegates_to_clone_viz(mock_clone_viz):
 @patch("ddpui.core.trial.clone_service._step_sources")
 @patch("ddpui.core.trial.clone_service._step_warehouse")
 @patch("ddpui.core.trial.clone_service._step_org_and_user")
-def test_clone_wires_step_viz_last(mock_s1, mock_s2, mock_s3, mock_s4, mock_s5, mock_s6, mock_s7):
+def test_clone_wires_step_viz_last(
+    mock_s1, mock_s2, mock_s3, mock_s4, mock_s5, mock_s6, mock_s7
+):
     template = Org.objects.create(name="tmpl-wire-viz", slug="tmpl-wire-viz")
     run = clone_service.clone_template_org(
         TrialCloneRequest(template_org_id=template.id, trial_email="a@b.org")
@@ -1488,7 +1653,12 @@ def test_delete_trial_org_deletes_kpis_metrics_before_delete_org(mock_cleanup_cl
 
     org = Org.objects.create(name="Trial delete", slug="trial-delete")
     metric = Metric.objects.create(
-        org=org, name="m1", schema_name="s", table_name="t", column="c", aggregation="sum"
+        org=org,
+        name="m1",
+        schema_name="s",
+        table_name="t",
+        column="c",
+        aggregation="sum",
     )
     KPI.objects.create(org=org, metric=metric, name="k1", extra_config={})
 
@@ -1579,7 +1749,9 @@ def test_record_stamp_failure_does_not_fail_a_finished_clone(
 @patch("ddpui.core.trial.clone_service.time.sleep")
 @patch("ddpui.core.trial.clone_service.drop_trial_database")
 @patch("ddpui.core.trial.clone_service.OrgCleanupService")
-@patch("ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom"))
+@patch(
+    "ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom")
+)
 @patch("ddpui.core.trial.clone_service._step_org_and_user")
 def test_teardown_retries_a_transient_delete_org_failure(
     mock_s1, mock_s2, mock_cleanup_cls, mock_drop, mock_sleep
@@ -1601,7 +1773,10 @@ def test_teardown_retries_a_transient_delete_org_failure(
 
     mock_s1.side_effect = fake_step1
     # fails once, then succeeds
-    mock_cleanup_cls.return_value.delete_org.side_effect = [Exception("airbyte 502"), None]
+    mock_cleanup_cls.return_value.delete_org.side_effect = [
+        Exception("airbyte 502"),
+        None,
+    ]
 
     with pytest.raises(RuntimeError, match="boom"):
         clone_service.clone_template_org(
@@ -1617,7 +1792,9 @@ def test_teardown_retries_a_transient_delete_org_failure(
 @patch("ddpui.core.trial.clone_service.time.sleep")
 @patch("ddpui.core.trial.clone_service.drop_trial_database")
 @patch("ddpui.core.trial.clone_service.OrgCleanupService")
-@patch("ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom"))
+@patch(
+    "ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom")
+)
 @patch("ddpui.core.trial.clone_service._step_org_and_user")
 def test_teardown_backdates_the_plan_when_delete_org_never_succeeds(
     mock_s1, mock_s2, mock_cleanup_cls, mock_drop, mock_sleep
@@ -1635,7 +1812,9 @@ def test_teardown_backdates_the_plan_when_delete_org_never_succeeds(
         end_date=timezone.now() + timedelta(days=14),
     )
     mock_s1.side_effect = lambda run: setattr(run, "trial_org", trial_org)
-    mock_cleanup_cls.return_value.delete_org.side_effect = Exception("airbyte unreachable")
+    mock_cleanup_cls.return_value.delete_org.side_effect = Exception(
+        "airbyte unreachable"
+    )
 
     with pytest.raises(RuntimeError, match="boom"):
         clone_service.clone_template_org(
@@ -1643,24 +1822,33 @@ def test_teardown_backdates_the_plan_when_delete_org_never_succeeds(
         )
 
     plan = OrgPlans.objects.get(org=trial_org)
-    assert plan.end_date <= timezone.now()  # the sweep will now pick it up within the hour
+    assert (
+        plan.end_date <= timezone.now()
+    )  # the sweep will now pick it up within the hour
 
 
 @patch("ddpui.core.trial.clone_service.time.sleep")
 @patch("ddpui.core.trial.clone_service.drop_trial_database")
 @patch("ddpui.core.trial.clone_service.OrgCleanupService")
-@patch("ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom"))
+@patch(
+    "ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom")
+)
 @patch("ddpui.core.trial.clone_service._step_org_and_user")
 def test_teardown_survives_an_org_with_no_plan_row(
     mock_s1, mock_s2, mock_cleanup_cls, mock_drop, mock_sleep
 ):
     """A clone that died between create_organization and create_org_plan leaves an org with no
     OrgPlans row. The sweep selects THROUGH OrgPlans so it can never see that org — the backdate
-    must log loudly rather than raise (teardown must never mask the original exception)."""
+    must log loudly rather than raise (teardown must never mask the original exception).
+    """
     template = Org.objects.create(name="tmpl-np", slug="tmpl-np")
-    trial_org = Org.objects.create(name="Trial NP", slug="trial-np")  # deliberately no OrgPlans
+    trial_org = Org.objects.create(
+        name="Trial NP", slug="trial-np"
+    )  # deliberately no OrgPlans
     mock_s1.side_effect = lambda run: setattr(run, "trial_org", trial_org)
-    mock_cleanup_cls.return_value.delete_org.side_effect = Exception("airbyte unreachable")
+    mock_cleanup_cls.return_value.delete_org.side_effect = Exception(
+        "airbyte unreachable"
+    )
 
     with pytest.raises(RuntimeError, match="boom"):
         clone_service.clone_template_org(
@@ -1674,7 +1862,9 @@ def test_teardown_survives_an_org_with_no_plan_row(
 @patch("ddpui.core.trial.clone_service.time.sleep")
 @patch("ddpui.core.trial.clone_service.drop_trial_database")
 @patch("ddpui.core.trial.clone_service.OrgCleanupService")
-@patch("ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom"))
+@patch(
+    "ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom")
+)
 @patch("ddpui.core.trial.clone_service._step_org_and_user")
 def test_teardown_alerts_engineering_when_it_gives_up(
     mock_s1, mock_s2, mock_cleanup_cls, mock_drop, mock_sleep, mock_alert
@@ -1685,7 +1875,9 @@ def test_teardown_alerts_engineering_when_it_gives_up(
     template = Org.objects.create(name="tmpl-alert", slug="tmpl-alert")
     trial_org = Org.objects.create(name="Trial Alert", slug="trial-alert")
     mock_s1.side_effect = lambda run: setattr(run, "trial_org", trial_org)
-    mock_cleanup_cls.return_value.delete_org.side_effect = Exception("airbyte unreachable")
+    mock_cleanup_cls.return_value.delete_org.side_effect = Exception(
+        "airbyte unreachable"
+    )
 
     with pytest.raises(RuntimeError, match="boom"):
         clone_service.clone_template_org(
@@ -1703,7 +1895,9 @@ def test_teardown_alerts_engineering_when_it_gives_up(
 @patch("ddpui.core.trial.clone_service.time.sleep")
 @patch("ddpui.core.trial.clone_service.drop_trial_database")
 @patch("ddpui.core.trial.clone_service.OrgCleanupService")
-@patch("ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom"))
+@patch(
+    "ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom")
+)
 @patch("ddpui.core.trial.clone_service._step_org_and_user")
 def test_teardown_does_not_alert_when_it_succeeds(
     mock_s1, mock_s2, mock_cleanup_cls, mock_drop, mock_sleep, mock_alert
@@ -1747,11 +1941,15 @@ def test_teardown_sends_exactly_one_alert_even_when_both_actions_fail(
     """ONE mail per failed teardown, never one per action and never one per retry attempt —
     otherwise a single bad clone mails engineering four times and the alert stops being read.
     Both leaked resources must still be named in that single mail."""
-    template = Org.objects.create(name="tmpl-1mail", slug="tmpl-1mail", airbyte_workspace_id="ws-t")
+    template = Org.objects.create(
+        name="tmpl-1mail", slug="tmpl-1mail", airbyte_workspace_id="ws-t"
+    )
     OrgWarehouse.objects.create(
         org=template, wtype="postgres", airbyte_destination_id="dest-t", credentials="x"
     )
-    trial_org = Org.objects.create(name="Trial 1mail", slug="trial-1mail", airbyte_workspace_id="w")
+    trial_org = Org.objects.create(
+        name="Trial 1mail", slug="trial-1mail", airbyte_workspace_id="w"
+    )
     mock_s1.side_effect = lambda run: setattr(run, "trial_org", trial_org)
     mock_provision.return_value = TrialDbParams(
         host="h", port=5432, database="ft_x_db", username="u", password="p"
@@ -1762,7 +1960,9 @@ def test_teardown_sends_exactly_one_alert_even_when_both_actions_fail(
     mock_create_wh.side_effect = Exception("create_warehouse blew up")
     # BOTH teardown actions fail, every attempt
     mock_drop.side_effect = Exception("rds unreachable")
-    mock_cleanup_cls.return_value.delete_org.side_effect = Exception("airbyte unreachable")
+    mock_cleanup_cls.return_value.delete_org.side_effect = Exception(
+        "airbyte unreachable"
+    )
 
     with pytest.raises(RuntimeError, match="create_warehouse failed"):
         clone_service.clone_template_org(
@@ -1779,7 +1979,9 @@ def test_teardown_sends_exactly_one_alert_even_when_both_actions_fail(
 @patch("ddpui.core.trial.clone_service.time.sleep")
 @patch("ddpui.core.trial.clone_service.drop_trial_database")
 @patch("ddpui.core.trial.clone_service.OrgCleanupService")
-@patch("ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom"))
+@patch(
+    "ddpui.core.trial.clone_service._step_warehouse", side_effect=RuntimeError("boom")
+)
 @patch("ddpui.core.trial.clone_service._step_org_and_user")
 def test_teardown_does_not_alert_when_the_retry_rescues_it(
     mock_s1, mock_s2, mock_cleanup_cls, mock_drop, mock_sleep, mock_alert
@@ -1789,7 +1991,10 @@ def test_teardown_does_not_alert_when_the_retry_rescues_it(
     template = Org.objects.create(name="tmpl-resc", slug="tmpl-resc")
     trial_org = Org.objects.create(name="Trial Resc", slug="trial-resc")
     mock_s1.side_effect = lambda run: setattr(run, "trial_org", trial_org)
-    mock_cleanup_cls.return_value.delete_org.side_effect = [Exception("airbyte 502"), None]
+    mock_cleanup_cls.return_value.delete_org.side_effect = [
+        Exception("airbyte 502"),
+        None,
+    ]
 
     with pytest.raises(RuntimeError, match="boom"):
         clone_service.clone_template_org(

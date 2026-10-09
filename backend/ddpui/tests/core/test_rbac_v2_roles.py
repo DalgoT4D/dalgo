@@ -25,11 +25,20 @@ def seed_db(django_db_setup, django_db_blocker):
 def slugs_for(role_slug: str) -> set[str]:
     """Return the set of permission slugs granted to the role."""
     role = Role.objects.get(slug=role_slug)
-    return set(RolePermission.objects.filter(role=role).values_list("permission__slug", flat=True))
+    return set(
+        RolePermission.objects.filter(role=role).values_list(
+            "permission__slug", flat=True
+        )
+    )
 
 
 # the four content resources that members may view and analysts may fully manage
-CONTENT_VIEW = {"can_view_dashboards", "can_view_charts", "can_view_metrics", "can_view_kpis"}
+CONTENT_VIEW = {
+    "can_view_dashboards",
+    "can_view_charts",
+    "can_view_metrics",
+    "can_view_kpis",
+}
 # infra "view" slugs — analysts keep these, members must NOT have them
 INFRA_VIEW = {"can_view_warehouses", "can_view_sources", "can_view_dbt_workspace"}
 # infra "write/run" slugs analysts must lose
@@ -62,7 +71,11 @@ def test_super_admin_untouched(seed_db):
 
 def test_admin_has_full_management(seed_db):
     admin = slugs_for("admin")
-    assert {"can_create_pipeline", "can_delete_dashboards", "can_edit_warehouse"} <= admin
+    assert {
+        "can_create_pipeline",
+        "can_delete_dashboards",
+        "can_edit_warehouse",
+    } <= admin
 
 
 def test_analyst_keeps_infra_view_loses_infra_write(seed_db):
@@ -71,7 +84,11 @@ def test_analyst_keeps_infra_view_loses_infra_write(seed_db):
     assert INFRA_VIEW <= analyst
     assert not (INFRA_WRITE & analyst)
     # but full management of content — including metrics + KPIs
-    assert {"can_create_dashboards", "can_delete_charts", "can_share_dashboards"} <= analyst
+    assert {
+        "can_create_dashboards",
+        "can_delete_charts",
+        "can_share_dashboards",
+    } <= analyst
     assert {
         "can_create_metrics",
         "can_edit_metrics",

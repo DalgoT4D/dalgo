@@ -14,7 +14,12 @@ from ddpui.core.dbt_automation import assets
 from ddpui.models.role_based_access import Role, RolePermission, Permission
 from ddpui.models.org_user import OrgUser
 from ddpui.models.org import OrgWarehouse, OrgDbt, TransformType
-from ddpui.models.dbt_workflow import OrgDbtModel, OrgDbtOperation, DbtEdge, OrgDbtModelType
+from ddpui.models.dbt_workflow import (
+    OrgDbtModel,
+    OrgDbtOperation,
+    DbtEdge,
+    OrgDbtModelType,
+)
 from ddpui.models.canvaslock import CanvasLock
 from ddpui.models.canvas_models import CanvasNode, CanvasEdge, CanvasNodeType
 from ddpui.auth import (
@@ -98,9 +103,13 @@ def create_canvas_graph(orgdbt):
     )
 
     # Create edges: source -> operation -> model
-    edge1 = CanvasEdge.objects.create(from_node=source_node, to_node=operation_node, seq=1)
+    edge1 = CanvasEdge.objects.create(
+        from_node=source_node, to_node=operation_node, seq=1
+    )
 
-    edge2 = CanvasEdge.objects.create(from_node=operation_node, to_node=model_node, seq=1)
+    edge2 = CanvasEdge.objects.create(
+        from_node=operation_node, to_node=model_node, seq=1
+    )
 
     return {
         "nodes": [source_node, operation_node, model_node],
@@ -127,15 +136,21 @@ def mock_setup_dbt_workspace_ui_transform(orguser: OrgUser, tmp_path):
         os.makedirs(dbtrepo_dir / "models")
 
     with patch(
-        "ddpui.ddpdbt.dbt_service.DbtProjectManager.get_org_dir", return_value=project_dir
+        "ddpui.ddpdbt.dbt_service.DbtProjectManager.get_org_dir",
+        return_value=project_dir,
     ), patch(
-        "ddpui.ddpdbt.dbt_service.DbtProjectManager.run_dbt_command", side_effect=run_dbt_init
+        "ddpui.ddpdbt.dbt_service.DbtProjectManager.run_dbt_command",
+        side_effect=run_dbt_init,
     ) as mock_dbt_command, patch(
-        "ddpui.ddpdbt.dbt_service.create_or_update_dbt_profile_secret_blk", return_value=None
+        "ddpui.ddpdbt.dbt_service.create_or_update_dbt_profile_secret_blk",
+        return_value=None,
     ) as mock_create_cli_block, patch(
-        "ddpui.ddpdbt.dbt_service.secretsmanager.retrieve_warehouse_credentials", return_value={}
+        "ddpui.ddpdbt.dbt_service.secretsmanager.retrieve_warehouse_credentials",
+        return_value={},
     ) as mock_retrieve_creds:
-        setup_managed_git_workspace(org, project_name=project_name, default_schema=default_schema)
+        setup_managed_git_workspace(
+            org, project_name=project_name, default_schema=default_schema
+        )
         mock_dbt_command.assert_called_once()
         mock_retrieve_creds.assert_called_once()
         mock_create_cli_block.assert_called_once()
@@ -406,11 +421,15 @@ def test_create_dbt_project_mocked_helper(orguser: OrgUser):
         )
 
 
-def test_delete_dbt_project_failure_projectdir_does_not_exist(orguser: OrgUser, tmp_path):
+def test_delete_dbt_project_failure_projectdir_does_not_exist(
+    orguser: OrgUser, tmp_path
+):
     """a failure test for delete a dbt project api when project dir does not exist"""
     request = mock_request(orguser)
     project_name = "dummy-project"
-    with patch("ddpui.api.transform_api.DbtProjectManager.get_org_dir", return_value=tmp_path):
+    with patch(
+        "ddpui.api.transform_api.DbtProjectManager.get_org_dir", return_value=tmp_path
+    ):
         with pytest.raises(HttpError) as excinfo:
             delete_dbt_project(request, project_name)
     assert (
@@ -419,7 +438,9 @@ def test_delete_dbt_project_failure_projectdir_does_not_exist(orguser: OrgUser, 
     )
 
 
-def test_delete_dbt_project_failure_dbtrepodir_does_not_exist(orguser: OrgUser, tmp_path):
+def test_delete_dbt_project_failure_dbtrepodir_does_not_exist(
+    orguser: OrgUser, tmp_path
+):
     """a failure test for delete a dbt project api when dbt repo dir does not exist"""
     request = mock_request(orguser)
     project_name = "dummy-project"
@@ -455,7 +476,10 @@ def test_delete_dbt_project_success(orguser: OrgUser, tmp_path):
 
     assert OrgDbt.objects.filter(org=orguser.org).count() == 1
 
-    with patch("ddpui.api.transform_api.DbtProjectManager.get_org_dir", return_value=project_dir):
+    with patch(
+        "ddpui.api.transform_api.DbtProjectManager.get_org_dir",
+        return_value=project_dir,
+    ):
         delete_dbt_project(request, project_name)
 
     assert not dbtrepo_dir.exists()
@@ -463,7 +487,9 @@ def test_delete_dbt_project_success(orguser: OrgUser, tmp_path):
     assert OrgDbt.objects.filter(org=orguser.org).count() == 0
 
 
-def test_delete_dbt_project_blocked_by_canvas_nodes(seed_db, orguser: OrgUser, tmp_path):
+def test_delete_dbt_project_blocked_by_canvas_nodes(
+    seed_db, orguser: OrgUser, tmp_path
+):
     """Test that delete_dbt_project is blocked when canvas nodes exist and force_delete=False"""
     request = mock_request(orguser)
     project_name = "dummy-project"
@@ -505,13 +531,18 @@ def test_delete_dbt_project_blocked_by_canvas_nodes(seed_db, orguser: OrgUser, t
     assert CanvasNode.objects.filter(orgdbt=dbt).count() == 2
 
     # Attempt to delete with force_delete=False should be blocked
-    with patch("ddpui.api.transform_api.DbtProjectManager.get_org_dir", return_value=project_dir):
+    with patch(
+        "ddpui.api.transform_api.DbtProjectManager.get_org_dir",
+        return_value=project_dir,
+    ):
         with pytest.raises(HttpError) as excinfo:
             delete_dbt_project(request, project_name, force_delete=False)
 
     # Verify the error
     assert excinfo.value.status_code == 422
-    assert "Cannot delete dbt workspace: 2 active workflow elements found" in str(excinfo.value)
+    assert "Cannot delete dbt workspace: 2 active workflow elements found" in str(
+        excinfo.value
+    )
 
     # Verify nothing was deleted
     assert dbtrepo_dir.exists()
@@ -520,7 +551,9 @@ def test_delete_dbt_project_blocked_by_canvas_nodes(seed_db, orguser: OrgUser, t
     assert orguser.org.dbt is not None
 
 
-def test_delete_dbt_project_force_delete_bypasses_canvas_check(seed_db, orguser: OrgUser, tmp_path):
+def test_delete_dbt_project_force_delete_bypasses_canvas_check(
+    seed_db, orguser: OrgUser, tmp_path
+):
     """Test that delete_dbt_project with force_delete=True bypasses canvas node check"""
     request = mock_request(orguser)
     project_name = "dummy-project"
@@ -555,7 +588,10 @@ def test_delete_dbt_project_force_delete_bypasses_canvas_check(seed_db, orguser:
     assert CanvasNode.objects.filter(orgdbt=dbt).count() == 1
 
     # Force delete should succeed despite canvas nodes
-    with patch("ddpui.api.transform_api.DbtProjectManager.get_org_dir", return_value=project_dir):
+    with patch(
+        "ddpui.api.transform_api.DbtProjectManager.get_org_dir",
+        return_value=project_dir,
+    ):
         result = delete_dbt_project(request, project_name, force_delete=True)
 
     # Verify deletion succeeded
@@ -564,7 +600,9 @@ def test_delete_dbt_project_force_delete_bypasses_canvas_check(seed_db, orguser:
     assert OrgDbt.objects.filter(org=orguser.org).count() == 0
 
 
-def test_delete_dbt_project_allowed_when_no_canvas_nodes(seed_db, orguser: OrgUser, tmp_path):
+def test_delete_dbt_project_allowed_when_no_canvas_nodes(
+    seed_db, orguser: OrgUser, tmp_path
+):
     """Test that delete_dbt_project is allowed when no canvas nodes exist"""
     request = mock_request(orguser)
     project_name = "dummy-project"
@@ -591,7 +629,10 @@ def test_delete_dbt_project_allowed_when_no_canvas_nodes(seed_db, orguser: OrgUs
     assert CanvasNode.objects.filter(orgdbt=dbt).count() == 0
 
     # Delete should succeed even with force_delete=False
-    with patch("ddpui.api.transform_api.DbtProjectManager.get_org_dir", return_value=project_dir):
+    with patch(
+        "ddpui.api.transform_api.DbtProjectManager.get_org_dir",
+        return_value=project_dir,
+    ):
         result = delete_dbt_project(request, project_name, force_delete=False)
 
     # Verify deletion succeeded
@@ -620,7 +661,10 @@ def test_delete_dbt_project_when_orgdbt_is_none(seed_db, orguser: OrgUser, tmp_p
     assert OrgDbt.objects.filter(org=orguser.org).count() == 0
 
     # Delete should succeed but directory should remain (due to your change)
-    with patch("ddpui.api.transform_api.DbtProjectManager.get_org_dir", return_value=project_dir):
+    with patch(
+        "ddpui.api.transform_api.DbtProjectManager.get_org_dir",
+        return_value=project_dir,
+    ):
         result = delete_dbt_project(request, project_name, force_delete=False)
 
     # Verify deletion "succeeded" but directory remains because orgdbt was None
@@ -682,7 +726,9 @@ def test_sync_sources_success(orguser: OrgUser, tmp_path):
         assert args[0] == orgdbt.id
         assert args[1] == org_warehouse.id
         # args[2] is a random uuid
-        assert args[3] == f"{TaskProgressHashPrefix.SYNCSOURCES.value}-{orguser.org.slug}"
+        assert (
+            args[3] == f"{TaskProgressHashPrefix.SYNCSOURCES.value}-{orguser.org.slug}"
+        )
         assert "task_id" in result
         assert "hashkey" in result
 
@@ -697,7 +743,9 @@ def test_get_input_sources_and_models_v2_warehouse_not_setup(seed_db, orguser: O
     assert str(excinfo.value) == "please setup your warehouse first"
 
 
-def test_get_input_sources_and_models_v2_dbt_workspace_not_setup(seed_db, orguser: OrgUser):
+def test_get_input_sources_and_models_v2_dbt_workspace_not_setup(
+    seed_db, orguser: OrgUser
+):
     """Test failure when dbt workspace is not setup"""
     # Create warehouse but no dbt workspace
     OrgWarehouse.objects.create(
@@ -741,7 +789,9 @@ def test_get_input_sources_and_models_v2_empty_response(seed_db, orguser: OrgUse
     assert result == []
 
 
-def test_get_input_sources_and_models_v2_with_models_and_sources(seed_db, orguser: OrgUser):
+def test_get_input_sources_and_models_v2_with_models_and_sources(
+    seed_db, orguser: OrgUser
+):
     """Test success with models and sources, excluding under_construction models"""
     # Setup warehouse and dbt workspace
     OrgWarehouse.objects.create(
@@ -804,7 +854,9 @@ def test_get_input_sources_and_models_v2_with_models_and_sources(seed_db, orguse
     assert len(result) == 2
 
     # Find the completed model in results
-    completed_model_result = next((r for r in result if r["name"] == "completed_model"), None)
+    completed_model_result = next(
+        (r for r in result if r["name"] == "completed_model"), None
+    )
     assert completed_model_result is not None
     assert completed_model_result["schema"] == "public"
     assert completed_model_result["sql_path"] == "models/completed_model.sql"
@@ -1215,7 +1267,9 @@ def test_get_dbt_project_DAG_v2_empty_canvas(seed_db, orguser: OrgUser, tmp_path
     request = mock_request(orguser)
 
     # Mock DbtProjectManager.get_dbt_project_dir
-    with patch("ddpui.api.transform_api.DbtProjectManager.get_dbt_project_dir") as mock_get_dir:
+    with patch(
+        "ddpui.api.transform_api.DbtProjectManager.get_dbt_project_dir"
+    ) as mock_get_dir:
         mock_get_dir.return_value = str(tmp_path)
 
         result = get_dbt_project_DAG_v2(request)
@@ -1324,7 +1378,9 @@ def test_get_dbt_project_DAG_v2_project_directory_not_exist(seed_db, orguser: Or
     request = mock_request(orguser)
 
     # Mock DbtProjectManager.get_dbt_project_dir to return nonexistent path
-    with patch("ddpui.api.transform_api.DbtProjectManager.get_dbt_project_dir") as mock_get_dir:
+    with patch(
+        "ddpui.api.transform_api.DbtProjectManager.get_dbt_project_dir"
+    ) as mock_get_dir:
         mock_get_dir.return_value = "/nonexistent/path"
 
         with pytest.raises(HttpError) as excinfo:
@@ -1395,7 +1451,9 @@ def test_post_create_src_model_node_model_not_found(seed_db, orguser):
     assert str(excinfo.value) == "model not found"
 
 
-@patch("ddpui.api.transform_api.dbtautomation_service.ensure_source_yml_definition_in_project")
+@patch(
+    "ddpui.api.transform_api.dbtautomation_service.ensure_source_yml_definition_in_project"
+)
 @patch("ddpui.api.transform_api.dbtautomation_service.update_output_cols_of_dbt_model")
 @patch("ddpui.api.transform_api.convert_canvas_node_to_frontend_format")
 def test_post_create_src_model_node_source_type_success(
@@ -1444,7 +1502,10 @@ def test_post_create_src_model_node_source_type_success(
     mock_update_cols.return_value = ["id", "name", "email"]
 
     # Mock convert_canvas_node_to_frontend_format
-    mock_convert_canvas.return_value = {"uuid": str(org_dbt_model.uuid), "name": "test_source"}
+    mock_convert_canvas.return_value = {
+        "uuid": str(org_dbt_model.uuid),
+        "name": "test_source",
+    }
 
     # Call the function
     result = post_create_src_model_node(request, str(org_dbt_model.uuid))
@@ -1512,7 +1573,10 @@ def test_post_create_src_model_node_model_type_success(
     mock_update_cols.return_value = ["id", "name", "processed_at"]
 
     # Mock convert_canvas_node_to_frontend_format
-    mock_convert_canvas.return_value = {"uuid": str(org_dbt_model.uuid), "name": "test_model"}
+    mock_convert_canvas.return_value = {
+        "uuid": str(org_dbt_model.uuid),
+        "name": "test_model",
+    }
 
     # Call the function
     result = post_create_src_model_node(request, str(org_dbt_model.uuid))
@@ -1579,7 +1643,10 @@ def test_post_create_src_model_node_existing_node_returns_existing(
     )
 
     # Mock convert_canvas_node_to_frontend_format
-    mock_convert_canvas.return_value = {"uuid": str(existing_node.uuid), "name": "existing_model"}
+    mock_convert_canvas.return_value = {
+        "uuid": str(existing_node.uuid),
+        "name": "existing_model",
+    }
 
     # Call the function
     result = post_create_src_model_node(request, str(org_dbt_model.uuid))
@@ -1594,8 +1661,12 @@ def test_post_create_src_model_node_existing_node_returns_existing(
     assert result == {"uuid": str(existing_node.uuid), "name": "existing_model"}
 
 
-@patch("ddpui.api.transform_api.dbtautomation_service.ensure_source_yml_definition_in_project")
-def test_post_create_src_model_node_source_definition_error(mock_ensure_source, seed_db, orguser):
+@patch(
+    "ddpui.api.transform_api.dbtautomation_service.ensure_source_yml_definition_in_project"
+)
+def test_post_create_src_model_node_source_definition_error(
+    mock_ensure_source, seed_db, orguser
+):
     """Test post_create_src_model_node handles error in source definition creation"""
     request = mock_request(orguser)
 
@@ -1633,7 +1704,10 @@ def test_post_create_src_model_node_source_definition_error(mock_ensure_source, 
     with pytest.raises(HttpError) as excinfo:
         post_create_src_model_node(request, str(org_dbt_model.uuid))
 
-    assert str(excinfo.value) == "Failed to create node: Failed to create source definition"
+    assert (
+        str(excinfo.value)
+        == "Failed to create node: Failed to create source definition"
+    )
 
     # Verify ensure_source was called
     mock_ensure_source.assert_called_once_with(orgdbt, "public", "test_source")
@@ -1643,7 +1717,9 @@ def test_post_create_src_model_node_source_definition_error(mock_ensure_source, 
 
 
 @patch("ddpui.api.transform_api.dbtautomation_service.update_output_cols_of_dbt_model")
-def test_post_create_src_model_node_update_cols_error(mock_update_cols, seed_db, orguser):
+def test_post_create_src_model_node_update_cols_error(
+    mock_update_cols, seed_db, orguser
+):
     """Test post_create_src_model_node handles error in update_output_cols"""
     request = mock_request(orguser)
 
@@ -1690,7 +1766,9 @@ def test_post_create_src_model_node_update_cols_error(mock_update_cols, seed_db,
     assert not CanvasNode.objects.filter(dbtmodel=org_dbt_model).exists()
 
 
-@patch("ddpui.api.transform_api.dbtautomation_service.ensure_source_yml_definition_in_project")
+@patch(
+    "ddpui.api.transform_api.dbtautomation_service.ensure_source_yml_definition_in_project"
+)
 @patch("ddpui.api.transform_api.dbtautomation_service.update_output_cols_of_dbt_model")
 @patch("ddpui.api.transform_api.convert_canvas_node_to_frontend_format")
 def test_post_create_src_model_node_source_no_existing_node_calls_all_functions(
@@ -1810,7 +1888,10 @@ def test_post_add_operation_node_warehouse_not_setup(seed_db, orguser):
     OrgWarehouse.objects.filter(org=orguser.org).delete()
 
     payload = CreateOperationNodePayload(
-        config={}, input_node_uuid=str(uuid.uuid4()), op_type="aggregate", source_columns=["id"]
+        config={},
+        input_node_uuid=str(uuid.uuid4()),
+        op_type="aggregate",
+        source_columns=["id"],
     )
 
     with pytest.raises(HttpError) as excinfo:
@@ -1833,7 +1914,10 @@ def test_post_add_operation_node_dbt_workspace_not_setup(seed_db, orguser):
     orguser.org.save()
 
     payload = CreateOperationNodePayload(
-        config={}, input_node_uuid=str(uuid.uuid4()), op_type="aggregate", source_columns=["id"]
+        config={},
+        input_node_uuid=str(uuid.uuid4()),
+        op_type="aggregate",
+        source_columns=["id"],
     )
 
     with pytest.raises(HttpError) as excinfo:
@@ -1929,7 +2013,11 @@ def test_post_add_operation_node_single_input_operation_success(
     payload = CreateOperationNodePayload(
         config={
             "aggregate_on": [
-                {"column": "value", "operation": "sum", "output_column_name": "total_value"}
+                {
+                    "column": "value",
+                    "operation": "sum",
+                    "output_column_name": "total_value",
+                }
             ]
         },
         input_node_uuid=str(input_node.uuid),
@@ -2069,12 +2157,16 @@ def test_post_add_operation_node_multi_input_operation_success(
     assert operation_node.operation_config["type"] == "join"
 
     # Verify edges were created
-    main_edge = CanvasEdge.objects.get(from_node=input_node, to_node=operation_node, seq=1)
+    main_edge = CanvasEdge.objects.get(
+        from_node=input_node, to_node=operation_node, seq=1
+    )
     assert main_edge.seq == 1
 
     # Verify second node was created and edge exists
     second_node = CanvasNode.objects.get(dbtmodel=org_dbt_model2)
-    second_edge = CanvasEdge.objects.get(from_node=second_node, to_node=operation_node, seq=2)
+    second_edge = CanvasEdge.objects.get(
+        from_node=second_node, to_node=operation_node, seq=2
+    )
     assert second_edge.seq == 2
 
     # Verify result
@@ -2082,7 +2174,9 @@ def test_post_add_operation_node_multi_input_operation_success(
 
 
 @patch("ddpui.api.transform_api.validate_operation_config_v2")
-def test_post_add_operation_node_invalid_operation_config(mock_validate_config, seed_db, orguser):
+def test_post_add_operation_node_invalid_operation_config(
+    mock_validate_config, seed_db, orguser
+):
     """Test post_add_operation_node with invalid operation config"""
     request = mock_request(orguser)
 
@@ -2112,7 +2206,9 @@ def test_post_add_operation_node_invalid_operation_config(mock_validate_config, 
     )
 
     # Mock validation to raise ValueError
-    mock_validate_config.side_effect = ValueError("Invalid config for aggregate operation")
+    mock_validate_config.side_effect = ValueError(
+        "Invalid config for aggregate operation"
+    )
 
     payload = CreateOperationNodePayload(
         config={"invalid": "config"},
@@ -2131,7 +2227,9 @@ def test_post_add_operation_node_invalid_operation_config(mock_validate_config, 
     mock_validate_config.assert_called_once_with("aggregate", {"invalid": "config"})
 
     # Verify no operation node was created
-    assert not CanvasNode.objects.filter(orgdbt=orgdbt, node_type=CanvasNodeType.OPERATION).exists()
+    assert not CanvasNode.objects.filter(
+        orgdbt=orgdbt, node_type=CanvasNodeType.OPERATION
+    ).exists()
 
 
 @patch("ddpui.api.transform_api.validate_operation_config_v2")
@@ -2182,13 +2280,17 @@ def test_post_add_operation_node_get_output_cols_error(
     with pytest.raises(HttpError) as excinfo:
         post_add_operation_node(request, payload)
 
-    assert str(excinfo.value) == "Failed to create operation: Failed to get output columns"
+    assert (
+        str(excinfo.value) == "Failed to create operation: Failed to get output columns"
+    )
 
     # Verify get_output_cols was called
     mock_get_output_cols.assert_called_once()
 
     # Verify no operation node was created
-    assert not CanvasNode.objects.filter(orgdbt=orgdbt, node_type=CanvasNodeType.OPERATION).exists()
+    assert not CanvasNode.objects.filter(
+        orgdbt=orgdbt, node_type=CanvasNodeType.OPERATION
+    ).exists()
 
 
 @patch("ddpui.api.transform_api.validate_operation_config_v2")
@@ -2246,7 +2348,9 @@ def test_post_add_operation_node_validate_inputs_error(
     mock_validate_inputs.assert_called_once()
 
     # Verify no operation node was created
-    assert not CanvasNode.objects.filter(orgdbt=orgdbt, node_type=CanvasNodeType.OPERATION).exists()
+    assert not CanvasNode.objects.filter(
+        orgdbt=orgdbt, node_type=CanvasNodeType.OPERATION
+    ).exists()
 
 
 @patch("ddpui.api.transform_api.validate_operation_config_v2")
@@ -2291,7 +2395,11 @@ def test_post_add_operation_node_verify_function_calls(
     config = {
         "where_type": "and",
         "clauses": [
-            {"column": "value", "operator": ">", "operand": {"is_col": False, "value": 10}}
+            {
+                "column": "value",
+                "operator": ">",
+                "operand": {"is_col": False, "value": 10},
+            }
         ],
     }
 
@@ -2333,7 +2441,9 @@ def test_put_operation_node_warehouse_not_setup(seed_db, orguser):
     # Ensure no warehouse exists
     OrgWarehouse.objects.filter(org=orguser.org).delete()
 
-    payload = EditOperationNodePayload(config={}, op_type="aggregate", source_columns=["id"])
+    payload = EditOperationNodePayload(
+        config={}, op_type="aggregate", source_columns=["id"]
+    )
 
     with pytest.raises(HttpError) as excinfo:
         put_operation_node(request, str(uuid.uuid4()), payload)
@@ -2354,7 +2464,9 @@ def test_put_operation_node_dbt_workspace_not_setup(seed_db, orguser):
     orguser.org.dbt = None
     orguser.org.save()
 
-    payload = EditOperationNodePayload(config={}, op_type="aggregate", source_columns=["id"])
+    payload = EditOperationNodePayload(
+        config={}, op_type="aggregate", source_columns=["id"]
+    )
 
     with pytest.raises(HttpError) as excinfo:
         put_operation_node(request, str(uuid.uuid4()), payload)
@@ -2383,7 +2495,9 @@ def test_put_operation_node_operation_node_not_found(seed_db, orguser):
     orguser.org.dbt = orgdbt
     orguser.org.save()
 
-    payload = EditOperationNodePayload(config={}, op_type="aggregate", source_columns=["id"])
+    payload = EditOperationNodePayload(
+        config={}, op_type="aggregate", source_columns=["id"]
+    )
 
     with pytest.raises(HttpError) as excinfo:
         put_operation_node(request, str(uuid.uuid4()), payload)  # Non-existent node
@@ -2420,7 +2534,9 @@ def test_put_operation_node_non_operation_node(seed_db, orguser):
         output_cols=["id"],
     )
 
-    payload = EditOperationNodePayload(config={}, op_type="aggregate", source_columns=["id"])
+    payload = EditOperationNodePayload(
+        config={}, op_type="aggregate", source_columns=["id"]
+    )
 
     with pytest.raises(HttpError) as excinfo:
         put_operation_node(request, str(source_node.uuid), payload)
@@ -2469,12 +2585,19 @@ def test_put_operation_node_single_input_operation_success(
     # Mock responses
     mock_validate_config.return_value = None  # No exception means valid
     mock_get_output_cols.return_value = ["id", "total_value"]
-    mock_convert_canvas.return_value = {"uuid": str(existing_operation.uuid), "name": "aggregate"}
+    mock_convert_canvas.return_value = {
+        "uuid": str(existing_operation.uuid),
+        "name": "aggregate",
+    }
 
     payload = EditOperationNodePayload(
         config={
             "aggregate_on": [
-                {"column": "value", "operation": "sum", "output_column_name": "total_value"}
+                {
+                    "column": "value",
+                    "operation": "sum",
+                    "output_column_name": "total_value",
+                }
             ]
         },
         op_type="aggregate",
@@ -2494,7 +2617,10 @@ def test_put_operation_node_single_input_operation_success(
     assert existing_operation.name == "aggregate"
     assert existing_operation.output_cols == ["id", "total_value"]
     assert existing_operation.operation_config["type"] == "aggregate"
-    assert existing_operation.operation_config["config"]["source_columns"] == ["id", "value"]
+    assert existing_operation.operation_config["config"]["source_columns"] == [
+        "id",
+        "value",
+    ]
 
     # Verify result
     assert result == {"uuid": str(existing_operation.uuid), "name": "aggregate"}
@@ -2583,7 +2709,9 @@ def test_put_operation_node_multi_input_operation_success(
         name="public.old_table",
         output_cols=["id"],
     )
-    CanvasEdge.objects.create(from_node=old_second_node, to_node=existing_operation, seq=2)
+    CanvasEdge.objects.create(
+        from_node=old_second_node, to_node=existing_operation, seq=2
+    )
 
     # Mock validation responses
     from ddpui.schemas.dbt_workflow_schema import ModelSrcInputsForMultiInputOp
@@ -2593,7 +2721,10 @@ def test_put_operation_node_multi_input_operation_success(
 
     mock_validate_config.return_value = None
     mock_get_output_cols.return_value = ["id", "name", "user_id", "amount"]
-    mock_convert_canvas.return_value = {"uuid": str(existing_operation.uuid), "name": "join"}
+    mock_convert_canvas.return_value = {
+        "uuid": str(existing_operation.uuid),
+        "name": "join",
+    }
 
     payload = EditOperationNodePayload(
         config={
@@ -2633,11 +2764,15 @@ def test_put_operation_node_multi_input_operation_success(
 
     # Verify new edge was created for the new second input
     second_node = CanvasNode.objects.get(dbtmodel=org_dbt_model2)
-    new_edge = CanvasEdge.objects.get(from_node=second_node, to_node=existing_operation, seq=2)
+    new_edge = CanvasEdge.objects.get(
+        from_node=second_node, to_node=existing_operation, seq=2
+    )
     assert new_edge.seq == 2
 
     # Verify main edge (seq=1) still exists
-    main_edge = CanvasEdge.objects.get(from_node=input_node, to_node=existing_operation, seq=1)
+    main_edge = CanvasEdge.objects.get(
+        from_node=input_node, to_node=existing_operation, seq=1
+    )
     assert main_edge.seq == 1
 
     # Verify result
@@ -2645,7 +2780,9 @@ def test_put_operation_node_multi_input_operation_success(
 
 
 @patch("ddpui.api.transform_api.validate_operation_config_v2")
-def test_put_operation_node_invalid_operation_config(mock_validate_config, seed_db, orguser):
+def test_put_operation_node_invalid_operation_config(
+    mock_validate_config, seed_db, orguser
+):
     """Test put_operation_node with invalid operation config"""
     request = mock_request(orguser)
 
@@ -2676,7 +2813,9 @@ def test_put_operation_node_invalid_operation_config(mock_validate_config, seed_
     )
 
     # Mock validation to raise ValueError
-    mock_validate_config.side_effect = ValueError("Invalid config for aggregate operation")
+    mock_validate_config.side_effect = ValueError(
+        "Invalid config for aggregate operation"
+    )
 
     payload = EditOperationNodePayload(
         config={"invalid": "config"}, op_type="aggregate", source_columns=["id"]
@@ -2744,7 +2883,9 @@ def test_put_operation_node_get_output_cols_error(
     with pytest.raises(HttpError) as excinfo:
         put_operation_node(request, str(existing_operation.uuid), payload)
 
-    assert str(excinfo.value) == "Failed to create operation: Failed to get output columns"
+    assert (
+        str(excinfo.value) == "Failed to create operation: Failed to get output columns"
+    )
 
     # Verify get_output_cols was called
     mock_get_output_cols.assert_called_once()
@@ -2851,12 +2992,19 @@ def test_put_operation_node_verify_function_calls(
     # Mock responses
     mock_validate_config.return_value = None
     mock_get_output_cols.return_value = ["filtered_id"]
-    mock_convert_canvas.return_value = {"uuid": str(existing_operation.uuid), "name": "where"}
+    mock_convert_canvas.return_value = {
+        "uuid": str(existing_operation.uuid),
+        "name": "where",
+    }
 
     config = {
         "where_type": "and",
         "clauses": [
-            {"column": "value", "operator": ">", "operand": {"is_col": False, "value": 10}}
+            {
+                "column": "value",
+                "operator": ">",
+                "operand": {"is_col": False, "value": 10},
+            }
         ],
     }
 
@@ -2963,7 +3111,9 @@ def test_put_operation_node_edge_cleanup_for_multi_input_operation(
     )
 
     CanvasEdge.objects.create(from_node=main_node, to_node=existing_operation, seq=1)
-    old_edge = CanvasEdge.objects.create(from_node=old_node2, to_node=existing_operation, seq=2)
+    old_edge = CanvasEdge.objects.create(
+        from_node=old_node2, to_node=existing_operation, seq=2
+    )
 
     # Mock validation responses for new union operation
     from ddpui.schemas.dbt_workflow_schema import ModelSrcInputsForMultiInputOp
@@ -2980,7 +3130,11 @@ def test_put_operation_node_edge_cleanup_for_multi_input_operation(
         op_type="unionall",  # Change to different multi-input operation
         source_columns=["id", "name"],
         other_inputs=[
-            {"input_model_uuid": str(org_dbt_model2.uuid), "columns": ["id", "value"], "seq": 2}
+            {
+                "input_model_uuid": str(org_dbt_model2.uuid),
+                "columns": ["id", "value"],
+                "seq": 2,
+            }
         ],
     )
 
@@ -3158,7 +3312,10 @@ def test_post_terminate_operation_node_create_new_model_success(
     # Mock function responses
     mock_operations_list = [{"type": "aggregate", "config": {}}]
     mock_tranverse_graph.return_value = mock_operations_list
-    mock_create_dbt_model.return_value = (Path("models/test_model.sql"), ["id", "total"])
+    mock_create_dbt_model.return_value = (
+        Path("models/test_model.sql"),
+        ["id", "total"],
+    )
     mock_convert_canvas.return_value = {"uuid": str(uuid.uuid4())}
 
     payload = TerminateChainAndCreateModelPayload(
@@ -3176,7 +3333,9 @@ def test_post_terminate_operation_node_create_new_model_success(
         "output_name": "test_model",
         "rel_dir_to_models": None,
     }
-    mock_create_dbt_model.assert_called_once_with(org_warehouse, expected_config, orgdbt)
+    mock_create_dbt_model.assert_called_once_with(
+        org_warehouse, expected_config, orgdbt
+    )
 
     # Verify OrgDbtModel was created
     dbt_model = OrgDbtModel.objects.get(orgdbt=orgdbt, name="test_model")
@@ -3192,7 +3351,9 @@ def test_post_terminate_operation_node_create_new_model_success(
     assert model_node.output_cols == ["id", "total"]
 
     # Verify edge was created
-    assert CanvasEdge.objects.filter(from_node=operation_node, to_node=model_node, seq=1).exists()
+    assert CanvasEdge.objects.filter(
+        from_node=operation_node, to_node=model_node, seq=1
+    ).exists()
 
 
 @patch("ddpui.api.transform_api.tranverse_graph_and_return_operations_list")
@@ -3386,7 +3547,10 @@ def test_post_terminate_operation_node_with_rel_dir_to_models(
     # Mock function responses
     mock_operations_list = [{"type": "aggregate", "config": {}}]
     mock_tranverse_graph.return_value = mock_operations_list
-    mock_create_dbt_model.return_value = (Path("custom/models/test_model.sql"), ["id", "total"])
+    mock_create_dbt_model.return_value = (
+        Path("custom/models/test_model.sql"),
+        ["id", "total"],
+    )
     mock_convert_canvas.return_value = {"uuid": str(uuid.uuid4())}
 
     payload = TerminateChainAndCreateModelPayload(
@@ -3406,7 +3570,9 @@ def test_post_terminate_operation_node_with_rel_dir_to_models(
         "output_name": "test_model",
         "rel_dir_to_models": "custom",
     }
-    mock_create_dbt_model.assert_called_once_with(org_warehouse, expected_config, orgdbt)
+    mock_create_dbt_model.assert_called_once_with(
+        org_warehouse, expected_config, orgdbt
+    )
 
     # Verify model was created
     dbt_model = OrgDbtModel.objects.get(orgdbt=orgdbt, name="test_model")
@@ -3452,7 +3618,10 @@ def test_post_terminate_operation_node_with_root_directory_edge_case(
     # Mock function responses
     mock_operations_list = [{"type": "aggregate", "config": {}}]
     mock_tranverse_graph.return_value = mock_operations_list
-    mock_create_dbt_model.return_value = (Path("models/root_test_model.sql"), ["id", "total"])
+    mock_create_dbt_model.return_value = (
+        Path("models/root_test_model.sql"),
+        ["id", "total"],
+    )
     mock_convert_canvas.return_value = {"uuid": str(uuid.uuid4())}
 
     payload = TerminateChainAndCreateModelPayload(
@@ -3472,7 +3641,9 @@ def test_post_terminate_operation_node_with_root_directory_edge_case(
         "output_name": "root_test_model",
         "rel_dir_to_models": "/",
     }
-    mock_create_dbt_model.assert_called_once_with(org_warehouse, expected_config, orgdbt)
+    mock_create_dbt_model.assert_called_once_with(
+        org_warehouse, expected_config, orgdbt
+    )
 
     # Verify model was created
     dbt_model = OrgDbtModel.objects.get(orgdbt=orgdbt, name="root_test_model")

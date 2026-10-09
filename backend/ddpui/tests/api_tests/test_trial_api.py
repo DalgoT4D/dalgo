@@ -61,12 +61,16 @@ class TestTrialSignup:
         mock_exists.return_value = False
         mock_create_token.return_value = "tok123"
 
-        payload = TrialSignupSchema(email="a@b.org", org_name="Acme", role="data_technology")
+        payload = TrialSignupSchema(
+            email="a@b.org", org_name="Acme", role="data_technology"
+        )
         result = trial_signup(None, payload)
 
         assert result == {"status": "verification_sent"}
         mock_create_token.assert_called_once_with(
-            ActivationTokenData(email="a@b.org", org_name="Acme", role="data_technology")
+            ActivationTokenData(
+                email="a@b.org", org_name="Acme", role="data_technology"
+            )
         )
         mock_send_email.assert_called_once()
         args, _ = mock_send_email.call_args
@@ -76,10 +80,14 @@ class TestTrialSignup:
     @patch("ddpui.api.trial_api.send_verification")
     @patch("ddpui.api.trial_api.create_activation_token")
     @patch("ddpui.api.trial_api.account_exists_for_email")
-    def test_existing_account_returns_409(self, mock_exists, mock_create_token, mock_send_email):
+    def test_existing_account_returns_409(
+        self, mock_exists, mock_create_token, mock_send_email
+    ):
         mock_exists.return_value = True
 
-        payload = TrialSignupSchema(email="a@b.org", org_name="Acme", role="data_technology")
+        payload = TrialSignupSchema(
+            email="a@b.org", org_name="Acme", role="data_technology"
+        )
         with pytest.raises(HttpError) as exc:
             trial_signup(None, payload)
 
@@ -88,7 +96,9 @@ class TestTrialSignup:
         mock_send_email.assert_not_called()
 
     def test_invalid_email_returns_400(self):
-        payload = TrialSignupSchema(email="not-an-email", org_name="Acme", role="data_technology")
+        payload = TrialSignupSchema(
+            email="not-an-email", org_name="Acme", role="data_technology"
+        )
         with pytest.raises(HttpError) as exc:
             trial_signup(None, payload)
 
@@ -105,7 +115,8 @@ class TestTrialSignup:
         mock_exists.return_value = False
 
         trial_signup(
-            None, TrialSignupSchema(email="a@b.org", org_name="Acme", role="data_technology")
+            None,
+            TrialSignupSchema(email="a@b.org", org_name="Acme", role="data_technology"),
         )
 
         record = TrialSignup.objects.get(email="a@b.org")
@@ -120,14 +131,20 @@ class TestTrialSignup:
     @patch("ddpui.api.trial_api.create_activation_token")
     @patch("ddpui.api.trial_api.account_exists_for_email")
     def test_signup_survives_a_record_failure(
-        self, mock_exists, mock_create_token, mock_send_email, mock_record, seed_template_org
+        self,
+        mock_exists,
+        mock_create_token,
+        mock_send_email,
+        mock_record,
+        seed_template_org,
     ):
         """Bookkeeping must never cost a real user their trial."""
         mock_exists.return_value = False
         mock_record.side_effect = Exception("db down")
 
         result = trial_signup(
-            None, TrialSignupSchema(email="a@b.org", org_name="Acme", role="data_technology")
+            None,
+            TrialSignupSchema(email="a@b.org", org_name="Acme", role="data_technology"),
         )
 
         assert result == {"status": "verification_sent"}
@@ -136,11 +153,15 @@ class TestTrialSignup:
     @patch("ddpui.api.trial_api.send_verification")
     @patch("ddpui.api.trial_api.create_activation_token")
     @patch("ddpui.api.trial_api.account_exists_for_email")
-    def test_invalid_email_writes_no_record(self, mock_exists, mock_create_token, mock_send_email):
+    def test_invalid_email_writes_no_record(
+        self, mock_exists, mock_create_token, mock_send_email
+    ):
         with pytest.raises(HttpError):
             trial_signup(
                 None,
-                TrialSignupSchema(email="not-an-email", org_name="Acme", role="data_technology"),
+                TrialSignupSchema(
+                    email="not-an-email", org_name="Acme", role="data_technology"
+                ),
             )
 
         assert TrialSignup.objects.count() == 0
@@ -155,7 +176,9 @@ class TestTrialSignup:
         mock_exists.return_value = False
         monkeypatch.setattr(settings, "FRONTEND_URL_V2", "")
 
-        payload = TrialSignupSchema(email="a@b.org", org_name="Acme", role="data_technology")
+        payload = TrialSignupSchema(
+            email="a@b.org", org_name="Acme", role="data_technology"
+        )
         with pytest.raises(HttpError) as exc:
             trial_signup(None, payload)
 
@@ -174,7 +197,9 @@ class TestTrialSignup:
         mock_exists.return_value = False
         monkeypatch.setattr(settings, "TEMPLATE_ORG_SLUG", "nonexistent-template")
 
-        payload = TrialSignupSchema(email="a@b.org", org_name="Acme", role="data_technology")
+        payload = TrialSignupSchema(
+            email="a@b.org", org_name="Acme", role="data_technology"
+        )
         with pytest.raises(HttpError) as exc:
             trial_signup(None, payload)
 
@@ -227,7 +252,9 @@ class TestTrialActivate:
         result = trial_activate(None, payload)
 
         assert "task_id" in result
-        assert result["email"] == "new@b.org"  # echoed back for the progress screen's auto-login
+        assert (
+            result["email"] == "new@b.org"
+        )  # echoed back for the progress screen's auto-login
         user = User.objects.get(username="new@b.org")
         assert user.check_password(STRONG_PASSWORD)
         # the lifetime running-clone lock is taken (released by the task in its finally)
@@ -252,7 +279,11 @@ class TestTrialActivate:
         assert isinstance(start_calls[0].args[1], int)
         assert start_calls[0].kwargs.get("ex") == 86400
         mock_clone_task.delay.assert_called_once_with(
-            result["task_id"], seed_template_org.id, "new@b.org", "Acme", "data_technology"
+            result["task_id"],
+            seed_template_org.id,
+            "new@b.org",
+            "Acme",
+            "data_technology",
         )
 
     @patch("ddpui.api.trial_api.clone_trial_org_task")
@@ -274,14 +305,18 @@ class TestTrialActivate:
         seed_template_org,
     ):
         """This endpoint IS the consent screen's "Accept and Continue" — it must record that."""
-        record = TrialSignup.objects.create(email="new@b.org", signed_up_at=timezone.now())
+        record = TrialSignup.objects.create(
+            email="new@b.org", signed_up_at=timezone.now()
+        )
         mock_peek.return_value = _token_data()
         mock_consume.return_value = _token_data()
         mock_exists.return_value = False
         mock_lock.return_value = True
         _mock_redis(mock_redis_cls)
 
-        trial_activate(None, TrialActivateSchema(token="tok123", password=STRONG_PASSWORD))
+        trial_activate(
+            None, TrialActivateSchema(token="tok123", password=STRONG_PASSWORD)
+        )
 
         record.refresh_from_db()
         assert record.tnc_accepted is True
@@ -298,7 +333,9 @@ class TestTrialActivate:
     ):
         """The acceptance happened even though no account got created — the row stays open with
         tnc_accepted True, so follow-up mail can still reach this person."""
-        record = TrialSignup.objects.create(email="weak@b.org", signed_up_at=timezone.now())
+        record = TrialSignup.objects.create(
+            email="weak@b.org", signed_up_at=timezone.now()
+        )
         mock_peek.return_value = _token_data("weak@b.org")
         mock_exists.return_value = False
         mock_lock.return_value = True
@@ -349,7 +386,13 @@ class TestTrialActivate:
     @patch("ddpui.api.trial_api.consume_activation_token")
     @patch("ddpui.api.trial_api.peek_activation_token")
     def test_concurrent_activation_is_locked_out(
-        self, mock_peek, mock_consume, mock_exists, mock_lock, mock_clone_task, seed_template_org
+        self,
+        mock_peek,
+        mock_consume,
+        mock_exists,
+        mock_lock,
+        mock_clone_task,
+        seed_template_org,
     ):
         """I2: a second concurrent activate for the same email must be rejected (409)."""
         mock_peek.return_value = _token_data("dup@b.org")
@@ -372,10 +415,17 @@ class TestTrialActivate:
     @patch("ddpui.api.trial_api.consume_activation_token")
     @patch("ddpui.api.trial_api.peek_activation_token")
     def test_weak_password_returns_400_and_token_not_burned(
-        self, mock_peek, mock_consume, mock_exists, mock_redis_cls, mock_lock, mock_clone_task
+        self,
+        mock_peek,
+        mock_consume,
+        mock_exists,
+        mock_redis_cls,
+        mock_lock,
+        mock_clone_task,
     ):
         """I3: a weak password must be rejected before the user is created — and must NOT
-        consume the token or take the lock, so a corrected resubmit of the same link works."""
+        consume the token or take the lock, so a corrected resubmit of the same link works.
+        """
         mock_peek.return_value = _token_data("weak@b.org")
         mock_exists.return_value = False
         mock_lock.return_value = True
@@ -402,7 +452,13 @@ class TestTrialActivate:
     @patch("ddpui.api.trial_api.consume_activation_token")
     @patch("ddpui.api.trial_api.peek_activation_token")
     def test_empty_password_returns_400_and_no_user_created(
-        self, mock_peek, mock_consume, mock_exists, mock_redis_cls, mock_lock, mock_clone_task
+        self,
+        mock_peek,
+        mock_consume,
+        mock_exists,
+        mock_redis_cls,
+        mock_lock,
+        mock_clone_task,
     ):
         mock_peek.return_value = _token_data("empty@b.org")
         mock_exists.return_value = False
@@ -424,11 +480,18 @@ class TestTrialActivate:
     @patch("ddpui.api.trial_api.consume_activation_token")
     @patch("ddpui.api.trial_api.peek_activation_token")
     def test_missing_template_returns_500_without_side_effects(
-        self, mock_peek, mock_consume, mock_exists, mock_lock, mock_clone_task, monkeypatch
+        self,
+        mock_peek,
+        mock_consume,
+        mock_exists,
+        mock_lock,
+        mock_clone_task,
+        monkeypatch,
     ):
         """The staging incident: TEMPLATE_ORG_SLUG unset/missing must 500 BEFORE consuming the
         token, taking the lock, or creating the user — so once ops fixes the config, the very
-        same activation link works. Previously the token was burned and the lock leaked."""
+        same activation link works. Previously the token was burned and the lock leaked.
+        """
         mock_peek.return_value = _token_data("tmpl@b.org")
         mock_exists.return_value = False
         monkeypatch.setattr(settings, "TEMPLATE_ORG_SLUG", "nonexistent-template")
@@ -449,7 +512,13 @@ class TestTrialActivate:
     @patch("ddpui.api.trial_api.consume_activation_token")
     @patch("ddpui.api.trial_api.peek_activation_token")
     def test_double_post_loser_returns_400(
-        self, mock_peek, mock_consume, mock_exists, mock_lock, mock_clone_task, seed_template_org
+        self,
+        mock_peek,
+        mock_consume,
+        mock_exists,
+        mock_lock,
+        mock_clone_task,
+        seed_template_org,
     ):
         """Double-POST race: both requests peek successfully, but the consume loser (delete
         returned 0) must 400 without taking the lock or enqueuing a second clone."""
@@ -486,7 +555,8 @@ class TestTrialActivate:
         seed_template_org,
     ):
         """If anything past lock-acquisition raises (here: broker down at .delay), the lock
-        must be released — otherwise every retry 409s 'already being set up' until the TTL."""
+        must be released — otherwise every retry 409s 'already being set up' until the TTL.
+        """
         mock_peek.return_value = _token_data("boom@b.org")
         mock_consume.return_value = _token_data("boom@b.org")
         mock_exists.return_value = False
@@ -509,7 +579,13 @@ class TestTrialRetry:
     @patch("ddpui.api.trial_api.account_exists_for_email")
     @patch("ddpui.api.trial_api.fetch_clone_params")
     def test_retry_reenqueues_same_task_id(
-        self, mock_fetch, mock_exists, mock_lock, mock_redis_cls, mock_clone_task, mock_progress_cls
+        self,
+        mock_fetch,
+        mock_exists,
+        mock_lock,
+        mock_redis_cls,
+        mock_clone_task,
+        mock_progress_cls,
     ):
         """Happy path: stored params re-drive the clone under the SAME task_id, no user input."""
         mock_fetch.return_value = TrialCloneParams(
@@ -539,7 +615,9 @@ class TestTrialRetry:
         # the failed run's progress history is overwritten AT retry time (not when the worker
         # starts) so /status never serves the old fully-advanced step list during the
         # enqueue→pickup gap.
-        mock_progress_cls.assert_called_once_with("task-9", "trial-clone-task-9", 24 * 3600)
+        mock_progress_cls.assert_called_once_with(
+            "task-9", "trial-clone-task-9", 24 * 3600
+        )
         mock_progress_cls.return_value.add.assert_called_once_with(
             {"message": "queued", "status": "queued"}
         )
@@ -616,7 +694,9 @@ class TestTrialStatus:
 
         result = trial_status(None, "task-1")
 
-        mock_taskprogress_cls.fetch.assert_called_once_with("task-1", "trial-clone-task-1")
+        mock_taskprogress_cls.fetch.assert_called_once_with(
+            "task-1", "trial-clone-task-1"
+        )
         assert result["task_id"] == "task-1"
         assert result["status"] == "completed"
         assert result["org_slug"] == "trial-abc"
@@ -626,7 +706,9 @@ class TestTrialStatus:
 
     @patch("ddpui.api.trial_api.RedisClient")
     @patch("ddpui.api.trial_api.TaskProgress")
-    def test_status_empty_progress_is_pending(self, mock_taskprogress_cls, mock_redis_cls):
+    def test_status_empty_progress_is_pending(
+        self, mock_taskprogress_cls, mock_redis_cls
+    ):
         mock_taskprogress_cls.fetch.return_value = None
         mock_redis_cls.get_instance.return_value.get.return_value = None
 
@@ -661,13 +743,17 @@ class TestTrialValidatePassword:
         """the rule the frontend cannot mirror without shipping Django's 20k-word list —
         the whole reason this endpoint exists."""
         with pytest.raises(HttpError) as exc:
-            trial_validate_password(None, TrialValidatePasswordSchema(password="password123"))
+            trial_validate_password(
+                None, TrialValidatePasswordSchema(password="password123")
+            )
         assert exc.value.status_code == 400
         assert "too common" in str(exc.value)
 
     def test_all_numeric_password_rejected(self):
         with pytest.raises(HttpError) as exc:
-            trial_validate_password(None, TrialValidatePasswordSchema(password="4831067295"))
+            trial_validate_password(
+                None, TrialValidatePasswordSchema(password="4831067295")
+            )
         assert exc.value.status_code == 400
         assert "entirely numeric" in str(exc.value)
 
@@ -680,5 +766,7 @@ class TestTrialValidatePassword:
         """it validates a string and nothing else — no state, no account, nothing to enumerate."""
         before = User.objects.count()
         with pytest.raises(HttpError):
-            trial_validate_password(None, TrialValidatePasswordSchema(password="password"))
+            trial_validate_password(
+                None, TrialValidatePasswordSchema(password="password")
+            )
         assert User.objects.count() == before

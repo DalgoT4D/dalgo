@@ -86,12 +86,16 @@ def test_invalid_column_config():
     col = {"name": "test_col"}
 
     with pytest.raises(KeyError):
-        obj = SomeDataTypeColInsightsParentClass([col], "test_table", "test_schema", None)
+        obj = SomeDataTypeColInsightsParentClass(
+            [col], "test_table", "test_schema", None
+        )
 
     col = {"name": "test_col", "data_type": "some_type"}
 
     with pytest.raises(KeyError):
-        obj = SomeDataTypeColInsightsParentClass([col], "test_table", "test_schema", None)
+        obj = SomeDataTypeColInsightsParentClass(
+            [col], "test_table", "test_schema", None
+        )
 
 
 def test_valid_column_config():

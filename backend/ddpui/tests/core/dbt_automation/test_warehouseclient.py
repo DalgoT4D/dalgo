@@ -6,7 +6,9 @@ from ddpui.utils.warehouse.old_client.warehouse_factory import get_client
 
 @patch("ddpui.utils.warehouse.old_client.warehouse_factory.BigQueryClient")
 @patch("ddpui.utils.warehouse.old_client.warehouse_factory.PostgresClient")
-def test_dbt_automation_warehouse_client(MockPostgresClient: Mock, MockBigqueryClient: Mock):
+def test_dbt_automation_warehouse_client(
+    MockPostgresClient: Mock, MockBigqueryClient: Mock
+):
     """test the warehouse client"""
     conn_info = {
         "host": "localhost",

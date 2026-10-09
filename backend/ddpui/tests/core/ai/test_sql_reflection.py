@@ -32,16 +32,23 @@ def test_find_sql_issue_flags_an_issue():
 
 def test_find_sql_issue_passes_clean_sql_and_fails_open():
     assert (
-        reflection.find_sql_issue("q", "SELECT 1", "postgres", model=FakeModel('{"ok": true}'))
+        reflection.find_sql_issue(
+            "q", "SELECT 1", "postgres", model=FakeModel('{"ok": true}')
+        )
         is None
     )
     assert (
-        reflection.find_sql_issue("q", "SELECT 1", "postgres", model=FakeModel("garbage")) is None
+        reflection.find_sql_issue(
+            "q", "SELECT 1", "postgres", model=FakeModel("garbage")
+        )
+        is None
     )
 
 
 def run_execute_sql(ctx, sql):
-    return sql_tools.execute_sql.func(sql=sql, runtime=type("R", (), {"context": ctx})())
+    return sql_tools.execute_sql.func(
+        sql=sql, runtime=type("R", (), {"context": ctx})()
+    )
 
 
 def test_reflection_gates_complex_lane_only(monkeypatch):

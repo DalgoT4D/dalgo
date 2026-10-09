@@ -13,7 +13,9 @@ from ddpui.models.org import Org
 from ddpui.models.org_user import OrgUser
 from ddpui.models.role_based_access import Role
 from ddpui.models.userpreferences import UserPreferences
-from ddpui.tests.api_tests.test_user_org_api import seed_db  # noqa: F401 — pytest fixture
+from ddpui.tests.api_tests.test_user_org_api import (
+    seed_db,
+)  # noqa: F401 — pytest fixture
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ddpui.settings")
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"

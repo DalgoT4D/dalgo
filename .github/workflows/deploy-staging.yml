@@ -13,6 +13,7 @@ name: Deploy to Staging
 # main's migrations". Safe across PR rebases/renumbers.
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths-ignore:
@@ -66,9 +67,13 @@ jobs:
           PR_NUMBER=""
           IMAGE_TAG=""
 
-          if [[ "$EVENT" == "push" ]]; then
+          if [[ "$EVENT" == "push" || "$EVENT" == "workflow_dispatch" ]]; then
             SHOULD_DEPLOY=true
-            DEPLOY_REF="${{ github.sha }}"
+            if [[ "$EVENT" == "workflow_dispatch" ]]; then
+              DEPLOY_REF=$(gh api repos/${{ github.repository }}/commits/main --jq '.sha')
+            else
+              DEPLOY_REF="${{ github.sha }}"
+            fi
             SHORT_SHA="${DEPLOY_REF:0:7}"
             IMAGE_TAG="main-${SHORT_SHA}"
           elif [[ "$EVENT" == "pull_request" ]]; then
@@ -355,16 +360,20 @@ jobs:
           ssh "$SSH_USER@$SSH_HOST" "cd $DEPLOY_PATH/docker && \
             docker compose -f docker-compose.staging.yml exec -T backend bash scripts/post-deploy.sh"
 
-      - name: Swap staging label (if PR swap)
-        if: needs.plan.outputs.pr_number != '' && needs.plan.outputs.previous_pr != ''
+      - name: Remove staging label from previous PR
+        if: needs.plan.outputs.previous_pr != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr edit ${{ needs.plan.outputs.previous_pr }} \
-            --repo "${{ github.repository }}" --remove-label staging
+            --repo "${{ github.repository }}" --remove-label staging || true
+          if [[ -n "${{ needs.plan.outputs.pr_number }}" ]]; then
+            MSG="Staging taken over by #${{ needs.plan.outputs.pr_number }}. Migrations rolled back."
+          else
+            MSG="Staging reset to main (${{ needs.plan.outputs.image_tag }}). Migrations rolled back."
+          fi
           gh pr comment ${{ needs.plan.outputs.previous_pr }} \
-            --repo "${{ github.repository }}" \
-            --body "Staging taken over by #${{ needs.plan.outputs.pr_number }}. Migrations rolled back."
+            --repo "${{ github.repository }}" --body "$MSG"
 
       - name: Comment on deployed PR
         if: needs.plan.outputs.pr_number != ''

@@ -115,12 +115,20 @@ def f_dbt_tasks():
     tasks.append(task_clean)
 
     task_deps = Task.objects.create(
-        type=TaskType.DBT, slug=TASK_DBTDEPS, label="dbt deps", command="dbt deps", is_system=True
+        type=TaskType.DBT,
+        slug=TASK_DBTDEPS,
+        label="dbt deps",
+        command="dbt deps",
+        is_system=True,
     )
     tasks.append(task_deps)
 
     task_run = Task.objects.create(
-        type=TaskType.DBT, slug=TASK_DBTRUN, label="dbt run", command="dbt run", is_system=True
+        type=TaskType.DBT,
+        slug=TASK_DBTRUN,
+        label="dbt run",
+        command="dbt run",
+        is_system=True,
     )
     tasks.append(task_run)
 
@@ -137,7 +145,9 @@ def f_org_tasks(org_with_workspace, f_dbt_tasks):
     org_tasks: list[OrgTask] = []
 
     for task in f_dbt_tasks:
-        org_task = OrgTask.objects.create(org=org_with_workspace, task=task, generated_by="system")
+        org_task = OrgTask.objects.create(
+            org=org_with_workspace, task=task, generated_by="system"
+        )
         org_tasks.append(org_task)
 
     yield org_tasks
@@ -227,11 +237,14 @@ def test_post_dbt_git_pull_gitpull_failed(orguser: OrgUser):
     request = mock_request(orguser)
 
     with patch(
-        "ddpui.api.dbt_api.DbtProjectManager.get_dbt_project_dir", return_value="project_dir"
+        "ddpui.api.dbt_api.DbtProjectManager.get_dbt_project_dir",
+        return_value="project_dir",
     ), patch("ddpui.api.dbt_api.GitManager") as mock_git_manager, pytest.raises(
         HttpError
     ) as excinfo:
-        mock_git_manager.return_value.pull_changes.side_effect = Exception("git pull failed")
+        mock_git_manager.return_value.pull_changes.side_effect = Exception(
+            "git pull failed"
+        )
         post_dbt_git_pull(request)
     assert str(excinfo.value) == "git pull failed"
 
@@ -244,7 +257,8 @@ def test_post_dbt_git_pull_succes(orguser: OrgUser):
     request = mock_request(orguser)
 
     with patch(
-        "ddpui.api.dbt_api.DbtProjectManager.get_dbt_project_dir", return_value="project_dir"
+        "ddpui.api.dbt_api.DbtProjectManager.get_dbt_project_dir",
+        return_value="project_dir",
     ), patch("ddpui.api.dbt_api.GitManager") as mock_git_manager:
         mock_git_manager.return_value.pull_changes.return_value = None
         response = post_dbt_git_pull(request)
@@ -326,7 +340,9 @@ def test_put_dbt_schema_v1_no_warehouse(orguser: OrgUser):
     request = mock_request(orguser)
     with pytest.raises(HttpError) as excinfo:
         put_dbt_schema_v1(request, payload)
-    assert str(excinfo.value) == "No warehouse configuration found for this organization"
+    assert (
+        str(excinfo.value) == "No warehouse configuration found for this organization"
+    )
 
 
 def test_put_dbt_schema_v1_success(orguser: OrgUser, f_orgwarehouse: OrgWarehouse):
@@ -340,7 +356,9 @@ def test_put_dbt_schema_v1_success(orguser: OrgUser, f_orgwarehouse: OrgWarehous
     with patch(
         "ddpui.api.dbt_api.secretsmanager.retrieve_warehouse_credentials",
         return_value={"username": "u", "password": "pw"},
-    ), patch("ddpui.api.dbt_api.create_or_update_dbt_profile_secret_blk") as mock_upsert:
+    ), patch(
+        "ddpui.api.dbt_api.create_or_update_dbt_profile_secret_blk"
+    ) as mock_upsert:
         retval = put_dbt_schema_v1(request, payload)
 
     assert retval == {"success": 1}
@@ -353,7 +371,9 @@ def test_put_dbt_schema_v1_success(orguser: OrgUser, f_orgwarehouse: OrgWarehous
     assert args[2] == {"username": "u", "password": "pw"}
 
 
-def test_put_dbt_schema_v1_no_warehouse_creds(orguser: OrgUser, f_orgwarehouse: OrgWarehouse):
+def test_put_dbt_schema_v1_no_warehouse_creds(
+    orguser: OrgUser, f_orgwarehouse: OrgWarehouse
+):
     """put_dbt_schema_v1 returns 500 when warehouse credentials are missing."""
     orguser.org.dbt = OrgDbt(gitrepo_url="A", target_type="B", default_schema="C")
     orguser.org.dbt.save()
@@ -363,7 +383,9 @@ def test_put_dbt_schema_v1_no_warehouse_creds(orguser: OrgUser, f_orgwarehouse: 
     with patch(
         "ddpui.api.dbt_api.secretsmanager.retrieve_warehouse_credentials",
         return_value=None,
-    ), patch("ddpui.api.dbt_api.create_or_update_dbt_profile_secret_blk") as mock_upsert:
+    ), patch(
+        "ddpui.api.dbt_api.create_or_update_dbt_profile_secret_blk"
+    ) as mock_upsert:
         with pytest.raises(HttpError) as excinfo:
             put_dbt_schema_v1(request, payload)
 
@@ -399,7 +421,8 @@ def test_post_run_dbt_commands_no_payload(orguser: OrgUser, f_org_tasks):
     with patch("ddpui.api.dbt_api.uuid4", return_value=mock_task_id), patch(
         "ddpui.api.dbt_api.TaskProgress"
     ) as mock_task_progress, patch(
-        "ddpui.celeryworkers.tasks.run_dbt_commands.delay", return_value=mock_celery_task
+        "ddpui.celeryworkers.tasks.run_dbt_commands.delay",
+        return_value=mock_celery_task,
     ) as mock_run_dbt:
         response = post_run_dbt_commands(request)
 
@@ -417,7 +440,9 @@ def test_post_run_dbt_commands_no_payload(orguser: OrgUser, f_org_tasks):
         )
 
         # Verify celery task was called with correct parameters
-        mock_run_dbt.assert_called_once_with(orguser.org.id, orguser.org.dbt.id, mock_task_id, None)
+        mock_run_dbt.assert_called_once_with(
+            orguser.org.id, orguser.org.dbt.id, mock_task_id, None
+        )
 
 
 def test_post_run_dbt_commands_with_payload(orguser: OrgUser, f_org_tasks):
@@ -430,10 +455,13 @@ def test_post_run_dbt_commands_with_payload(orguser: OrgUser, f_org_tasks):
     mock_celery_task = Mock()
     mock_celery_task.id = "celery-task-id"
 
-    with patch("ddpui.api.dbt_api.uuid4", return_value=mock_task_id) as mock_uuid, patch(
+    with patch(
+        "ddpui.api.dbt_api.uuid4", return_value=mock_task_id
+    ) as mock_uuid, patch(
         "ddpui.api.dbt_api.TaskProgress"
     ) as mock_task_progress, patch(
-        "ddpui.celeryworkers.tasks.run_dbt_commands.delay", return_value=mock_celery_task
+        "ddpui.celeryworkers.tasks.run_dbt_commands.delay",
+        return_value=mock_celery_task,
     ) as mock_run_dbt:
         response = post_run_dbt_commands(request, payload)
 
@@ -462,7 +490,8 @@ def test_post_run_dbt_commands_task_locks(orguser: OrgUser, f_org_tasks):
     with patch("ddpui.api.dbt_api.uuid4") as mock_uuid, patch(
         "ddpui.api.dbt_api.TaskProgress"
     ), patch(
-        "ddpui.celeryworkers.tasks.run_dbt_commands.delay", return_value=mock_celery_task
+        "ddpui.celeryworkers.tasks.run_dbt_commands.delay",
+        return_value=mock_celery_task,
     ) as mock_celery_delay:
         mock_uuid.return_value = "test-task-id-789"
 
@@ -485,7 +514,8 @@ def test_post_run_dbt_commands_exception_handling(orguser: OrgUser, f_org_tasks)
     with patch("ddpui.api.dbt_api.uuid4") as mock_uuid, patch(
         "ddpui.api.dbt_api.TaskProgress"
     ), patch(
-        "ddpui.celeryworkers.tasks.run_dbt_commands.delay", side_effect=Exception("Celery error")
+        "ddpui.celeryworkers.tasks.run_dbt_commands.delay",
+        side_effect=Exception("Celery error"),
     ):
         mock_uuid.return_value = "test-task-id-error"
 
@@ -507,7 +537,9 @@ def test_post_run_dbt_commands_task_filtering(orguser: OrgUser, f_org_tasks):
         command="dbt run",
         is_system=False,
     )
-    extra_org_task = OrgTask.objects.create(org=orguser.org, task=extra_task, generated_by="client")
+    extra_org_task = OrgTask.objects.create(
+        org=orguser.org, task=extra_task, generated_by="client"
+    )
 
     mock_celery_task = Mock()
 
@@ -515,7 +547,8 @@ def test_post_run_dbt_commands_task_filtering(orguser: OrgUser, f_org_tasks):
         with patch("ddpui.api.dbt_api.uuid4") as mock_uuid, patch(
             "ddpui.api.dbt_api.TaskProgress"
         ), patch(
-            "ddpui.celeryworkers.tasks.run_dbt_commands.delay", return_value=mock_celery_task
+            "ddpui.celeryworkers.tasks.run_dbt_commands.delay",
+            return_value=mock_celery_task,
         ) as mock_celery_delay:
             mock_uuid.return_value = "test-task-id-filtering"
 
@@ -591,7 +624,9 @@ def test_post_publish_changes_workspace_errors(seed_db, orguser: OrgUser):
         mock_path.return_value.exists.return_value = True
         with patch(
             "ddpui.api.dbt_api.GitManager",
-            side_effect=GitManagerError(message="Not a git repository", error="details"),
+            side_effect=GitManagerError(
+                message="Not a git repository", error="details"
+            ),
         ), pytest.raises(HttpError) as excinfo:
             post_dbt_publish_changes(request, payload)
         assert "Git is not initialized" in str(excinfo.value)
@@ -676,7 +711,9 @@ def test_post_publish_changes_push_fails_no_remote(seed_db, orguser: OrgUser):
     request = mock_request(orguser)
     payload = OrgDbtChangesPublish(commit_message="Test commit")
 
-    orgdbt = OrgDbt.objects.create(transform_type="github")  # No PAT secret but github type
+    orgdbt = OrgDbt.objects.create(
+        transform_type="github"
+    )  # No PAT secret but github type
     request.orguser.org.dbt = orgdbt
     request.orguser.org.save()
 
@@ -774,7 +811,9 @@ def test_post_publish_changes_nothing_to_commit(seed_db, orguser: OrgUser):
 
         mock_git_manager = Mock()
         # This is what git returns when there's nothing to commit
-        mock_git_manager.commit_changes.return_value = "Nothing to commit, working tree clean"
+        mock_git_manager.commit_changes.return_value = (
+            "Nothing to commit, working tree clean"
+        )
         mock_git_manager.push_changes.return_value = "Everything up-to-date"
 
         with patch(
@@ -810,7 +849,8 @@ def test_put_switch_git_repo_success_with_new_pat(seed_db, orguser: OrgUser):
     request.orguser.org.save()
 
     payload = OrgDbtConnectGitRemote(
-        gitrepoUrl="https://github.com/user/new-repo", gitrepoAccessToken="ghp_newtoken123"
+        gitrepoUrl="https://github.com/user/new-repo",
+        gitrepoAccessToken="ghp_newtoken123",
     )
 
     with patch(
@@ -863,13 +903,17 @@ def test_put_switch_git_repo_success_with_masked_pat(seed_db, orguser: OrgUser):
         mock_retrieve_pat.assert_called_once_with("existing-pat-secret")
 
         # Verify the service was called with the EXISTING PAT (not masked one)
-        mock_switch.assert_called_once_with(orguser, payload, "existing_pat_from_secrets")
+        mock_switch.assert_called_once_with(
+            orguser, payload, "existing_pat_from_secrets"
+        )
 
     # Cleanup
     orgdbt.delete()
 
 
-def test_put_switch_git_repo_error_masked_token_no_existing_pat(seed_db, orguser: OrgUser):
+def test_put_switch_git_repo_error_masked_token_no_existing_pat(
+    seed_db, orguser: OrgUser
+):
     """Test error when using masked token but no existing PAT found"""
     request = mock_request(orguser)
 
@@ -934,7 +978,8 @@ def test_put_switch_git_repo_error_no_dbt_workspace(seed_db, orguser: OrgUser):
     request.orguser.org.dbt = None
 
     payload = OrgDbtConnectGitRemote(
-        gitrepoUrl="https://github.com/user/new-repo", gitrepoAccessToken="ghp_newtoken123"
+        gitrepoUrl="https://github.com/user/new-repo",
+        gitrepoAccessToken="ghp_newtoken123",
     )
 
     with pytest.raises(HttpError) as excinfo:
@@ -957,7 +1002,8 @@ def test_put_switch_git_repo_error_general_exception(seed_db, orguser: OrgUser):
     request.orguser.org.save()
 
     payload = OrgDbtConnectGitRemote(
-        gitrepoUrl="https://github.com/user/new-repo", gitrepoAccessToken="ghp_newtoken123"
+        gitrepoUrl="https://github.com/user/new-repo",
+        gitrepoAccessToken="ghp_newtoken123",
     )
 
     with patch(
@@ -993,7 +1039,8 @@ def test_post_dbt_git_pull_creates_audit_log(mock_audit_log, seed_db, orguser: O
     request.orguser.org.save()
 
     with patch(
-        "ddpui.api.dbt_api.DbtProjectManager.get_dbt_project_dir", return_value="project_dir"
+        "ddpui.api.dbt_api.DbtProjectManager.get_dbt_project_dir",
+        return_value="project_dir",
     ), patch("ddpui.api.dbt_api.GitManager") as mock_git_manager:
         mock_git_manager.return_value.pull_changes.return_value = None
         post_dbt_git_pull(request)
@@ -1045,7 +1092,9 @@ def test_put_dbt_schema_v1_creates_audit_log(
 
 
 @patch("ddpui.api.dbt_api.create_audit_log")
-def test_put_switch_git_repo_creates_audit_log(mock_audit_log, seed_db, orguser: OrgUser):
+def test_put_switch_git_repo_creates_audit_log(
+    mock_audit_log, seed_db, orguser: OrgUser
+):
     """Switching the git repo logs the new repo url and managed-by-system flag
     read back from the DB after the switch — never the access token."""
     orgdbt = OrgDbt.objects.create(
@@ -1067,7 +1116,10 @@ def test_put_switch_git_repo_creates_audit_log(mock_audit_log, seed_db, orguser:
         orgdbt.save()
         return {"success": 1}
 
-    with patch("ddpui.api.dbt_api.dbt_service.switch_git_repository_v1", side_effect=fake_switch):
+    with patch(
+        "ddpui.api.dbt_api.dbt_service.switch_git_repository_v1",
+        side_effect=fake_switch,
+    ):
         put_switch_git_repo(request, payload)
 
     mock_audit_log.assert_called_once()
@@ -1087,7 +1139,9 @@ def test_put_switch_git_repo_creates_audit_log(mock_audit_log, seed_db, orguser:
 
 @patch("ddpui.api.dbt_api.create_audit_log")
 @patch("ddpui.api.dbt_api.OrgCleanupService")
-def test_dbt_delete_creates_audit_log(mock_cleanup, mock_audit_log, seed_db, orguser: OrgUser):
+def test_dbt_delete_creates_audit_log(
+    mock_cleanup, mock_audit_log, seed_db, orguser: OrgUser
+):
     """Test that deleting dbt workspace creates an audit log entry"""
     request = mock_request(orguser)
 
@@ -1199,7 +1253,8 @@ def test_post_run_dbt_commands_creates_audit_log(
     mock_celery_task.id = "celery-task-id"
 
     with patch("ddpui.api.dbt_api.TaskProgress"), patch(
-        "ddpui.celeryworkers.tasks.run_dbt_commands.delay", return_value=mock_celery_task
+        "ddpui.celeryworkers.tasks.run_dbt_commands.delay",
+        return_value=mock_celery_task,
     ):
         post_run_dbt_commands(request)
 
@@ -1212,7 +1267,9 @@ def test_post_run_dbt_commands_creates_audit_log(
 
 
 @patch("ddpui.api.dbt_api.create_audit_log")
-def test_post_dbt_publish_changes_creates_audit_log(mock_audit_log, seed_db, orguser: OrgUser):
+def test_post_dbt_publish_changes_creates_audit_log(
+    mock_audit_log, seed_db, orguser: OrgUser
+):
     """Test that publishing dbt changes creates an audit log entry with commit info"""
     request = mock_request(orguser)
     payload = OrgDbtChangesPublish(commit_message="Test commit")

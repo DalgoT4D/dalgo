@@ -101,9 +101,19 @@ async def main(webhook_url: str, api_key: str):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Set up Dalgo webhook automation in Prefect")
-    parser.add_argument("--backend-webhook-url", required=True, help="e.g. http://backend:8002/webhooks/v1/notification/")
-    parser.add_argument("--backend-api-key", required=True, help="Value of PREFECT_NOTIFICATIONS_WEBHOOK_KEY from DDP_backend/.env")
+    parser = argparse.ArgumentParser(
+        description="Set up Dalgo webhook automation in Prefect"
+    )
+    parser.add_argument(
+        "--backend-webhook-url",
+        required=True,
+        help="e.g. http://backend:8002/webhooks/v1/notification/",
+    )
+    parser.add_argument(
+        "--backend-api-key",
+        required=True,
+        help="Value of PREFECT_NOTIFICATIONS_WEBHOOK_KEY from DDP_backend/.env",
+    )
     args = parser.parse_args()
 
     asyncio.run(main(args.backend_webhook_url, args.backend_api_key))

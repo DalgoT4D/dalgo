@@ -24,7 +24,11 @@ from prefect_gcp import GcpCredentials
 from dotenv import load_dotenv
 
 
-from proxy.helpers import CustomLogger, cleaned_name_for_prefectblock, deployment_to_json
+from proxy.helpers import (
+    CustomLogger,
+    cleaned_name_for_prefectblock,
+    deployment_to_json,
+)
 from proxy.exception import PrefectException
 from proxy.schemas import (
     AirbyteServerCreate,
@@ -53,7 +57,12 @@ FLOW_RUN_SCHEDULED = "SCHEDULED"
 logger = CustomLogger("prefect-proxy")
 
 PREFECT_API_TIMEOUT = int(os.getenv("PREFECT_API_TIMEOUT", "30"))
-PREFECT_API_RETRY = os.getenv("PREFECT_API_RETRY", "false").lower() in ["true", "1", "yes", "y"]
+PREFECT_API_RETRY = os.getenv("PREFECT_API_RETRY", "false").lower() in [
+    "true",
+    "1",
+    "yes",
+    "y",
+]
 PREFECT_API_RETRY_DELAY = float(os.getenv("PREFECT_API_RETRY_DELAY", "3.0"))
 PREFECT_PROXY_GIT_BRANCH = os.getenv("PREFECT_PROXY_GIT_BRANCH", "main")
 
@@ -68,7 +77,9 @@ def prefect_post(endpoint: str, payload: dict) -> dict:
     root = os.getenv("PREFECT_API_URL")
 
     if PREFECT_API_RETRY:
-        res = requests.post(f"{root}/{endpoint}", timeout=PREFECT_API_TIMEOUT, json=payload)
+        res = requests.post(
+            f"{root}/{endpoint}", timeout=PREFECT_API_TIMEOUT, json=payload
+        )
         try:
             res.raise_for_status()
             return res.json()
@@ -97,7 +108,9 @@ def prefect_patch(endpoint: str, payload: dict) -> dict:
     root = os.getenv("PREFECT_API_URL")
 
     if PREFECT_API_RETRY:
-        res = requests.patch(f"{root}/{endpoint}", timeout=PREFECT_API_TIMEOUT, json=payload)
+        res = requests.patch(
+            f"{root}/{endpoint}", timeout=PREFECT_API_TIMEOUT, json=payload
+        )
         try:
             res.raise_for_status()
             # no content
@@ -110,7 +123,9 @@ def prefect_patch(endpoint: str, payload: dict) -> dict:
             logger.info("Retrying prefect_patch request to %s", endpoint)
             sleep(PREFECT_API_RETRY_DELAY)
 
-    res = requests.patch(f"{root}/{endpoint}", timeout=PREFECT_API_TIMEOUT, json=payload)
+    res = requests.patch(
+        f"{root}/{endpoint}", timeout=PREFECT_API_TIMEOUT, json=payload
+    )
     try:
         res.raise_for_status()
         # no content
@@ -251,7 +266,9 @@ async def update_airbyte_server_block(payload: AirbyteServerUpdate):
         airbyteservercblock: AirbyteServer = await AirbyteServer.load(payload.blockName)
     except Exception as error:
         logger.exception(error)
-        raise PrefectException("no airbyte server block named " + payload.blockName) from error
+        raise PrefectException(
+            "no airbyte server block named " + payload.blockName
+        ) from error
 
     try:
         if payload.serverHost:
@@ -311,7 +328,9 @@ async def upsert_airbyte_connection_block(payload: AirbyteConnectionCreate):
         logger.exception(error)
         raise PrefectException("failed to upsert airbyte connection block") from error
 
-    logger.info("upserted airbyte connection block named %s", payload.connectionBlockName)
+    logger.info(
+        "upserted airbyte connection block named %s", payload.connectionBlockName
+    )
     return _block_id(connection_block), payload.connectionBlockName
 
 
@@ -405,16 +424,18 @@ def post_deployment_v1(payload: DeploymentCreate2) -> dict:
     logger.info(payload)
 
     work_queue_name = payload.work_queue_name if payload.work_queue_name else "ddp"
-    work_pool_name = payload.work_pool_name if payload.work_pool_name else "default-agent-pool"
+    work_pool_name = (
+        payload.work_pool_name if payload.work_pool_name else "default-agent-pool"
+    )
 
     try:
         source = GitRepository(
-            url="https://github.com/DalgoT4D/prefect-proxy.git",
+            url="https://github.com/DalgoT4D/dalgo.git",
             branch=PREFECT_PROXY_GIT_BRANCH,
         )
         deployment_id = flow.from_source(
             source=source,
-            entrypoint="proxy/prefect_flows_runner.py:deployment_schedule_flow_v5",
+            entrypoint="prefect-proxy/proxy/prefect_flows_runner.py:deployment_schedule_flow_v5",
         ).deploy(
             name=payload.deployment_name,
             work_queue_name=work_queue_name,
@@ -422,7 +443,12 @@ def post_deployment_v1(payload: DeploymentCreate2) -> dict:
             tags=[payload.org_slug],
             parameters=payload.deployment_params,
             schedules=(
-                [{"schedule": CronSchedule(cron=payload.cron).model_dump(), "active": True}]
+                [
+                    {
+                        "schedule": CronSchedule(cron=payload.cron).model_dump(),
+                        "active": True,
+                    }
+                ]
                 if payload.cron
                 else []
             ),
@@ -453,7 +479,9 @@ def put_deployment_v1(deployment_id: str, payload: DeploymentUpdate2) -> dict:
 
     newpayload = {}
 
-    newpayload["parameters"] = payload.deployment_params if payload.deployment_params else {}
+    newpayload["parameters"] = (
+        payload.deployment_params if payload.deployment_params else {}
+    )
 
     newpayload["schedules"] = (
         [{"schedule": CronSchedule(cron=payload.cron).model_dump(), "active": True}]
@@ -530,7 +558,9 @@ def update_flow_run_final_state(flow_run: dict) -> dict:
     return flow_run
 
 
-def get_flow_runs_by_deployment_id(deployment_id: str, limit: int, start_time_gt: str) -> list:
+def get_flow_runs_by_deployment_id(
+    deployment_id: str, limit: int, start_time_gt: str
+) -> list:
     """
     Fetch flow runs of a deployment that are FAILED/COMPLETED,
     sorted by descending start time of each run
@@ -610,7 +640,9 @@ def filter_late_flow_runs(payload: FilterLateFlowRuns) -> list[dict]:
         query_payload["work_pools"] = {"name": {"any_": [payload.work_pool_name]}}
 
     if payload.work_queue_name:
-        query_payload["work_pool_queues"] = {"name": {"any_": [payload.work_queue_name]}}
+        query_payload["work_pool_queues"] = {
+            "name": {"any_": [payload.work_queue_name]}
+        }
 
     if payload.limit and payload.limit > 0:
         query_payload["limit"] = payload.limit
@@ -621,17 +653,21 @@ def filter_late_flow_runs(payload: FilterLateFlowRuns) -> list[dict]:
         }
 
     if payload.after_start_time:
-        query_payload["flow_runs"]["expected_start_time"] = query_payload["flow_runs"].get(
-            "expected_start_time", {}
+        query_payload["flow_runs"]["expected_start_time"] = query_payload[
+            "flow_runs"
+        ].get("expected_start_time", {})
+        query_payload["flow_runs"]["expected_start_time"]["after_"] = str(
+            payload.after_start_time
         )
-        query_payload["flow_runs"]["expected_start_time"]["after_"] = str(payload.after_start_time)
 
     try:
         logger.info("Query payload %s", query_payload)
         result = prefect_post("flow_runs/filter", query_payload)
     except Exception as error:
         logger.exception(error)
-        raise PrefectException(f"failed to fetch late flow_runs for {payload.dict()}") from error
+        raise PrefectException(
+            f"failed to fetch late flow_runs for {payload.dict()}"
+        ) from error
 
     flow_runs = []
     for flow_run in result:
@@ -778,7 +814,9 @@ def traverse_flow_run_graph_v2(flow_run_id: str):
                 # server-side (see prefect/server/database/query_components.py:648).
                 # Strip the prefix so subflow labels look like task-run labels — e.g.
                 # `dbtjob-dbt-run` instead of `dbtjob_v2_runner / dbtjob-dbt-run`.
-                if node_data.get("kind") == "flow-run" and " / " in node_data.get("label", ""):
+                if node_data.get("kind") == "flow-run" and " / " in node_data.get(
+                    "label", ""
+                ):
                     node_data["label"] = node_data["label"].split(" / ", 1)[1]
                 res.append(node_data)
                 for child in node_data["children"]:
@@ -789,7 +827,9 @@ def traverse_flow_run_graph_v2(flow_run_id: str):
     return res
 
 
-def get_flow_run_logs(flow_run_id: str, task_run_id: str, limit: int, offset: int) -> dict:
+def get_flow_run_logs(
+    flow_run_id: str, task_run_id: str, limit: int, offset: int
+) -> dict:
     """return logs from a flow run"""
     if not isinstance(flow_run_id, str):
         raise TypeError("flow_run_id must be a string")
@@ -813,7 +853,11 @@ def get_flow_run_logs(flow_run_id: str, task_run_id: str, limit: int, offset: in
             "logs": {
                 "operator": "and_",
                 "flow_run_id": {"any_": all_flow_run_ids},
-                **({"task_run_id": {"any_": [task_run_id]}} if task_run_id != "" else {}),
+                **(
+                    {"task_run_id": {"any_": [task_run_id]}}
+                    if task_run_id != ""
+                    else {}
+                ),
             },
             "sort": "TIMESTAMP_ASC",
             "offset": offset,

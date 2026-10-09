@@ -150,7 +150,9 @@ def test_sync_sources_failed_to_fetch_schemas(orguser: OrgUser, tmp_path):
         get_wclient_mock.assert_called_once_with(warehouse)
 
 
-@pytest.mark.skip(reason="Skipping this test as celery integration needs to be done on CI")
+@pytest.mark.skip(
+    reason="Skipping this test as celery integration needs to be done on CI"
+)
 def test_sync_sources_success_with_no_schemas(orguser: OrgUser, tmp_path):
     """
     a success test that syncs all sources of warehouse
@@ -203,9 +205,9 @@ def test_sync_sources_success_with_no_schemas(orguser: OrgUser, tmp_path):
         sync_sources_for_warehouse_v2(orgdbt.id, warehouse.id, "task-id", "hashkey")
         for schema in SCHEMAS_TABLES:
             assert set(
-                OrgDbtModel.objects.filter(type="source", orgdbt=orgdbt, schema=schema).values_list(
-                    "name", flat=True
-                )
+                OrgDbtModel.objects.filter(
+                    type="source", orgdbt=orgdbt, schema=schema
+                ).values_list("name", flat=True)
             ) == set(SCHEMAS_TABLES[schema])
 
         add_progress_mock.assert_has_calls(
@@ -248,9 +250,9 @@ def test_sync_sources_success_with_no_schemas(orguser: OrgUser, tmp_path):
         sync_sources_for_warehouse_v2(orgdbt.id, warehouse.id, "task-id", "hashkey")
         for schema in SCHEMAS_TABLES:
             assert set(
-                OrgDbtModel.objects.filter(type="source", orgdbt=orgdbt, schema=schema).values_list(
-                    "name", flat=True
-                )
+                OrgDbtModel.objects.filter(
+                    type="source", orgdbt=orgdbt, schema=schema
+                ).values_list("name", flat=True)
             ) == set(SCHEMAS_TABLES[schema])
 
         # add a new table in the warehouse
@@ -258,13 +260,15 @@ def test_sync_sources_success_with_no_schemas(orguser: OrgUser, tmp_path):
         sync_sources_for_warehouse_v2(orgdbt.id, warehouse.id, "task-id", "hashkey")
         for schema in SCHEMAS_TABLES:
             assert set(
-                OrgDbtModel.objects.filter(type="source", orgdbt=orgdbt, schema=schema).values_list(
-                    "name", flat=True
-                )
+                OrgDbtModel.objects.filter(
+                    type="source", orgdbt=orgdbt, schema=schema
+                ).values_list("name", flat=True)
             ) == set(SCHEMAS_TABLES[schema])
 
 
-def test_sync_sources_v2_with_existing_models_update_columns(orguser: OrgUser, tmp_path):
+def test_sync_sources_v2_with_existing_models_update_columns(
+    orguser: OrgUser, tmp_path
+):
     """Test sync_sources_for_warehouse_v2 when existing models exist - should update their columns"""
     project_dir: Path = Path(tmp_path) / orguser.org.slug
     warehouse = OrgWarehouse.objects.create(
@@ -386,7 +390,9 @@ def test_sync_sources_v2_column_fetch_error_handling(orguser: OrgUser, tmp_path)
         sync_sources_for_warehouse_v2(orgdbt.id, warehouse.id, "task-id", "hashkey")
 
         # Source should still be created, just without columns
-        source = OrgDbtModel.objects.get(type=OrgDbtModelType.SOURCE, orgdbt=orgdbt, name="table1")
+        source = OrgDbtModel.objects.get(
+            type=OrgDbtModelType.SOURCE, orgdbt=orgdbt, name="table1"
+        )
         assert source.output_cols is None or source.output_cols == []
 
 
@@ -421,12 +427,22 @@ def test_sync_sources_v2_empty_warehouse(orguser: OrgUser, tmp_path):
 
         get_wclient_mock.return_value = mock_instance
 
-        assert OrgDbtModel.objects.filter(type=OrgDbtModelType.SOURCE, orgdbt=orgdbt).count() == 0
+        assert (
+            OrgDbtModel.objects.filter(
+                type=OrgDbtModelType.SOURCE, orgdbt=orgdbt
+            ).count()
+            == 0
+        )
 
         sync_sources_for_warehouse_v2(orgdbt.id, warehouse.id, "task-id", "hashkey")
 
         # No sources should be created
-        assert OrgDbtModel.objects.filter(type=OrgDbtModelType.SOURCE, orgdbt=orgdbt).count() == 0
+        assert (
+            OrgDbtModel.objects.filter(
+                type=OrgDbtModelType.SOURCE, orgdbt=orgdbt
+            ).count()
+            == 0
+        )
 
         # Should have completed without error
         add_progress_mock.assert_any_call(
@@ -491,7 +507,9 @@ def test_detect_schema_changes_for_org_ensure_orphan_connections_are_deleted(
     synctask = OrgTask.objects.create(
         org=org_without_workspace, task=synctask, connection_id="some-connection-id"
     )
-    OrgSchemaChange.objects.create(org=org_without_workspace, connection_id="fake-connection-id")
+    OrgSchemaChange.objects.create(
+        org=org_without_workspace, connection_id="fake-connection-id"
+    )
     assert OrgSchemaChange.objects.filter(org=org_without_workspace).count() == 1
     with patch(
         "ddpui.ddpairbyte.airbytehelpers.fetch_and_update_org_schema_changes"
@@ -503,7 +521,9 @@ def test_detect_schema_changes_for_org_ensure_orphan_connections_are_deleted(
     assert OrgSchemaChange.objects.filter(org=org_without_workspace).count() == 0
     tag = " [STAGING]" if not PRODUCTION else ""
     mock_send_text_message.assert_called_once_with(
-        "adminemail", f"Schema change detection errors for test-org-WO-slug{tag}", "error"
+        "adminemail",
+        f"Schema change detection errors for test-org-WO-slug{tag}",
+        "error",
     )
 
 
@@ -520,19 +540,25 @@ def test_detect_schema_changes_for_org_notifies_when_auto_accept_fallback_leaves
             slug=TASK_AIRBYTESYNC, type="Airbyte Sync", label="Airbyte Sync"
         )
     connection_id = "fallback-conn-id"
-    OrgTask.objects.create(org=org_without_workspace, task=synctask, connection_id=connection_id)
+    OrgTask.objects.create(
+        org=org_without_workspace, task=synctask, connection_id=connection_id
+    )
     # Flag is ON for this org
     OrgPreferences.objects.create(
         org=org_without_workspace, auto_accept_non_breaking_schema_changes=True
     )
     # Simulate the fallback: apply_schema_change raised and the fallback created a row
     OrgSchemaChange.objects.create(
-        org=org_without_workspace, connection_id=connection_id, change_type="non_breaking"
+        org=org_without_workspace,
+        connection_id=connection_id,
+        change_type="non_breaking",
     )
 
     with patch(
         "ddpui.ddpairbyte.airbytehelpers.fetch_and_update_org_schema_changes"
-    ) as fetch_mock, patch("ddpui.celeryworkers.tasks.notify_schema_change") as notify_mock, patch(
+    ) as fetch_mock, patch(
+        "ddpui.celeryworkers.tasks.notify_schema_change"
+    ) as notify_mock, patch(
         "ddpui.celeryworkers.tasks.send_text_message"
     ) as platform_mail_mock, patch.dict(
         os.environ, {"FRONTEND_URL": "http://x", "ADMIN_EMAIL": "platform@dalgo"}
@@ -571,7 +597,9 @@ def test_get_connection_catalog_task_error(org_without_workspace: Org):
         "ddpui.celeryworkers.tasks.send_text_message"
     ) as mock_send_text_message:
         fetch_and_update_org_schema_changes_mock.return_value = None, "error", None
-        get_connection_catalog_task(task_key, org_without_workspace.id, "fake-connection-id")
+        get_connection_catalog_task(
+            task_key, org_without_workspace.id, "fake-connection-id"
+        )
     result = SingleTaskProgress.fetch(task_key)
     assert result == [
         {"message": "started", "status": TaskProgressStatus.RUNNING, "result": None},
@@ -606,7 +634,9 @@ def test_get_connection_catalog_task_success(org_without_workspace: Org):
             None,
             None,
         )
-        get_connection_catalog_task(task_key, org_without_workspace.id, "fake-connection-id")
+        get_connection_catalog_task(
+            task_key, org_without_workspace.id, "fake-connection-id"
+        )
     result = SingleTaskProgress.fetch(task_key)
     assert result == [
         {"message": "started", "status": TaskProgressStatus.RUNNING, "result": None},
@@ -672,7 +702,9 @@ def test_clear_stuck_locks_terminal_state_recent(orguser):
     """Test clear_stuck_locks with terminal state but recent end_time (<5 min)"""
     # Create locks
     lock1 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="recent-flow-run-id"
+        orgtask=create_test_orgtask(orguser),
+        locked_by=orguser,
+        flow_run_id="recent-flow-run-id",
     )
 
     # Mock flow run that ended 2 minutes ago
@@ -684,7 +716,9 @@ def test_clear_stuck_locks_terminal_state_recent(orguser):
         "updated": recent_time.isoformat(),
     }
 
-    with patch("ddpui.celeryworkers.tasks.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.celeryworkers.tasks.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.celeryworkers.tasks.do_handle_prefect_webhook"
     ) as mock_webhook:
         mock_get_flow_run.return_value = mock_flow_run
@@ -700,10 +734,14 @@ def test_clear_stuck_locks_terminal_state_old(orguser):
     """Test clear_stuck_locks with terminal state and old end_time (>5 min)"""
     # Create locks for same flow_run_id
     lock1 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="old-flow-run-id"
+        orgtask=create_test_orgtask(orguser),
+        locked_by=orguser,
+        flow_run_id="old-flow-run-id",
     )
     lock2 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="old-flow-run-id"
+        orgtask=create_test_orgtask(orguser),
+        locked_by=orguser,
+        flow_run_id="old-flow-run-id",
     )
 
     # Mock flow run that ended 10 minutes ago
@@ -715,7 +753,9 @@ def test_clear_stuck_locks_terminal_state_old(orguser):
         "updated": old_time.isoformat(),
     }
 
-    with patch("ddpui.celeryworkers.tasks.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.celeryworkers.tasks.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.celeryworkers.tasks.do_handle_prefect_webhook"
     ) as mock_webhook:
         mock_get_flow_run.return_value = mock_flow_run
@@ -724,7 +764,9 @@ def test_clear_stuck_locks_terminal_state_old(orguser):
 
         assert result == 1  # Should process one flow_run_id
         mock_get_flow_run.assert_called_once_with("old-flow-run-id")
-        mock_webhook.assert_called_once_with("old-flow-run-id", FLOW_RUN_FAILED_STATE_NAME)
+        mock_webhook.assert_called_once_with(
+            "old-flow-run-id", FLOW_RUN_FAILED_STATE_NAME
+        )
 
 
 def test_clear_stuck_locks_no_end_time_fallback_to_updated(orguser):
@@ -744,7 +786,9 @@ def test_clear_stuck_locks_no_end_time_fallback_to_updated(orguser):
         "updated": old_time.isoformat(),
     }
 
-    with patch("ddpui.celeryworkers.tasks.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.celeryworkers.tasks.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.celeryworkers.tasks.do_handle_prefect_webhook"
     ) as mock_webhook:
         mock_get_flow_run.return_value = mock_flow_run
@@ -752,13 +796,17 @@ def test_clear_stuck_locks_no_end_time_fallback_to_updated(orguser):
         result = clear_stuck_locks()
 
         assert result == 1
-        mock_webhook.assert_called_once_with("no-endtime-flow-run-id", FLOW_RUN_CRASHED_STATE_NAME)
+        mock_webhook.assert_called_once_with(
+            "no-endtime-flow-run-id", FLOW_RUN_CRASHED_STATE_NAME
+        )
 
 
 def test_clear_stuck_locks_running_state_ignored(orguser):
     """Test clear_stuck_locks ignores non-terminal states"""
     lock = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="running-flow-run-id"
+        orgtask=create_test_orgtask(orguser),
+        locked_by=orguser,
+        flow_run_id="running-flow-run-id",
     )
 
     mock_flow_run = {
@@ -768,7 +816,9 @@ def test_clear_stuck_locks_running_state_ignored(orguser):
         "updated": (datetime.now(pytz.utc) - timedelta(hours=1)).isoformat(),
     }
 
-    with patch("ddpui.celeryworkers.tasks.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.celeryworkers.tasks.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.celeryworkers.tasks.do_handle_prefect_webhook"
     ) as mock_webhook:
         mock_get_flow_run.return_value = mock_flow_run
@@ -784,13 +834,19 @@ def test_clear_stuck_locks_multiple_flow_runs(orguser):
     """Test clear_stuck_locks with multiple different flow_run_ids"""
     # Create locks for different flow_run_ids
     lock1 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="old-flow-1"
+        orgtask=create_test_orgtask(orguser),
+        locked_by=orguser,
+        flow_run_id="old-flow-1",
     )
     lock2 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="old-flow-2"
+        orgtask=create_test_orgtask(orguser),
+        locked_by=orguser,
+        flow_run_id="old-flow-2",
     )
     lock3 = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="recent-flow"
+        orgtask=create_test_orgtask(orguser),
+        locked_by=orguser,
+        flow_run_id="recent-flow",
     )
 
     old_time = datetime.now(pytz.utc) - timedelta(minutes=10)
@@ -820,9 +876,9 @@ def test_clear_stuck_locks_multiple_flow_runs(orguser):
             }
         return None
 
-    with patch("ddpui.celeryworkers.tasks.get_flow_run_poll", side_effect=mock_get_flow_run), patch(
-        "ddpui.celeryworkers.tasks.do_handle_prefect_webhook"
-    ) as mock_webhook:
+    with patch(
+        "ddpui.celeryworkers.tasks.get_flow_run_poll", side_effect=mock_get_flow_run
+    ), patch("ddpui.celeryworkers.tasks.do_handle_prefect_webhook") as mock_webhook:
         result = clear_stuck_locks()
 
         assert result == 2  # Should process 2 old flow runs
@@ -837,10 +893,14 @@ def test_clear_stuck_locks_multiple_flow_runs(orguser):
 def test_clear_stuck_locks_api_error_handling(orguser):
     """Test clear_stuck_locks handles API errors gracefully"""
     lock = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="error-flow-run-id"
+        orgtask=create_test_orgtask(orguser),
+        locked_by=orguser,
+        flow_run_id="error-flow-run-id",
     )
 
-    with patch("ddpui.celeryworkers.tasks.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.celeryworkers.tasks.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.celeryworkers.tasks.do_handle_prefect_webhook"
     ) as mock_webhook:
         mock_get_flow_run.side_effect = Exception("API Error")
@@ -855,7 +915,9 @@ def test_clear_stuck_locks_api_error_handling(orguser):
 def test_clear_stuck_locks_no_time_fields(orguser):
     """Test clear_stuck_locks when both end_time and updated are null/unparseable"""
     lock = TaskLock.objects.create(
-        orgtask=create_test_orgtask(orguser), locked_by=orguser, flow_run_id="no-time-flow-run-id"
+        orgtask=create_test_orgtask(orguser),
+        locked_by=orguser,
+        flow_run_id="no-time-flow-run-id",
     )
 
     mock_flow_run = {
@@ -865,7 +927,9 @@ def test_clear_stuck_locks_no_time_fields(orguser):
         "updated": None,
     }
 
-    with patch("ddpui.celeryworkers.tasks.get_flow_run_poll") as mock_get_flow_run, patch(
+    with patch(
+        "ddpui.celeryworkers.tasks.get_flow_run_poll"
+    ) as mock_get_flow_run, patch(
         "ddpui.celeryworkers.tasks.do_handle_prefect_webhook"
     ) as mock_webhook:
         mock_get_flow_run.return_value = mock_flow_run

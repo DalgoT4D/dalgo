@@ -315,7 +315,10 @@ def test_upsert_airbyte_connection_block_http_payload(mock_put: Mock):
     extra and post-sync casts silently stop firing."""
     mock_put.return_value = {"block_id": "blk-id", "cleaned_block_name": "conn-uuid"}
 
-    extra = {"env": {"dbt-profile-secret-block": "sec"}, "post_sync_ops": [{"type": "cast"}]}
+    extra = {
+        "env": {"dbt-profile-secret-block": "sec"},
+        "post_sync_ops": [{"type": "cast"}],
+    }
     upsert_airbyte_connection_block(
         server_block_name="srv-blk",
         connection_id="conn-uuid",

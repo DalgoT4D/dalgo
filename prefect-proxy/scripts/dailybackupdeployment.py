@@ -23,7 +23,9 @@ def backup_one_rds(rds_to_backup):
 
     # Run the script with the secret as an environment variable
     ShellOperation(
-        commands=["/home/ddp/maintenance/.venv/bin/python /home/ddp/maintenance/dailybackup.py"],
+        commands=[
+            "/home/ddp/maintenance/.venv/bin/python /home/ddp/maintenance/dailybackup.py"
+        ],
         env=secret_value,
         working_dir="/home/ddp/maintenance",
     ).run()

@@ -34,7 +34,9 @@ START = datetime(2026, 8, 1, 9, 0, tzinfo=UTC)
 
 def test_completed_flows_counts_only_completed_entries():
     """a flow counts only when completed is True"""
-    assert completed_flows({"insights": {"completed": True, "skipped": False}}) == ["insights"]
+    assert completed_flows({"insights": {"completed": True, "skipped": False}}) == [
+        "insights"
+    ]
 
 
 def test_completed_flows_ignores_skipped():
@@ -78,13 +80,17 @@ def test_trial_window_computes_elapsed_and_total_days():
 
 def test_trial_window_day_number_truncates():
     """71 hours in is still day 2 — .days floors"""
-    day_number, _ = trial_window(START, START + timedelta(days=14), START + timedelta(hours=71))
+    day_number, _ = trial_window(
+        START, START + timedelta(days=14), START + timedelta(hours=71)
+    )
     assert day_number == 2
 
 
 def test_trial_window_respects_a_shorter_admin_set_window():
     """a 7-day window renders as 7, never rounded up to the 14-day default"""
-    _, total_days = trial_window(START, START + timedelta(days=7), START + timedelta(days=1))
+    _, total_days = trial_window(
+        START, START + timedelta(days=7), START + timedelta(days=1)
+    )
     assert total_days == 7
 
 
@@ -218,7 +224,9 @@ def test_decide_email_normalizes_none_flags():
 pytestmark = pytest.mark.django_db
 
 
-def _make_trial(slug, days_ago, completed=(), plan=OrgPlanType.FREE_TRIAL.value, duration=14):
+def _make_trial(
+    slug, days_ago, completed=(), plan=OrgPlanType.FREE_TRIAL.value, duration=14
+):
     """a free-trial org whose plan started `days_ago` days ago, with the given flows completed"""
     now = timezone.now()
     org = Org.objects.create(slug=slug, name=slug, airbyte_workspace_id=None)
@@ -259,7 +267,9 @@ def test_sweep_sends_in_progress_email_with_the_completed_flow():
 
 def test_sweep_sends_completion_email_and_stamps_both_flags():
     """both flows complete sends C and locks out the day-3 email"""
-    _, orguser = _make_trial("trial-c", days_ago=5, completed=("insights", "automate_pipeline"))
+    _, orguser = _make_trial(
+        "trial-c", days_ago=5, completed=("insights", "automate_pipeline")
+    )
     with patch("ddpui.core.trial.lifecycle_emails.send_completion") as mock_send:
         assert run_trial_lifecycle_sweep() == 1
         mock_send.assert_called_once()
@@ -280,9 +290,9 @@ def test_sweep_is_idempotent():
 def test_sweep_sends_one_email_per_run():
     """a day-7 trial with no flags gets the day-3 email first, midpoint on the next run"""
     _make_trial("trial-e", days_ago=7)
-    with patch("ddpui.core.trial.lifecycle_emails.send_day3_not_started") as mock_a, patch(
-        "ddpui.core.trial.lifecycle_emails.send_midpoint"
-    ) as mock_mid:
+    with patch(
+        "ddpui.core.trial.lifecycle_emails.send_day3_not_started"
+    ) as mock_a, patch("ddpui.core.trial.lifecycle_emails.send_midpoint") as mock_mid:
         assert run_trial_lifecycle_sweep() == 1
         assert mock_a.call_count == 1
         assert mock_mid.call_count == 0
@@ -453,7 +463,9 @@ def test_celery_task_delegates_to_the_sweep():
     """the task is a thin wrapper — all logic lives in the sweep"""
     from ddpui.celeryworkers.tasks import send_trial_lifecycle_emails
 
-    with patch("ddpui.celeryworkers.tasks.run_trial_lifecycle_sweep", return_value=3) as mock_sweep:
+    with patch(
+        "ddpui.celeryworkers.tasks.run_trial_lifecycle_sweep", return_value=3
+    ) as mock_sweep:
         assert send_trial_lifecycle_emails() == 3
         mock_sweep.assert_called_once_with()
 
@@ -481,13 +493,17 @@ def test_trial_lifecycle_emails_is_registered_as_an_hourly_beat_task():
         if call.kwargs.get("name") == "trial lifecycle emails"
         or "trial lifecycle emails" in call.args
     ]
-    assert len(matching_calls) == 1, "expected exactly one 'trial lifecycle emails' beat entry"
+    assert (
+        len(matching_calls) == 1
+    ), "expected exactly one 'trial lifecycle emails' beat entry"
 
     from celery.schedules import crontab
 
     call = matching_calls[0]
     schedule = (
-        call.args[0] if call.args else call.kwargs.get("run_every") or call.kwargs.get("schedule")
+        call.args[0]
+        if call.args
+        else call.kwargs.get("run_every") or call.kwargs.get("schedule")
     )
     # crontab, not a bare 3600.0 interval: an interval is anchored to beat's START time, so a
     # restart at 09:37 moves every sweep to :37 past the hour until the next restart.

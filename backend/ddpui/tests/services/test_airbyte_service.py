@@ -100,7 +100,9 @@ def mock_abreq(endpoint, data):
 
 def test_abreq_success():
     endpoint = "workspaces/list"
-    expected_response = {"workspaces": [{"workspaceId": "1", "name": "Example Workspace"}]}
+    expected_response = {
+        "workspaces": [{"workspaceId": "1", "name": "Example Workspace"}]
+    }
 
     with patch("ddpui.ddpairbyte.airbyte_service.requests.post") as mock_post:
         mock_post.return_value.status_code = 200
@@ -577,7 +579,10 @@ def test_create_source_failure():
         with pytest.raises(HttpError) as excinfo:
             create_source(workspace_id, "Example Source 1", "1", {"test": "test"})
         assert excinfo.value.status_code == 500
-        assert str(excinfo.value) == 'Failed to create source: {"error": "Invalid request data"}'
+        assert (
+            str(excinfo.value)
+            == 'Failed to create source: {"error": "Invalid request data"}'
+        )
 
 
 def test_create_source_with_invalid_workspace_id():
@@ -635,7 +640,10 @@ def test_update_source_failure():
         with pytest.raises(HttpError) as excinfo:
             update_source(source_id, name, {"test": "test"}, sourcedef_id)
         assert excinfo.value.status_code == 500
-        assert str(excinfo.value) == 'Failed to update source: {"error": "Invalid request data"}'
+        assert (
+            str(excinfo.value)
+            == 'Failed to update source: {"error": "Invalid request data"}'
+        )
 
 
 def test_update_source_with_invalid_name():
@@ -859,7 +867,9 @@ def test_get_source_schema_catalog_failure_3():
         with pytest.raises(HttpError) as excinfo:
             get_source_schema_catalog(workspace_id, source_id)
         assert excinfo.value.status_code == 400
-        assert str(excinfo.value) == "Failed to discover schema for source: my_source_id"
+        assert (
+            str(excinfo.value) == "Failed to discover schema for source: my_source_id"
+        )
 
 
 def test_get_destination_definitions_success():
@@ -867,7 +877,9 @@ def test_get_destination_definitions_success():
         mock_response = Mock(spec=requests.Response)
         mock_response.status_code = 200
         mock_response.headers = {"Content-Type": "application/json"}
-        mock_response.json.return_value = {"destinationDefinitions": "theDestinationDefinitions"}
+        mock_response.json.return_value = {
+            "destinationDefinitions": "theDestinationDefinitions"
+        }
         mock_post.return_value = mock_response
 
         response = get_destination_definitions("workspace-id")
@@ -900,7 +912,9 @@ def test_get_destination_definition():
         mock_response = Mock(spec=requests.Response)
         mock_response.status_code = 200
         mock_response.headers = {"Content-Type": "application/json"}
-        mock_response.json.return_value = {"destinationDefinitionId": "theDestinationDefId"}
+        mock_response.json.return_value = {
+            "destinationDefinitionId": "theDestinationDefId"
+        }
         mock_post.return_value = mock_response
 
         response = get_destination_definition("workspace-id", "destination_def_id")
@@ -920,7 +934,9 @@ def test_get_destination_definition_specification_success():
         }
         mock_post.return_value = mock_response
 
-        response = get_destination_definition_specification("workspace-id", "destinationdef_id")
+        response = get_destination_definition_specification(
+            "workspace-id", "destinationdef_id"
+        )
 
         assert response["connectionSpecification"] == {
             "title": "theTitle",
@@ -943,12 +959,16 @@ def test_get_destination_definition_specification_success_postgres():
         }
         mock_post.return_value = mock_response
 
-        response = get_destination_definition_specification("workspace-id", "destinationdef_id")
+        response = get_destination_definition_specification(
+            "workspace-id", "destinationdef_id"
+        )
 
         assert response["connectionSpecification"] == {
             "title": "Postgres Destination Spec",
             "properties": {
-                "ssl_mode": {"title": "SSL modes* (select 'disable' if you don't know)"},
+                "ssl_mode": {
+                    "title": "SSL modes* (select 'disable' if you don't know)"
+                },
                 "tunnel_method": {
                     "title": "SSH Tunnel Method* (select 'No Tunnel' if you don't know)"
                 },
@@ -976,9 +996,13 @@ def test_get_destination_definition_specification_failure():
         mock_response.json.return_value = {"wrong-key": "theConnectionSpecification"}
         mock_post.return_value = mock_response
         with pytest.raises(HttpError) as excinfo:
-            get_destination_definition_specification("workspace-id", "destinationdef_id")
+            get_destination_definition_specification(
+                "workspace-id", "destinationdef_id"
+            )
 
-        assert str(excinfo.value) == "Failed to get destination definition specification"
+        assert (
+            str(excinfo.value) == "Failed to get destination definition specification"
+        )
 
 
 def test_get_destinations_success():
@@ -1203,7 +1227,10 @@ def test_check_destination_connection_failure_1():
         with pytest.raises(HttpError) as excinfo:
             check_destination_connection("workspace_id", payload)
 
-        assert str(excinfo.value) == "Failed to connect to warehouse: " + failure_reason["message"]
+        assert (
+            str(excinfo.value)
+            == "Failed to connect to warehouse: " + failure_reason["message"]
+        )
 
 
 def test_check_destination_connection_failure_2():
@@ -1228,7 +1255,8 @@ def test_check_destination_connection_failure_2():
             check_destination_connection("workspace_id", payload)
 
         assert (
-            str(excinfo.value) == "Failed to connect to warehouse: " + failure_response["message"]
+            str(excinfo.value)
+            == "Failed to connect to warehouse: " + failure_response["message"]
         )
 
 
@@ -1272,7 +1300,8 @@ def test_check_destination_connection_for_update_failure_1():
             check_destination_connection_for_update("destination_id", payload)
 
         assert (
-            str(excinfo.value) == "Failed to connect to warehouse: " + failure_response["message"]
+            str(excinfo.value)
+            == "Failed to connect to warehouse: " + failure_response["message"]
         )
 
 
@@ -1296,7 +1325,8 @@ def test_check_destination_connection_for_update_failure_2():
             check_destination_connection_for_update("destination_id", payload)
 
         assert (
-            str(excinfo.value) == "Failed to connect to warehouse: " + failure_response["message"]
+            str(excinfo.value)
+            == "Failed to connect to warehouse: " + failure_response["message"]
         )
 
 
@@ -1314,7 +1344,9 @@ def test_get_connections_no_connections():
         workspace_id = "workspace-id"
         with pytest.raises(HttpError) as excinfo:
             get_connections(workspace_id)
-        assert str(excinfo.value) == f"connections not found for workspace: {workspace_id}"
+        assert (
+            str(excinfo.value) == f"connections not found for workspace: {workspace_id}"
+        )
 
 
 def test_get_connections_success():
@@ -1357,7 +1389,10 @@ def test_get_connection_success():
 
 def test_update_connection_bad_workspace_id():
     conninfo = schema.AirbyteConnectionUpdate(
-        catalogId="catalog-id", syncCatalog={"streams": []}, name="connection-name", streams=[]
+        catalogId="catalog-id",
+        syncCatalog={"streams": []},
+        name="connection-name",
+        streams=[],
     )
     with pytest.raises(HttpError) as excinfo:
         update_connection(1, conninfo, {})
@@ -1366,12 +1401,18 @@ def test_update_connection_bad_workspace_id():
 
 def test_update_connection_no_streams():
     conninfo = schema.AirbyteConnectionUpdate(
-        catalogId="catalog-id", syncCatalog={"streams": []}, name="connection-name", streams=[]
+        catalogId="catalog-id",
+        syncCatalog={"streams": []},
+        name="connection-name",
+        streams=[],
     )
     workspace_id = "workspace-id"
     with pytest.raises(HttpError) as excinfo:
         update_connection(workspace_id, conninfo, {})
-    assert str(excinfo.value) == f"must specify at least one stream workspace_id={workspace_id}"
+    assert (
+        str(excinfo.value)
+        == f"must specify at least one stream workspace_id={workspace_id}"
+    )
 
 
 @patch.multiple(
@@ -1407,14 +1448,19 @@ def test_update_connection_failed_to_update():
         destinationSchema=None,
     )
     workspace_id = "workspace-id"
-    with patch("ddpui.ddpairbyte.airbyte_service.abreq", return_value={"no-connectionId": True}):
+    with patch(
+        "ddpui.ddpairbyte.airbyte_service.abreq", return_value={"no-connectionId": True}
+    ):
         with pytest.raises(HttpError) as excinfo:
             update_connection(
                 workspace_id,
                 connection_info,
                 {"sourceId": "source-id", "syncCatalog": {"streams": []}},
             )
-        assert str(excinfo.value) == 'Failed to update connection: {"no-connectionId": true}'
+        assert (
+            str(excinfo.value)
+            == 'Failed to update connection: {"no-connectionId": true}'
+        )
 
 
 @patch.multiple(
@@ -1468,7 +1514,9 @@ def test_delete_connection():
         return_value={"connectionId": "connection-id"},
     ) as mock_abreq_:
         delete_connection("wsid", "connection-id")
-        mock_abreq_.assert_called_once_with("connections/delete", {"connectionId": "connection-id"})
+        mock_abreq_.assert_called_once_with(
+            "connections/delete", {"connectionId": "connection-id"}
+        )
 
 
 def test_sync_connection():
@@ -1477,7 +1525,9 @@ def test_sync_connection():
         return_value={"connectionId": "connection-id"},
     ) as mock_abreq_:
         sync_connection("wsid", "connection-id")
-        mock_abreq_.assert_called_once_with("connections/sync", {"connectionId": "connection-id"})
+        mock_abreq_.assert_called_once_with(
+            "connections/sync", {"connectionId": "connection-id"}
+        )
 
 
 def test_get_job_info():
@@ -1555,7 +1605,9 @@ def test_get_logs_for_job():
         return_value={"logs": {"logLines": ["log-line-1", "log-line-2"]}},
     ) as mock_abreq_:
         get_logs_for_job(1)
-        mock_abreq_.assert_called_once_with("attempt/get_for_job", {"jobId": 1, "attemptNumber": 0})
+        mock_abreq_.assert_called_once_with(
+            "attempt/get_for_job", {"jobId": 1, "attemptNumber": 0}
+        )
 
 
 def test_get_logs_for_job_1():
@@ -1564,7 +1616,9 @@ def test_get_logs_for_job_1():
         return_value={"logs": {"logLines": ["log-line-1", "log-line-2"]}},
     ) as mock_abreq_:
         get_logs_for_job(1, 1)
-        mock_abreq_.assert_called_once_with("attempt/get_for_job", {"jobId": 1, "attemptNumber": 1})
+        mock_abreq_.assert_called_once_with(
+            "attempt/get_for_job", {"jobId": 1, "attemptNumber": 1}
+        )
 
 
 def test_get_logs_for_job_raise():
@@ -1923,7 +1977,9 @@ def test_update_connection_with_all_columns_selected():
             ],
         }
     ]
-    connection_info.syncCatalog = {"streams": [{"stream": {"name": "test_stream"}, "config": {}}]}
+    connection_info.syncCatalog = {
+        "streams": [{"stream": {"name": "test_stream"}, "config": {}}]
+    }
 
     current_connection = {"syncCatalog": {"streams": []}}
 
@@ -1961,7 +2017,9 @@ def test_update_connection_with_partial_columns_selected():
             ],
         }
     ]
-    connection_info.syncCatalog = {"streams": [{"stream": {"name": "test_stream"}, "config": {}}]}
+    connection_info.syncCatalog = {
+        "streams": [{"stream": {"name": "test_stream"}, "config": {}}]
+    }
 
     current_connection = {"syncCatalog": {"streams": []}}
 
@@ -2001,7 +2059,9 @@ def test_update_connection_with_no_columns_selected():
             ],
         }
     ]
-    connection_info.syncCatalog = {"streams": [{"stream": {"name": "test_stream"}, "config": {}}]}
+    connection_info.syncCatalog = {
+        "streams": [{"stream": {"name": "test_stream"}, "config": {}}]
+    }
 
     current_connection = {"syncCatalog": {"streams": []}}
 
@@ -2035,7 +2095,9 @@ def test_update_connection_with_no_columns_provided():
             # No columns key
         }
     ]
-    connection_info.syncCatalog = {"streams": [{"stream": {"name": "test_stream"}, "config": {}}]}
+    connection_info.syncCatalog = {
+        "streams": [{"stream": {"name": "test_stream"}, "config": {}}]
+    }
 
     current_connection = {"syncCatalog": {"streams": []}}
 
@@ -2069,7 +2131,9 @@ def test_update_connection_with_empty_columns_list():
             "columns": [],  # Empty columns list
         }
     ]
-    connection_info.syncCatalog = {"streams": [{"stream": {"name": "test_stream"}, "config": {}}]}
+    connection_info.syncCatalog = {
+        "streams": [{"stream": {"name": "test_stream"}, "config": {}}]
+    }
 
     current_connection = {"syncCatalog": {"streams": []}}
 
@@ -2107,7 +2171,9 @@ def test_update_connection_with_columns_missing_selected_field():
             ],
         }
     ]
-    connection_info.syncCatalog = {"streams": [{"stream": {"name": "test_stream"}, "config": {}}]}
+    connection_info.syncCatalog = {
+        "streams": [{"stream": {"name": "test_stream"}, "config": {}}]
+    }
 
     current_connection = {"syncCatalog": {"streams": []}}
 
@@ -2139,14 +2205,20 @@ def test_update_connection_multiple_streams_with_different_column_configs():
             "selected": True,
             "syncMode": "full_refresh",
             "destinationSyncMode": "overwrite",
-            "columns": [{"name": "col1", "selected": True}, {"name": "col2", "selected": True}],
+            "columns": [
+                {"name": "col1", "selected": True},
+                {"name": "col2", "selected": True},
+            ],
         },
         {
             "name": "stream2",
             "selected": True,
             "syncMode": "full_refresh",
             "destinationSyncMode": "overwrite",
-            "columns": [{"name": "col1", "selected": True}, {"name": "col2", "selected": False}],
+            "columns": [
+                {"name": "col1", "selected": True},
+                {"name": "col2", "selected": False},
+            ],
         },
     ]
     connection_info.syncCatalog = {
@@ -2204,7 +2276,9 @@ def test_update_connection_with_incremental_and_columns():
             ],
         }
     ]
-    connection_info.syncCatalog = {"streams": [{"stream": {"name": "test_stream"}, "config": {}}]}
+    connection_info.syncCatalog = {
+        "streams": [{"stream": {"name": "test_stream"}, "config": {}}]
+    }
 
     current_connection = {"syncCatalog": {"streams": []}}
 

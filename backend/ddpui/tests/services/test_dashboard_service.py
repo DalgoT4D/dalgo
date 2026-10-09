@@ -41,7 +41,11 @@ from ddpui.services.dashboard_service import (
     upload_widget_image,
     copy_widget_image,
 )
-from ddpui.schemas.dashboard_schema import DashboardCreate, DashboardUpdate, DashboardTabSchema
+from ddpui.schemas.dashboard_schema import (
+    DashboardCreate,
+    DashboardUpdate,
+    DashboardTabSchema,
+)
 from ddpui.tests.api_tests.test_user_org_api import seed_db
 
 pytestmark = pytest.mark.django_db
@@ -56,7 +60,9 @@ pytestmark = pytest.mark.django_db
 def authuser():
     """A django User object"""
     user = User.objects.create(
-        username="dashserviceuser", email="dashserviceuser@test.com", password="testpassword"
+        username="dashserviceuser",
+        email="dashserviceuser@test.com",
+        password="testpassword",
     )
     yield user
     user.delete()
@@ -66,7 +72,9 @@ def authuser():
 def authuser2():
     """A second django User object for permission testing"""
     user = User.objects.create(
-        username="dashserviceuser2", email="dashserviceuser2@test.com", password="testpassword"
+        username="dashserviceuser2",
+        email="dashserviceuser2@test.com",
+        password="testpassword",
     )
     yield user
     user.delete()
@@ -215,7 +223,9 @@ class TestUpdateDashboardLockChecking:
 class TestDeleteDashboardPermissions:
     """Tests for DashboardService.delete_dashboard() permission logic"""
 
-    def test_delete_dashboard_permission_denied_not_creator(self, orguser, orguser2, org, seed_db):
+    def test_delete_dashboard_permission_denied_not_creator(
+        self, orguser, orguser2, org, seed_db
+    ):
         """Test that only creator can delete dashboard"""
         dashboard = Dashboard.objects.create(
             title="Protected Dashboard",
@@ -228,7 +238,10 @@ class TestDeleteDashboardPermissions:
         with pytest.raises(DashboardPermissionError) as excinfo:
             DashboardService.delete_dashboard(dashboard.id, org, orguser2)
 
-        assert "Only the owner or an admin can delete this dashboard." in excinfo.value.message
+        assert (
+            "Only the owner or an admin can delete this dashboard."
+            in excinfo.value.message
+        )
 
         # Cleanup
         dashboard.delete()
@@ -479,7 +492,9 @@ class TestResolveDashboardFiltersForChart:
         assert result[0]["column"] == "status"
         assert result[0]["type"] == "value"
         assert result[0]["value"] == "active"
-        warehouse_client.column_exists.assert_called_once_with("public", "orders", "status")
+        warehouse_client.column_exists.assert_called_once_with(
+            "public", "orders", "status"
+        )
 
     def test_skips_filter_when_column_not_exists(self):
         """With warehouse_client, skips filter when column_exists returns False"""
@@ -496,7 +511,9 @@ class TestResolveDashboardFiltersForChart:
     def test_resolves_matching_filter_with_schema_table_match(self):
         """Without warehouse_client, resolves filter when schema/table matches"""
         filter_defs = [
-            self._make_filter_def(1, "status", schema_name="public", table_name="orders")
+            self._make_filter_def(
+                1, "status", schema_name="public", table_name="orders"
+            )
         ]
         result = DashboardService.resolve_dashboard_filters_for_chart(
             {"1": "active"}, filter_defs, "public", "orders"
@@ -508,7 +525,9 @@ class TestResolveDashboardFiltersForChart:
 
     def test_skips_filter_when_schema_table_mismatch(self):
         """Without warehouse_client, skips filter when schema/table doesn't match"""
-        filter_defs = [self._make_filter_def(1, "status", schema_name="public", table_name="users")]
+        filter_defs = [
+            self._make_filter_def(1, "status", schema_name="public", table_name="users")
+        ]
         result = DashboardService.resolve_dashboard_filters_for_chart(
             {"1": "active"}, filter_defs, "public", "orders"
         )
@@ -549,7 +568,11 @@ class TestResolveDashboardFiltersForChart:
             self._make_filter_def(2, "missing_col"),
         ]
         result = DashboardService.resolve_dashboard_filters_for_chart(
-            {"1": "active", "2": "value"}, filter_defs, "public", "orders", warehouse_client
+            {"1": "active", "2": "value"},
+            filter_defs,
+            "public",
+            "orders",
+            warehouse_client,
         )
 
         assert result is not None
@@ -657,7 +680,9 @@ class TestCreateDashboardDefaultTab:
 class TestUpdateDashboardTabs:
     """Tests for DashboardService.update_dashboard() tabs handling"""
 
-    def test_update_dashboard_tabs_saves_correctly(self, orguser, sample_dashboard, seed_db):
+    def test_update_dashboard_tabs_saves_correctly(
+        self, orguser, sample_dashboard, seed_db
+    ):
         """Test that providing tabs in update saves them as dicts"""
         new_tabs = [
             DashboardTabSchema(
@@ -688,7 +713,12 @@ class TestUpdateDashboardTabs:
     ):
         """Test that omitting tabs in update does not overwrite existing tabs"""
         sample_dashboard.tabs = [
-            {"id": "tab-existing", "title": "Existing Tab", "layout_config": [], "components": {}}
+            {
+                "id": "tab-existing",
+                "title": "Existing Tab",
+                "layout_config": [],
+                "components": {},
+            }
         ]
         sample_dashboard.save()
 
@@ -746,12 +776,19 @@ class TestUploadWidgetImage:
         ) as mock_upload:
             image_url, image_key = upload_widget_image(b"fake-bytes", "image/png", org)
 
-        assert image_url == "https://test-bucket.s3.ap-south-1.amazonaws.com/fake-key.png"
+        assert (
+            image_url == "https://test-bucket.s3.ap-south-1.amazonaws.com/fake-key.png"
+        )
         assert image_key.startswith(f"orgs/{org.pk}/dashboards/images/")
         assert image_key.endswith(".png")
 
         mock_upload.assert_called_once()
-        called_bucket, called_key, called_bytes, called_content_type = mock_upload.call_args[0]
+        (
+            called_bucket,
+            called_key,
+            called_bytes,
+            called_content_type,
+        ) = mock_upload.call_args[0]
         assert called_bucket == "test-bucket"
         assert called_key == image_key
         assert called_bytes == b"fake-bytes"

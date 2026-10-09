@@ -35,7 +35,9 @@ def _make_public_request(body=None):
     """A public endpoint request — no auth, but the handler reads IP / user agent"""
     if body:
         request = rf.post(
-            "/api/v1/public/dashboards/", data=json.dumps(body), content_type="application/json"
+            "/api/v1/public/dashboards/",
+            data=json.dumps(body),
+            content_type="application/json",
         )
     else:
         request = rf.get("/api/v1/public/dashboards/")
@@ -98,7 +100,9 @@ def _create_dashboard(orguser, org, **kwargs):
 
 @pytest.fixture
 def public_dashboard(orguser, org):
-    dashboard = _create_dashboard(orguser, org, is_public=True, public_share_token="pub-dash-token")
+    dashboard = _create_dashboard(
+        orguser, org, is_public=True, public_share_token="pub-dash-token"
+    )
     yield dashboard
     try:
         dashboard.refresh_from_db()
@@ -109,7 +113,9 @@ def public_dashboard(orguser, org):
 
 @pytest.fixture
 def private_dashboard(orguser, org):
-    dashboard = _create_dashboard(orguser, org, is_public=False, public_share_token="priv-token")
+    dashboard = _create_dashboard(
+        orguser, org, is_public=False, public_share_token="priv-token"
+    )
     yield dashboard
     try:
         dashboard.refresh_from_db()
@@ -152,7 +158,9 @@ class TestGetPublicDashboard:
     def test_private_dashboard_not_accessible(self, private_dashboard, seed_db):
         """A dashboard with a token but is_public=False stays inaccessible"""
         request = _make_public_request()
-        status, response = get_public_dashboard(request, private_dashboard.public_share_token)
+        status, response = get_public_dashboard(
+            request, private_dashboard.public_share_token
+        )
 
         assert status == 404
         assert response.is_valid is False
@@ -198,7 +206,9 @@ class TestGetPublicMapDataOverlay:
         assert status == 404
         assert response.is_valid is False
 
-    def test_chart_not_map_type_returns_404(self, public_dashboard, org, orguser, seed_db):
+    def test_chart_not_map_type_returns_404(
+        self, public_dashboard, org, orguser, seed_db
+    ):
         """A chart_id belonging to a non-map chart is rejected."""
         bar_chart = Chart.objects.create(
             title="Bar Chart",
@@ -240,7 +250,10 @@ class TestGetPublicMapDataOverlay:
             "ddpui.api.public_api.charts_service.execute_map_data_overlay"
         ) as mock_execute:
             mock_get_client.return_value = MagicMock()
-            mock_execute.return_value = {"data": [{"name": "Karnataka", "value": 5.0}], "count": 1}
+            mock_execute.return_value = {
+                "data": [{"name": "Karnataka", "value": 5.0}],
+                "count": 1,
+            }
             response = get_public_map_data_overlay(
                 request, public_dashboard.public_share_token, chart_id=map_chart.id
             )

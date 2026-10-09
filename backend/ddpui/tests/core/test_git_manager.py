@@ -25,7 +25,9 @@ class TestGitManagerCheckRemoteRepositoryEmptyStatic:
         # Mock successful API response (file exists)
         mock_response = {"name": "dbt_project.yml", "type": "file"}
 
-        with patch.object(GitManager, "_github_api_request", return_value=mock_response):
+        with patch.object(
+            GitManager, "_github_api_request", return_value=mock_response
+        ):
             result = GitManager.check_remote_repository_empty_static(remote_url, pat)
 
         # Should return False (not empty) when dbt_project.yml exists
@@ -179,7 +181,9 @@ class TestGitManagerValidateRepositoryAccessStatic:
         # Mock successful API response with push permissions
         mock_response = {"permissions": {"push": True, "pull": True, "admin": False}}
 
-        with patch.object(GitManager, "_github_api_request", return_value=mock_response):
+        with patch.object(
+            GitManager, "_github_api_request", return_value=mock_response
+        ):
             result = GitManager.validate_repository_access(remote_url, pat)
 
         assert result is True
@@ -192,7 +196,9 @@ class TestGitManagerValidateRepositoryAccessStatic:
             GitManager.validate_repository_access(remote_url, None)
 
         assert "PAT not configured" in str(excinfo.value)
-        assert "A Personal Access Token is required to verify remote URL" in str(excinfo.value)
+        assert "A Personal Access Token is required to verify remote URL" in str(
+            excinfo.value
+        )
 
     def test_validate_repository_access_empty_pat(self):
         """Test validation fails when empty PAT is provided"""
@@ -211,7 +217,9 @@ class TestGitManagerValidateRepositoryAccessStatic:
         # Mock API response with only pull permissions
         mock_response = {"permissions": {"push": False, "pull": True, "admin": False}}
 
-        with patch.object(GitManager, "_github_api_request", return_value=mock_response):
+        with patch.object(
+            GitManager, "_github_api_request", return_value=mock_response
+        ):
             with pytest.raises(GitManagerError) as excinfo:
                 GitManager.validate_repository_access(remote_url, pat)
 
@@ -226,7 +234,9 @@ class TestGitManagerValidateRepositoryAccessStatic:
         # Mock API response without permissions key
         mock_response = {"name": "repo", "full_name": "user/repo"}
 
-        with patch.object(GitManager, "_github_api_request", return_value=mock_response):
+        with patch.object(
+            GitManager, "_github_api_request", return_value=mock_response
+        ):
             with pytest.raises(GitManagerError) as excinfo:
                 GitManager.validate_repository_access(remote_url, pat)
 
@@ -349,7 +359,9 @@ class TestGitManagerDeleteManagedRepositoryStatic:
             GitManager.delete_managed_repository(remote_url, None)
 
         assert "PAT not configured" in str(excinfo.value)
-        assert "A Personal Access Token is required to delete repository" in str(excinfo.value)
+        assert "A Personal Access Token is required to delete repository" in str(
+            excinfo.value
+        )
 
     def test_delete_managed_repository_empty_pat(self):
         """Test deletion fails when empty PAT is provided"""
@@ -469,7 +481,8 @@ class TestGitManagerCreateManagedRepositoryStatic:
     """Test cases for GitManager.create_managed_repository"""
 
     @patch.dict(
-        os.environ, {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"}
+        os.environ,
+        {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"},
     )
     def test_create_managed_repository_success(self):
         """Test successful repository creation"""
@@ -484,7 +497,9 @@ class TestGitManagerCreateManagedRepositoryStatic:
             "private": True,
         }
 
-        with patch.object(GitManager, "_github_api_request", return_value=mock_response):
+        with patch.object(
+            GitManager, "_github_api_request", return_value=mock_response
+        ):
             result = GitManager.create_managed_repository(org_slug, environment)
 
         assert result["name"] == "dbt-test-org-dev"
@@ -492,7 +507,8 @@ class TestGitManagerCreateManagedRepositoryStatic:
         assert result["private"] is True
 
     @patch.dict(
-        os.environ, {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"}
+        os.environ,
+        {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"},
     )
     def test_create_managed_repository_proper_naming(self):
         """Test repository name follows correct format"""
@@ -514,7 +530,10 @@ class TestGitManagerCreateManagedRepositoryStatic:
             call_args = mock_api.call_args
             payload = call_args[1]["payload"]
             assert payload["name"] == "dbt-my-org-production"
-            assert payload["description"] == "Managed dbt repository for my-org (production)"
+            assert (
+                payload["description"]
+                == "Managed dbt repository for my-org (production)"
+            )
             assert payload["private"] is True
             assert payload["auto_init"] is False
 
@@ -527,7 +546,9 @@ class TestGitManagerCreateManagedRepositoryStatic:
         with pytest.raises(GitManagerError) as excinfo:
             GitManager.create_managed_repository(org_slug, environment)
 
-        assert "DALGO_GITHUB_ORG and DALGO_ORG_ADMIN_PAT must be set" in str(excinfo.value)
+        assert "DALGO_GITHUB_ORG and DALGO_ORG_ADMIN_PAT must be set" in str(
+            excinfo.value
+        )
 
     @patch.dict(os.environ, {"DALGO_GITHUB_ORG": "dalgo-test"}, clear=True)
     def test_create_managed_repository_missing_admin_pat(self):
@@ -538,7 +559,9 @@ class TestGitManagerCreateManagedRepositoryStatic:
         with pytest.raises(GitManagerError) as excinfo:
             GitManager.create_managed_repository(org_slug, environment)
 
-        assert "DALGO_GITHUB_ORG and DALGO_ORG_ADMIN_PAT must be set" in str(excinfo.value)
+        assert "DALGO_GITHUB_ORG and DALGO_ORG_ADMIN_PAT must be set" in str(
+            excinfo.value
+        )
 
     @patch.dict(os.environ, {"DALGO_ORG_ADMIN_PAT": "ghp_admin_token"}, clear=True)
     def test_create_managed_repository_missing_github_org_only(self):
@@ -549,10 +572,13 @@ class TestGitManagerCreateManagedRepositoryStatic:
         with pytest.raises(GitManagerError) as excinfo:
             GitManager.create_managed_repository(org_slug, environment)
 
-        assert "DALGO_GITHUB_ORG and DALGO_ORG_ADMIN_PAT must be set" in str(excinfo.value)
+        assert "DALGO_GITHUB_ORG and DALGO_ORG_ADMIN_PAT must be set" in str(
+            excinfo.value
+        )
 
     @patch.dict(
-        os.environ, {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"}
+        os.environ,
+        {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"},
     )
     def test_create_managed_repository_already_exists_422(self):
         """Test creation fails when repository already exists"""
@@ -568,12 +594,14 @@ class TestGitManagerCreateManagedRepositoryStatic:
             with pytest.raises(GitManagerError) as excinfo:
                 GitManager.create_managed_repository(org_slug, environment)
 
-        assert "Repository dbt-existing-org-dev already exists or name is invalid" in str(
-            excinfo.value
+        assert (
+            "Repository dbt-existing-org-dev already exists or name is invalid"
+            in str(excinfo.value)
         )
 
     @patch.dict(
-        os.environ, {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"}
+        os.environ,
+        {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"},
     )
     def test_create_managed_repository_auth_failed_401(self):
         """Test creation fails with 401 authentication error"""
@@ -592,7 +620,8 @@ class TestGitManagerCreateManagedRepositoryStatic:
         assert "Authentication failed - check PAT permissions" in str(excinfo.value)
 
     @patch.dict(
-        os.environ, {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"}
+        os.environ,
+        {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"},
     )
     def test_create_managed_repository_forbidden_403(self):
         """Test creation fails with 403 insufficient permissions error"""
@@ -608,10 +637,13 @@ class TestGitManagerCreateManagedRepositoryStatic:
             with pytest.raises(GitManagerError) as excinfo:
                 GitManager.create_managed_repository(org_slug, environment)
 
-        assert "Insufficient permissions to create repository in organization" in str(excinfo.value)
+        assert "Insufficient permissions to create repository in organization" in str(
+            excinfo.value
+        )
 
     @patch.dict(
-        os.environ, {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"}
+        os.environ,
+        {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"},
     )
     def test_create_managed_repository_other_http_error(self):
         """Test creation fails with other HTTP errors"""
@@ -630,7 +662,8 @@ class TestGitManagerCreateManagedRepositoryStatic:
         assert "GitHub API error: HTTP 500" in str(excinfo.value)
 
     @patch.dict(
-        os.environ, {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"}
+        os.environ,
+        {"DALGO_GITHUB_ORG": "dalgo-test", "DALGO_ORG_ADMIN_PAT": "ghp_admin_token"},
     )
     def test_create_managed_repository_network_error(self):
         """Test creation fails with network/timeout error"""

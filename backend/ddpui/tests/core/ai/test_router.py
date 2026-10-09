@@ -44,7 +44,9 @@ def test_routes_a_data_question():
             }
         )
     )
-    route = run(route_question("How many farmers enrolled in Maharashtra last month?", model))
+    route = run(
+        route_question("How many farmers enrolled in Maharashtra last month?", model)
+    )
     assert route == RouteResult(
         intent="data_question",
         complexity="simple",
@@ -83,12 +85,17 @@ def test_history_reaches_the_router_prompt():
             self.prompts.append(prompt)
             return await super().ainvoke(prompt)
 
-    model = CapturingModel(json.dumps({"intent": "data_question", "complexity": "simple"}))
+    model = CapturingModel(
+        json.dumps({"intent": "data_question", "complexity": "simple"})
+    )
     run(
         route_question(
             "can we create a chart of this?",
             model,
-            history=["User: list of top donors", "Assistant: Here are the top donors..."],
+            history=[
+                "User: list of top donors",
+                "Assistant: Here are the top donors...",
+            ],
         )
     )
     prompt = model.prompts[0]
@@ -119,7 +126,9 @@ def test_creation_requests_override_data_routing_mid_conversation():
 
 
 def test_creation_backstop_applies_even_when_the_router_fails():
-    route = run(route_question("create a chart of farmers by district", ExplodingModel()))
+    route = run(
+        route_question("create a chart of farmers by district", ExplodingModel())
+    )
     assert route.intent == "platform_help"
 
 

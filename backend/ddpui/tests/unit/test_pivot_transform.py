@@ -229,7 +229,9 @@ class TestSingleColumn:
     def test_leaf_cell(self):
         cells = _cells(self._run())
         leaf = [
-            c for c in cells if c["row_key"] == ["Mumbai", "Education"] and c["col_kind"] == "leaf"
+            c
+            for c in cells
+            if c["row_key"] == ["Mumbai", "Education"] and c["col_kind"] == "leaf"
         ]
         assert leaf == [
             {
@@ -267,7 +269,11 @@ class TestSingleColumn:
 
     def test_grand_total_row_total(self):
         cells = _cells(self._run())
-        gt = [c for c in cells if c["row_kind"] == "grand_total" and c["col_kind"] == "row_total"]
+        gt = [
+            c
+            for c in cells
+            if c["row_kind"] == "grand_total" and c["col_kind"] == "row_total"
+        ]
         assert gt == [
             {
                 "row_key": [],
@@ -300,7 +306,9 @@ class TestMultiColumn:
             for c in cells
         )
         assert any(
-            c["col_key"] == ["2026-01", "Health"] and c["col_kind"] == "leaf" and c["values"] == [3]
+            c["col_key"] == ["2026-01", "Health"]
+            and c["col_kind"] == "leaf"
+            and c["values"] == [3]
             for c in cells
         )
 
@@ -331,7 +339,9 @@ class TestMultiColumn:
             for c in cells
         )
         assert any(
-            c["row_kind"] == "grand_total" and c["col_kind"] == "row_total" and c["values"] == [8]
+            c["row_kind"] == "grand_total"
+            and c["col_kind"] == "row_total"
+            and c["values"] == [8]
             for c in cells
         )
 
@@ -628,7 +638,10 @@ class TestColumnOrdering:
             metric_aliases=["Count"],
             show_column_subtotals=True,
         )
-        assert result["column_keys"] == [["2026-01", "Education"], ["2026-01", "Health"]]
+        assert result["column_keys"] == [
+            ["2026-01", "Education"],
+            ["2026-01", "Health"],
+        ]
         assert result["column_subtotal_keys"] == [["2026-01"]]
 
     def test_column_subtotal_keys_empty_when_disabled(self):

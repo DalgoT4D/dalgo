@@ -96,7 +96,10 @@ def test_label_formatting_tolerated_in_projection():
     from ddpui.core.ai.evals.sql_compare import gold_satisfied
 
     gold = [{"period": "Q3", "total": 155718.60}, {"period": "Q4", "total": 4012.50}]
-    agent = [["t", "Q3 (Oct-Dec 2025)", "155718.6"], ["t", "Q4 (Jan-Mar 2026)", "4012.5"]]
+    agent = [
+        ["t", "Q3 (Oct-Dec 2025)", "155718.6"],
+        ["t", "Q4 (Jan-Mar 2026)", "4012.5"],
+    ]
     assert gold_satisfied(gold, agent, "Q3 saw 155,718.6 vs Q4's 4,012.5.")
 
 

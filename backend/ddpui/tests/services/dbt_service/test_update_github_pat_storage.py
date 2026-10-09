@@ -21,7 +21,9 @@ def test_update_github_pat_storage_new_pat_creation(
     access_token = "test-pat-token"
 
     # Mock responses
-    mock_generate_oauth_url.return_value = "https://oauth2:test-pat-token@github.com/test/repo.git"
+    mock_generate_oauth_url.return_value = (
+        "https://oauth2:test-pat-token@github.com/test/repo.git"
+    )
     # prefect-proxy always echoes back the block_name it persisted (sanitized).
     # For "test-org" no chars need stripping, so the returned name matches the input.
     mock_prefect_service.upsert_secret_block.return_value = {
@@ -94,10 +96,14 @@ def test_update_github_pat_storage_existing_pat_update(
     mock_prefect_service.upsert_secret_block.assert_called_once()
     call_args = mock_prefect_service.upsert_secret_block.call_args[0][0]
     assert call_args.block_name == "test-org-git-pull-url"
-    assert call_args.secret == "https://oauth2:updated-pat-token@github.com/test/repo.git"
+    assert (
+        call_args.secret == "https://oauth2:updated-pat-token@github.com/test/repo.git"
+    )
 
     # Verify secrets manager PAT update (not creation)
-    mock_secretsmanager.update_github_pat.assert_called_once_with(existing_secret, access_token)
+    mock_secretsmanager.update_github_pat.assert_called_once_with(
+        existing_secret, access_token
+    )
     mock_secretsmanager.save_github_pat.assert_not_called()
 
 
@@ -123,7 +129,9 @@ def test_update_github_pat_storage_prefect_block_already_exists(
     )
 
     # Mock responses
-    mock_generate_oauth_url.return_value = "https://oauth2:test-pat-token@github.com/test/repo.git"
+    mock_generate_oauth_url.return_value = (
+        "https://oauth2:test-pat-token@github.com/test/repo.git"
+    )
     mock_prefect_service.upsert_secret_block.return_value = {
         "block_id": "updated-block-id",
         "block_name": "test-org-git-pull-url",
@@ -164,8 +172,12 @@ def test_update_github_pat_storage_prefect_service_error(
     access_token = "test-pat-token"
 
     # Mock responses
-    mock_generate_oauth_url.return_value = "https://oauth2:test-pat-token@github.com/test/repo.git"
-    mock_prefect_service.upsert_secret_block.side_effect = Exception("Prefect service error")
+    mock_generate_oauth_url.return_value = (
+        "https://oauth2:test-pat-token@github.com/test/repo.git"
+    )
+    mock_prefect_service.upsert_secret_block.side_effect = Exception(
+        "Prefect service error"
+    )
 
     # Execute and verify exception is raised
     with pytest.raises(Exception, match="Prefect service error"):
@@ -190,7 +202,9 @@ def test_update_github_pat_storage_secretsmanager_error(
     access_token = "test-pat-token"
 
     # Mock responses
-    mock_generate_oauth_url.return_value = "https://oauth2:test-pat-token@github.com/test/repo.git"
+    mock_generate_oauth_url.return_value = (
+        "https://oauth2:test-pat-token@github.com/test/repo.git"
+    )
     # prefect-proxy always echoes back the block_name it persisted (sanitized).
     # For "test-org" no chars need stripping, so the returned name matches the input.
     mock_prefect_service.upsert_secret_block.return_value = {
@@ -249,7 +263,9 @@ def test_update_github_pat_storage_stores_sanitized_block_name(
     access_token = "test-pat-token"
 
     # Mock: proxy sanitizes "new_org_test-git-pull-url" -> "neworgtest-git-pull-url"
-    mock_generate_oauth_url.return_value = "https://oauth2:test-pat-token@github.com/test/repo.git"
+    mock_generate_oauth_url.return_value = (
+        "https://oauth2:test-pat-token@github.com/test/repo.git"
+    )
     mock_prefect_service.upsert_secret_block.return_value = {
         "block_id": "test-block-id",
         "block_name": "neworgtest-git-pull-url",

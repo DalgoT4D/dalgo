@@ -165,7 +165,9 @@ def _retry_if_short_runtime(
     start = task_run.start_time
     end = state.timestamp
     if start is None or end is None:
-        logger.info("retry-check %s: missing start/end timestamp, not retrying", task_run.name)
+        logger.info(
+            "retry-check %s: missing start/end timestamp, not retrying", task_run.name
+        )
         return False
     runtime = end - start
     should_retry = runtime < DBT_RETRY_IF_FAILED_WITHIN
@@ -202,7 +204,9 @@ def dbtjob_v1(task_config: dict, task_slug: str):  # pylint: disable=unused-argu
         cert_content = extras.pop("sslrootcert_content")
         cert_path = extras.get("sslrootcert")
         if not cert_path:
-            cert_path = os.path.join(task_config["project_dir"], "..", "sslrootcert.pem")
+            cert_path = os.path.join(
+                task_config["project_dir"], "..", "sslrootcert.pem"
+            )
             extras["sslrootcert"] = cert_path
         os.makedirs(os.path.dirname(cert_path), exist_ok=True)
         with open(cert_path, "w", encoding="utf-8") as f:
@@ -252,13 +256,19 @@ def dbtjob_v1(task_config: dict, task_slug: str):  # pylint: disable=unused-argu
 #     flow_run_name: str
 # }
 @task(name="dbtcloudjob_v1", task_run_name="dbtcloudjob-{task_slug}")
-async def dbtcloudjob_v1(task_config: dict, task_slug: str):  # pylint: disable=unused-argument
+async def dbtcloudjob_v1(
+    task_config: dict, task_slug: str
+):  # pylint: disable=unused-argument
     """Create a dbt Cloud Credentials block and a dbt Cloud Job block"""
     try:
         # load the cloud credentials
-        dbt_cloud_creds = await DbtCloudCredentials.aload(task_config["dbt_cloud_creds_block"])
+        dbt_cloud_creds = await DbtCloudCredentials.aload(
+            task_config["dbt_cloud_creds_block"]
+        )
 
-        result = await trigger_dbt_cloud_job_run(dbt_cloud_creds, task_config["dbt_cloud_job_id"])
+        result = await trigger_dbt_cloud_job_run(
+            dbt_cloud_creds, task_config["dbt_cloud_job_id"]
+        )
 
         return result
     except Exception as error:  # skipcq PYL-W0703
@@ -312,7 +322,9 @@ def shellopjob(task_config: dict, task_slug: str):  # pylint: disable=unused-arg
         updated_cmds = [f"{cmd} {git_repo_endpoint} {project_dir}" for cmd in commands]
         task_config["commands"] = updated_cmds
 
-    elif task_config["slug"] == "generate-edr":  # DDP_backend:constants.TASK_GENERATE_EDR
+    elif (
+        task_config["slug"] == "generate-edr"
+    ):  # DDP_backend:constants.TASK_GENERATE_EDR
         # commands = ["edr send-report --bucket-file-path reports/{orgname}.TODAYS_DATE.html --profiles-dir elementary_profiles"]
         # env = {"PATH": /path/to/dbt/venv, "shell": "/bin/bash"}
         # Single consolidated Secret block replaces the old trio
@@ -325,9 +337,13 @@ def shellopjob(task_config: dict, task_slug: str):  # pylint: disable=unused-arg
         edr_s3_bucket = edr_config["s3_bucket"]
         # object key for the report
         todays_date = datetime.today().strftime("%Y-%m-%d")
-        task_config["commands"][0] = task_config["commands"][0].replace("TODAYS_DATE", todays_date)
+        task_config["commands"][0] = task_config["commands"][0].replace(
+            "TODAYS_DATE", todays_date
+        )
         # prepend the binary for edr cli
-        task_config["commands"][0] = task_config["env"]["PATH"] + "/" + task_config["commands"][0]
+        task_config["commands"][0] = (
+            task_config["env"]["PATH"] + "/" + task_config["commands"][0]
+        )
         # append the aws credentials and bucket name to the command
         task_config["commands"][
             0
@@ -336,7 +352,11 @@ def shellopjob(task_config: dict, task_slug: str):  # pylint: disable=unused-arg
     shell_op = ShellOperation(
         commands=task_config["commands"],
         working_dir=task_config["working_dir"],
-        shell=(task_config["env"]["shell"] if "shell" in task_config["env"] else "/bin/bash"),
+        shell=(
+            task_config["env"]["shell"]
+            if "shell" in task_config["env"]
+            else "/bin/bash"
+        ),
     )
     return shell_op.run()
 
@@ -363,7 +383,10 @@ def shellopjob(task_config: dict, task_slug: str):  # pylint: disable=unused-arg
 # }
 def _is_airbyte_sync_task(task_config: dict) -> bool:
     """Check if a task is an airbyte sync task"""
-    return task_config["type"] == AIRBYTECONNECTION and task_config["slug"] == "airbyte-sync"
+    return (
+        task_config["type"] == AIRBYTECONNECTION
+        and task_config["slug"] == "airbyte-sync"
+    )
 
 
 def _run_task(task_config: dict):
@@ -392,7 +415,9 @@ def _run_task(task_config: dict):
             )
 
         else:
-            raise ValueError(f"Unsupported AIRBYTECONNECTION slug: {task_config['slug']}")
+            raise ValueError(
+                f"Unsupported AIRBYTECONNECTION slug: {task_config['slug']}"
+            )
 
     else:
         raise ValueError(f"Unknown task type: {task_config['type']}")
@@ -421,7 +446,9 @@ def _run_tasks_with_sync_tolerance(tasks: list):
             _run_task(task_config)
         except Exception as error:  # skipcq PYL-W0703
             logger.error(
-                "Airbyte sync failed for connection %s: %s", task_config.get("connection_id"), error
+                "Airbyte sync failed for connection %s: %s",
+                task_config.get("connection_id"),
+                error,
             )
             sync_errors.append(error)
         sleep(10)
@@ -429,7 +456,8 @@ def _run_tasks_with_sync_tolerance(tasks: list):
     # if any sync failed, raise before running transforms
     if sync_errors:
         raise RuntimeError(
-            f"{len(sync_errors)} airbyte sync(s) failed: " + "; ".join(str(e) for e in sync_errors)
+            f"{len(sync_errors)} airbyte sync(s) failed: "
+            + "; ".join(str(e) for e in sync_errors)
         )
 
     # run remaining tasks sequentially, fail fast

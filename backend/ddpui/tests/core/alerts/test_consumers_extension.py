@@ -49,7 +49,9 @@ def org():
 @pytest.fixture
 def orguser(authuser, org):
     ou = OrgUser.objects.create(
-        user=authuser, org=org, new_role=Role.objects.filter(slug=ACCOUNT_MANAGER_ROLE).first()
+        user=authuser,
+        org=org,
+        new_role=Role.objects.filter(slug=ACCOUNT_MANAGER_ROLE).first(),
     )
     yield ou
     ou.delete()

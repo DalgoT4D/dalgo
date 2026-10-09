@@ -104,7 +104,8 @@ class TestUnionTablesSql:
 
         # Verify the relations array has both tables
         assert (
-            "relations=[source('raw_data', 'users_2023'),source('raw_data', 'users_2024')]" in sql
+            "relations=[source('raw_data', 'users_2023'),source('raw_data', 'users_2024')]"
+            in sql
         )
 
         # Verify output columns
@@ -538,7 +539,9 @@ class TestRawSqlOperation:
         ]
 
         for select_clause, expected_cols in test_cases:
-            result = extract_output_columns_from_select_clause(select_clause, source_cols)
+            result = extract_output_columns_from_select_clause(
+                select_clause, source_cols
+            )
             assert result == expected_cols, f"Failed for: {select_clause}"
 
     def test_functions_with_parentheses_and_commas(self, mock_warehouse):
@@ -602,7 +605,10 @@ class TestRawSqlOperation:
 
         # Should correctly identify all columns including function with commas
         assert output_cols == ["id", "name", "email"]
-        assert "SELECT id, coalesce(first_name, last_name, 'Unknown') as name, email" in sql
+        assert (
+            "SELECT id, coalesce(first_name, last_name, 'Unknown') as name, email"
+            in sql
+        )
 
     def test_function_without_alias(self, mock_warehouse):
         """Test rawsql with functions that don't have aliases"""
@@ -643,7 +649,9 @@ class TestRawSqlOperation:
         ]
 
         for select_clause, expected_cols in test_cases:
-            result = extract_output_columns_from_select_clause(select_clause, source_cols)
+            result = extract_output_columns_from_select_clause(
+                select_clause, source_cols
+            )
             assert result == expected_cols, f"Failed for: {select_clause}"
 
 
@@ -740,7 +748,11 @@ class TestCaseWhenOperation:
             "else_clause": {"value": "Minor", "is_col": False},
             "output_column_name": "classification",
             "case_type": "simple",
-            "input": {"input_type": "source", "source_name": "users", "input_name": "user_data"},
+            "input": {
+                "input_type": "source",
+                "source_name": "users",
+                "input_name": "user_data",
+            },
         }
 
         sql, columns = casewhen_dbt_sql(config, mock_warehouse)
@@ -772,7 +784,11 @@ class TestCaseWhenOperation:
             "else_clause": {"value": "Unknown Contact", "is_col": False},
             "output_column_name": "contact_status",
             "case_type": "simple",
-            "input": {"input_type": "model", "source_name": None, "input_name": "contacts"},
+            "input": {
+                "input_type": "model",
+                "source_name": None,
+                "input_name": "contacts",
+            },
         }
 
         sql, columns = casewhen_dbt_sql(config, mock_warehouse)
@@ -885,10 +901,18 @@ class TestWhereFilterOperation:
             "source_columns": ["name", "age", "email"],
             "clauses": [
                 {"column": "email", "operator": "IS NOT NULL", "operand": None},
-                {"column": "age", "operator": ">=", "operand": {"value": "18", "is_col": False}},
+                {
+                    "column": "age",
+                    "operator": ">=",
+                    "operand": {"value": "18", "is_col": False},
+                },
             ],
             "where_type": "and",
-            "input": {"input_type": "source", "source_name": "users", "input_name": "user_data"},
+            "input": {
+                "input_type": "source",
+                "source_name": "users",
+                "input_name": "user_data",
+            },
         }
 
         sql, columns = where_filter_sql(config, mock_warehouse)
@@ -906,7 +930,11 @@ class TestWhereFilterOperation:
                 {"column": "phone", "operator": "IS NULL", "operand": None},
             ],
             "where_type": "or",
-            "input": {"input_type": "model", "source_name": None, "input_name": "contacts"},
+            "input": {
+                "input_type": "model",
+                "source_name": None,
+                "input_name": "contacts",
+            },
         }
 
         sql, columns = where_filter_sql(config, mock_warehouse)
@@ -935,7 +963,10 @@ class TestWhereFilterOperation:
         sql, columns = where_filter_sql(config, mock_warehouse)
 
         # Verify multiple null operators combined
-        assert 'WHERE ("first_name" IS NOT NULL AND "email" IS NULL AND "phone" IS NOT NULL)' in sql
+        assert (
+            'WHERE ("first_name" IS NOT NULL AND "email" IS NULL AND "phone" IS NOT NULL)'
+            in sql
+        )
         assert columns == ["first_name", "last_name", "email", "phone"]
 
     def test_wherefilter_frontend_payload_format(self, mock_warehouse):

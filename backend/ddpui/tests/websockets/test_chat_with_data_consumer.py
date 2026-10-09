@@ -29,7 +29,10 @@ from ddpui.models.role_based_access import Role
 from django.core.management import call_command
 
 from ddpui.schemas.chat_with_data_schemas import ResumeApprovalAction
-from ddpui.websockets.chat_with_data_consumer import ChatWithDataConsumer, _allowed_pii_columns
+from ddpui.websockets.chat_with_data_consumer import (
+    ChatWithDataConsumer,
+    _allowed_pii_columns,
+)
 from ddpui.websockets.schemas import PendingInput, WebsocketCloseCodes
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -75,9 +78,13 @@ def orguser(seed_db):
     user = User.objects.create(
         username=f"cwdws-{suffix}", email=f"cwdws-{suffix}@test.com", password="x"
     )
-    org = Org.objects.create(name="WS Org", slug=f"ws-org-{suffix}", airbyte_workspace_id="w")
+    org = Org.objects.create(
+        name="WS Org", slug=f"ws-org-{suffix}", airbyte_workspace_id="w"
+    )
     ou = OrgUser.objects.create(
-        user=user, org=org, new_role=Role.objects.filter(slug=ACCOUNT_MANAGER_ROLE).first()
+        user=user,
+        org=org,
+        new_role=Role.objects.filter(slug=ACCOUNT_MANAGER_ROLE).first(),
     )
     yield ou
     ou.delete()
@@ -131,10 +138,14 @@ def test_connect_closed_when_feature_not_enabled(orguser):
 
 def test_connect_closed_for_another_orgs_session(orguser, enabled_org):
     other_org = Org.objects.create(
-        name="Other WS Org", slug=f"ws-other-{uuid_lib.uuid4().hex[:8]}", airbyte_workspace_id="w"
+        name="Other WS Org",
+        slug=f"ws-other-{uuid_lib.uuid4().hex[:8]}",
+        airbyte_workspace_id="w",
     )
     other_user = User.objects.create(
-        username=f"cwdws2-{uuid_lib.uuid4().hex[:8]}", email="cwdws2@test.com", password="x"
+        username=f"cwdws2-{uuid_lib.uuid4().hex[:8]}",
+        email="cwdws2@test.com",
+        password="x",
     )
     other = OrgUser.objects.create(
         user=other_user,
@@ -206,9 +217,14 @@ def scripted_turn(monkeypatch, orguser, enabled_org):
         ]
     )
 
-    def fake_build_agent(checkpointer=None, model=None, human_in_the_loop=True, **kwargs):
+    def fake_build_agent(
+        checkpointer=None, model=None, human_in_the_loop=True, **kwargs
+    ):
         return real_build_agent(
-            checkpointer=saver, model=scripted, human_in_the_loop=human_in_the_loop, **kwargs
+            checkpointer=saver,
+            model=scripted,
+            human_in_the_loop=human_in_the_loop,
+            **kwargs,
         )
 
     async def fake_get_checkpointer():
@@ -261,7 +277,9 @@ def test_full_turn_streams_events_and_updates_title(orguser, scripted_turn):
         connected, _ = await communicator.connect()
         assert connected
 
-        await communicator.send_json_to({"action": "send_message", "message": "how many?"})
+        await communicator.send_json_to(
+            {"action": "send_message", "message": "how many?"}
+        )
 
         events = []
         while True:
@@ -303,7 +321,9 @@ def test_full_turn_streams_events_and_updates_title(orguser, scripted_turn):
 def test_another_admin_in_the_org_can_continue_the_session(orguser, scripted_turn):
     session = scripted_turn  # created by `orguser`
     other_user = User.objects.create(
-        username=f"cwdws3-{uuid_lib.uuid4().hex[:8]}", email="cwdws3@test.com", password="x"
+        username=f"cwdws3-{uuid_lib.uuid4().hex[:8]}",
+        email="cwdws3@test.com",
+        password="x",
     )
     other = OrgUser.objects.create(
         user=other_user,
@@ -318,7 +338,9 @@ def test_another_admin_in_the_org_can_continue_the_session(orguser, scripted_tur
         connected, _ = await communicator.connect()
         assert connected
 
-        await communicator.send_json_to({"action": "send_message", "message": "how many?"})
+        await communicator.send_json_to(
+            {"action": "send_message", "message": "how many?"}
+        )
         while True:
             event = await communicator.receive_json_from(timeout=10)
             if event["type"] in ("title_updated", "error", "input_required"):
@@ -340,7 +362,9 @@ def test_another_admin_in_the_org_can_continue_the_session(orguser, scripted_tur
     run(scenario())
 
 
-def test_resume_approval_refuses_a_card_that_could_not_be_checked_for_pii(orguser, scripted_turn):
+def test_resume_approval_refuses_a_card_that_could_not_be_checked_for_pii(
+    orguser, scripted_turn
+):
     """Server-side enforcement of Fix 3: a request whose `columns` is explicitly
     None (an unreviewable projection) must refuse approval even if some other
     client skipped the browser's own disabled-button check."""
@@ -353,7 +377,9 @@ def test_resume_approval_refuses_a_card_that_could_not_be_checked_for_pii(orguse
         connected, _ = await communicator.connect()
         assert connected
 
-        await communicator.send_json_to({"action": "send_message", "message": "how many?"})
+        await communicator.send_json_to(
+            {"action": "send_message", "message": "how many?"}
+        )
         while True:
             event = await communicator.receive_json_from(timeout=10)
             if event["type"] == "input_required":
@@ -380,7 +406,9 @@ def test_resume_approval_refuses_a_card_that_could_not_be_checked_for_pii(orguse
     run(scenario())
 
 
-def test_typing_while_an_approval_is_pending_cancels_it_and_carries_on(orguser, scripted_turn):
+def test_typing_while_an_approval_is_pending_cancels_it_and_carries_on(
+    orguser, scripted_turn
+):
     """A message sent instead of approve/cancel rejects the pending step with the
     user's text as the reason, and the paused turn resumes — nobody is stuck."""
     session = scripted_turn
@@ -392,13 +420,17 @@ def test_typing_while_an_approval_is_pending_cancels_it_and_carries_on(orguser, 
         connected, _ = await communicator.connect()
         assert connected
 
-        await communicator.send_json_to({"action": "send_message", "message": "how many?"})
+        await communicator.send_json_to(
+            {"action": "send_message", "message": "how many?"}
+        )
         while True:
             event = await communicator.receive_json_from(timeout=10)
             if event["type"] == "input_required":
                 break
 
-        await communicator.send_json_to({"action": "send_message", "message": "no, skip that"})
+        await communicator.send_json_to(
+            {"action": "send_message", "message": "no, skip that"}
+        )
         events = []
         while True:
             event = await communicator.receive_json_from(timeout=10)
@@ -411,7 +443,11 @@ def test_typing_while_an_approval_is_pending_cancels_it_and_carries_on(orguser, 
         assert "message_complete" in types
         # the query was never run: its call closes as rejected, with no result
         tool_end = events[types.index("tool_end")]
-        assert tool_end == {"type": "tool_end", "tool": "execute_sql", "status": "error"}
+        assert tool_end == {
+            "type": "tool_end",
+            "tool": "execute_sql",
+            "status": "error",
+        }
         assert events[types.index("message_complete")]["result_table"] is None
 
         from ddpui.websockets import chat_with_data_consumer as consumer_module
@@ -450,7 +486,9 @@ def test_unsupported_action_yields_error_event(orguser, scripted_turn):
         ('{"action": "resume_approval", "approve": "maybe"}', "Invalid message format"),
     ],
 )
-def test_malformed_client_messages_get_a_specific_error(orguser, scripted_turn, raw, expected):
+def test_malformed_client_messages_get_a_specific_error(
+    orguser, scripted_turn, raw, expected
+):
     """Unknown actions and malformed payloads are told apart; a non-object
     payload used to crash receive() with AttributeError."""
     session = scripted_turn
@@ -481,7 +519,9 @@ def test_second_message_rejected_while_turn_in_flight(orguser, scripted_turn):
             session_id=session.id, token=token_for(orguser), orgslug=orguser.org.slug
         )
         await communicator.connect()
-        await communicator.send_json_to({"action": "send_message", "message": "how many?"})
+        await communicator.send_json_to(
+            {"action": "send_message", "message": "how many?"}
+        )
         event = await communicator.receive_json_from(timeout=5)
         assert event["type"] == "error"
         assert "previous question" in event["message"]
@@ -504,8 +544,16 @@ def test_connect_without_token_is_closed(seed_db):
 
 
 def _request(tool, columns):
-    columns = [{**column, "has_literal": False} for column in columns] if columns else columns
-    return {"tool": tool, "args": {}, "description": "", "sql": None, "columns": columns}
+    columns = (
+        [{**column, "has_literal": False} for column in columns] if columns else columns
+    )
+    return {
+        "tool": tool,
+        "args": {},
+        "description": "",
+        "sql": None,
+        "columns": columns,
+    }
 
 
 def _pending(*requests):
@@ -523,7 +571,9 @@ def test_only_columns_the_card_offered_are_accepted():
             ],
         )
     )
-    allowed = _allowed_pii_columns(pending, ["prod.beneficiaries.phone", "prod.other.secret"])
+    allowed = _allowed_pii_columns(
+        pending, ["prod.beneficiaries.phone", "prod.other.secret"]
+    )
     assert allowed == {"prod.beneficiaries.phone"}
 
 

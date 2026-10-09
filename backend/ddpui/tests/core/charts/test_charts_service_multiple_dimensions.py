@@ -18,7 +18,10 @@ import pytest
 from unittest.mock import MagicMock, patch
 from ddpui.core.charts import charts_service
 from ddpui.core.charts.maps_service import transform_data_for_map
-from ddpui.core.charts.charts_service import build_chart_data_payload, execute_map_data_overlay
+from ddpui.core.charts.charts_service import (
+    build_chart_data_payload,
+    execute_map_data_overlay,
+)
 from ddpui.schemas.chart_schemas import (
     ChartConfig,
     ChartDataPayload,
@@ -158,7 +161,9 @@ class TestTransformDataForChart:
         payload = TransformDataForChart(
             chart_type="table",
             dimensions=["KEY", "region", "country"],
-            metrics=[ChartMetric(aggregation="count", column=None, alias="Total Count")],
+            metrics=[
+                ChartMetric(aggregation="count", column=None, alias="Total Count")
+            ],
         )
 
         result = charts_service.transform_data_for_chart(results, payload)
@@ -337,10 +342,14 @@ class TestGetChartDataTablePreview:
             schema_name="public",
             table_name="test",
             dimensions=["KEY", "region", "country"],
-            metrics=[ChartMetric(aggregation="count", column=None, alias="Total Count")],
+            metrics=[
+                ChartMetric(aggregation="count", column=None, alias="Total Count")
+            ],
         )
 
-        result = charts_service.get_chart_data_table_preview(mock_org_warehouse, payload, 0, 10)
+        result = charts_service.get_chart_data_table_preview(
+            mock_org_warehouse, payload, 0, 10
+        )
 
         assert "columns" in result
         columns = result["columns"]
@@ -388,7 +397,9 @@ class TestGetChartDataTablePreview:
             ],
         )
 
-        result = charts_service.get_chart_data_table_preview(mock_org_warehouse, payload, 0, 10)
+        result = charts_service.get_chart_data_table_preview(
+            mock_org_warehouse, payload, 0, 10
+        )
 
         assert "columns" in result
         columns = result["columns"]
@@ -445,7 +456,13 @@ class TestTransformDataForMap:
             alias="avg pop",
         )
         out = transform_data_for_map(
-            self._results("avg pop", 42.0), self.GEOJSON, "state_name", None, {}, [metric], 0
+            self._results("avg pop", 42.0),
+            self.GEOJSON,
+            "state_name",
+            None,
+            {},
+            [metric],
+            0,
         )
         assert out["matched_regions"] == 1
         assert out["available_metrics"][0]["display_name"] == "avg pop"
@@ -494,7 +511,9 @@ class TestExecuteMapDataOverlay:
             "ddpui.core.charts.charts_service.execute_chart_query",
             return_value=[{"state_name": "Karnataka", "count_all_Total Count": 9}],
         ):
-            result = execute_map_data_overlay(map_payload, MagicMock(), warehouse_client)
+            result = execute_map_data_overlay(
+                map_payload, MagicMock(), warehouse_client
+            )
 
         assert result == {"data": [{"name": "Karnataka", "value": 9.0}], "count": 1}
 
@@ -509,6 +528,8 @@ class TestExecuteMapDataOverlay:
             "ddpui.core.charts.charts_service.execute_chart_query",
             return_value=[{"state_name": "Karnataka", "value": 500}],
         ):
-            result = execute_map_data_overlay(map_payload, MagicMock(), warehouse_client)
+            result = execute_map_data_overlay(
+                map_payload, MagicMock(), warehouse_client
+            )
 
         assert result == {"data": [{"name": "Karnataka", "value": 500.0}], "count": 1}

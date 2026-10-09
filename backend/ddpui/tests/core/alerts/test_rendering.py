@@ -164,7 +164,9 @@ def test_kpi_rag_formats_current_and_target_with_customizations():
 def test_kpi_rag_percentage_format_multiplies_by_100():
     """numberFormat='percentage' → multiplies by 100, appends '%'."""
     alert = _kpi_rag_alert(
-        extra_config={"customizations": {"numberFormat": "percentage", "decimalPlaces": 2}},
+        extra_config={
+            "customizations": {"numberFormat": "percentage", "decimalPlaces": 2}
+        },
         target_value=1.0,
     )
     tokens = tokens_for_alert(alert, current_value=0.855, rag_status="green")
@@ -197,7 +199,9 @@ def test_kpi_rag_customizations_without_numberFormat_apply_decimal_places():
 def test_kpi_rag_customizations_without_numberFormat_apply_prefix_suffix():
     """Prefix/suffix without numberFormat should still wrap the raw value."""
     alert = _kpi_rag_alert(
-        extra_config={"customizations": {"numberPrefix": "₹", "numberSuffix": " total"}},
+        extra_config={
+            "customizations": {"numberPrefix": "₹", "numberSuffix": " total"}
+        },
         target_value=10000,
     )
     tokens = tokens_for_alert(alert, current_value=9500)
