@@ -23,3 +23,7 @@ flag_management:
       paths:
         - webapp/
       carryforward: true
+    - name: ai-llm-service
+      paths:
+        - ai-llm-service/
+      carryforward: true

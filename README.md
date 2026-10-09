@@ -2,6 +2,15 @@
 
 Monorepo for all Dalgo services. Service code lives in top-level directories; all Docker configuration is centralised under `docker/`.
 
+## Coverage
+
+| Service | Coverage |
+|---|---|
+| Backend | [![backend coverage](https://img.shields.io/codecov/c/github/DalgoT4D/dalgo?flag=backend&label=backend)](https://app.codecov.io/gh/DalgoT4D/dalgo?flags%5B0%5D=backend) |
+| Webapp | [![webapp coverage](https://img.shields.io/codecov/c/github/DalgoT4D/dalgo?flag=webapp&label=webapp)](https://app.codecov.io/gh/DalgoT4D/dalgo?flags%5B0%5D=webapp) |
+| Prefect Proxy | [![prefect-proxy coverage](https://img.shields.io/codecov/c/github/DalgoT4D/dalgo?flag=prefect-proxy&label=prefect-proxy)](https://app.codecov.io/gh/DalgoT4D/dalgo?flags%5B0%5D=prefect-proxy) |
+| AI LLM Service | [![ai-llm-service coverage](https://img.shields.io/codecov/c/github/DalgoT4D/dalgo?flag=ai-llm-service&label=ai-llm-service)](https://app.codecov.io/gh/DalgoT4D/dalgo?flags%5B0%5D=ai-llm-service) |
+
 ```
 dalgo/
 ├── backend/           Django/Ninja API + Celery workers
