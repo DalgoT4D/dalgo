@@ -1,11 +1,11 @@
-# dalgo-core
+# harness
 
 Central repo for AI-assisted development workflows, specs, plans, and Claude Code configuration for the Dalgo platform.
 
 ## Repo Structure
 
 ```
-dalgo-core/
+harness/
 ├── .claude/
 │   ├── agents/              # Specialized AI agents (auto-invoked by context)
 │   ├── commands/
@@ -25,9 +25,10 @@ dalgo-core/
 │       │   └── tasks.md         # Execution progress checkpoint
 │       └── v2/
 │           └── ...              # Next iteration
-├── DDP_backend -> ../DDP_backend   (symlink, gitignored)
-└── webapp_v2 -> ../webapp_v2       (symlink, gitignored)
 ```
+
+Service code (`backend/`, `webapp/`, `prefect-proxy/`, `ai-llm-service/`, `docs/`) lives
+at the monorepo root — this `harness/` directory sits alongside them.
 
 ## Three Types of Tools
 
@@ -195,7 +196,7 @@ Structured code review — checks service-specific conventions, security, testin
 
 ```
 /engineering/review-pr 142
-/engineering/review-pr https://github.com/DalgoT4D/DDP_backend/pull/142
+/engineering/review-pr https://github.com/DalgoT4D/dalgo/pull/142
 ```
 Does NOT auto-post to GitHub — outputs the review for you to use.
 
@@ -217,9 +218,9 @@ write a docs page for data quality
 refresh docs for the abc123..def456 changes
 ```
 
-Claude auto-loads the `documentation` skill in `.claude/skills/documentation/`. The skill walks you through research → placement (derived from `webapp_v2/app/` + `dalgo_docs/sidebars.js`) → writing → sidebar update → domain-map update.
+Claude auto-loads the `documentation` skill in `.claude/skills/documentation/`. The skill walks you through research → placement (derived from `webapp/app/` + `docs/sidebars.js`) → writing → sidebar update → domain-map update.
 
-**Output:** Markdown page in `dalgo_docs/docs/` at the correct location, screenshots in `dalgo_docs/static/img/{feature}/`, and updated `dalgo_docs/sidebars.js` if it's a new page.
+**Output:** Markdown page in `docs/docs/` at the correct location, screenshots in `docs/static/img/{feature}/`, and updated `docs/sidebars.js` if it's a new page.
 
 The skill is broken into `workflow.md`, `sidebar.md`, `repo-structure.md`, and `style-*.md` files — each under 100 lines.
 
@@ -231,12 +232,12 @@ Single script (`scripts/screenshot.py`) that runs YAML recipes from `scripts/rec
 
 **Setup — first time:**
 ```bash
-cd dalgo-core
+cd harness
 uv sync                              # creates .venv/, installs deps from uv.lock
 uv run playwright install chromium   # one-time browser download
 ```
 
-**Create `dalgo-core/.env`** (gitignored, auto-loaded via `python-dotenv`):
+**Create `harness/.env`** (gitignored, auto-loaded via `python-dotenv`):
 ```
 E2E_ADMIN_EMAIL=your@email.com
 E2E_ADMIN_PASSWORD=yourpassword
@@ -245,7 +246,7 @@ E2E_BASE_URL=https://staging-app.dalgo.org
 
 **Run:**
 ```bash
-cd dalgo-core
+cd harness
 uv run python scripts/screenshot.py              # run all recipes (bulk refresh)
 uv run python scripts/screenshot.py kpis         # one feature
 uv run python scripts/screenshot.py kpis metrics # several
@@ -336,7 +337,7 @@ Agents are specialized personas that Claude invokes automatically when the conte
 uv run python scripts/screenshot.py
 
 # Preview the docs site locally
-cd ../dalgo_docs && npm start
+cd ../docs && npm start
 ```
 
 ### Next Iteration
@@ -355,5 +356,5 @@ cd ../dalgo_docs && npm start
 | `/write-tests` | Test writing is part of `/engineering/execute-plan`. |
 | `/deploy` | Deployment depends on CI/CD that varies per environment. |
 | `/estimate` | Effort estimation needs team velocity context Claude can't provide. |
-| Repo-level agents | Workspace-level agents read all repos via symlinks. |
+| Repo-level agents | The monorepo exposes all services at the top level — one Claude workspace covers them. |
 | Research agent | Research is a step within `/engineering/plan-feature`, saved as `research.md`. |

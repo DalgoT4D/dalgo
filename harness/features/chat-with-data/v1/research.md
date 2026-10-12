@@ -13,7 +13,7 @@ warehouse-touching endpoint and its permission slug).
 > **Note for harness maintainers:** the plan-feature command says to read
 > `.claude/skills/backend-architecture/landmarks.md` and
 > `.claude/skills/frontend-architecture/landmarks.md` — neither skill exists in
-> `dalgo-core` today. Prior feature research filled the gap.
+> `harness` today. Prior feature research filled the gap.
 
 Acronyms: LLM (large language model) · AST (abstract syntax tree — the parsed structure
 of a query) · WS (WebSocket) · ORM (Django's database layer) · JWT (login token) ·
@@ -21,7 +21,7 @@ RBAC (role-based access control).
 
 ---
 
-## 1. Codebase findings (DDP_backend)
+## 1. Codebase findings (backend)
 
 ### 1.1 WebSocket infrastructure exists but is sync-only
 
@@ -57,7 +57,7 @@ entry stays hidden and the status endpoint says why.
 
 ### 1.4 Warehouse access: one canonical client
 
-Per DDP_backend's own `warehouse-client` skill (authoritative, supersedes the stale
+Per backend's own `warehouse-client` skill (authoritative, supersedes the stale
 `ddpui/datatypes/` path named in the alerts research):
 
 ```python
@@ -93,7 +93,7 @@ syncs KoboToolbox forms still gets answers, from raw tables.
 
 ---
 
-## 2. Codebase findings (webapp_v2)
+## 2. Codebase findings (webapp)
 
 ### 2.1 WebSocket client plumbing already exists
 
@@ -107,7 +107,7 @@ no new transport code.
 `components/main-layout.tsx` uses `useFeatureFlags()` → `isFeatureFlagEnabled(FeatureFlagKeys.X)`
 and per-item `hide:` composition (line 131 shows the REPORTS example). New enum value
 `CHAT_WITH_DATA` in `hooks/api/useFeatureFlags.ts` + one nav item. `llm_optin` is not
-surfaced anywhere in webapp_v2 yet — our status endpoint carries that signal instead.
+surfaced anywhere in webapp yet — our status endpoint carries that signal instead.
 
 ### 2.3 Everything else follows the standard hooks/api pattern
 
@@ -251,6 +251,6 @@ this ships (the map's own rule for new product entities).
 
 ## 6. Deprecated / superseded references spotted
 
-- `features/alerts/v1/research.md` names `WarehouseFactory` at `ddpui/datatypes/warehouse_*.py` — the current canonical path is `ddpui/utils/warehouse/client/` (per DDP_backend's `warehouse-client` skill). Trust the skill.
+- `features/alerts/v1/research.md` names `WarehouseFactory` at `ddpui/datatypes/warehouse_*.py` — the current canonical path is `ddpui/utils/warehouse/client/` (per backend's `warehouse-client` skill). Trust the skill.
 - `OrgUser.llm_optin` — deprecated field; org-level consent lives on `OrgPreferences`.
 - `langgraph.prebuilt.create_react_agent` and `pre_model_hook` — deprecated upstream; any older Dalgo branch code using them is not a pattern to copy.

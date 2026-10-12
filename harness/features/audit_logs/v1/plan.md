@@ -5,7 +5,7 @@
 A backend-only platform-wide audit logging system. Every significant user-initiated create/update/delete/lifecycle action across Dalgo writes one immutable record to a single `AuditLog` table.
 
 - **Spec:** [../spec.md](../spec.md)
-- **Services affected:** `DDP_backend` only. No `webapp_v2` UI changes in v1. No `prefect-proxy` changes.
+- **Services affected:** `backend` only. No `webapp` UI changes in v1. No `prefect-proxy` changes.
 
 ## 2. Blast Radius
 
@@ -61,7 +61,7 @@ Key design decisions:
 
 ### 4.1 Data model
 
-New file: `DDP_backend/ddpui/models/audit_log.py`
+New file: `backend/ddpui/models/audit_log.py`
 
 ```python
 from django.db import models
@@ -155,7 +155,7 @@ class AuditLog(models.Model):
 
 ### 4.2 Backend logic — service layer
 
-New file: `DDP_backend/ddpui/core/audit_log_service.py`
+New file: `backend/ddpui/core/audit_log_service.py`
 
 ```python
 # core/audit_log_service.py
@@ -316,7 +316,7 @@ The rule of thumb: don't just check what today's frontend sends — check what t
 
 ### 4.3 Frontend components
 
-None in v1 — no `webapp_v2` changes. This is a backend-only implementation, per spec.md §1.
+None in v1 — no `webapp` changes. This is a backend-only implementation, per spec.md §1.
 
 ### 4.4 Integration points
 
@@ -355,7 +355,7 @@ None in v1 — no `webapp_v2` changes. This is a backend-only implementation, pe
 #### Milestone 1: Core infrastructure
 
 - **Deliverable:** `AuditLog` model + migration, `audit_log_service.py` (`create_audit_log`, `_write_audit_log`).
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [x] Create `models/audit_log.py` and migration
   - [x] Implement `core/audit_log_service.py` (thread-based write, never raises)
@@ -365,7 +365,7 @@ None in v1 — no `webapp_v2` changes. This is a backend-only implementation, pe
 #### Milestone 2: Auth & user management events
 
 - **Deliverable:** All events in spec.md §5.1 "Login & Authentication" and "User & Organization Management" (including Settings & Branding) are logged.
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [x] Wire `user_org_api.py`: login, logout, password change/reset, email verify
   - [x] Wire user/org management: add/remove user, role change, invitations (sent/resent/accepted/deleted), org created
@@ -375,7 +375,7 @@ None in v1 — no `webapp_v2` changes. This is a backend-only implementation, pe
 #### Milestone 3: Data infrastructure events
 
 - **Deliverable:** Warehouse, Data Sources/Connections, Pipelines, and the full dbt event list (Appendix A) are logged.
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [x] Wire warehouse create/delete — **done** (`wtype`/`name` logged on create, `name` logged on delete; `airbyteConfig` credentials never logged). There is no dedicated warehouse-update endpoint in the product — only create and delete exist — so there's nothing to wire for "update."
   - [x] Wire `airbyte_api.py`: source/connection CUD, manual sync, reset, schema change — **done** (`config`/credentials never logged; Connection `streams` summarized to stream names via `_summarize_streams()`). See `test_airbyte_api.py` and `test_airbyte_api_v1.py` for audit-log-specific coverage.
@@ -386,7 +386,7 @@ None in v1 — no `webapp_v2` changes. This is a backend-only implementation, pe
 #### Milestone 4: Analytics & reporting events
 
 - **Deliverable:** Dashboards, Charts, Metrics, KPIs, Reports & Comments are logged.
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [x] Wire `dashboard_native_api.py`: CUD, publish, share (unshare logs as a regular update), set-as-default, filters
   - [x] Wire `charts_api.py`: CUD
@@ -397,7 +397,7 @@ None in v1 — no `webapp_v2` changes. This is a backend-only implementation, pe
 #### Milestone 5: Retention
 
 - **Deliverable:** `purge_old_audit_logs` management command + a Celery Beat periodic task that runs it automatically on a monthly schedule. Retention period is configurable via `AUDIT_LOG_RETENTION_DAYS` env variable so it can be changed without a code deployment.
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [x] Implement `purge_old_audit_logs` management command. Reads `AUDIT_LOG_RETENTION_DAYS` from the environment (default: 365) — so changing from 1 year to 6 months is a single env var update with no code change required.
   - [x] Register a Celery Beat periodic task (monthly cadence) to call this command automatically — following the same pattern used by `dispatch_due_alerts` in `ddpui/celeryworkers/alert_tasks.py`.

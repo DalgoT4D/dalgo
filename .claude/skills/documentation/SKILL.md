@@ -5,7 +5,7 @@ description: Generate, update, or review Dalgo user-facing documentation. Use wh
 
 # Documentation Skill
 
-Reference and workflow for generating Dalgo's user-facing Docusaurus documentation. Lives in the `dalgo_docs/` repo (symlinked into `dalgo-core/`).
+Reference and workflow for generating Dalgo's user-facing Docusaurus documentation. Lives in the top-level `docs/` directory of the monorepo.
 
 ## When to use
 

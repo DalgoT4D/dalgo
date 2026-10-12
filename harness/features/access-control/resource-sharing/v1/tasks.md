@@ -21,8 +21,8 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] **1e** `charts_api.py list_charts` — pass `orguser`; include `access_level` in `ChartResponse`
 - [x] **1e** `ReportService.list_snapshots` — add `orguser` param; apply `accessible_filter`; annotate `access_level`
 - [x] **1e** `report_api.py list_snapshots` — pass `orguser`; include `access_level` in `SnapshotResponse`
-- [x] **1e** `webapp_v2/types/charts.ts` — add `access_level?: 'view' | 'edit'`
-- [x] **1e** `webapp_v2/types/reports.ts` — add `access_level?: 'view' | 'edit'`
+- [x] **1e** `webapp/types/charts.ts` — add `access_level?: 'view' | 'edit'`
+- [x] **1e** `webapp/types/reports.ts` — add `access_level?: 'view' | 'edit'`
 - [x] **1e** `app/charts/page.tsx` — gate edit/share buttons on `chart.access_level === 'edit'` instead of role permission
 - [x] **1e** `app/reports/page.tsx` — gate edit/delete/share buttons on `report.access_level === 'edit'`
 - [x] **1f** Add `CascadeSourceSchema` to `resource_share_schema.py`

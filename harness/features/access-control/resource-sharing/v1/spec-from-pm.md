@@ -371,7 +371,7 @@ The one-time auto-extend is the migration's critical step — without it, Member
 
 ## 15. Technical Implications
 
-### 15.1 DDP_backend (Django + Django Ninja)
+### 15.1 backend (Django + Django Ninja)
 
 | Change | Impact |
 |---|---|
@@ -392,7 +392,7 @@ The one-time auto-extend is the migration's critical step — without it, Member
 | Redis cache | Invalidate on grant/floor/group/public-link change. |
 | V-next hooks | `dataset_access_rules` stub for future RLS/column-masking; KPI/Metric share rows ready when modules ship. |
 
-### 15.2 webapp_v2 (Next.js 15 + React 19)
+### 15.2 webapp (Next.js 15 + React 19)
 
 | Change | Impact |
 |---|---|

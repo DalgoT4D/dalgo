@@ -1,6 +1,6 @@
 # Sidebar Structure & Patterns
 
-Sidebar lives in `dalgo_docs/sidebars.js`. Mirrors the product left-nav exactly.
+Sidebar lives in `docs/sidebars.js`. Mirrors the product left-nav exactly.
 
 ## Current Structure
 

@@ -336,7 +336,7 @@ Because v2 ships before the grant model, content visibility behaves differently 
 
 ## Technical Scope
 
-### DDP_backend (Django + Django Ninja)
+### backend (Django + Django Ninja)
 
 | Change | Impact |
 |---|---|
@@ -349,7 +349,7 @@ Because v2 ships before the grant model, content visibility behaves differently 
 | Member view-only cap | Server-side: reject any create/edit/delete/share request from a Member on any resource. The permission resolver caps a Member's effective level at View regardless of grants, so the cap survives into Spec B. |
 | Hooks for Spec B | Permission resolver structured to accept resource grants later; `owner` consumed by Spec B's share/delete/**transfer** logic. |
 
-### webapp_v2 (Next.js 15 + React 19)
+### webapp (Next.js 15 + React 19)
 
 | Change | Impact |
 |---|---|

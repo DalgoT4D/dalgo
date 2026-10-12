@@ -11,7 +11,7 @@ This document captures the codebase findings backing the v1.1 plan. The enhancem
 
 ### Frontend config UI
 
-**Component:** `webapp_v2/components/charts/types/number/NumberChartCustomizations.tsx` (lines 1–107)
+**Component:** `webapp/components/charts/types/number/NumberChartCustomizations.tsx` (lines 1–107)
 
 Form fields exposed:
 - `numberSize` (radio: small / medium / large) — lines 29–45
@@ -25,7 +25,7 @@ Form fields exposed:
 
 ### Frontend customizations type
 
-`webapp_v2/lib/chart-formatting-utils.ts` (lines 18–30):
+`webapp/lib/chart-formatting-utils.ts` (lines 18–30):
 
 ```typescript
 export interface ChartCustomizations {
@@ -41,7 +41,7 @@ This is the exact shape we lift onto KPI under `extra_config.customizations`.
 
 ### Frontend render-time formatter
 
-**Function:** `formatNumber()` in `webapp_v2/lib/formatters.ts` (lines 135–230)
+**Function:** `formatNumber()` in `webapp/lib/formatters.ts` (lines 135–230)
 
 Signature:
 ```typescript
@@ -59,7 +59,7 @@ type NumberFormat = 'default' | 'percentage' | 'currency'
 
 ### Frontend prefix/suffix application
 
-`webapp_v2/lib/chart-formatting-utils.ts` (lines 213–233) — `applyNumberChartFormatting()`:
+`webapp/lib/chart-formatting-utils.ts` (lines 213–233) — `applyNumberChartFormatting()`:
 
 ```typescript
 const formatter = (value: number) => {
@@ -75,7 +75,7 @@ const formatter = (value: number) => {
 
 ### Backend customizations schema
 
-`DDP_backend/ddpui/schemas/chart_schemas/customizations.py` (lines 121–132):
+`backend/ddpui/schemas/chart_schemas/customizations.py` (lines 121–132):
 
 ```python
 class NumberChartCustomizations(BaseModel):
@@ -94,7 +94,7 @@ KPI v1.1 reuses this schema as the typed nested validator inside `KPICreate.extr
 
 ### Backend formatter (current)
 
-`DDP_backend/ddpui/core/charts/echarts_config_generator.py` (lines 89–112) — `EChartsConfigGenerator._format_number`:
+`backend/ddpui/core/charts/echarts_config_generator.py` (lines 89–112) — `EChartsConfigGenerator._format_number`:
 
 ```python
 @staticmethod
@@ -121,11 +121,11 @@ def _format_number(
 
 ### Backend endpoint touchpoints (Chart, today)
 
-`DDP_backend/ddpui/api/charts_api.py`:
+`backend/ddpui/api/charts_api.py`:
 - `POST /create_chart` (line 1093) — `payload: ChartCreate` → stores `extra_config`
 - `PUT /update_chart` (line 1148) — `payload: ChartUpdate` → updates `extra_config`
 
-`ChartCreate` / `ChartUpdate` at `DDP_backend/ddpui/schemas/chart_schema.py` (lines 18–39). Both accept `extra_config: dict`.
+`ChartCreate` / `ChartUpdate` at `backend/ddpui/schemas/chart_schema.py` (lines 18–39). Both accept `extra_config: dict`.
 
 ---
 
@@ -133,7 +133,7 @@ def _format_number(
 
 ### KPI Django model
 
-`DDP_backend/ddpui/models/metric.py` (lines 84–129):
+`backend/ddpui/models/metric.py` (lines 84–129):
 
 Current fields (no formatting yet):
 ```
@@ -148,7 +148,7 @@ display_order, org (FK), created_by, last_modified_by
 
 ### KPI Pydantic schemas
 
-`DDP_backend/ddpui/schemas/kpi_schema.py` (lines 13–62):
+`backend/ddpui/schemas/kpi_schema.py` (lines 13–62):
 - `KPICreate` — accepts all KPI creation fields
 - `KPIUpdate` — same, all Optional
 - `KPISchema` — response shape
@@ -157,7 +157,7 @@ display_order, org (FK), created_by, last_modified_by
 
 ### KPI frontend form
 
-`webapp_v2/components/kpis/kpi-form.tsx` (lines 1–649):
+`webapp/components/kpis/kpi-form.tsx` (lines 1–649):
 - Step 1: Metric picker + Name + Target + Direction (lines 335–428)
 - Step 2: RAG thresholds + Time config (lines 431–626)
 
@@ -167,13 +167,13 @@ display_order, org (FK), created_by, last_modified_by
 
 | Component | Path | Where formatting plugs in |
 |---|---|---|
-| Card (KPIs page) | `webapp_v2/components/kpis/kpi-card.tsx` | Lines 281, 285 — currently call `formatMetricValue(currentValue)` and target render. Swap to `formatKPIValue(value, kpi.extra_config?.customizations)` |
-| Detail drawer | `webapp_v2/components/kpis/kpi-detail-drawer.tsx` | Header current value + target — same swap |
-| Dashboard widget | `webapp_v2/components/dashboard/kpi-chart-element.tsx` (line 31 consumes `echartsConfig` from `useKPIData`) | Verify it inherits via `KPICard` render path. **No `applyNumberChartFormatting` call** (gauge-specific) |
+| Card (KPIs page) | `webapp/components/kpis/kpi-card.tsx` | Lines 281, 285 — currently call `formatMetricValue(currentValue)` and target render. Swap to `formatKPIValue(value, kpi.extra_config?.customizations)` |
+| Detail drawer | `webapp/components/kpis/kpi-detail-drawer.tsx` | Header current value + target — same swap |
+| Dashboard widget | `webapp/components/dashboard/kpi-chart-element.tsx` (line 31 consumes `echartsConfig` from `useKPIData`) | Verify it inherits via `KPICard` render path. **No `applyNumberChartFormatting` call** (gauge-specific) |
 
 ### Today's formatter
 
-`webapp_v2/lib/formatters.ts` — `formatMetricValue()` (line 18 referenced by `kpi-card.tsx`). v1.1 replaces this call with a new `formatKPIValue(value, customizations)` that wraps `formatNumber()` + prefix/suffix + null guard.
+`webapp/lib/formatters.ts` — `formatMetricValue()` (line 18 referenced by `kpi-card.tsx`). v1.1 replaces this call with a new `formatKPIValue(value, customizations)` that wraps `formatNumber()` + prefix/suffix + null guard.
 
 ---
 
@@ -181,7 +181,7 @@ display_order, org (FK), created_by, last_modified_by
 
 Per `docs/domain-map.md`, KPI chart data is already frozen into `Report.frozen_chart_configs` keyed by chart_id at snapshot time. **The format config needs to ride along inside that frozen JSON.**
 
-`DDP_backend/ddpui/schemas/report_schema.py` (line 59) — `FrozenKpiConfig` is a strict Pydantic model. Extra fields don't silently pass through. v1.1 explicitly adds:
+`backend/ddpui/schemas/report_schema.py` (line 59) — `FrozenKpiConfig` is a strict Pydantic model. Extra fields don't silently pass through. v1.1 explicitly adds:
 
 ```python
 class FrozenKpiConfig(BaseModel):
@@ -189,7 +189,7 @@ class FrozenKpiConfig(BaseModel):
     customizations: Optional[Dict[str, Any]] = None
 ```
 
-The snapshot freeze code (grep `FrozenKpiConfig(` in `DDP_backend/ddpui/core/`) copies `kpi.extra_config.get("customizations")` at snapshot time. Snapshots taken before v1.1 ship with `customizations=None` → renderer falls back to "no formatting" (same as a v1 KPI).
+The snapshot freeze code (grep `FrozenKpiConfig(` in `backend/ddpui/core/`) copies `kpi.extra_config.get("customizations")` at snapshot time. Snapshots taken before v1.1 ship with `customizations=None` → renderer falls back to "no formatting" (same as a v1 KPI).
 
 ---
 
@@ -200,7 +200,7 @@ Per `docs/domain-map.md`:
 - Message rendered via Mustache template
 - Alert evaluates on a cron schedule (NOT pipeline events)
 
-Current token resolution in `DDP_backend/ddpui/core/alerts/rendering.py` (line 52):
+Current token resolution in `backend/ddpui/core/alerts/rendering.py` (line 52):
 - `{{current_value}}` resolves via `str(v)` — emits raw scalar
 - Existing templates assume raw: `tests/core/alerts/test_rendering.py:21` asserts `"value is 42"`
 
@@ -211,18 +211,18 @@ Current token resolution in `DDP_backend/ddpui/core/alerts/rendering.py` (line 5
 ## 5. Tests — existing patterns to mirror
 
 **Number chart formatting tests:**
-- Frontend: `webapp_v2/lib/__tests__/chart-formatting-utils.test.ts` — tests `applyNumberChartFormatting()` and `formatNumber()`
-- Backend: `DDP_backend/ddpui/tests/api_tests/test_charts_api.py` (line 326)
+- Frontend: `webapp/lib/__tests__/chart-formatting-utils.test.ts` — tests `applyNumberChartFormatting()` and `formatNumber()`
+- Backend: `backend/ddpui/tests/api_tests/test_charts_api.py` (line 326)
 
 **KPI test files to extend:**
-- `DDP_backend/ddpui/tests/api_tests/test_kpi_api.py`
-- `DDP_backend/ddpui/tests/services/test_kpi_service.py`
-- `webapp_v2/components/kpis/__tests__/` (card logic + types)
+- `backend/ddpui/tests/api_tests/test_kpi_api.py`
+- `backend/ddpui/tests/services/test_kpi_service.py`
+- `webapp/components/kpis/__tests__/` (card logic + types)
 
 **New test files:**
-- `DDP_backend/ddpui/tests/core/charts/test_number_formatting.py` (new)
-- `webapp_v2/lib/__tests__/formatters.test.ts` (extend)
-- Shared parity fixture at `dalgo-core/tests/fixtures/number_format_parity.json` (new)
+- `backend/ddpui/tests/core/charts/test_number_formatting.py` (new)
+- `webapp/lib/__tests__/formatters.test.ts` (extend)
+- Shared parity fixture at `harness/tests/fixtures/number_format_parity.json` (new)
 
 ---
 
@@ -230,12 +230,12 @@ Current token resolution in `DDP_backend/ddpui/core/alerts/rendering.py` (line 5
 
 | Need | Reuse from | Location |
 |---|---|---|
-| Frontend formatter | `formatNumber()` | `webapp_v2/lib/formatters.ts:135–230` |
-| Frontend customizations TS type | `ChartCustomizations` interface | `webapp_v2/lib/chart-formatting-utils.ts:18–30` |
-| Backend customizations schema | `NumberChartCustomizations` Pydantic | `DDP_backend/ddpui/schemas/chart_schemas/customizations.py:121–132` |
-| Backend `NumberFormat` literal | shared Literal type | `DDP_backend/ddpui/schemas/chart_schemas/customizations.py:8–17` |
-| Backend formatter (current) | `_format_number()` (to be extended) | `DDP_backend/ddpui/core/charts/echarts_config_generator.py:89–112` |
-| Form-panel UI (to extract) | sub-block of `NumberChartCustomizations.tsx` | `webapp_v2/components/charts/types/number/NumberChartCustomizations.tsx:1–107` |
+| Frontend formatter | `formatNumber()` | `webapp/lib/formatters.ts:135–230` |
+| Frontend customizations TS type | `ChartCustomizations` interface | `webapp/lib/chart-formatting-utils.ts:18–30` |
+| Backend customizations schema | `NumberChartCustomizations` Pydantic | `backend/ddpui/schemas/chart_schemas/customizations.py:121–132` |
+| Backend `NumberFormat` literal | shared Literal type | `backend/ddpui/schemas/chart_schemas/customizations.py:8–17` |
+| Backend formatter (current) | `_format_number()` (to be extended) | `backend/ddpui/core/charts/echarts_config_generator.py:89–112` |
+| Form-panel UI (to extract) | sub-block of `NumberChartCustomizations.tsx` | `webapp/components/charts/types/number/NumberChartCustomizations.tsx:1–107` |
 
 ---
 

@@ -21,7 +21,7 @@
 
 > ### ⚠️ Second update, 2026-08-19 — `Org.is_active` / `OrgUser.is_active` fully removed
 >
-> Overnight on 2026-08-19, `Org.is_active` and `OrgUser.is_active` were removed entirely: model fields, migration (`0172_remove_org_is_active_orguser_is_active`), and the `auth.py` enforcement that read them (`026decfb`). Confirmed live in `DDP_backend` at commit `21a3484f` (current HEAD of `feature/admin-portal-m4-users`):
+> Overnight on 2026-08-19, `Org.is_active` and `OrgUser.is_active` were removed entirely: model fields, migration (`0172_remove_org_is_active_orguser_is_active`), and the `auth.py` enforcement that read them (`026decfb`). Confirmed live in `backend` at commit `21a3484f` (current HEAD of `feature/admin-portal-m4-users`):
 > - `ddpui/models/org.py` and `ddpui/models/org_user.py` — no `is_active` field on `Org` or `OrgUser`.
 > - `ddpui/auth.py` — no org-deactivated / orguser-deactivated 403 checks anywhere in `CustomJwtAuthMiddleware`.
 > - `ddpui/api/admin_api.py` routes — confirmed by listing every `@admin_router.*` route: `GET/POST /orgs`, `GET/PUT /orgs/{id}`, `GET /orgs/{id}/users`, `POST /orgs/{id}/users/invite`, `PUT /orgs/{id}/users/{id}/role`, `GET /orgs/{id}/users/{id}/removal-impact`, `DELETE /orgs/{id}/users/{id}`, `DELETE /orgs/{id}/invitations/{id}`. **No deactivate/reactivate route for orgs or users, and no delete route for an org.**
@@ -33,7 +33,7 @@
 > - `ddpui/models/org.py:340` — `OrgFeatureFlag` **still exists**, unchanged from §4.1 below (nullable `org` FK, `flag_name`, `flag_value`, `unique_together`). Reuse it; do not add a new model.
 > - Per the standing convention (reuse existing schema/functions before writing new ones), no new model is needed for either feature area — only new admin-facing HTTP endpoints on top of what's already there.
 
-> This is a **fresh read** of DDP_backend and webapp_v2 as of 2026-07-22. Every file/line below was re-verified that day. It covers the five surfaces the portal touches: the existing admin portal, the auth system, notifications, feature flags, and the Airbyte/pipeline read paths — plus the frontend shell. Pre-existing bugs found along the way are listed at the end and are **not** fixed here.
+> This is a **fresh read** of backend and webapp as of 2026-07-22. Every file/line below was re-verified that day. It covers the five surfaces the portal touches: the existing admin portal, the auth system, notifications, feature flags, and the Airbyte/pipeline read paths — plus the frontend shell. Pre-existing bugs found along the way are listed at the end and are **not** fixed here.
 
 ---
 
@@ -46,7 +46,7 @@ Organization onboarding and user management are built and merged, backend and fr
 - Every route is decorated `@platform_admin_required` (`ddpui/auth.py:63-80`). Org CRUD: `GET/POST /orgs`, `GET/PUT /orgs/{id}` — **create and edit only; no deactivate/reactivate, no delete** (`Org.is_active` was removed 2026-08-19; delete was never built). User management: list users, invite, change role, removal-impact, remove (delete) user, cancel invitation — **no deactivate/reactivate** (`OrgUser.is_active` was removed 2026-08-19).
 - Business logic lives in `ddpui/core/admin/admin_service.py` (logger `CustomLogger("ddpui.core.admin")`, `:25`). Its docstring states the convention: handlers stay thin (**parse → call service → convert → return**); the service "knows nothing about HTTP" and returns models/primitives (`:1-11`).
 
-**Frontend** — `webapp_v2`:
+**Frontend** — `webapp`:
 - Admin routes render through `components/client-layout.tsx:58-70`: `pathname.startsWith('/admin')` → `AuthGuard > AdminGuard > AdminLayout`.
 - `components/admin/AdminLayout.tsx`: nav = Home, Organizations (live), **Notifications and Feature Flags are `disabled: true` placeholders** (`:19-24`); "Back to Dalgo" link → `href="/"` (`:78`).
 - `components/admin/AdminGuard.tsx`: reads `is_platform_admin` from the `/api/currentuserv2` SWR cache (`:33`, `data[0].is_platform_admin` `:37`); non-admin bounce → `router.replace('/')` (`:41`).

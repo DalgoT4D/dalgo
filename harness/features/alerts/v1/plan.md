@@ -13,8 +13,8 @@
 A schedule-driven alerting system for Dalgo. Three alert types (Metric-threshold, KPI-RAG, Standalone) authored through a shared 3-step modal wizard. Each alert runs on its own cron schedule, evaluates a numeric condition against the org's warehouse, and on fire delivers a rendered message via Email (always) and/or Slack (per-alert webhook URL). The `/alerts` page lists every alert with All-alerts and Firing tabs and a per-alert fire-history modal. Role-gated CRUD.
 
 **Services affected:**
-- **DDP_backend** — New Alert/AlertRecipient/AlertFire/AlertDelivery models, Alert CRUD + dry-run + slack-test API, Celery dispatcher + evaluator tasks, Mustache rendering, SES + Slack-webhook delivery, permission slugs.
-- **webapp_v2** — New `/alerts` page (listing + tabs), 3-step authoring wizard, Alert log modal, recipient picker, entry-point CTAs on Metrics page and KPI detail drawer.
+- **backend** — New Alert/AlertRecipient/AlertFire/AlertDelivery models, Alert CRUD + dry-run + slack-test API, Celery dispatcher + evaluator tasks, Mustache rendering, SES + Slack-webhook delivery, permission slugs.
+- **webapp** — New `/alerts` page (listing + tabs), 3-step authoring wizard, Alert log modal, recipient picker, entry-point CTAs on Metrics page and KPI detail drawer.
 
 **Not affected:** prefect-proxy (alerts do not orchestrate pipelines), prefect-airbyte, dalgo-ai-gen.
 
@@ -51,7 +51,7 @@ Confirmed in scope-confirmation conversation 2026-06-11. Domain map traversal in
 ### 3.1 System architecture
 
 ```
-┌──────────────────────────── webapp_v2 ───────────────────────────┐
+┌──────────────────────────── webapp ───────────────────────────┐
 │                                                                  │
 │  /metrics page       KPI detail drawer       /alerts page        │
 │      │                       │                       │           │
@@ -61,7 +61,7 @@ Confirmed in scope-confirmation conversation 2026-06-11. Domain map traversal in
 │                              │                                   │
 └──────────────────────────────┼───────────────────────────────────┘
                                │  apiGet/apiPost/apiPut/apiDelete
-┌──────────────────────────────┼───── DDP_backend ─────────────────┐
+┌──────────────────────────────┼───── backend ─────────────────┐
 │                              │                                   │
 │  Alert API                                                       │
 │   • POST /api/alerts/        • POST /api/alerts/test/            │
@@ -662,7 +662,7 @@ CELERY_BEAT_SCHEDULE = {
 }
 ```
 
-### 4.7 Frontend — `webapp_v2`
+### 4.7 Frontend — `webapp`
 
 #### New page
 
@@ -769,7 +769,7 @@ TOKENS_BY_TYPE = {
 
 ## 6. Testing Strategy
 
-### Unit tests — DDP_backend
+### Unit tests — backend
 
 `tests/core/alerts/`:
 - `test_scheduling.py`
@@ -846,7 +846,7 @@ Each milestone is independently shippable: backend + frontend deliver a working 
 
 **Deliverable:** Two new models (`Alert`, `AlertLog`) with migrations and permission slugs. Full CRUD via `/api/alerts/`. No evaluator yet — Alerts can be created but won't fire.
 
-**Services:** DDP_backend
+**Services:** backend
 
 **Backend tasks:**
 - [ ] Create `ddpui/models/alert.py` with `Alert` + `AlertLog` (two models, with `recipients` JSON on Alert and `deliveries` JSON on AlertLog)
@@ -880,7 +880,7 @@ Each milestone is independently shippable: backend + frontend deliver a working 
 
 **Deliverable:** Authoring wizard works end-to-end for all three alert types except Step 3 (Test). Save creates an Alert in the DB. Edit re-opens the same wizard prefilled. Entry-point CTAs from Metrics page, KPI detail drawer, and /alerts page (placeholder listing). The "Send test message" Slack button works (via Milestone-3 endpoint, but we can stub-call the backend now and finish the impl in M3).
 
-**Services:** DDP_backend (slack-webhook test endpoint only) + webapp_v2
+**Services:** backend (slack-webhook test endpoint only) + webapp
 
 **Backend tasks:**
 - [ ] Implement `POST /api/alerts/test-slack-webhook/` (the only delivery code needed at this milestone)
@@ -914,7 +914,7 @@ Each milestone is independently shippable: backend + frontend deliver a working 
 
 **Deliverable:** Saved alerts actually fire on schedule. SES emails arrive. Slack posts land. AlertFire + AlertDelivery rows written. Step 3 of the wizard (Test) shows real dry-run results.
 
-**Services:** DDP_backend + webapp_v2 (Step 3 UI)
+**Services:** backend + webapp (Step 3 UI)
 
 **Backend tasks:**
 - [ ] Implement `ddpui/core/alerts/alert_query.py` — build SQL for the three types (delegate to MetricService/KPIService where possible)
@@ -948,7 +948,7 @@ Each milestone is independently shippable: backend + frontend deliver a working 
 
 **Deliverable:** Real /alerts page with All alerts + Firing tabs, column filters/sorts, row 3-dot menu (Edit / Delete / Alert log), enable/disable toggle, empty states. Alert log modal opens from any row showing paginated fire history with per-fire expand → recipient list + per-recipient delivery status + collapsible SQL.
 
-**Services:** webapp_v2 (frontend-heavy) + DDP_backend (firing list + fires list endpoint polish)
+**Services:** webapp (frontend-heavy) + backend (firing list + fires list endpoint polish)
 
 **Backend tasks:**
 - [ ] Polish `GET /api/alerts/firing/` — efficient query: alerts whose most recent `AlertLog.fired = True`
@@ -988,7 +988,7 @@ Each milestone is independently shippable: backend + frontend deliver a working 
 
 **Deliverable:** Spec validation passes (`/engineering/validate-spec`). All toasts and visual treatments per spec. Role-gated UI affordances per Story 9. Alerts nav item visible in production.
 
-**Services:** webapp_v2 + DDP_backend (role mapping cleanup)
+**Services:** webapp + backend (role mapping cleanup)
 
 **Backend tasks:**
 - [ ] Audit role → permission mapping; finalize assignments for `can_view_alerts`, `can_create_alerts`, `can_edit_alerts`, `can_delete_alerts`

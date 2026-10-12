@@ -1,11 +1,11 @@
 ---
 name: release-notes
-description: Draft a new Dalgo release notes entry on dalgo_docs from the latest release tags of DDP_backend and webapp_v2. Use when the user asks to write, publish, or update release notes after a release ships.
+description: Draft a new Dalgo release notes entry on docs from the latest release tags of backend and webapp. Use when the user asks to write, publish, or update release notes after a release ships.
 ---
 
 # Release Notes Skill
 
-Creates a new dated entry in `dalgo_docs/release-notes-docs/` from changes between the previous and latest release tags in `../DDP_backend` and `../webapp_v2`.
+Creates a new dated entry in `docs/release-notes-docs/` from changes between the previous and latest release tags of the monorepo, filtered to the `backend/` and `webapp/` paths.
 
 Audience: NGO clients reading https://docs.dalgo.org/release-notes. Tone is friendly and plain-spoken with a light touch of humour. No version numbers, no internal jargon.
 
@@ -46,7 +46,7 @@ sidebar_position: <integer — see step 7>
 
 ---
 
-*Release tags: <a href="https://github.com/DalgoT4D/DDP_backend/releases/tag/<tag>" target="_blank" rel="noopener noreferrer">DDP_backend &lt;tag&gt;</a> · <a href="https://github.com/DalgoT4D/webapp_v2/releases/tag/<tag>" target="_blank" rel="noopener noreferrer">webapp_v2 &lt;tag&gt;</a>*
+*Release tag: <a href="https://github.com/DalgoT4D/dalgo/releases/tag/<tag>" target="_blank" rel="noopener noreferrer">&lt;tag&gt;</a>*
 ```
 
 Non-negotiable elements (present in every entry, in this order):
@@ -71,18 +71,17 @@ The filename, sidebar position, dates, sections, and tags are the only things th
 Tags may be missing locally — always fetch first.
 
 ```bash
-cd ../DDP_backend && git fetch --tags && git tag --sort=-creatordate | head -5
-cd ../webapp_v2  && git fetch --tags && git tag --sort=-creatordate | head -5
+git fetch --tags && git tag --sort=-creatordate | head -5
 ```
 
-Record for each repo: latest tag, previous tag, tag dates.
+Record: latest tag, previous tag, tag dates.
 
 ### 2. Pull commits in each tag range
 
 ```bash
-git log --no-merges <prev>..<latest> --format="- %s"
-git log <prev>..<latest> --format="%h %s" --grep="^Merge pull"
-git diff --name-only <prev>..<latest>
+git log --no-merges <prev>..<latest> --format="- %s" -- backend/ webapp/
+git log <prev>..<latest> --format="%h %s" --grep="^Merge pull" -- backend/ webapp/
+git diff --name-only <prev>..<latest> -- backend/ webapp/
 ```
 
 Inspect file paths and PR titles to understand what shipped. For unclear PRs, `git show <sha>` the merge commit or read the diff.
@@ -103,7 +102,7 @@ If the entire release is internal, tell the user — don't invent user-facing co
 
 ### 4. Group by theme
 
-Features often span both repos (one PR in DDP_backend + one in webapp_v2). Cluster them by user-facing capability, not by repo.
+Features often span both repos (one PR in backend + one in webapp). Cluster them by user-facing capability, not by repo.
 
 Section pattern:
 - `## <Headline feature>` — the big new capability that anchors the release
@@ -125,7 +124,7 @@ Examples that don't:
 
 ### 6. Write the entry file
 
-File: `dalgo_docs/release-notes-docs/YYYY-MM-DD.md` — the filename uses ISO date for filesystem sortability. Use the **most recent** of the two tag dates so the filename matches the release event the user remembers.
+File: `docs/release-notes-docs/YYYY-MM-DD.md` — the filename uses ISO date for filesystem sortability. Use the **most recent** of the two tag dates so the filename matches the release event the user remembers.
 
 Follow the **Canonical entry structure** at the top of this skill exactly. Do not improvise on shape — only the content inside sections varies between releases.
 
@@ -137,7 +136,7 @@ Specific reminders when writing the body:
 
 ### 7. Put the new entry on top
 
-Open `dalgo_docs/sidebarsReleaseNotes.js`. **Prepend** the new file id (filename without `.md`) so the navbar lands on the latest release:
+Open `docs/sidebarsReleaseNotes.js`. **Prepend** the new file id (filename without `.md`) so the navbar lands on the latest release:
 
 ```js
 // before
@@ -152,7 +151,7 @@ Also bump `sidebar_position` of the previous top entry (2, 3, …) so the order 
 ### 8. Verify build
 
 ```bash
-cd dalgo_docs && yarn build
+cd docs && yarn build
 ```
 
 Must complete cleanly — no broken links, no warnings on the new page. If a link in the body points at a doc page that doesn't exist, drop the link rather than break the build.
@@ -161,15 +160,15 @@ Must complete cleanly — no broken links, no warnings on the new page. If a lin
 
 ```
 Release notes drafted:
-- Entry: dalgo_docs/release-notes-docs/<date>.md
+- Entry: docs/release-notes-docs/<date>.md
 - Sidebar: <date> placed at the top
 - Build: clean
 
 Preview locally:
-  cd dalgo_docs && yarn start
+  cd docs && yarn start
   → http://localhost:3000/release-notes
 
-Commit on a branch in dalgo_docs and open a PR when ready.
+Commit on a branch in docs and open a PR when ready.
 ```
 
 ## Conventions

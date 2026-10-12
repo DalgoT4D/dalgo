@@ -10,8 +10,6 @@
       "WebFetch"
     ],
     "additionalDirectories": [
-      "../DDP_backend",
-      "../webapp_v2",
       "../.dalgo-worktrees"
     ],
     "deny": [

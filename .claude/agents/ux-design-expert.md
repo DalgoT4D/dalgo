@@ -20,7 +20,7 @@ They are smart and capable but not technical. Their reference point is Google Sh
 
 Reference these established patterns (detailed in `.claude/skills/design-review/patterns.md`):
 
-- **Component library**: Shadcn UI (components in `webapp_v2/components/ui/`)
+- **Component library**: Shadcn UI (components in `webapp/components/ui/`)
 - **Styling**: Tailwind CSS v4
 - **Primary brand color**: `#00897B` (teal)
 - **Success**: `#059669` (WCAG AA compliant for text)

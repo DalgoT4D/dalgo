@@ -17,7 +17,7 @@ This enhancement:
 
 The pattern for inline metric creation mirrors the chart builder's `MetricAccordionItem` / `MetricsSelector` approach (same metric form fields, same API calls), but adapted for the modal context (toggle, not accordion).
 
-**Services affected:** `webapp_v2` only. No backend changes.
+**Services affected:** `webapp` only. No backend changes.
 
 ---
 
@@ -73,7 +73,7 @@ When Continue is clicked in "Select existing" mode: same as today — validate `
 
 ## 4. File Changes
 
-### New files — `webapp_v2/components/kpis/`
+### New files — `webapp/components/kpis/`
 
 **`KpiMetricStep.tsx`**
 - Owns its own `useForm<MetricFormData>` for the inline metric fields (same shape as `MetricFormDialog`).
@@ -91,14 +91,14 @@ When Continue is clicked in "Select existing" mode: same as today — validate `
 - Stateless. Props: `control`, `register`, `watch`, `errors`, `existingTags`.
 - Fields: RAG threshold grid (green/amber/red), program tags, KPI type buttons, `NumberFormatSection`, prefix/suffix `DebouncedInput` pair.
 
-### Additional new file — `webapp_v2/components/kpis/`
+### Additional new file — `webapp/components/kpis/`
 
 **`kpi-form-types.ts`**
 - Extracted `KPIFormData` interface here to avoid a circular import between `kpi-form.tsx` and the step components (which each need the type but were importing from `kpi-form.tsx`).
 
 ### Modified files
 
-**`webapp_v2/components/kpis/kpi-form.tsx`**
+**`webapp/components/kpis/kpi-form.tsx`**
 - Change `step` state from `1 | 2` to `1 | 2 | 3`.
 - Add a `StepIndicator` with two rows (circles + connectors top row, labels bottom row) for equal-length connectors regardless of label length. Labels: `{ 1: 'Metric', 2: 'KPI Setup', 3: 'Thresholds & Display' }`.
 - **StepIndicator shown in both create and edit modes** (original plan said hide for edit). In edit mode, step 1 renders as "done" (teal filled circle) since the metric is locked — this keeps the UI consistent.
@@ -112,7 +112,7 @@ When Continue is clicked in "Select existing" mode: same as today — validate `
 - Step 2 Continue calls `trigger(['name', 'target_value', 'direction', 'time_dimension_column'])` for field-level validation before advancing.
 - `inlineCreatedMetric` fallback scoped by id: `metrics.find(m => m.id === metricId) ?? (inlineCreatedMetric?.id === metricId ? inlineCreatedMetric : undefined)` — prevents stale metric data bleeding in if the user changes their selection.
 
-**`webapp_v2/constants/analytics.ts`**
+**`webapp/constants/analytics.ts`**
 - Added `KPI_WIZARD_STEP_VIEWED: 'kpi:wizard_step_viewed'`.
 
 ---

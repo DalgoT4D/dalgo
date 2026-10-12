@@ -5,7 +5,7 @@
 Status legend: `[ ]` todo · `[x]` done · `[~]` in progress
 
 ## Milestone 1: SQL guard + limits (pure library code) ✅ (commit: "Chat with Data M1")
-- [x] Add sqlglot dep to DDP_backend (sqlglot==30.12.0 via uv)
+- [x] Add sqlglot dep to backend (sqlglot==30.12.0 via uv)
 - [x] `guards/sql_guard.py` — validate(): parse, single-statement, SELECT-only by node type (both dialects; UNION/INTERSECT/EXCEPT allowed)
 - [x] `guards/sql_guard.py` — schema allowlist enforcement (CTE aliases exempt)
 - [x] LIMIT inject/clamp via AST — *deviation: lives in sql_guard.py, no separate limits.py; smaller user LIMIT preserved*
@@ -48,7 +48,7 @@ Status legend: `[ ]` todo · `[x]` done · `[~]` in progress
 - [x] Analytics: session created/renamed/deleted, message_sent (value action), sql_viewed, feature:viewed via PATHNAME_TO_FEATURE
 - [x] Hook reducer tests + component render tests + page gating tests (21 tests)
 - [x] FORBIDDEN (4004) close code added to lib/websocket.ts, no-reconnect
-- [x] *Deviation: no markdown renderer exists in webapp_v2* — assistant text renders whitespace-pre-wrap plain text; backend prompt now instructs plain text (prompts.py, uncommitted in backend worktree)
+- [x] *Deviation: no markdown renderer exists in webapp* — assistant text renders whitespace-pre-wrap plain text; backend prompt now instructs plain text (prompts.py, uncommitted in backend worktree)
 - [ ] Playwright browser smoke test — deferred to M6 live validation (needs running stack + flagged org)
 
 ## Post-M5 additions (2026-07-07)
@@ -61,6 +61,6 @@ Status legend: `[ ]` todo · `[x]` done · `[~]` in progress
 - [ ] Concurrency sanity (3 sessions streaming)
 - [ ] Audit rows + per-turn cost measured; prompt tuning if needed
 - [x] domain-map.md entity entry (Analytics Layer → "Chat with Data")
-- [ ] User-facing docs page (documentation skill, dalgo_docs)
-- [ ] `.env.template`: add ANTHROPIC_API_KEY / CHAT_WITH_DATA_MODEL / LANGSMITH_* — **still blocked by sandbox perms; snippet in DDP_backend dev doc**
+- [ ] User-facing docs page (documentation skill, docs)
+- [ ] `.env.template`: add ANTHROPIC_API_KEY / CHAT_WITH_DATA_MODEL / LANGSMITH_* — **still blocked by sandbox perms; snippet in backend dev doc**
 - [ ] Backend PR + frontend PR (backend first, cross-linked)

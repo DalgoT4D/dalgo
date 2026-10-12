@@ -8,7 +8,7 @@
 ## 1. Current State (from spec: sentry_setup_plan.md)
 
 ### SDK Version
-- @sentry/nextjs v8.55.0 installed in webapp_v2
+- @sentry/nextjs v8.55.0 installed in webapp
 
 ### Existing Config Files
 | File | Purpose | Status |

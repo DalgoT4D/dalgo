@@ -35,8 +35,8 @@ Follow this 4-phase approach for every bug:
 
 ## Architecture References
 
-- **Backend**: The `backend-architecture` skill has templates and examples. Read `DDP_backend/.claude/CLAUDE.md` for rules and conventions.
-- **Frontend**: The `frontend-architecture` skill has patterns and reference. Read `webapp_v2/CLAUDE.md` for rules and conventions.
+- **Backend**: The `backend-architecture` skill has templates and examples. Read `backend/.claude/CLAUDE.md` for rules and conventions.
+- **Frontend**: The `frontend-architecture` skill has patterns and reference. Read `webapp/CLAUDE.md` for rules and conventions.
 
 ---
 

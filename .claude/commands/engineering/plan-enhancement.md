@@ -15,8 +15,8 @@ The output is a plan (`plan.md`) inside a newly created version folder. The rest
 Before research, in this order:
 
 ### 1. Read platform context (mandatory)
-- `dalgo-core/README.md` — workflow and directory conventions.
-- `dalgo-core/docs/domain-map.md` — product entities and their consumers. **Source of truth for impact analysis.**
+- `harness/README.md` — workflow and directory conventions.
+- `harness/domain-map.md` — product entities and their consumers. **Source of truth for impact analysis.**
 
 Skipping these will produce an incomplete plan that misses downstream surfaces.
 
@@ -74,7 +74,7 @@ Identical to `/engineering/plan-feature`:
 1. **Codebase Analysis** — search for similar patterns, identify files to reference, note conventions, check test patterns.
 2. **External Research** — library docs (with URLs), implementation examples, common pitfalls.
 3. **Clarification** — ask whatever is needed to resolve ambiguity in the enhancement.
-4. **Multi-service Impact** — DDP_backend, webapp_v2, prefect-proxy — which services change, how to validate each.
+4. **Multi-service Impact** — backend, webapp, prefect-proxy — which services change, how to validate each.
 5. **Save Research** — write findings to `features/{feature-name}/v{major}.{minor}/research.md`.
 
 ## Plan Document Structure

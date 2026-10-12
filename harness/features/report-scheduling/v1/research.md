@@ -5,7 +5,7 @@
 
 ---
 
-## 1. Backend Architecture (DDP_backend)
+## 1. Backend Architecture (backend)
 
 ### Framework & Patterns
 - **Django + Django Ninja** for REST APIs with automatic Pydantic schema validation
@@ -63,7 +63,7 @@
 
 ---
 
-## 2. Frontend Architecture (webapp_v2)
+## 2. Frontend Architecture (webapp)
 
 ### Framework & Patterns
 - **Next.js 15 + React 19** with App Router
@@ -163,13 +163,13 @@ Reference: `features/metrics_kpis/v1/plan.md` and `features/metrics_kpis/v1/task
 
 | File | Purpose |
 |------|---------|
-| `DDP_backend/ddpui/celeryworkers/tasks.py` | Register hourly `check_scheduled_reports` task |
-| `DDP_backend/ddpui/core/reports/report_service.py` | Reuse `ReportService.create_snapshot()` |
-| `DDP_backend/ddpui/celeryworkers/report_tasks.py` | Pattern for `send_report_email_task` |
-| `DDP_backend/ddpui/routes.py` | Register new schedule API router |
-| `webapp_v2/components/reports/share-via-email-dialog.tsx` | UI pattern for recipient management |
-| `webapp_v2/components/reports/create-snapshot-dialog.tsx` | Pattern for date column picker |
+| `backend/ddpui/celeryworkers/tasks.py` | Register hourly `check_scheduled_reports` task |
+| `backend/ddpui/core/reports/report_service.py` | Reuse `ReportService.create_snapshot()` |
+| `backend/ddpui/celeryworkers/report_tasks.py` | Pattern for `send_report_email_task` |
+| `backend/ddpui/routes.py` | Register new schedule API router |
+| `webapp/components/reports/share-via-email-dialog.tsx` | UI pattern for recipient management |
+| `webapp/components/reports/create-snapshot-dialog.tsx` | Pattern for date column picker |
 
 ---
 
-*Research compiled from codebase exploration via DDP_backend GitHub repo, domain-map.md, existing features/metrics_kpis/v1 artifacts, and existing report infrastructure analysis.*
+*Research compiled from codebase exploration via backend GitHub repo, domain-map.md, existing features/metrics_kpis/v1 artifacts, and existing report infrastructure analysis.*

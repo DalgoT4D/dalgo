@@ -87,7 +87,7 @@ This file tracks execution progress so a resumed session can pick up where the p
 - `ddpui/schemas/alert_schema.py` — added `RecipientCandidate` (orguser_id + email + name) for the wizard picker.
 - `ddpui/tests/api_tests/test_alert_api.py` — 4 new slack-webhook tests + 1 recipient-candidates test; aliased the imported `test_slack_webhook` as `run_slack_webhook_test` to avoid pytest treating the imported handler as a test function.
 
-**Frontend (`webapp_v2/` on `feature/alerts-prod`):**
+**Frontend (`webapp/` on `feature/alerts-prod`):**
 - `lib/api.ts` — added `apiPatch` helper.
 - `jest.setup.ts` — added `apiPatch: jest.fn()` to the global `@/lib/api` mock.
 - `types/alerts.ts` — TS interfaces mirroring backend Pydantic + cron utilities `localScheduleToUtcCron` / `utcCronToLocalSchedule` (round-trip safe; clamps DOM to [1, 28]).
@@ -109,7 +109,7 @@ This file tracks execution progress so a resumed session can pick up where the p
 - `components/alerts/__tests__/RecipientCombobox.test.tsx` — 4 tests (Dalgo user select, external email add, invalid-email rejection, chip removal). Uses per-test `SWRConfig` provider to isolate cache.
 - `components/alerts/__tests__/AlertWizardModal.test.tsx` — 4 tests (open on step 1, blocks Next on invalid step 1, advances on valid, Back preserves values).
 
-**Test totals at the end of M2:** 16 new frontend tests + 5 new backend tests, all passing. Total backend alert suite is now 69 passing (M1 + M2). Full webapp_v2 suite: 1320 pre-existing tests still passing (2 pre-existing failing suites unrelated to alerts).
+**Test totals at the end of M2:** 16 new frontend tests + 5 new backend tests, all passing. Total backend alert suite is now 69 passing (M1 + M2). Full webapp suite: 1320 pre-existing tests still passing (2 pre-existing failing suites unrelated to alerts).
 
 ### Validation done
 
@@ -164,7 +164,7 @@ This file tracks execution progress so a resumed session can pick up where the p
 - `ddpui/celeryworkers/alert_tasks.py` — `dispatch_due_alerts` (beat-fired, iterates active alerts, calls `is_due`, enqueues `evaluate_alert.delay`) and `evaluate_alert` (atomic claim via conditional UPDATE on `last_evaluated_at`; reload with `select_related`; run `_run_evaluation` which builds SQL → executes → evaluates condition → renders body → calls `deliver_all` → writes one AlertLog row with snapshot + sql_executed + message + deliveries JSON).
 - `ddpui/settings.py` — added `CELERY_BEAT_SCHEDULE["alerts-dispatcher"]` running every 60 seconds.
 
-**Frontend (`webapp_v2/` on `feature/alerts-prod`):**
+**Frontend (`webapp/` on `feature/alerts-prod`):**
 - `types/alerts.ts` — added `AlertTestPayload` + `AlertTestResponse` interfaces.
 - `hooks/api/useAlerts.ts` — added `dryRunAlert(payload)` mutator.
 - `components/alerts/AlertTestStep.tsx` — Step 3 UI. Auto-runs the dry-run on mount + whenever the payload signature changes (Back→Next re-runs). States rendered: loading spinner, network-error block with retry, backend-error block (e.g. "no warehouse"), would-fire green banner, would-not-fire muted banner, empty-result amber banner. Shows current_value + outcome badge, rendered message in a styled block, collapsible SQL pre tag, manual Re-run button.
@@ -180,7 +180,7 @@ This file tracks execution progress so a resumed session can pick up where the p
 - **Frontend (added in M3):** 7 new tests, all passing.
   - `components/alerts/__tests__/AlertTestStep.test.tsx` — would-fire banner + message, would-not-fire banner, empty-result amber banner, backend-error block, network-error block, SQL toggle expand/collapse, re-run on payload change.
 
-**Test totals at the end of M3:** Backend alert suite **95 passing** (M1 64 + M2 5 + M3 26). Frontend alert suite **23 passing** (M2 16 + M3 7). Full webapp_v2 suite 1327 passing (3 pre-existing failures unrelated).
+**Test totals at the end of M3:** Backend alert suite **95 passing** (M1 64 + M2 5 + M3 26). Frontend alert suite **23 passing** (M2 16 + M3 7). Full webapp suite 1327 passing (3 pre-existing failures unrelated).
 
 ### Validation done
 
@@ -227,7 +227,7 @@ This file tracks execution progress so a resumed session can pick up where the p
 **Backend (`DDP_backend_alerts/` on `feature/alerts`):**
 - No code changes — M3 already shipped the `firing` / `logs` endpoints with correct shapes, the `(alert, -evaluated_at)` and `(alert, -evaluated_at, fired)` indexes on AlertLog, and `compute_fire_streak`. M4 audit verified these are good for v1 scale.
 
-**Frontend (`webapp_v2/` on `feature/alerts-prod`):**
+**Frontend (`webapp/` on `feature/alerts-prod`):**
 - `components/alerts/AlertsTable.tsx` — new table component with per-column sort/filter affordances:
   - Columns: Name (+ source subtitle), Alert condition, Enabled toggle, Frequency, Fire streak, Last fire, Actions.
   - **Source subtitle** is a `next/link` for Metric (`/metrics?highlight=N`) and KPI (`/kpis?open=N`); plain text for Standalone (datasets aren't navigable per spec).
@@ -260,7 +260,7 @@ This file tracks execution progress so a resumed session can pick up where the p
   - modal title + row content, expand-row shows message + email + slack + SQL toggle, Partial badge for mixed delivery outcomes, Not-fired badge for non-firing evaluations, empty-message when no logs exist.
 - `components/metrics/__tests__/consumer-links.test.tsx` — +1 test (alert count rendering + link to `/alerts`), plus fixture updates to include `alerts: []`.
 
-**Test totals at the end of M4:** Backend alert suite still **95 passing** (unchanged from M3). Frontend alert suite **41 passing** (M2 16 + M3 7 + M4 18). Full webapp_v2 suite 1345 passing (3 pre-existing failures unrelated — `DataPreview`, `pipeline-run-history`).
+**Test totals at the end of M4:** Backend alert suite still **95 passing** (unchanged from M3). Frontend alert suite **41 passing** (M2 16 + M3 7 + M4 18). Full webapp suite 1345 passing (3 pre-existing failures unrelated — `DataPreview`, `pipeline-run-history`).
 
 ### Validation done
 
@@ -292,7 +292,7 @@ This file tracks execution progress so a resumed session can pick up where the p
 
 ### What shipped
 
-**Frontend (`webapp_v2/` on `feature/alerts-prod`):**
+**Frontend (`webapp/` on `feature/alerts-prod`):**
 - `components/main-layout.tsx` — removed `'Alerts'` from `PRODUCTION_HIDDEN_ITEMS` so the nav item is visible in production. List is now empty (typed as `string[]`).
 - `components/kpis/kpi-detail-drawer.tsx` — imported `ALERT_PERMISSIONS` + `useUserPermissions`; the BellRing "Create alert" icon button only renders when the user has `can_create_alerts`.
 - `components/metrics/metrics-library.tsx` — same gating on the row 3-dot menu's "Create alert" item (also fixed casing: was "Create Alert" → now "Create alert" per design.md item 9).
@@ -318,7 +318,7 @@ This file tracks execution progress so a resumed session can pick up where the p
   - Switch is disabled when `canEdit=false`.
   - Delete dropdown item has `aria-disabled="true"` when `canDelete=false`.
 
-**Test totals at the end of M5:** Backend alert suite still **95 passing** (unchanged from M3). Frontend alert + consumer-links suite **43 passing** (M2 16 + M3 7 + M4 18 + M5 2). Full webapp_v2 suite continues to pass aside from the same pre-existing unrelated failures.
+**Test totals at the end of M5:** Backend alert suite still **95 passing** (unchanged from M3). Frontend alert + consumer-links suite **43 passing** (M2 16 + M3 7 + M4 18 + M5 2). Full webapp suite continues to pass aside from the same pre-existing unrelated failures.
 
 ### Validation done
 
@@ -332,7 +332,7 @@ This file tracks execution progress so a resumed session can pick up where the p
 - **Tooltip via native `title=` attribute, not Radix `<Tooltip>`.** Native title hint shows on hover with no extra render cost. v1 acceptable; if Pasha asks for branded tooltips in v2 we can wrap with the existing `<Tooltip>` primitive.
 - **Toast copy uses `sonner` directly, not `lib/toast` helpers.** `lib/toast` injects generic strings like "Alert created successfully!" and "Failed to create alert"; the spec requires verbatim wording like "Alert created. It will run on its next scheduled time." Bypassing the helper keeps the copy exact and centralized at the call site.
 - **Toggle error reverts via SWR mutate, message is generic** (`"Couldn't update the alert. The row was reverted."`). The handler calls `mutateBoth()` only on success; on failure the optimistic state stays out of sync until the next fetch — but since the Switch is `checked={a.is_active}` from server data, the UI immediately snaps back to the previous state when the SWR cache stays unchanged. No need for explicit revert logic.
-- **design.md items 8, 11, 12 are already satisfied.** Item 8 (frequency rules) — `ScheduleField.tsx` already enforces Daily=time, Weekly=day+time, Monthly=DoM+time. Item 11 (`biiling` typo) — not present in webapp_v2 source. Item 12 ("Invalid username. Please check your email.") — never written into our codebase; `RecipientCombobox` rejects malformed emails silently (doesn't surface a user-facing error). If item 12 needs a visible message in v2 we can add one.
+- **design.md items 8, 11, 12 are already satisfied.** Item 8 (frequency rules) — `ScheduleField.tsx` already enforces Daily=time, Weekly=day+time, Monthly=DoM+time. Item 11 (`biiling` typo) — not present in webapp source. Item 12 ("Invalid username. Please check your email.") — never written into our codebase; `RecipientCombobox` rejects malformed emails silently (doesn't surface a user-facing error). If item 12 needs a visible message in v2 we can add one.
 - **design.md item 10 (Metric row menu labels)** is a Figma-side fix; the implementation already shows "Edit Metric / Create KPI / Create alert / Delete" which is correct.
 
 ### Out of M5 scope (per plan)
@@ -345,7 +345,7 @@ This file tracks execution progress so a resumed session can pick up where the p
 ## Notes for resumed sessions
 
 - Backend worktree: `DDP_backend_alerts/` on branch `feature/alerts`.
-- Frontend dir: `webapp_v2/` on branch `feature/alerts-prod` (no separate worktree).
+- Frontend dir: `webapp/` on branch `feature/alerts-prod` (no separate worktree).
 - Spec deviation captured in [plan.md §8 Open Questions #8]: Metric/KPI delete cascades to alerts; spec text needs updating before merge.
 - `Delivery status` badge (Story 6) — **resolved in M4**. Backend returns `fired` + `deliveries`; frontend `AlertLogModal` derives Success/Partial/Failed/Not-fired client-side. Mark plan §8 open question #7 as resolved before merge.
 - `summary_status` is NOT stored on `alert_log` — derived in the UI as above.

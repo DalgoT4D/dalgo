@@ -17,8 +17,8 @@ Acronyms used here: RBAC (role-based access control — who can do what, by role
 
 | Service | Touched? | What |
 |---|---|---|
-| DDP_backend | ✅ heavily | role remap migration, permission seed, `owner` column + backfill, owner-or-admin delete, 2 OrgPreferences fields |
-| webapp_v2 | ✅ heavily | sidebar role filter, route guards, No Access page, Settings re-IA, `<PermissionGate>` |
+| backend | ✅ heavily | role remap migration, permission seed, `owner` column + backfill, owner-or-admin delete, 2 OrgPreferences fields |
+| webapp | ✅ heavily | sidebar role filter, route guards, No Access page, Settings re-IA, `<PermissionGate>` |
 | prefect-proxy | ❌ | no user/role model lives here (see research §7) |
 
 ---
@@ -237,7 +237,7 @@ Ordered to match the spec's implementation order; each is independently shippabl
 
 #### Milestone 1: Role collapse + permission remap (backend)
 - **Deliverable:** 3 customer roles live; AM/PM→admin, analyst→analyst (infra write removed), guest→member (view fixed); `super-admin` untouched.
-- **Services:** DDP_backend.
+- **Services:** backend.
 - **Key tasks:**
   - [ ] Update `seed/001_roles.json` + `seed/003_role_permissions.json` for the 3 roles.
   - [ ] Data migration: remap OrgUser roles + apply permission deltas + `set_roles_and_permissions_in_redis()`; implement reverse.
@@ -246,7 +246,7 @@ Ordered to match the spec's implementation order; each is independently shippabl
 
 #### Milestone 2: Analyst read-only / Member hidden on Data + DQ + Explore
 - **Deliverable:** Data sections (incl. Data Quality, Explore) render read-only for Analyst, hidden for Member.
-- **Services:** DDP_backend (already done via M1 seed) + webapp_v2.
+- **Services:** backend (already done via M1 seed) + webapp.
 - **Key tasks:**
   - [ ] Frontend: hide create/edit/run affordances in ingest/transform/warehouse/pipeline/orchestrate/data-quality/explore for Analyst; hide nav for Member.
   - [ ] Confirm DQ + Explore permission slugs trimmed for Analyst in M1 seed.
@@ -254,7 +254,7 @@ Ordered to match the spec's implementation order; each is independently shippabl
 
 #### Milestone 3: Sidebar + route gating + No Access page (frontend)
 - **Deliverable:** nav filtered by role; hidden direct-URLs redirect; No Access page exists.
-- **Services:** webapp_v2.
+- **Services:** webapp.
 - **Key tasks:**
   - [ ] Add `visibleToRoles` to `NavItemType`; tag items; extend filter.
   - [ ] Route guard + No Access component.
@@ -263,7 +263,7 @@ Ordered to match the spec's implementation order; each is independently shippabl
 
 #### Milestone 4: Settings consolidation + Org-defaults (inert)
 - **Deliverable:** one Settings area; Admin-only globals (Warehouse, Appearance, Org-defaults, Users, Billing); Groups slot reserved; org-defaults toggles persist.
-- **Services:** webapp_v2 + DDP_backend.
+- **Services:** webapp + backend.
 - **Key tasks:**
   - [ ] Add `default_visibility_floor` + `allow_public_sharing` to OrgPreferences + schema + API.
   - [ ] Settings IA pages; gate globals Admin-only; Billing Admin-only.
@@ -272,7 +272,7 @@ Ordered to match the spec's implementation order; each is independently shippabl
 
 #### Milestone 5: Ownership — owner column, backfill, owner-or-admin delete
 - **Deliverable:** `owner` on all 5 content models; backfilled; delete is owner-or-admin everywhere (incl. Metric/KPI).
-- **Services:** DDP_backend (+ minor frontend: delete button visibility).
+- **Services:** backend (+ minor frontend: delete button visibility).
 - **Key tasks:**
   - [ ] Schema migration + backfill (oldest-active-Admin fallback).
   - [ ] `can_delete_resource()` helper; wire into 5 delete services.
@@ -282,7 +282,7 @@ Ordered to match the spec's implementation order; each is independently shippabl
 
 #### Milestone 6: Settings > Users invite surface
 - **Deliverable:** Admin creates/changes-role/deletes users via the existing (re-skinned) Users page.
-- **Services:** webapp_v2 (+ verify backend invite endpoint).
+- **Services:** webapp (+ verify backend invite endpoint).
 - **Key tasks:**
   - [ ] Extend `UserManagement.tsx` for the 3-role dropdown; Admin-only.
   - [ ] Verify invite endpoint role-cap + Admin-only gating.
@@ -290,7 +290,7 @@ Ordered to match the spec's implementation order; each is independently shippabl
 
 #### Milestone 7: Browser testing with Playwright MCP (post-build verification)
 - **Deliverable:** the role-gating flows verified live in a real browser, not just in unit/E2E test files.
-- **Services:** webapp_v2 (running locally) + DDP_backend (running locally).
+- **Services:** webapp (running locally) + backend (running locally).
 - **When:** only after Milestones 1–6 are implemented and all automated tests pass.
 - **Key tasks:**
   - [ ] **Once the feature is fully built, stop and ask the user** whether to run browser testing with the Playwright MCP before declaring the work done. Do not assume — confirm first.

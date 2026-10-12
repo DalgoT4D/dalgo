@@ -3,7 +3,7 @@
 **Status:** All milestones done and browser-verified (2026-10-07) — 1, 3, 4, 5, and 6. Milestone 2 has no separate backend deliverable (see §7). Feature complete per this plan.
 **Spec:** [features/dependent-filters/spec.md](../spec.md) — "v2 — supersedes parent-child"
 **Research:** [research.md](./research.md)
-**Services affected:** `DDP_backend` (Django + Ninja), `webapp_v2` (Next.js)
+**Services affected:** `backend` (Django + Ninja), `webapp` (Next.js)
 
 ## 1. Overview
 
@@ -125,7 +125,7 @@ Frontend → backend: same query-param pattern on the existing `/preview/` endpo
 
 #### Milestone 1: Backend data model + group validation — ✅ DONE (2026-09-29)
 - **Deliverable:** a dashboard's dependent group (a flat list of filter ids) can be set via a new endpoint, with same-table + categorical-only validation.
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [x] `DashboardFilter.dependent_group_id` field + migration (`0189_dashboard_filter_dependent_group_id.py`)
   - [x] `DashboardService.set_dependent_group()` + validation
@@ -133,7 +133,7 @@ Frontend → backend: same query-param pattern on the existing `/preview/` endpo
   - [x] `duplicate_dashboard` copies each filter's `dependent_group_id` straight to its counterpart in the new dashboard — safe without remapping, since every query reading it is already scoped by dashboard
   - [x] Delete the now-unused `_has_cycle` / `depends_on_filter_ids` cycle-check code (done in pre-execution cleanup pass)
 - **Acceptance criteria:** valid same-table categorical sets save; a different-table or non-categorical id is rejected with a clear error; duplicating a dashboard with a group produces a correctly-relinked copy.
-- **Verified:** 121 passed (`test_dashboard_service.py`, `test_dashboard_native_api.py`, `test_filter_api.py`, `test_public_report_api.py`), worktree `DDP_backend-dependent-filters`.
+- **Verified:** 121 passed (`test_dashboard_service.py`, `test_dashboard_native_api.py`, `test_filter_api.py`, `test_public_report_api.py`), worktree `backend-dependent-filters`.
 - **Bug found + fixed (2026-09-30):** `delete_filter()` never removed a deleted filter's id from `dependent_group_filter_ids`, leaving a dangling reference. Concretely: this didn't just show stale data -- it *blocked saving any new group* afterward, since `set_dependent_group`'s "every id must belong to this dashboard" check rejected the whole save because of the one dead id. Found via manual testing, confirmed against spec.md's edge case ("unlink or delete a member → the others widen; a group under 2 members dissolves"). Fixed: `delete_filter` now removes the deleted id from the group, and dissolves the group entirely (empty list) if fewer than 2 members remain. One test covers the removal behavior. This also covers part of Milestone 5's "Group-under-2-members dissolves correctly" — the delete-triggered case is done; the checklist-uncheck-triggered case is still open there.
 
 #### Milestone 2: Backend narrowing query — ⏭️ NOT NEEDED (folded into Milestone 4, 2026-09-30)
@@ -142,7 +142,7 @@ Frontend → backend: same query-param pattern on the existing `/preview/` endpo
 
 #### Milestone 3: Frontend group config UI — ✅ DONE (2026-09-30)
 - **Deliverable:** builder can create/edit the dashboard's one dependent group via the new gear-icon checklist.
-- **Services:** webapp_v2
+- **Services:** webapp
 - **Key tasks:**
   - [x] Gear icon in `unified-filters-panel.tsx`, left of "+ Add" (both horizontal and vertical layouts, edit mode only, only shown once a dashboard has at least one filter)
   - [x] `dependent-filters-config-modal.tsx` (new file) — checklist, greys out non-categorical and different-table filters; anchor table = whichever filter is checked first; saves via `PUT .../dependent-group/`
@@ -156,7 +156,7 @@ Frontend → backend: same query-param pattern on the existing `/preview/` endpo
 
 #### Milestone 4: Frontend live mutual narrowing — ✅ DONE for all surfaces, browser-verified (2026-10-01)
 - **Deliverable:** the full viewer-facing experience from the spec's "Behavior (view mode)" section — narrowing in every direction, symmetric auto-drop. Absorbs former Milestone 2's goal (narrowing actually working end to end) since building the `constraints` payload is frontend work.
-- **Services:** webapp_v2
+- **Services:** webapp
 - **Key tasks:**
   - [x] `getGroupNarrowingInfo()` in `dashboard-filter-utils.ts` — for one member, returns every *other* group member's `{column, operator: "in", value}` (skips members without a value, excludes self); reuses the existing `filterValueToOperatorEntries` helper. One unit test covering self-exclusion + unset-exclusion + correct shape together.
   - [x] `ValueFilterWidget`'s SWR key includes every other group member's current value — computed once per filter in `unified-filters-panel.tsx` (`getGroupNarrowingInfo` + `JSON.stringify`), threaded down as a JSON-string prop through `SortableFilterItem` → `FilterElement` → `DashboardFilterWidget` → `ValueFilterWidget`, appended to the API URL as the existing `constraints` param.
@@ -179,7 +179,7 @@ Frontend → backend: same query-param pattern on the existing `/preview/` endpo
 
 #### Milestone 5: Polish + manual verification — ✅ DONE, browser-verified (2026-10-04)
 - **Deliverable:** remaining edge cases from the spec, verified end to end.
-- **Services:** DDP_backend, webapp_v2
+- **Services:** backend, webapp
 - **Key tasks:**
   - [x] Column-removed (truly gone) shows broken in edit mode, rest of group keeps working — verified by the user with a real `DROP COLUMN`: broken member shows the edit-mode notice, sibling members gracefully fall back to unnarrowed (not erroring), confirmed by `test_narrowed_query_falls_back_to_full_list_on_error` (backend) and the existing "broken filter" widget test (frontend). No new code needed — already correctly handled by pre-existing infrastructure.
   - [x] Column-rename handling (pure column_name change, same table/type) — already works, no new code: `table_name`/`schema_name` can't change via the UI once a filter exists (`DatasetSelector` is `disabled={mode === 'edit'}`), and group membership is id-based, so a rename-remap never risks the group's invariants.
@@ -193,7 +193,7 @@ Frontend → backend: same query-param pattern on the existing `/preview/` endpo
 
 #### Milestone 6: Linked filters visual grouping + polish — ✅ DONE, browser-verified (2026-10-07)
 - **Deliverable:** group members render as a visually distinct, fixed "Linked filters" card at the top of the filter panel, across edit/view/public/report modes and both layouts; drag-reorder stays scoped within the linked group or within independent filters, never across; locked filters (report mode's frozen date filter) always render above the card.
-- **Services:** webapp_v2, DDP_backend
+- **Services:** webapp, backend
 - **Key tasks:**
   - [x] `unified-filters-panel.tsx` — filters partition into locked / grouped / ungrouped at render time; each partition gets its own `SortableContext`; `handleDragEnd` only reorders within one partition at a time.
   - [x] "Linked filters" card — bordered, gray header strip with a filter-count badge, no edit icon, rendered first and not itself draggable; present in both horizontal and vertical layouts, across edit, view, public, and report modes.

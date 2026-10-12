@@ -10,7 +10,7 @@ This document captures codebase research, existing patterns to reuse, library op
 
 ## 1. Codebase patterns to reuse
 
-### DDP_backend (Django + Django Ninja)
+### backend (Django + Django Ninja)
 
 | Concern | File / Pattern | How we use it |
 |---|---|---|
@@ -28,7 +28,7 @@ This document captures codebase research, existing patterns to reuse, library op
 | **Celery worker** | `ddpui/celeryworkers/` — existing `task = @shared_task` pattern | New `ddpui/celeryworkers/alert_tasks.py` for `dispatch_due_alerts` + `evaluate_alert` |
 | **Celery beat config** | `ddpui/celery.py` + Django settings `CELERY_BEAT_SCHEDULE` | Add one entry: `alerts-dispatcher` ticking every 60s |
 
-### webapp_v2 (Next.js 15 + Shadcn)
+### webapp (Next.js 15 + Shadcn)
 
 | Concern | File / Pattern | How we use it |
 |---|---|---|
@@ -164,7 +164,7 @@ No 2-hop downstream because Alert's only consumer (Notification) is out of scope
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     webapp_v2 (Next.js)                          │
+│                     webapp (Next.js)                          │
 │                                                                  │
 │  /metrics page          /kpis (drawer)         /alerts page      │
 │      │                       │                       │           │
@@ -176,7 +176,7 @@ No 2-hop downstream because Alert's only consumer (Notification) is out of scope
                                │  HTTP via lib/api.ts
                                │
 ┌──────────────────────────────┼───────────────────────────────────┐
-│                       DDP_backend (Django Ninja)                 │
+│                       backend (Django Ninja)                 │
 │                              │                                   │
 │  /api/alerts/  (CRUD)        /api/alerts/test/ (dry-run)         │
 │  /api/alerts/{id}/fires/     /api/alerts/test-slack-webhook/     │

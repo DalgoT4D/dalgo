@@ -34,3 +34,12 @@ logs/
 # Sync tooling
 .sync-cache/
 .sync-state
+
+# Harness / Claude
+.claude/agent-memory
+.claude/test-credentials.local.json
+.claude/worktrees
+.claude/.DS_Store
+.obsidian/
+.serena
+.superpowers

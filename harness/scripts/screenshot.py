@@ -12,7 +12,7 @@ Usage:
     uv run python scripts/screenshot.py kpis metrics # several
     uv run python scripts/screenshot.py --list       # list recipes
 
-Environment (from dalgo-core/.env):
+Environment (from harness/.env):
     E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD, E2E_BASE_URL
 """
 
@@ -27,11 +27,11 @@ from playwright.sync_api import sync_playwright, Page
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
-REPO_ROOT = Path(__file__).parent.parent
-RECIPES_DIR = REPO_ROOT / "scripts" / "recipes"
-# Resolve dalgo_docs via the symlink at dalgo-core/dalgo_docs (set up in the repo root).
-# This is the sanctioned path — don't assume a sibling layout.
-DOCS_IMG_ROOT = (REPO_ROOT / "dalgo_docs" / "static" / "img").resolve()
+HARNESS_ROOT = Path(__file__).parent.parent
+RECIPES_DIR = HARNESS_ROOT / "scripts" / "recipes"
+# User-facing docs are at the monorepo root (sibling of harness/).
+MONOREPO_ROOT = HARNESS_ROOT.parent
+DOCS_IMG_ROOT = (MONOREPO_ROOT / "docs" / "static" / "img").resolve()
 BASE_URL = os.environ.get("E2E_BASE_URL", "https://staging-app.dalgo.org")
 EMAIL = os.environ.get("E2E_ADMIN_EMAIL")
 PASSWORD = os.environ.get("E2E_ADMIN_PASSWORD")

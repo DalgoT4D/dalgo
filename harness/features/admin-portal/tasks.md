@@ -35,7 +35,7 @@ Remove with `User.objects.filter(email__in=[...]).delete()` — that cascades th
 
 **What shipped:** an admin sign-in screen and a sign-out control over the **shared** product session, with `@platform_admin_required` on every admin route as the enforced boundary. Not an independent session — see `plan.md` §3.2 for why that was reversed.
 
-### Backend — DDP_backend
+### Backend — backend
 
 - [x] **`869af4af`** — convention and duplication cleanup
   - [x] Deleted `AdminInviteUserSchema` (field-identical to `NewInvitationSchema`) and `AdminLoginSchema` (field-identical to `LoginPayload`); the endpoints now take the existing schemas
@@ -49,7 +49,7 @@ Remove with `User.objects.filter(email__in=[...]).delete()` — that cascades th
   - [x] Kept `GET /admin/currentuser`, gated by `@platform_admin_required` only
   - [x] Added `drf_authentication_failed_handler` in `routes.py`: a wrong password now returns **401** instead of the **500** it used to. This fixes the normal product login too, not only the admin one.
 
-### Frontend — webapp_v2
+### Frontend — webapp
 
 - [x] **`d1227c0`** — sign in through the shared login
   - [x] `/admin/login` posts to `POST /api/v2/login/`, reads `is_platform_admin` from the response, and refuses a non-admin locally without navigating
@@ -104,14 +104,14 @@ Each was found in passing and deliberately left alone. Each deserves its own tic
 | 3 | **Stale migration bytecode after the renumber in `5222d791`.** | Anyone still holding `0161_org_is_active.py`, `0162_orguser_is_active.py`, or `0163_invitation_invited_in_org.py` (renumbered to `0169`–`0171`) will hit a duplicate-column error on `migrate`. Delete the stale files and their `__pycache__/*.pyc`. |
 | 4 | **A platform admin belonging to no org cannot use the portal.** | `CustomJwtAuthMiddleware` loads `request.orguser` and `@platform_admin_required` reads it. Pre-existing and unchanged by this work — see `plan.md` §8 Q5. Untested and unfixed; we assume every platform admin belongs to at least one org. |
 | 5 | **`is_platform_admin` now has three frontend read paths** — the Zustand store (normal sidebar), the `/admin/currentuser` SWR call (AdminGuard), and the `/api/v2/login/` response body (sign-in screen). | All three read the same server-side flag, and the server re-checks it per request, so a disagreement is a stale-UI bug rather than an access hole. Worth consolidating. |
-| 6 | **`git stash` is unsafe in `webapp_v2` while the dev server is running.** | It fails partway on locked `.swc/plugins` and `components/__tests__/`, leaving a stash entry and an aborted `pop`. Hit once here; recovered by checking the working tree, confirming the stash was byte-identical to it, then dropping it. |
+| 6 | **`git stash` is unsafe in `webapp` while the dev server is running.** | It fails partway on locked `.swc/plugins` and `components/__tests__/`, leaving a stash entry and an aborted `pop`. Hit once here; recovered by checking the working tree, confirming the stash was byte-identical to it, then dropping it. |
 | 7 | **No reversible per-org or per-user suspend exists.** `Org.is_active`/`OrgUser.is_active` were removed entirely on 2026-08-19 (`026decfb`, squashed/renumbered in `261c10d1`/`ac1dd051`/`21a3484f`) — fields, migration, and auth enforcement all gone. | Accepted trade-off, not a regression to fix later — see `026decfb`'s commit message. The only remaining levers to stop someone signing in are removing their `OrgUser` membership outright, flipping the global `User.is_active` (blocks every org, not just one), or deleting the org itself — and org delete was never built. |
 
 ---
 
 ## Held for a frontend dependency check
 
-From the backend duplication audit. Deliberately **not** applied, because each changes a wire contract `webapp_v2` reads:
+From the backend duplication audit. Deliberately **not** applied, because each changes a wire contract `webapp` reads:
 
 - Renaming `AdminInvitationSchema.invited_role_slug` to the established `invited_new_role_slug`
 - Renaming `RemovalImpactSchema` → `AdminRemovalImpactSchema` for module consistency
@@ -123,4 +123,4 @@ From the backend duplication audit. Deliberately **not** applied, because each c
 
 - **2026-07-22** — setup; branch `feature/admin-portal-m4-users`; environment verified; independent-session Milestone 1 built (backend `aa81d3a`…`2530c3f`, frontend `dccc3ee`…`9618d37`).
 - **2026-07-26** — duplication/convention audit → `869af4af`. Independent session reversed → `eca9865f` (backend), `d1227c0` (frontend). Sidebar sign-out added → `968435a`. Spec, plan, research, and this file updated to match.
-- **2026-08-19** — `Org.is_active`/`OrgUser.is_active` removed entirely: model fields, migration, and auth enforcement (`026decfb`, squashed/renumbered in `261c10d1`, `ac1dd051`, `21a3484f`). Spec, research, and plan corrected to match: org/user CRUD is create/edit/remove/cancel-invite only (no deactivate, no delete); broadcast read-tracking and an admin audit trail dropped from scope entirely (neither was ever built or planned — see `plan.md` §2/§4.3/§7). Orphaned `features/admin-portal/v1/spec.md` (and its empty `v1/` directory) deleted — grep confirmed `plan.md`/`research.md`/`tasks.md` all already pointed at the flat `spec.md`, and nothing referenced the versioned path. Two pre-existing stale-comment-path bugs found in passing, fixed as their own standalone commits (comment text only, no logic change): `a9e229cc` (DDP_backend — `test_admin_api.py`, `orguserfunctions.py`) and `5565233c` (webapp_v2 — `useAdminPortal.ts`), both still pointing at the old `v1/plan.md` path from before it was flattened to `plan.md` (`2f99890`, prior to this session). Neither backend nor frontend commit is pushed.
+- **2026-08-19** — `Org.is_active`/`OrgUser.is_active` removed entirely: model fields, migration, and auth enforcement (`026decfb`, squashed/renumbered in `261c10d1`, `ac1dd051`, `21a3484f`). Spec, research, and plan corrected to match: org/user CRUD is create/edit/remove/cancel-invite only (no deactivate, no delete); broadcast read-tracking and an admin audit trail dropped from scope entirely (neither was ever built or planned — see `plan.md` §2/§4.3/§7). Orphaned `features/admin-portal/v1/spec.md` (and its empty `v1/` directory) deleted — grep confirmed `plan.md`/`research.md`/`tasks.md` all already pointed at the flat `spec.md`, and nothing referenced the versioned path. Two pre-existing stale-comment-path bugs found in passing, fixed as their own standalone commits (comment text only, no logic change): `a9e229cc` (backend — `test_admin_api.py`, `orguserfunctions.py`) and `5565233c` (webapp — `useAdminPortal.ts`), both still pointing at the old `v1/plan.md` path from before it was flattened to `plan.md` (`2f99890`, prior to this session). Neither backend nor frontend commit is pushed.

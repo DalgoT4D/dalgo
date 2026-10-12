@@ -14,16 +14,16 @@ Perform a structured code review of a GitHub pull request.
 
 ### Step 2: Identify Affected Services
 From the changed files, determine which services are affected:
-- `DDP_backend/` → Backend (Django)
-- `webapp_v2/` → Frontend (Next.js)
+- `backend/` → Backend (Django)
+- `webapp/` → Frontend (Next.js)
 - `prefect-proxy/` → Orchestration proxy
 - `dalgo-ai-gen/` → AI/ML services
 - Other files → Note for review
 
 ### Step 3: Review by Service
 
-#### For Backend Changes (DDP_backend)
-Check compliance with `DDP_backend/.claude/CLAUDE.md`:
+#### For Backend Changes (backend)
+Check compliance with `backend/.claude/CLAUDE.md`:
 - **Layer architecture**: Are API, Core, Schema, Model responsibilities respected?
 - **No local imports**: All imports at file top?
 - **Router naming**: Uses `{module}_router` pattern?
@@ -33,8 +33,8 @@ Check compliance with `DDP_backend/.claude/CLAUDE.md`:
 - **Exception handling**: Feature-specific exceptions, not bare `except:`?
 - **No barrel exports**: `__init__.py` files kept empty?
 
-#### For Frontend Changes (webapp_v2)
-Check compliance with `webapp_v2/CLAUDE.md`:
+#### For Frontend Changes (webapp)
+Check compliance with `webapp/CLAUDE.md`:
 - **Component structure**: Thin pages, logic in components?
 - **SWR hooks**: Proper hook patterns (`useFeatures`, `useFeature`, `useCreateFeature`)?
 - **data-testid**: Present on all new interactive elements?

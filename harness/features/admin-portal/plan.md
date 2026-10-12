@@ -20,8 +20,8 @@
 
 | Service | Role |
 |---|---|
-| DDP_backend (Django + Django Ninja) | Shipped: the `@platform_admin_required` gate and `GET /admin/currentuser`. To build: admin endpoints for notifications, feature flags, and the Airbyte/pipeline read view. |
-| webapp_v2 (Next.js 15) | Shipped: admin sign-in screen, `AdminGuard`, sidebar sign-out. To build: Notifications, Feature flags, Airbyte/Pipelines screens; un-disable the placeholder nav items. |
+| backend (Django + Django Ninja) | Shipped: the `@platform_admin_required` gate and `GET /admin/currentuser`. To build: admin endpoints for notifications, feature flags, and the Airbyte/pipeline read view. |
+| webapp (Next.js 15) | Shipped: admin sign-in screen, `AdminGuard`, sidebar sign-out. To build: Notifications, Feature flags, Airbyte/Pipelines screens; un-disable the placeholder nav items. |
 | prefect-proxy | Not touched (pipeline data is read from the DB, not the proxy). |
 | Infra / DNS / TLS | **Nothing** — the host is already live. |
 
@@ -57,7 +57,7 @@ Traversed from `docs/domain-map.md`. The portal **operates** entities but change
 ### 3.1 One deployment, one path, one shared session — **BUILT**
 
 ```
-Browser                         insights.dalgo.org  (one existing deployment, webapp_v2)
+Browser                         insights.dalgo.org  (one existing deployment, webapp)
 ───────                         ┌─────────────────────────────────────────────────────────┐
 insights.dalgo.org/…      ───►  │ client-layout: normal product  (AuthGuard > MainLayout)   │
 insights.dalgo.org/admin  ───►  │ client-layout: /admin  (AdminGuard > AdminLayout)         │
@@ -67,7 +67,7 @@ insights.dalgo.org/admin  ───►  │ client-layout: /admin  (AdminGuard >
         │ POST /api/v2/login/
         │ Set-Cookie access_token + refresh_token   (host-only on the API host)
         ▼
-      ┌──────────────────────────── DDP_backend (api host) ─────────────────────────────┐
+      ┌──────────────────────────── backend (api host) ─────────────────────────────┐
       │ CustomJwtAuthMiddleware  reads access_token → ALL APIs, normal and admin alike   │
       │ /api/v1/admin/*          additionally @platform_admin_required on every route    │
       └──────────────────────────────────────────────────────────────────────────────────┘
@@ -249,16 +249,16 @@ Each milestone is one reviewable PR set (backend PR first where both are touched
 #### Milestone 1: Admin access model — **SHIPPED 2026-07-26**
 
 - **Deliverable:** an admin sign-in screen and sign-out over the **shared** product session, with `@platform_admin_required` as the enforced boundary on every admin route.
-- **Services:** DDP_backend, webapp_v2
+- **Services:** backend, webapp
 
 **Shipped in four commits** (all local on `feature/admin-portal-m4-users`, not yet pushed):
 
 | Commit | Repo | What it did |
 |---|---|---|
-| `869af4af` | DDP_backend | Convention/duplication cleanup ahead of the rework: deleted two schemas that duplicated existing ones (`AdminInviteUserSchema` → `NewInvitationSchema`, `AdminLoginSchema` → `LoginPayload`), added `AdminInvitationSchema.from_model()`, moved the org-payload widening into the service, routed the invite / role-change / remove endpoints through `admin_service` wrappers, typed four untyped routes. |
-| `eca9865f` | DDP_backend | **The reversal.** Removed `AdminJwtAuthMiddleware`, the `admin_access_token`/`admin_refresh_token` cookies, `issue_admin_session`/`refresh_admin_session`, the admin `login`/`logout`/`token/refresh` routes, the three session exception classes, and the `JWT_ADMIN_*` settings. Kept `GET /admin/currentuser`. Added the `AuthenticationFailed → 401` handler. |
-| `d1227c0` | webapp_v2 | Sign-in switched to `POST /api/v2/login/` with the platform-admin check read from the response; removed the admin-aware refresh routing; kept `adminAwareLoginPath` so an admin 401 still lands on `/admin/login`. |
-| `968435a` | webapp_v2 | Added the sidebar **"Log out"** control — full shared logout, reusing the normal app's endpoint, store method, analytics event, and handler shape. |
+| `869af4af` | backend | Convention/duplication cleanup ahead of the rework: deleted two schemas that duplicated existing ones (`AdminInviteUserSchema` → `NewInvitationSchema`, `AdminLoginSchema` → `LoginPayload`), added `AdminInvitationSchema.from_model()`, moved the org-payload widening into the service, routed the invite / role-change / remove endpoints through `admin_service` wrappers, typed four untyped routes. |
+| `eca9865f` | backend | **The reversal.** Removed `AdminJwtAuthMiddleware`, the `admin_access_token`/`admin_refresh_token` cookies, `issue_admin_session`/`refresh_admin_session`, the admin `login`/`logout`/`token/refresh` routes, the three session exception classes, and the `JWT_ADMIN_*` settings. Kept `GET /admin/currentuser`. Added the `AuthenticationFailed → 401` handler. |
+| `d1227c0` | webapp | Sign-in switched to `POST /api/v2/login/` with the platform-admin check read from the response; removed the admin-aware refresh routing; kept `adminAwareLoginPath` so an admin 401 still lands on `/admin/login`. |
+| `968435a` | webapp | Added the sidebar **"Log out"** control — full shared logout, reusing the normal app's endpoint, store method, analytics event, and handler shape. |
 
 > **Note on commit ordering.** `eca9865f` (backend) and `d1227c0` (frontend) are a **breaking pair** — the backend deletes the admin login/logout/refresh routes and the frontend is what stops calling them. They must deploy together. `968435a` depends on `d1227c0`, so it cannot ship ahead of the backend either.
 
@@ -267,7 +267,7 @@ Each milestone is one reviewable PR set (backend PR first where both are touched
 
 #### Milestone 2: Broadcast notifications
 - **Deliverable:** platform admins compose, preview, send/schedule, cancel, and review broadcasts. No read tracking, no audit trail (spec, corrected 2026-08-19).
-- **Services:** DDP_backend, webapp_v2
+- **Services:** backend, webapp
 - **Key tasks:**
   - [ ] Migration: additive `scope` + `target_org` on `Notification`. Reuses the existing `Notification`/`NotificationRecipient` models as-is — no new model.
   - [ ] Admin routes on the service functions: `preview` (count only), create (author server-derived, persists scope/target_org), cancel, history (audience, time, recipient count — no read-count endpoint).
@@ -277,7 +277,7 @@ Each milestone is one reviewable PR set (backend PR first where both are touched
 
 #### Milestone 3: Per-org feature flags
 - **Deliverable:** platform admins turn each feature on/off per org.
-- **Services:** DDP_backend, webapp_v2
+- **Services:** backend, webapp
 - **Key tasks:**
   - [ ] Admin endpoints: catalog, per-org read, set on/off, clear; small `clear_org_flag` in `utils/feature_flags.py`. Reuses `OrgFeatureFlag` as-is — no new model, no audit fields, no global-default-inheritance change.
   - [ ] Frontend: per-org Flags tab + portal-wide matrix; serve the catalog; un-disable the nav item.
@@ -286,7 +286,7 @@ Each milestone is one reviewable PR set (backend PR first where both are touched
 
 #### Milestone 4: Airbyte & pipeline read-only view
 - **Deliverable:** platform admins view any org's connections, sync history, pipeline runs, and full logs — read-only.
-- **Services:** DDP_backend, webapp_v2
+- **Services:** backend, webapp
 - **Key tasks:**
   - [ ] `cleanup=False` on `get_connections`/`get_one_connection` + warehouse-deref guard (with the regression that `cleanup=True` still dispatches).
   - [ ] Admin read endpoints on the safe primitives; `org_id` in the URL; org-ownership resolution before any bare-id log fetch; `AdminReadMeta` on every response.

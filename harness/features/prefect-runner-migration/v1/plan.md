@@ -27,18 +27,18 @@ Do the version pinning first, sanity-check it locally, then start on the runner 
 
 ### Step 1: Move the runner Dockerfile to prefect-proxy
 
-The Prefect worker image belongs with prefect-proxy, not DDP_backend. Move:
+The Prefect worker image belongs with prefect-proxy, not backend. Move:
 
 ```
-DDP_backend/dbt_deps/Dockerfile.prefect-job-runner  →  prefect-proxy/docker/Dockerfile.job-runner
-DDP_backend/dbt_deps/dbt-1.8.7/                      →  prefect-proxy/docker/dbt-1.8.7/
-DDP_backend/dbt_deps/dbt-1.9.8/                      →  prefect-proxy/docker/dbt-1.9.8/
-DDP_backend/dbt_deps/dbt-1.10.19/                    →  prefect-proxy/docker/dbt-1.10.19/
-DDP_backend/dbt_deps/README.md                       →  prefect-proxy/docker/README.md
+backend/dbt_deps/Dockerfile.prefect-job-runner  →  prefect-proxy/docker/Dockerfile.job-runner
+backend/dbt_deps/dbt-1.8.7/                      →  prefect-proxy/docker/dbt-1.8.7/
+backend/dbt_deps/dbt-1.9.8/                      →  prefect-proxy/docker/dbt-1.9.8/
+backend/dbt_deps/dbt-1.10.19/                    →  prefect-proxy/docker/dbt-1.10.19/
+backend/dbt_deps/README.md                       →  prefect-proxy/docker/README.md
 ```
 
 Use `git mv` so history follows. Then:
-- Update `DDP_backend/README.md:148-160` — swap the `cd dbt_deps/dbt-1.*/` snippets for the new paths (or delete if the docs belong with the moved README).
+- Update `backend/README.md:148-160` — swap the `cd dbt_deps/dbt-1.*/` snippets for the new paths (or delete if the docs belong with the moved README).
 - Update `prefect-proxy/docker/README.md` — its "From the dbt_deps directory" build-instruction paths, and the image-tag/build-arg examples.
 
 ### Step 2: Lock versions
@@ -63,7 +63,7 @@ RUN pip install --no-cache-dir \
     "dbt-bigquery==1.10.3"
 ```
 
-The `dbt-1.8.7/`, `dbt-1.9.8/`, `dbt-1.10.19/` subdirs at `prefect-proxy/docker/` remain (Django-side local dev still bootstraps its own venv from `dbt-1.10.19/pyproject.toml` per `DDP_backend/README.md`) — the Dockerfile just doesn't COPY them anymore.
+The `dbt-1.8.7/`, `dbt-1.9.8/`, `dbt-1.10.19/` subdirs at `prefect-proxy/docker/` remain (Django-side local dev still bootstraps its own venv from `dbt-1.10.19/pyproject.toml` per `backend/README.md`) — the Dockerfile just doesn't COPY them anymore.
 
 `requirements_dbt.txt` at `prefect-proxy/` root and `elementary-data==0.15.1` stay untouched for now — Elementary orgs still on the old flow use it.
 
@@ -259,15 +259,15 @@ One source of truth per warehouse. Runner reads one block and has everything it 
 - `prefect-proxy/pyproject.toml` — pin `dbt-core==1.10.19`, `dbt-postgres==1.10.2`, `dbt-bigquery==1.10.3`; then `uv sync` + regenerate `uv.lock`
 - `prefect-proxy/proxy/prefect_flows_runner.py` *(new)* — `dbtjob_v2_runner`, `_run_task_runner`, `deployment_schedule_flow_v5`, `build_profile_dict`
 - `prefect-proxy/proxy/service.py` — add `create_or_update_warehouse_secret_block` and `delete_warehouse_secret_block` + route handlers that Django calls
-- `prefect-proxy/docker/Dockerfile.job-runner` *(moved from `DDP_backend/dbt_deps/Dockerfile.prefect-job-runner` with `git mv`)* — line 39: pin `dbt-core==1.10.19`, `dbt-postgres==1.10.2`, `dbt-bigquery==1.10.3` in the base env; drop the `[bigquery,postgres]` extras
-- `prefect-proxy/docker/dbt-1.{8.7,9.8,10.19}/` *(moved from `DDP_backend/dbt_deps/`)* — venv build-sources, unchanged
-- `prefect-proxy/docker/README.md` *(moved from `DDP_backend/dbt_deps/README.md`)* — update build-command paths to reference the new location
-- `DDP_backend/README.md:148-160` — swap the `cd dbt_deps/dbt-*/` snippets to point at the new prefect-proxy path (or delete if the moved README covers it)
-- `DDP_backend/ddpui/ddpairbyte/airbytehelpers.py` — mirror `{creds, extras}` to Prefect Secret block in `create_warehouse` and `update_destination`
-- `DDP_backend/ddpui/services/org_cleanup_service.py` — delete Secret block in `delete_warehouse` after `delete_warehouse_credentials`
-- `DDP_backend/ddpui/management/commands/addparamstodbtcliprofile.py` — also update Secret block alongside the existing CLI-profile-block update
-- `DDP_backend/ddpui/models/org.py` — add `OrgWarehouse.secret_block: FK(OrgPrefectBlockv1, null=True)` + Django migration
-- `DDP_backend/ddpui/core/pipelinefunctions.py` — `setup_dbt_core_task_config` populates `env` with `warehouse-secret-block-name`, `wtype`, `default-schema` (was `env={}`)
+- `prefect-proxy/docker/Dockerfile.job-runner` *(moved from `backend/dbt_deps/Dockerfile.prefect-job-runner` with `git mv`)* — line 39: pin `dbt-core==1.10.19`, `dbt-postgres==1.10.2`, `dbt-bigquery==1.10.3` in the base env; drop the `[bigquery,postgres]` extras
+- `prefect-proxy/docker/dbt-1.{8.7,9.8,10.19}/` *(moved from `backend/dbt_deps/`)* — venv build-sources, unchanged
+- `prefect-proxy/docker/README.md` *(moved from `backend/dbt_deps/README.md`)* — update build-command paths to reference the new location
+- `backend/README.md:148-160` — swap the `cd dbt_deps/dbt-*/` snippets to point at the new prefect-proxy path (or delete if the moved README covers it)
+- `backend/ddpui/ddpairbyte/airbytehelpers.py` — mirror `{creds, extras}` to Prefect Secret block in `create_warehouse` and `update_destination`
+- `backend/ddpui/services/org_cleanup_service.py` — delete Secret block in `delete_warehouse` after `delete_warehouse_credentials`
+- `backend/ddpui/management/commands/addparamstodbtcliprofile.py` — also update Secret block alongside the existing CLI-profile-block update
+- `backend/ddpui/models/org.py` — add `OrgWarehouse.secret_block: FK(OrgPrefectBlockv1, null=True)` + Django migration
+- `backend/ddpui/core/pipelinefunctions.py` — `setup_dbt_core_task_config` populates `env` with `warehouse-secret-block-name`, `wtype`, `default-schema` (was `env={}`)
 
 ## Verification (local, single test org)
 

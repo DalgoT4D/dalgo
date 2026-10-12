@@ -149,8 +149,8 @@ class ShareRowSchema(Schema):
 ```
 
 Frontend impact (additive changes to existing files):
-- `webapp_v2/types/access.ts` — add `cascade_sources: CascadeSource[]` to `ShareRow`
-- `webapp_v2/components/ui/share-modal.tsx` — `cascade_sources.length > 0` → show "via Dashboard X"; disable level dropdown
+- `webapp/types/access.ts` — add `cascade_sources: CascadeSource[]` to `ShareRow`
+- `webapp/components/ui/share-modal.tsx` — `cascade_sources.length > 0` → show "via Dashboard X"; disable level dropdown
 
 ### Access control model — key constraints
 
@@ -246,8 +246,8 @@ def _require_edit_or_admin(orguser, resource, rtype, action):
 - `ddpui/api/report_api.py` — pass `orguser`; add `access_level: Optional[str]` to `SnapshotResponse`
 
 **Frontend (both):**
-- `webapp_v2/types/charts.ts` — add `access_level?: 'view' | 'edit'`
-- `webapp_v2/types/reports.ts` (or equivalent) — add `access_level?: 'view' | 'edit'`
+- `webapp/types/charts.ts` — add `access_level?: 'view' | 'edit'`
+- `webapp/types/reports.ts` (or equivalent) — add `access_level?: 'view' | 'edit'`
 - `app/charts/page.tsx` — change edit/share button gating from `PERMISSIONS.CAN_EDIT_CHARTS` → `chart.access_level === 'edit'`
 - `app/reports/page.tsx` — same for the report edit/delete/share buttons
 
@@ -660,7 +660,7 @@ if r.get("type") == "user_group":
 
 Replaces the existing `RecipientCombobox` with a unified `RecipientPicker` that supports org members, user groups, and external emails.
 
-**`webapp_v2/types/alerts.ts`:**
+**`webapp/types/alerts.ts`:**
 ```typescript
 // Add to RecipientIn and RecipientOut:
 user_group_id?: number | null;
@@ -669,7 +669,7 @@ user_group_name?: string | null;
 type: 'orguser' | 'external' | 'user_group';
 ```
 
-**New component `webapp_v2/components/alerts/RecipientPicker.tsx`:**
+**New component `webapp/components/alerts/RecipientPicker.tsx`:**
 
 Props: `value: RecipientIn[]`, `onChange: (v: RecipientIn[]) => void` — same interface as the old `RecipientCombobox`.
 
@@ -705,7 +705,7 @@ Key behaviors:
 - External: shown only when input is a valid email; click or Enter → `{ type: 'external', email }`.
 - Backspace on empty input removes last chip. Already-added recipients filtered from dropdown.
 
-**`webapp_v2/components/alerts/AlertNotifyStep.tsx`:**
+**`webapp/components/alerts/AlertNotifyStep.tsx`:**
 ```typescript
 // Replace:
 import { RecipientCombobox } from './RecipientCombobox';
@@ -715,7 +715,7 @@ import { RecipientPicker } from './RecipientPicker';
 
 Delete `RecipientCombobox.tsx` and its test file after swapping.
 
-**Tests — new file `webapp_v2/components/alerts/__tests__/RecipientPicker.test.tsx`:**
+**Tests — new file `webapp/components/alerts/__tests__/RecipientPicker.test.tsx`:**
 
 | Test | Checks |
 |---|---|

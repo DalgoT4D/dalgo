@@ -10,7 +10,7 @@ Evaluate UI through two simultaneous lenses: professional UX design standards an
 ## How to Use
 
 Provide one or more of:
-- A component file path (e.g., `webapp_v2/components/dashboard/dashboard-list.tsx`)
+- A component file path (e.g., `webapp/components/dashboard/dashboard-list.tsx`)
 - A screenshot path
 - A description of the UI to review
 

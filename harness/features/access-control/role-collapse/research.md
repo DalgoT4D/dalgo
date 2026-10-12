@@ -10,7 +10,7 @@ Acronyms: FK (foreign key — a DB column pointing at another table's row) · RB
 
 ## 1. The real role + permission data (grounds the migration)
 
-Read directly from `DDP_backend/seed/001_roles.json` and `ddpui/models/role_based_access.py` on 2026-06-17.
+Read directly from `backend/seed/001_roles.json` and `ddpui/models/role_based_access.py` on 2026-06-17.
 
 There are **5 roles today, not 4.** The fifth is `super-admin`.
 
@@ -115,8 +115,8 @@ Backend landmark (Org config section): `OrgPreferences` model (`ddpui/models/org
 
 ## 7. Multi-service impact
 
-- **DDP_backend** — the bulk: role remap migration, permission seed changes, `owner` column migration + backfill, owner-or-admin delete helper, two `OrgPreferences` fields, Settings/invite endpoints already mostly exist.
-- **webapp_v2** — sidebar role filtering, route guards + No Access page, Settings re-IA + new pages, `<PermissionGate>`, hardcoded-slug cleanup.
-- **prefect-proxy** — **not touched.** Role/permission logic lives entirely in DDP_backend; prefect-proxy has no user model. Pipelines being read-only for Analyst is enforced at the DDP_backend API layer, not in the proxy.
+- **backend** — the bulk: role remap migration, permission seed changes, `owner` column migration + backfill, owner-or-admin delete helper, two `OrgPreferences` fields, Settings/invite endpoints already mostly exist.
+- **webapp** — sidebar role filtering, route guards + No Access page, Settings re-IA + new pages, `<PermissionGate>`, hardcoded-slug cleanup.
+- **prefect-proxy** — **not touched.** Role/permission logic lives entirely in backend; prefect-proxy has no user model. Pipelines being read-only for Analyst is enforced at the backend API layer, not in the proxy.
 
 Validation per service: backend = pytest (role migration + permission + delete-override unit tests, see plan §6); frontend = Vitest for nav/guard logic + Playwright E2E for "Member sees only 4 nav items / Analyst can't edit infra".

@@ -69,7 +69,7 @@ Only 1-hop edges are listed per entity. Transitive paths (Metric → Dashboard �
 - **Consumed by:**
   - Pipeline (`compose`) — a Source is one step in the ingest flow
   - Warehouse (`query-from` → writes raw tables)
-- **Platform-specific behaviors:** Sources in Dalgo live behind the `ingest/` route on webapp_v2 and are orchestrated via Airbyte's own API, not directly queried by the Django backend.
+- **Platform-specific behaviors:** Sources in Dalgo live behind the `ingest/` route on webapp and are orchestrated via Airbyte's own API, not directly queried by the Django backend.
 - **Change impact:** Source schema changes break downstream Transforms. Credential rotation requires re-auth. Removing a Source orphans its raw tables in the Warehouse.
 - **Confidence:** `draft` (filesystem + CLAUDE.md; need to read `models/airbyte.py` + `ddpairbyte/` for `verified`)
 
@@ -264,7 +264,7 @@ Only 1-hop edges are listed per entity. Transitive paths (Metric → Dashboard �
   - Cron change re-anchors all future evaluations; no backfill of missed ticks.
   - Webhook URL rotation requires editing the alert (the masked URL is preserved if untouched).
   - Deleting an Alert cascades to its AlertLog rows — full delivery history is lost.
-- **Confidence:** `verified` (read `DDP_backend/ddpui/models/alert.py` 2026-06-16; cross-checked frontend wizard, table, and log modal).
+- **Confidence:** `verified` (read `backend/ddpui/models/alert.py` 2026-06-16; cross-checked frontend wizard, table, and log modal).
 
 ### Share link *(a mode of Dashboard or ReportSnapshot, not a standalone entity)*
 - **One-line identity:** A public URL + access token that lets external viewers access a Dashboard (live) or a ReportSnapshot (frozen layout, live data under date filter).
@@ -311,7 +311,7 @@ Only 1-hop edges are listed per entity. Transitive paths (Metric → Dashboard �
   - Org deletion must cascade carefully — data-privacy / donor-compliance requirement.
   - Logo upload and URL-link are mutually exclusive — the current logo must be removed before switching methods. Uploaded files go to S3; URL-linked logos are stored as a direct external reference.
 - **Change impact:** Org-level config changes cascade to every entity within that org. Logo changes are reflected immediately on the next render of the app header, exports, and public links (no cache invalidation needed).
-- **Confidence:** `verified` (cross-checked against `DDP_backend/ddpui/models/org.py`)
+- **Confidence:** `verified` (cross-checked against `backend/ddpui/models/org.py`)
 
 ### OrgUser
 - **One-line identity:** A user within an organization, with a role that gates what they can see and edit.

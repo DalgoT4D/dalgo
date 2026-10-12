@@ -1,7 +1,7 @@
 # Metrics & KPIs v1 — Task List
 
 **Last audited:** 2026-05-22
-**Sources:** spec.md, plan.md, design.md, FIGMA.md, **Figma v2 designs** vs code in `DDP_backend_metrics` + `webapp_v2`
+**Sources:** spec.md, plan.md, design.md, FIGMA.md, **Figma v2 designs** vs code in `DDP_backend_metrics` + `webapp`
 **Figma file:** `v8BYFkebTGQNuiRrCXWssa` → section "Metrics & KPI - V2" (node `11914:1422`)
 
 ## Figma v2 Design Notes (source of truth for UI)

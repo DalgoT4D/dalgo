@@ -13,7 +13,7 @@ Fast-track a feature idea to something testable with NGO partners.
 ## What it produces
 
 ```
-prototypes/{feature-name}/
+harness/prototypes/{feature-name}/
 └── brief.md          ← 1-page prototype brief
 ```
 
@@ -47,7 +47,7 @@ Fast, targeted — not a deep analysis:
 
 ### 3. Write the brief
 
-Save to: `prototypes/{feature-name}/brief.md`
+Save to: `harness/prototypes/{feature-name}/brief.md`
 
 ```markdown
 # Prototype: {Feature Name}
@@ -90,7 +90,7 @@ Save to: `prototypes/{feature-name}/brief.md`
 Print:
 
 ```
-Brief saved to: prototypes/{feature-name}/brief.md
+Brief saved to: harness/prototypes/{feature-name}/brief.md
 
 What next?
 1. Build it — I'll implement the quick plan
@@ -118,7 +118,7 @@ Try it: {steps to test the feature}
 
 Next:
 - Validated? → /product/write-spec "{feature name}"
-- Didn't work? → delete prototype code + prototypes/{feature-name}/
+- Didn't work? → delete prototype code + harness/prototypes/{feature-name}/
 ```
 
 ---

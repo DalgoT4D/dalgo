@@ -1,7 +1,7 @@
 # Tasks — Access Control v2 (RBAC)
 
 **Plan:** [plan.md](./plan.md) · **Research:** [research.md](./research.md)
-**Branch:** `feature/rbac` (both code repos) · **Worktrees:** `../.dalgo-worktrees/rbac/{DDP_backend,webapp_v2}`
+**Branch:** `feature/rbac` (both code repos) · **Worktrees:** `../.dalgo-worktrees/rbac/{backend,webapp}`
 **Started:** 2026-06-17
 
 ## Resolved open questions (2026-06-17)

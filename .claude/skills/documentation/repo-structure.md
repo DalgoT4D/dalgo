@@ -1,9 +1,9 @@
 # Doc Repo Structure
 
-Layout of the `dalgo_docs/` repo (symlinked at `dalgo-core/dalgo_docs`).
+Layout of the user-facing docs — top-level `docs/` directory in the monorepo.
 
 ```
-dalgo_docs/
+docs/
   docs/
     welcome.md
     quickstart/
@@ -60,5 +60,5 @@ For naming, dir mapping, and missing-screenshot handling, see `style-images.md`.
 
 ## Screenshot capture
 
-- Capture with `scripts/screenshot.py` (recipe-driven). Bulk = no args; per-feature = pass the recipe name. See `workflow.md` step 5.
+- Capture with `harness/scripts/screenshot.py` (recipe-driven). Bulk = no args; per-feature = pass the recipe name. See `workflow.md` step 5.
 - **No `<!-- SCREENSHOT: ... -->` HTML comment placeholders** shipped to main. Use `:::info Screenshot coming soon` instead — it's honest and renders correctly.

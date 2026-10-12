@@ -18,7 +18,7 @@ A chat page where Priya (a program manager, not an engineer) asks questions like
 org's warehouse, writes a guarded read-only SQL query, runs it, and streams back the
 answer with a results table. Follow-ups keep context.
 
-- **Services affected:** `DDP_backend` (agent, REST, WS), `webapp_v2` (chat page). `prefect-proxy`: untouched.
+- **Services affected:** `backend` (agent, REST, WS), `webapp` (chat page). `prefect-proxy`: untouched.
 - **New backend deps:** `langgraph==1.2.7`, `langchain==1.3.11`, `langchain-anthropic==1.4.8`, `langgraph-checkpoint-postgres==3.1.0`, `sqlglot==30.12.0`, `psycopg[binary,pool]` (coexists with psycopg2 — research §3.3).
 
 ---
@@ -48,7 +48,7 @@ Post-ship task: add the new entity to `docs/domain-map.md`.
 ### 3.1 One turn, end to end
 
 ```
-Priya types "surveys in Pune last month?"          webapp_v2
+Priya types "surveys in Pune last month?"          webapp
     │ WS send_message                                  │
     ▼                                                  │
 ChatWithDataConsumer (async, first in codebase)        │
@@ -277,7 +277,7 @@ History endpoint: `graph.aget_state(thread config)` → map `HumanMessage` → u
 | RBAC | New slug `can_use_chat_with_data` seeded to account-manager, org-admin, pipeline-manager, analyst (NOT guest) via the 0137-style RunPython migration + `seed/003_role_permissions.json` |
 | Existing AI_DATA_ANALYSIS flag | Untouched — gates the old warehouse-prompt feature (research §1.2) |
 
-### 4.7 Frontend (webapp_v2)
+### 4.7 Frontend (webapp)
 
 ```
 app/chat-with-data/page.tsx            two-pane layout (spec §10 wireframe)
@@ -302,7 +302,7 @@ Nav: `FeatureFlagKeys.CHAT_WITH_DATA` + `hide:` composition in `main-layout.tsx`
 - `scripts/chat_with_data_repl.py` (management command or script): terminal REPL that
   builds the same agent against a dev org and streams to stdout — try the agent
   without the frontend.
-- `.env.template` additions + a `docs/` note in DDP_backend:
+- `.env.template` additions + a `docs/` note in backend:
   `ANTHROPIC_API_KEY`, `CHAT_WITH_DATA_MODEL`, and the three `LANGSMITH_*` vars
   (research §3.7 — free Developer tier, traces show every tool call + SQL).
 - Definition of "working": run the REPL, ask a question, open smith.langchain.com,
@@ -335,7 +335,7 @@ Nav: `FeatureFlagKeys.CHAT_WITH_DATA` + `hide:` composition in `main-layout.tsx`
 | Trimming middleware | Long fake history → trimmed request, checkpoint intact |
 | WS consumer | Channels `WebsocketCommunicator`: auth reject (no cookie / wrong org), flag/consent reject, event sequence for a scripted turn, turn-lock rejection, rate limit |
 | REST | Ninja test client: CRUD, owner-scoping (Sarah can't rename Priya's session), history mapping incl. sql attachment |
-| Frontend | `useChatWithData` reducer unit tests (event stream → UI state, reconnect), component render tests (chips, table, error) — RTL per webapp_v2 conventions |
+| Frontend | `useChatWithData` reducer unit tests (event stream → UI state, reconnect), component render tests (chips, table, error) — RTL per webapp conventions |
 | Integration (live) | REPL script against dev warehouse (Postgres AND one BigQuery org): 5 canned questions incl. one that forces a SQL error; verify traces in LangSmith |
 | Edge cases | empty warehouse, org with no dbt (raw fallback), 0-row result, huge result (truncation), warehouse down (friendly error), Anthropic 529/overload (retry surface), session deleted mid-turn |
 
@@ -348,7 +348,7 @@ dark behind the flag until M5).
 
 #### Milestone 1: SQL guard + limits (pure library code)
 - **Deliverable:** `guards/` package with full test suite; no LangGraph yet
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [ ] Add `sqlglot` dep; implement `sql_guard.validate()` (both dialects) + `limits.py`
   - [ ] Bypass-catalog test suite (§6 row 1)
@@ -356,7 +356,7 @@ dark behind the flag until M5).
 
 #### Milestone 2: Agent core + dev harness (LangSmith)
 - **Deliverable:** working agent callable from a terminal REPL, traced in LangSmith
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [ ] Pin langgraph/langchain/langchain-anthropic/psycopg deps (research §3.2)
   - [ ] `state.py`, `context.py`, `prompts.py`, `middleware.py`, `tools/` (registry + 5 tools), `agent.py`
@@ -367,7 +367,7 @@ dark behind the flag until M5).
 
 #### Milestone 3: Sessions, REST, gating, audit
 - **Deliverable:** full REST surface + models + permission, exercised by API tests
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [ ] Models + migration; `CHAT_WITH_DATA` flag entry; permission slug seed + migration
   - [ ] `chat_with_data_api.py` (status, session CRUD, history from checkpointer)
@@ -376,7 +376,7 @@ dark behind the flag until M5).
 
 #### Milestone 4: WebSocket streaming
 - **Deliverable:** end-to-end turn over WS (testable with wscat/Channels communicator)
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [ ] `AsyncBaseConsumer` (async port of cookie-JWT auth) + `chat_with_data_consumer.py` + `ws_urlpatterns` entry
   - [ ] astream→event mapping, turn lock, rate limit, title generation (Haiku), error surfaces
@@ -386,7 +386,7 @@ dark behind the flag until M5).
 
 #### Milestone 5: Frontend chat page
 - **Deliverable:** the visible feature — nav entry, page, streaming UI
-- **Services:** webapp_v2
+- **Services:** webapp
 - **Key tasks:**
   - [ ] `FeatureFlagKeys.CHAT_WITH_DATA` + nav item + status-driven empty states
   - [ ] `useChatSessions` (SWR) + `useChatWithData` (WS reducer)

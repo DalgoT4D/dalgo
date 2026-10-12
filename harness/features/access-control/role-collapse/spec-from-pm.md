@@ -280,7 +280,7 @@ Two-axis floor (audience minimum-role × View/Edit) + org-default · direct shar
 
 ## 15. Technical Implications
 
-### 15.1 DDP_backend (Django + Django Ninja)
+### 15.1 backend (Django + Django Ninja)
 
 | Change | Impact |
 |---|---|
@@ -292,7 +292,7 @@ Two-axis floor (audience minimum-role × View/Edit) + org-default · direct shar
 | Route/permission gating | Server-side capability checks per role for Data-infra and Settings endpoints. |
 | Hooks for Spec B | Permission resolver structured to accept resource grants later; `owner` consumed by Spec B share/delete logic. |
 
-### 15.2 webapp_v2 (Next.js 15 + React 19)
+### 15.2 webapp (Next.js 15 + React 19)
 
 | Change | Impact |
 |---|---|

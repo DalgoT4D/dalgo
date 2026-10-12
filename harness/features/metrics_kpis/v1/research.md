@@ -5,7 +5,7 @@
 
 ---
 
-## 1. Backend Architecture (DDP_backend)
+## 1. Backend Architecture (backend)
 
 ### Framework & Patterns
 - **Django + Django Ninja** for REST APIs with automatic Pydantic schema validation
@@ -64,7 +64,7 @@ class ChartService:
 
 ---
 
-## 2. Frontend Architecture (webapp_v2)
+## 2. Frontend Architecture (webapp)
 
 ### Framework & Patterns
 - **Next.js 15** (App Router), **React 19**, **TypeScript**

@@ -13,8 +13,8 @@
 Build the end-to-end chain: **Metric creation → reuse in charts → KPI definition → KPI page → KPI dashboard chart**. This delivers reusable metric definitions, a scannable KPI view for leadership, and KPI charts inside dashboards (Bhumi's mid-June blocker).
 
 **Services affected:**
-- **DDP_backend** — New Metric + KPI models, CRUD APIs, warehouse query execution for metric values, reference tracking
-- **webapp_v2** — Metrics library page, KPI page, KPI detail drawer, MetricsSelector refactor, KPI dashboard chart
+- **backend** — New Metric + KPI models, CRUD APIs, warehouse query execution for metric values, reference tracking
+- **webapp** — Metrics library page, KPI page, KPI detail drawer, MetricsSelector refactor, KPI dashboard chart
 
 **Not affected:** prefect-proxy (freshness polling deferred to follow-up)
 
@@ -49,7 +49,7 @@ Derived from `docs/domain-map.md` by traversing 1-hop and 2-hop consumers of the
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                      webapp_v2                          │
+│                      webapp                          │
 │                                                         │
 │  ┌──────────────┐  ┌──────────────┐  ┌───────────────┐ │
 │  │ Metrics      │  │ KPI Page     │  │ Dashboard     │ │
@@ -63,7 +63,7 @@ Derived from `docs/domain-map.md` by traversing 1-hop and 2-hop consumers of the
 └───────────────────────────┼─────────────────────────────┘
                             │ HTTP (apiGet/apiPost/...)
 ┌───────────────────────────┼─────────────────────────────┐
-│                    DDP_backend                          │
+│                    backend                          │
 │                            │                            │
 │  ┌────────────────┐  ┌────┴───────────┐  ┌───────────┐ │
 │  │ /api/metrics/  │  │ /api/kpis/     │  │ /api/     │ │
@@ -582,7 +582,7 @@ Each milestone delivers a complete vertical slice (backend + frontend) that is t
 
 **Deliverable:** Users can create (simple column+aggregation or free-text expression), browse, edit, and delete metrics from the `/metrics` page with validation on save and live value preview. Chart builder's MetricsSelector gets a "Saved Metrics" tab alongside the existing ad-hoc mode. Charts can reference saved metrics.
 
-**Services:** DDP_backend + webapp_v2
+**Services:** backend + webapp
 
 **Backend tasks:**
 - [ ] Create `ddpui/models/metric.py` with `Metric` and `KPI` models
@@ -635,7 +635,7 @@ Each milestone delivers a complete vertical slice (backend + frontend) that is t
 
 **Deliverable:** Users can create KPIs from metrics, see them on the `/kpis` page with values, RAG badges, trendlines, and open a detail drawer.
 
-**Services:** DDP_backend + webapp_v2
+**Services:** backend + webapp
 
 **Backend tasks:**
 - [ ] Create `ddpui/schemas/kpi_schema.py` (KPI schemas)
@@ -678,7 +678,7 @@ Each milestone delivers a complete vertical slice (backend + frontend) that is t
 
 **Deliverable:** KPI appears as a chart type in the dashboard builder. Users can add, position, resize KPI charts. Auto-inherits on live public share views.
 
-**Services:** DDP_backend + webapp_v2
+**Services:** backend + webapp
 
 **Backend tasks:**
 - [ ] Add `KPI = "kpi"` to `DashboardComponentType` enum
@@ -708,7 +708,7 @@ Each milestone delivers a complete vertical slice (backend + frontend) that is t
 
 **Deliverable:** ReportSnapshots correctly render KPI charts and support commenting on them. When a dashboard containing KPI charts is snapshotted, the KPI chart's current value, target, RAG status, and trendline are frozen into `frozen_chart_configs` and render correctly in snapshot views and shared snapshot links. Users can comment on KPI charts just like they comment on charts.
 
-**Services:** DDP_backend + webapp_v2
+**Services:** backend + webapp
 
 **Backend tasks:**
 - [ ] Update ReportSnapshot creation logic to handle `kpi` component type in `frozen_chart_configs`
@@ -820,7 +820,7 @@ Key gaps: `_compute_trend()` method missing (breaks PoP change + report KPI peri
 
 **Deliverable:** `_compute_trend()` works, trend + summary API endpoints exist, KPI detail drawer is wired into the KPI page, report snapshots freeze period data correctly.
 
-**Services:** DDP_backend + webapp_v2
+**Services:** backend + webapp
 
 #### Backend (`DDP_backend_metrics`)
 
@@ -869,7 +869,7 @@ def get_kpi_summary(request):
 
 - **File:** `ddpui/api/kpi_api.py`
 
-#### Frontend (`webapp_v2`)
+#### Frontend (`webapp`)
 
 **5.4 — Add missing types to `types/kpis.ts`**
 
@@ -923,7 +923,7 @@ export function useKPISummary() { ... }
 
 **Deliverable:** Metrics have tags (searchable/filterable), a detail drawer with references panel, and edit confirmation showing affected consumers.
 
-**Services:** DDP_backend + webapp_v2
+**Services:** backend + webapp
 
 #### Backend
 
@@ -982,7 +982,7 @@ In `metric-form-dialog.tsx`, before submitting an update:
 
 **Deliverable:** KPIs have a timeline of annotations (comments + beneficiary quotes) with auto-captured snapshots.
 
-**Services:** DDP_backend + webapp_v2
+**Services:** backend + webapp
 
 #### Backend
 
@@ -1103,7 +1103,7 @@ Period dropdown values come from `useKPITrend` response (the period labels).
 
 **Deliverable:** Time-window selector in KPI drawer, SQL expression safety blocklist.
 
-**Services:** DDP_backend + webapp_v2
+**Services:** backend + webapp
 
 #### Frontend
 
@@ -1166,22 +1166,22 @@ M5 (fix _compute_trend + wire drawer)  ←── start here
 | `DDP_backend_metrics/ddpui/schemas/kpi_schema.py` | 7 | Add annotation schemas |
 | `DDP_backend_metrics/ddpui/services/metric_service.py` | 6, 8 | Tags handling, SQL blocklist |
 | `DDP_backend_metrics/ddpui/api/metric_api.py` | 6 | Add tag filter param |
-| `webapp_v2/types/kpis.ts` | 5, 7 | Add KPISummary, AnnotationEntry |
-| `webapp_v2/types/metrics.ts` | 6 | Add tags |
-| `webapp_v2/hooks/api/useKPIs.ts` | 5, 7 | Add useKPITrend, useKPISummary, annotation hooks |
-| `webapp_v2/components/kpis/kpi-page.tsx` | 5 | Wire detail drawer |
-| `webapp_v2/components/kpis/kpi-detail-drawer.tsx` | 5, 7, 8 | Fix imports, add timeline, time-window |
-| `webapp_v2/components/metrics/metrics-library.tsx` | 6 | Tags display/filter, detail drawer trigger |
-| `webapp_v2/components/metrics/metric-form-dialog.tsx` | 6 | Tags input, edit blast-radius |
-| **New:** `webapp_v2/components/metrics/metric-detail-drawer.tsx` | 6 | Metric detail view |
+| `webapp/types/kpis.ts` | 5, 7 | Add KPISummary, AnnotationEntry |
+| `webapp/types/metrics.ts` | 6 | Add tags |
+| `webapp/hooks/api/useKPIs.ts` | 5, 7 | Add useKPITrend, useKPISummary, annotation hooks |
+| `webapp/components/kpis/kpi-page.tsx` | 5 | Wire detail drawer |
+| `webapp/components/kpis/kpi-detail-drawer.tsx` | 5, 7, 8 | Fix imports, add timeline, time-window |
+| `webapp/components/metrics/metrics-library.tsx` | 6 | Tags display/filter, detail drawer trigger |
+| `webapp/components/metrics/metric-form-dialog.tsx` | 6 | Tags input, edit blast-radius |
+| **New:** `webapp/components/metrics/metric-detail-drawer.tsx` | 6 | Metric detail view |
 | **New:** 2 migration files | 6, 7 | tags field, AnnotationEntry model |
-| **Delete:** `webapp_v2/components/kpis/kpi-card.tsx` | 5 | Orphaned, replaced by inline KPICardWithData |
+| **Delete:** `webapp/components/kpis/kpi-card.tsx` | 5 | Orphaned, replaced by inline KPICardWithData |
 
 ## Verification (M5-M8)
 
 After each milestone:
 1. Backend: `cd DDP_backend_metrics && uv run pytest ddpui/tests` — all tests pass
-2. Frontend: `cd webapp_v2 && npm run lint && npm test` — no regressions
+2. Frontend: `cd webapp && npm run lint && npm test` — no regressions
 3. Manual: start services via PM2, verify end-to-end in the browser
 
 End-to-end flow after all milestones:

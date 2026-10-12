@@ -1,32 +1,33 @@
-# Dalgo Core — Claude Code Guide
+# Dalgo — Claude Code Guide
 
 Dalgo is an open-source data platform for NGOs. It replaces manual Excel/Google Sheets
 workflows with automated data ingestion (Airbyte), transformation (dbt), orchestration
 (Prefect), and visualization (Superset + custom dashboards).
 
-## Repositories
+## Repository layout
 
-This repo (`dalgo-core`) is the **orchestration/harness repo** — docs, specs, skills,
-commands, and agents. It contains **no application code**. The code repos are
-**siblings of `dalgo-core`**, one level up, not nested inside it.
+Monorepo. Each service is a top-level directory. The AI/engineering harness (specs,
+skills, commands, agents, scripts) lives under `harness/`.
 
-| Repo | Location (relative to `dalgo-core`) | Tech | CLAUDE.md |
-|------|-------------------------------------|------|-----------|
-| `DDP_backend` | `../DDP_backend` | Django + Django Ninja | `../DDP_backend/.claude/CLAUDE.md` |
-| `webapp_v2` | `../webapp_v2` | Next.js 15, React 19, Shadcn UI | `../webapp_v2/CLAUDE.md` |
-| `prefect-proxy` | `../prefect-proxy` | FastAPI | — |
+| Path | Tech | CLAUDE.md |
+|------|------|-----------|
+| `backend/` | Django + Django Ninja | `backend/.claude/CLAUDE.md` |
+| `webapp/` | Next.js 15, React 19, Shadcn UI | `webapp/CLAUDE.md` |
+| `prefect-proxy/` | FastAPI | — |
+| `ai-llm-service/` | FastAPI | — |
+| `docs/` | Docusaurus (user-facing docs) | — |
+| `harness/` | specs, scripts, prototypes (no application code) | this file |
 
-To work on backend or frontend code, `cd` into the sibling repo and follow its own
+To work on backend or frontend code, `cd` into the service directory and follow its own
 CLAUDE.md for run/test/lint commands and conventions.
 
 ## Knowledge Base
 
-Deep reference lives in `docs/` — always accessible without loading a skill:
+Deep reference lives in `harness/` — always accessible without loading a skill:
 
 | File | Contents |
 |------|----------|
-| `docs/domain-map.md` | Product entity graph — source of truth for blast radius analysis |
-| `docs/harness-evolution.md` | Iterative plan for improving the engineering harness |
+| `harness/domain-map.md` | Product entity graph — source of truth for blast radius analysis |
 
 ---
 
@@ -35,11 +36,11 @@ Deep reference lives in `docs/` — always accessible without loading a skill:
 ### Fast track — prototype → validate → promote
 
 ```
-/product/prototype "feature idea"    → prototypes/{name}/brief.md + working build
+/product/prototype "feature idea"    → harness/prototypes/{name}/brief.md + working build
 ```
 
 Skip the full pipeline. Get something in front of NGO partners quickly.
-PM artifacts live in `prototypes/`, separate from `features/`.
+PM artifacts live in `harness/prototypes/`, separate from `harness/features/`.
 
 ---
 
@@ -48,14 +49,14 @@ PM artifacts live in `prototypes/`, separate from `features/`.
 #### 1. Spec
 
 ```
-/product/write-spec "feature idea"        → features/{name}/spec.md
-/product/write-spec features/{name}       → features/{name}/v1/spec.md
+/product/write-spec "feature idea"        → harness/features/{name}/spec.md
+/product/write-spec harness/features/{name}       → harness/features/{name}/v1/spec.md
 ```
 
 #### 2. Design *(UI features only)*
 
 ```
-/design/design-handoff features/{name}/v1/spec.md
+/design/design-handoff harness/features/{name}/v1/spec.md
 ```
 
 Gets designer direction, generates Figma frames, runs design review, writes `design.md`
@@ -65,13 +66,13 @@ Skip for backend-only features.
 #### 3. Plan
 
 ```
-/product/write-spec "feature idea"          → features/{name}/spec.md
-/product/write-spec features/{name}         → features/{name}/v1/spec.md (scope a version)
-/engineering/plan-feature features/{name}/v1/spec.md → features/{name}/v1/plan.md
-/engineering/plan-enhancement features/{name}/v1/spec.md  → features/{name}/v1.1/plan.md (minor bump)
+/product/write-spec "feature idea"          → harness/features/{name}/spec.md
+/product/write-spec harness/features/{name}         → harness/features/{name}/v1/spec.md (scope a version)
+/engineering/plan-feature harness/features/{name}/v1/spec.md → harness/features/{name}/v1/plan.md
+/engineering/plan-enhancement harness/features/{name}/v1/spec.md  → harness/features/{name}/v1.1/plan.md (minor bump)
 /engineering/plan-enhancement "paragraph describing the enhancement" → asks which feature, then plans a v{N}.{M+1}
-/engineering/execute-plan features/{name}/v1/plan.md → implements the code
-/engineering/validate-spec features/{name}/v1/spec.md → validate implementation against spec
+/engineering/execute-plan harness/features/{name}/v1/plan.md → implements the code
+/engineering/validate-spec harness/features/{name}/v1/spec.md → validate implementation against spec
 /engineering/review-pr <PR#>                → structured code review
 /engineering/debug-issue <Sentry URL>       → diagnose production bugs
 ```
@@ -79,18 +80,18 @@ Skip for backend-only features.
 #### 4. Build
 
 ```
-/engineering/execute-plan  features/{name}/v1/plan.md   → implements the code
+/engineering/execute-plan  harness/features/{name}/v1/plan.md   → implements the code
 ```
 
 Execution follows the **executing-feature-plans** skill: branch first, then build the
 feature in one session with red-green-refactor (one test at a time), reading each repo's
 CLAUDE.md before working in it. Progress is tracked in
-`features/{name}/{version}/tasks.md`; re-run to resume after an interruption.
+`harness/features/{name}/{version}/tasks.md`; re-run to resume after an interruption.
 
 ### Other commands
 
 ```
-/engineering/validate-spec features/{name}/v1/spec.md   → validates implementation
+/engineering/validate-spec harness/features/{name}/v1/spec.md   → validates implementation
 /engineering/review-pr     <PR# or URL>                 → structured code review
 /engineering/debug-issue   <Sentry URL or description>  → diagnose production bugs
 ```
@@ -119,7 +120,7 @@ CLAUDE.md before working in it. Progress is tracked in
 
 ## Feature Artifacts
 
-Every feature lives in `features/{name}/{version}/`:
+Every feature lives in `harness/features/{name}/{version}/`:
 
 | File | Produced by | Purpose |
 |------|-------------|---------|

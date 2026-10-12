@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-04
 **Status:** Approved design, ready for planning
-**Repos touched:** `DDP_backend` (agent + APIs), `webapp_v2` (chat page)
+**Repos touched:** `backend` (agent + APIs), `webapp` (chat page)
 
 ---
 
@@ -38,9 +38,9 @@ These were settled during design review with Siddhant:
 | Decision | Choice |
 |---|---|
 | Prior art (two old branches) | Ignore both; build greenfield |
-| Where the agent lives | Inside `DDP_backend` (new module), not a separate service |
+| Where the agent lives | Inside `backend` (new module), not a separate service |
 | LLM provider | Anthropic Claude only |
-| Scope | Full stack: backend agent + webapp_v2 chat page |
+| Scope | Full stack: backend agent + webapp chat page |
 | Warehouses | Postgres and BigQuery (both Dalgo supports today) |
 | Chat surface | Dedicated sidebar page, not a floating widget |
 | Graph architecture | Single LangGraph agent loop with a tool registry (option A) |
@@ -55,10 +55,10 @@ Rebuilding on native LangGraph patterns is less work than untangling either.
 ## 3. Architecture at a glance
 
 ```
-webapp_v2  "Chat with Data" page
+webapp  "Chat with Data" page
     │  WebSocket (streaming) + REST (sessions)
     ▼
-DDP_backend
+backend
     ├─ chat_with_data_consumer.py     (WebSocket, runs the agent, streams events)
     ├─ chat_with_data_api.py          (REST: session create/list/rename/delete/history)
     └─ ddpui/core/chat_with_data/     (the agent — transport-independent)
@@ -233,7 +233,7 @@ Haiku call).
 
 ---
 
-## 10. Frontend (webapp_v2)
+## 10. Frontend (webapp)
 
 Sidebar nav entry **"Chat with Data"** — rendered only when the org feature
 flag and user permission allow. Dedicated page:
@@ -259,7 +259,7 @@ flag and user permission allow. Dedicated page:
   (first 100 rows, scrollable) — not markdown blobs.
 - **`useChatWithData` hook** owns the WebSocket lifecycle: connect, send,
   reduce events into message state, reconnect with backoff.
-- SWR for session REST APIs, Shadcn components, per webapp_v2's CLAUDE.md.
+- SWR for session REST APIs, Shadcn components, per webapp's CLAUDE.md.
 - Built for slow connections and old devices: streaming makes waits feel
   short; no heavy chart libraries in v1.
 

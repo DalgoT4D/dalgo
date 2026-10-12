@@ -53,7 +53,7 @@
 
 ## 6. Frontend — per-filter modal changes from editable to read-only
 
-**The rule:** `filter-config-modal.tsx` currently has no "Depends on" field at all in the shipped codebase (that was parent-child-only work, not yet merged to main `webapp_v2`). For v2, the modal needs a small **read-only** display — "Linked with: State, District, City" — sourced from the dashboard-level group field (§3), not an editable picker.
+**The rule:** `filter-config-modal.tsx` currently has no "Depends on" field at all in the shipped codebase (that was parent-child-only work, not yet merged to main `webapp`). For v2, the modal needs a small **read-only** display — "Linked with: State, District, City" — sourced from the dashboard-level group field (§3), not an editable picker.
 
 **Why it matters:** this is *less* modal work than the parent-child model needed (no sibling-filter-list prop, no cycle-aware eligibility filtering inside the modal, no Combobox multi-select) — the modal just needs to know "is this filter's id in the dashboard's group list, and if so, who else is."
 

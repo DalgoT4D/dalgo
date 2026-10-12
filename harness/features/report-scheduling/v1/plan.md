@@ -3,7 +3,7 @@
 **Status:** Draft v1
 **Date:** 2026-05-08
 **Spec source:** User-provided spec (Report Scheduling feature)
-**Domain map:** `/Users/siddhant/Documents/Dalgo/dalgo-core/docs/domain-map.md`
+**Domain map:** `/Users/siddhant/Documents/Dalgo/harness/domain-map.md`
 
 ---
 
@@ -14,8 +14,8 @@ Build end-to-end scheduled report generation and delivery: **Schedule configurat
 This extends the existing manual report-sharing flow (snapshot creation -> one-time email send) with recurring automation.
 
 **Services affected:**
-- **DDP_backend** -- New `ReportSchedule` and `ScheduleRecipient` models, schedule CRUD API, Celery Beat hourly scheduler task, automated snapshot creation, PDF email delivery, retry logic with failure notifications
-- **webapp_v2** -- Schedule configuration UI on dashboards, recipient management, schedule status display
+- **backend** -- New `ReportSchedule` and `ScheduleRecipient` models, schedule CRUD API, Celery Beat hourly scheduler task, automated snapshot creation, PDF email delivery, retry logic with failure notifications
+- **webapp** -- Schedule configuration UI on dashboards, recipient management, schedule status display
 
 **Not affected:** prefect-proxy (scheduling is Celery-based, not orchestrated through Prefect)
 
@@ -50,7 +50,7 @@ Derived from `docs/domain-map.md` by traversing from Dashboard (the entity being
 ### 3.1 Architecture
 
 ```
-                        webapp_v2
+                        webapp
   ┌───────────────────────────────────────────────────┐
   │                                                   │
   │  Dashboard Settings → Schedule Config UI          │
@@ -61,7 +61,7 @@ Derived from `docs/domain-map.md` by traversing from Dashboard (the entity being
   └───────────────────────┼───────────────────────────┘
                           │ HTTP (apiPost/apiGet/apiPut/apiDelete)
   ┌───────────────────────┼───────────────────────────┐
-  │                 DDP_backend                        │
+  │                 backend                        │
   │                          │                         │
   │  ┌───────────────────────┴──────────────────────┐  │
   │  │  /api/dashboards/:id/schedule                │  │
@@ -244,7 +244,7 @@ class ScheduleRun(models.Model):
 
 #### Migration
 - Single migration file creating all three tables + permission slugs: `can_manage_report_schedules`
-- Next migration number follows the current latest in DDP_backend
+- Next migration number follows the current latest in backend
 
 ### 4.2 API Design
 
@@ -717,7 +717,7 @@ Each milestone delivers independently testable functionality.
 
 **Deliverable:** Backend models, migrations, and CRUD API for creating, reading, updating, and deleting report schedules with recipients. No actual scheduling logic yet.
 
-**Services:** DDP_backend
+**Services:** backend
 
 **Backend tasks:**
 - [ ] Create `ddpui/models/report_schedule.py` with `ReportSchedule`, `ScheduleRecipient`, `ScheduleRun`
@@ -743,7 +743,7 @@ Each milestone delivers independently testable functionality.
 
 **Deliverable:** Celery Beat hourly task that finds due schedules, creates snapshots, generates PDFs, and sends emails. Failure notifications and retry logic.
 
-**Services:** DDP_backend
+**Services:** backend
 
 **Backend tasks:**
 - [ ] Create `ddpui/celeryworkers/schedule_tasks.py` with `check_scheduled_reports` and `execute_scheduled_report`
@@ -770,7 +770,7 @@ Each milestone delivers independently testable functionality.
 
 **Deliverable:** Frontend UI for creating, viewing, editing, and deleting schedules from the dashboard page. Recipient management with CSV import. Test email button.
 
-**Services:** webapp_v2
+**Services:** webapp
 
 **Frontend tasks:**
 - [ ] Create `types/schedule.ts`
@@ -800,7 +800,7 @@ Each milestone delivers independently testable functionality.
 
 **Deliverable:** In-app notifications for @mentions and comment replies in reports (if not already fully covered by existing implementation from Metrics/KPIs Milestone 4). This milestone is potentially minimal if the existing mention system already works end-to-end.
 
-**Services:** DDP_backend + webapp_v2
+**Services:** backend + webapp
 
 **Backend tasks:**
 - [ ] Verify existing mention notification flow works for report comments
@@ -864,6 +864,6 @@ Each milestone delivers independently testable functionality.
 
 ---
 
-*Plan generated from user-provided spec, [domain map](/Users/siddhant/Documents/Dalgo/dalgo-core/docs/domain-map.md), codebase research via DDP_backend GitHub repo, and reference plan from [Metrics & KPIs v1](/Users/siddhant/Documents/Dalgo/dalgo-core/features/metrics_kpis/v1/plan.md).*
+*Plan generated from user-provided spec, [domain map](/Users/siddhant/Documents/Dalgo/harness/domain-map.md), codebase research via backend GitHub repo, and reference plan from [Metrics & KPIs v1](/Users/siddhant/Documents/Dalgo/harness/features/metrics_kpis/v1/plan.md).*
 
 ---

@@ -3,7 +3,7 @@
 **Date:** 2026-07-29
 **Owner:** Product (Abhishek)
 **Status:** Decisions locked — ready to fold into Spec B §4 / §6 / §11 (+ Spec A permission matrix)
-**Source:** Working session off [PR #46](https://github.com/DalgoT4D/dalgo-core/pull/46/changes) — the "Updates to spec to be incorporated" block
+**Source:** Working session off [PR #46](https://github.com/DalgoT4D/harness/pull/46/changes) — the "Updates to spec to be incorporated" block
 **Scope note:** Covers Metrics, Alerts, the IA move, and the permission matrix. **Edit-inheritance (PR changes 1 & 2 — Dashboard-edit cascading to child edit, and removal cascade + user warning) is PINNED and handled in a separate pass.**
 
 ---

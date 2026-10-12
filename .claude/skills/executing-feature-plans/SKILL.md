@@ -1,21 +1,20 @@
 ---
 name: executing-feature-plans
-description: Use when implementing a feature plan end-to-end across the Dalgo backend (DDP_backend, Django) and frontend (webapp_v2, Next.js). Triggers on "execute this plan", "implement this feature", "build this from the plan", working from a plan.md / tasks.md.
+description: Use when implementing a feature plan end-to-end across the Dalgo backend (backend, Django) and frontend (webapp, Next.js). Triggers on "execute this plan", "implement this feature", "build this from the plan", working from a plan.md / tasks.md.
 ---
 
 # Executing Feature Plans
 
 ## Overview
 
-Implement a feature from its planning document, full-stack across `DDP_backend`
-(Django + Django Ninja) and `webapp_v2` (Next.js + React), using **red-green-refactor,
+Implement a feature from its planning document, full-stack across `backend`
+(Django + Django Ninja) and `webapp` (Next.js + React), using **red-green-refactor,
 one test at a time**.
 
-**Where the code lives:** the backend and frontend are **sibling repos of `dalgo-core`**
-(`../DDP_backend`, `../webapp_v2`) — not nested inside it, so their CLAUDE.md / skills /
-rules do **not** auto-load. **Read both repos' CLAUDE.md before writing any code** — each
-is the source of truth for that repo's run/test/lint commands and conventions. Don't guess
-commands. (File access to the siblings is granted in `settings.json → additionalDirectories`.)
+**Where the code lives:** the backend and frontend are **top-level directories in this
+monorepo** (`backend/`, `webapp/`). Each has its own `CLAUDE.md` — **read both before
+writing any code**: each is the source of truth for that service's run/test/lint commands
+and conventions. Don't guess commands.
 
 **Implement inline, in this one session.** Backend and frontend are tightly coupled within
 a slice (an endpoint and the UI that consumes it), and tightly-coupled, shared-context work
@@ -44,21 +43,19 @@ in a repo's main working tree, and never on `main`. (See `superpowers:using-git-
 for the mechanics and rationale.)
 
 ```bash
-# <feature> = short kebab-case name; one line per repo you'll touch
-git -C ../DDP_backend worktree add ../.dalgo-worktrees/<feature>/DDP_backend -b feature/<feature> origin/main
-git -C ../webapp_v2   worktree add ../.dalgo-worktrees/<feature>/webapp_v2  -b feature/<feature> origin/main
+# <feature> = short kebab-case name; monorepo-wide worktree (one branch, all services).
+git worktree add ../.dalgo-worktrees/<feature> -b feature/<feature> origin/main
 ```
 
-All worktrees live under the dedicated root `../.dalgo-worktrees/<feature>/`, which is
-writable via `settings.json → additionalDirectories`. **Do all code work inside these
-worktree dirs**, not in `../DDP_backend` / `../webapp_v2`. The feature artifacts
-(`plan.md` / `research.md` / `tasks.md`) stay in `dalgo-core`. After the PRs merge, clean
-up with `git -C ../DDP_backend worktree remove ../.dalgo-worktrees/<feature>/DDP_backend`
-(and the same for `webapp_v2`).
+All worktrees live under the dedicated root `../.dalgo-worktrees/<feature>/`. **Do all
+code work inside the worktree**, not in the main repo checkout. The feature artifacts
+(`plan.md` / `research.md` / `tasks.md`) stay in `harness/features/<name>/<version>/`
+on the branch. After the PRs merge, clean up with `git worktree remove
+../.dalgo-worktrees/<feature>`.
 
 ### 2. Load the plan and set your checkpoint
 
-- Read the plan document and `research.md` in the same `features/{name}/{version}/` folder.
+- Read the plan document and `research.md` in the same `harness/features/{name}/{version}/` folder.
   `research.md` already holds the planner's findings — **consume it; don't re-run discovery.**
   Only investigate gaps it doesn't cover.
 - Create/open `tasks.md` in that folder. It is your resume checkpoint — mark tasks
@@ -110,11 +107,11 @@ resume points after an interruption.
 
 - Confirm every `tasks.md` item is done; re-read the plan to confirm nothing was missed.
 - Run the final validation suite. Let remote CI run as the final gate.
-- **Two repos → two PRs.** Push each worktree's `feature/<feature>` branch and open the
-  **backend PR first** (its API must exist for the frontend to build against), cross-link
-  the two PRs, and state the merge order. If they must ship together, say so in both.
-- Suggest `/engineering/validate-spec` before opening the PRs.
-- After both merge, remove the worktrees (`git worktree remove`, see step 1).
+- **One monorepo → one PR per branch.** Push the worktree's `feature/<feature>` branch and
+  open the PR. If backend and frontend changes could ship separately, split into two PRs
+  (backend first — its API must exist for the frontend to build against) and cross-link.
+- Suggest `/engineering/validate-spec` before opening the PR.
+- After merge, remove the worktree (`git worktree remove`, see step 1).
 
 ## Subagents — read-only bookends only
 
@@ -136,12 +133,12 @@ between any subagent and you — never route findings through memory alone.
 ## Red Flags — STOP
 
 - Implementing in a repo's main working tree or on `main` (you skipped the worktree step)
-- Writing code in a repo before reading its CLAUDE.md (siblings don't auto-load)
+- Writing code in a service before reading its CLAUDE.md (per-service CLAUDE.md doesn't auto-load from the monorepo root — open it explicitly)
 - Splitting implementation across subagents — coding is tightly coupled; keep it inline
   (subagents are for orientation/review only)
 - Implementation before a failing test exists, or several tests written upfront
 - "I'll just push and let CI tell me" — CI is the final gate, not the inner loop
-- "Frontend is hard to test, I'll skip it" — the loop is identical in `webapp_v2`
+- "Frontend is hard to test, I'll skip it" — the loop is identical in `webapp`
 - Marking a `tasks.md` item done with no test backing it
 
 **Each means: stop, branch / read the repo's CLAUDE.md / write the single failing test,

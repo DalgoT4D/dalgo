@@ -32,8 +32,8 @@ Before starting research, in this order:
 
 ### 1. Read platform context (mandatory)
 Read these two files first — they are the canonical references for how Dalgo works:
-- `dalgo-core/README.md` — the AI-assisted workflow and directory conventions.
-- `dalgo-core/docs/domain-map.md` — the product entities, what they consume, and what consumes them. **This is the source of truth for impact analysis.**
+- `harness/README.md` — the AI-assisted workflow and directory conventions.
+- `harness/domain-map.md` — the product entities, what they consume, and what consumes them. **This is the source of truth for impact analysis.**
 
 Do not skip these. Without them, you will miss downstream surfaces and plan an incomplete feature. The reason this step exists: historically, specs have silently dropped downstream surfaces (e.g. a Metrics spec that forgot Reports) because the planner had no map of product-level relationships.
 
@@ -58,8 +58,8 @@ Do not skip these. Without them, you will miss downstream surfaces and plan an i
 
 Read the architecture skills' `landmarks.md` files **before** spawning any Explore agents:
 
-- For any backend work touching DDP_backend → read `.claude/skills/backend-architecture/landmarks.md`
-- For any frontend work touching webapp_v2 → read `.claude/skills/frontend-architecture/landmarks.md`
+- For any backend work touching backend → read `.claude/skills/backend-architecture/landmarks.md`
+- For any frontend work touching webapp → read `.claude/skills/frontend-architecture/landmarks.md`
 
 These files are the lookup table for things planners repeatedly need: where the role/permission model lives, the `@has_permission` decorator, content models with line ranges, the sidebar nav contract, the `useUserPermissions` hook, the API client, migration + test templates. **If your question is "where does X live in the codebase?" and the landmark file answers it, do not spawn an Explore agent for that question.**
 
@@ -87,7 +87,7 @@ By the time you reach this section you should already have: spec context, blast 
    - Ask the user questions if blast-radius scope or technical-direction calls remain unresolved.
 
 4. **Multi-service Impact**
-   - Since Dalgo has multiple services (DDP_backend, webapp_v2, prefect-proxy), analyze which services need changes.
+   - Since Dalgo has multiple services (backend, webapp, prefect-proxy), analyze which services need changes.
    - How would you validate that changes in each service work.
    - Think about integration testing, functional testing, and unit testing.
 

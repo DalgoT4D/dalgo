@@ -30,16 +30,16 @@ For each requirement in the spec:
 
 ### Step 4: Run Service-Specific Checks
 
-#### For DDP_backend Changes
-If any files under `DDP_backend/` changed:
+#### For backend Changes
+If any files under `backend/` changed:
 - Run lint check on changed files
 - Run `uv run pytest` for any changed test files or test files related to changed modules
 - Check for missing Django migrations if models changed (`python manage.py makemigrations --check --dry-run`)
 
-#### For webapp_v2 Changes
-If any files under `webapp_v2/` changed:
-- Run `npm run lint` in webapp_v2
-- Run `npm run format:check` in webapp_v2
+#### For webapp Changes
+If any files under `webapp/` changed:
+- Run `npm run lint` in webapp
+- Run `npm run format:check` in webapp
 - Run `npm test` for changed components (if test files exist)
 
 ### Step 5: Scan Diff for Common Issues

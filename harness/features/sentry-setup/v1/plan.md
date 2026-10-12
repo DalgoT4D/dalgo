@@ -11,12 +11,12 @@
 
 ## 1. Overview
 
-Harden the existing Sentry error-tracking setup in webapp_v2 by reducing quota waste, filtering noise, protecting against SSR crashes, enabling source-map uploads in CI/CD, and adding privacy safeguards for NGO user data. The Sentry SDK (v8.55.0) and core integration files already exist on branch `setup-sentry-tracking`; this plan covers configuration improvements only — no new dependencies or architectural changes.
+Harden the existing Sentry error-tracking setup in webapp by reducing quota waste, filtering noise, protecting against SSR crashes, enabling source-map uploads in CI/CD, and adding privacy safeguards for NGO user data. The Sentry SDK (v8.55.0) and core integration files already exist on branch `setup-sentry-tracking`; this plan covers configuration improvements only — no new dependencies or architectural changes.
 
 **Services affected:**
-- **webapp_v2** — All changes are in this repo (Sentry config files, Next.js config, env documentation)
+- **webapp** — All changes are in this repo (Sentry config files, Next.js config, env documentation)
 
-**Not affected:** DDP_backend, prefect-proxy, dalgo-ai-gen
+**Not affected:** backend, prefect-proxy, dalgo-ai-gen
 
 ---
 
@@ -44,7 +44,7 @@ Sentry operates across three independent runtimes in the Next.js architecture. E
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│                         webapp_v2                              │
+│                         webapp                              │
 │                                                                │
 │  ┌──────────────────┐  ┌───────────────────┐  ┌─────────────┐ │
 │  │   Browser (CSR)  │  │  Node.js (SSR)    │  │    Edge     │ │
@@ -392,13 +392,13 @@ After deploying to production:
 
 ## 7. Milestones
 
-All changes are in the `webapp_v2` repo on branch `setup-sentry-tracking`. The milestones are ordered by priority and can be committed as separate, reviewable changesets within the existing PR #258.
+All changes are in the `webapp` repo on branch `setup-sentry-tracking`. The milestones are ordered by priority and can be committed as separate, reviewable changesets within the existing PR #258.
 
 ### Milestone 1: High-Priority Fixes (Quota + Noise + SSR Safety)
 
 **Deliverable:** tracesSampleRate lowered to 0.2, ignoreErrors list added, SSR window.location.origin risk fixed, SENTRY_AUTH_TOKEN documented in .env.example.
 
-**Services:** webapp_v2
+**Services:** webapp
 
 **Key tasks:**
 - [ ] In `sentry.client.config.ts`: change `tracesSampleRate` from `1.0` to `0.2`
@@ -422,7 +422,7 @@ All changes are in the `webapp_v2` repo on branch `setup-sentry-tracking`. The m
 
 **Deliverable:** Sentry can be disabled via missing DSN, ad-blocker-proof event delivery via tunnelRoute, PII scrubbing via beforeSend, extension noise filtered via denyUrls.
 
-**Services:** webapp_v2
+**Services:** webapp
 
 **Key tasks:**
 - [ ] In all three config files: add `enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN`
@@ -442,7 +442,7 @@ All changes are in the `webapp_v2` repo on branch `setup-sentry-tracking`. The m
 
 **Deliverable:** Remove unnecessary server/edge config options.
 
-**Services:** webapp_v2
+**Services:** webapp
 
 **Key tasks:**
 - [ ] In `sentry.server.config.ts`: remove `autoSessionTracking` if present
@@ -460,7 +460,7 @@ All changes are in the `webapp_v2` repo on branch `setup-sentry-tracking`. The m
 
 1. **window.location.origin reference (H3):** The spec flags an SSR risk from `window.location.origin`, but without reading the actual code, I cannot confirm which file contains this reference. During implementation, audit all three config files and `next.config.ts` for any `window` access. If found in the `tunnelRoute` setup, replacing with the relative path `/monitoring` eliminates the issue.
 
-2. **SENTRY_AUTH_TOKEN in CI/CD:** Which CI/CD platform does webapp_v2 use? If Vercel, add as a project-level environment variable. If GitHub Actions, add as a repository secret. The implementer should confirm the deployment pipeline and add the token accordingly.
+2. **SENTRY_AUTH_TOKEN in CI/CD:** Which CI/CD platform does webapp use? If Vercel, add as a project-level environment variable. If GitHub Actions, add as a repository secret. The implementer should confirm the deployment pipeline and add the token accordingly.
 
 3. **Sentry project/org names:** The LLD assumes `org: "dalgo"` and `project: "webapp-v2"` in `withSentryConfig()`. These should be verified against the actual Sentry project settings. Incorrect values will cause source map upload to fail silently.
 

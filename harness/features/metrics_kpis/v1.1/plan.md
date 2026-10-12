@@ -16,8 +16,8 @@ Add **number formatting + prefix/suffix** options to KPI config, mirroring the e
 > We actually need 2 things — Number formatting options and prefix/suffix options exactly same as the number chart.
 
 **Services affected:**
-- **DDP_backend** — KPI model + schema + new shared formatter module + alert rendering + report snapshot freeze
-- **webapp_v2** — KPI form, KPI card, drawer, dashboard widget, snapshot viewer
+- **backend** — KPI model + schema + new shared formatter module + alert rendering + report snapshot freeze
+- **webapp** — KPI form, KPI card, drawer, dashboard widget, snapshot viewer
 
 **Not affected:** prefect-proxy.
 
@@ -55,7 +55,7 @@ None — every in-scope surface ships in v1.1.
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                       webapp_v2                          │
+│                       webapp                          │
 │                                                          │
 │  ┌────────────┐  ┌────────────┐  ┌────────────────────┐ │
 │  │ KPI form   │  │ KPI card   │  │ Dashboard KPI      │ │
@@ -70,7 +70,7 @@ None — every in-scope surface ships in v1.1.
 └──────────────────────────┬───────────────────────────────┘
                            │ HTTP
 ┌──────────────────────────┼───────────────────────────────┐
-│                     DDP_backend                          │
+│                     backend                          │
 │                          ▼                                │
 │   POST /api/kpis/      PUT /api/kpis/{id}/               │
 │       │                     │                             │
@@ -151,7 +151,7 @@ No new endpoints. Existing endpoints extended:
 
 ### 4.1 Data model
 
-**Modified:** `DDP_backend/ddpui/models/metric.py` — KPI class (~lines 84–129)
+**Modified:** `backend/ddpui/models/metric.py` — KPI class (~lines 84–129)
 
 ```python
 class KPI(models.Model):
@@ -162,7 +162,7 @@ class KPI(models.Model):
 
 **Storage contract:** `extra_config` is **always a dict** at the DB layer — never `null`, never missing. `null=False` enforces it on the column; `default=dict` ensures every new row is created with `{}`.
 
-**Migration:** `DDP_backend/ddpui/migrations/00XX_kpi_extra_config.py`
+**Migration:** `backend/ddpui/migrations/00XX_kpi_extra_config.py`
 - `AddField` for `extra_config` with `default=dict`
 - Django backfills every existing KPI row with `{}` when the migration runs — no separate data-migration step needed.
 - After the migration, GET on a pre-v1.1 KPI returns `extra_config: {}` (i.e. `customizations` absent — frontend must check before reading).
@@ -171,7 +171,7 @@ class KPI(models.Model):
 
 KPI has a single, stable customization shape (unlike `Chart.extra_config`, which varies per chart_type and stays a loose dict). So we type the whole tree at the API boundary AND make `extra_config` a **required** field on every request — the KPI form will always send it.
 
-**`DDP_backend/ddpui/schemas/kpi_schema.py`:**
+**`backend/ddpui/schemas/kpi_schema.py`:**
 
 ```python
 from ddpui.schemas.chart_schemas.customizations import NumberChartCustomizations
@@ -199,7 +199,7 @@ class KPISchema(Schema):
 - `extra_config.customizations` is **optional** — frontend MUST check existence before reading `numberFormat` / `decimalPlaces` / etc. For pre-v1.1 KPIs (backfilled to `{}`), `customizations` will be absent.
 - Unknown keys inside `extra_config` or `customizations` are rejected at the API boundary by Pydantic.
 
-**Frontend mirror** (`webapp_v2/types/kpi.ts` or wherever KPI types live):
+**Frontend mirror** (`webapp/types/kpi.ts` or wherever KPI types live):
 
 ```typescript
 type KPICustomizations = Pick<
@@ -224,7 +224,7 @@ type KPI = {
 
 ### 4.3 Backend logic
 
-**New file:** `DDP_backend/ddpui/core/charts/number_formatting.py`
+**New file:** `backend/ddpui/core/charts/number_formatting.py`
 
 ```python
 from typing import Optional
@@ -238,7 +238,7 @@ def format_number_v2(
     suffix: str = "",
 ) -> str:
     """Format a numeric value for display.
-    Mirrors webapp_v2/lib/formatters.ts:formatNumber + chart-formatting-utils prefix/suffix wrap.
+    Mirrors webapp/lib/formatters.ts:formatNumber + chart-formatting-utils prefix/suffix wrap.
 
     Returns "No data" for None/NaN — without prefix/suffix wrap.
     """
@@ -268,32 +268,32 @@ def format_number_v2(
     return f"{prefix}{formatted}{suffix}"
 ```
 
-**Modified:** `DDP_backend/ddpui/core/charts/echarts_config_generator.py:89–112`
+**Modified:** `backend/ddpui/core/charts/echarts_config_generator.py:89–112`
 - `_format_number()` delegates to `number_formatting.format_number_v2`
 - No behavior change for existing number chart consumers
 
-**Modified:** `DDP_backend/ddpui/core/alerts/rendering.py:52` (or equivalent token-resolution site)
+**Modified:** `backend/ddpui/core/alerts/rendering.py:52` (or equivalent token-resolution site)
 - For `kpi_rag` alerts, resolve `{{current_value}}` by calling `format_number_v2` with the KPI's `extra_config.customizations`
 - KPI lookup already happens in this rendering path
 
-**Modified:** Snapshot freeze code — grep `FrozenKpiConfig(` call sites in `DDP_backend/ddpui/core/`. At freeze time, copy `kpi.extra_config.get("customizations")` into the `FrozenKpiConfig.customizations` field.
+**Modified:** Snapshot freeze code — grep `FrozenKpiConfig(` call sites in `backend/ddpui/core/`. At freeze time, copy `kpi.extra_config.get("customizations")` into the `FrozenKpiConfig.customizations` field.
 
-**Modified:** `DDP_backend/ddpui/schemas/report_schema.py:59` — `FrozenKpiConfig`
+**Modified:** `backend/ddpui/schemas/report_schema.py:59` — `FrozenKpiConfig`
 - Add `customizations: Optional[Dict[str, Any]] = None`
 
-**New dependency:** Add `babel` to `DDP_backend/pyproject.toml`.
+**New dependency:** Add `babel` to `backend/pyproject.toml`.
 
 ### 4.4 Frontend components
 
-**Modified:** `webapp_v2/components/charts/types/number/NumberChartCustomizations.tsx`
+**Modified:** `webapp/components/charts/types/number/NumberChartCustomizations.tsx`
 - **Extract** the number-format, decimals, prefix, suffix block into a reusable `<NumberFormatPanel value={…} onChange={…} />` component
-- Co-locate in `webapp_v2/components/shared/NumberFormatPanel.tsx` or `webapp_v2/components/charts/shared/`
+- Co-locate in `webapp/components/shared/NumberFormatPanel.tsx` or `webapp/components/charts/shared/`
 - `NumberChartCustomizations` re-imports the panel — no behavior change for number charts
 
-**Modified:** `webapp_v2/components/kpis/kpi-form.tsx` (Step 2, around line 578 — after RAG/time-config, before tags)
+**Modified:** `webapp/components/kpis/kpi-form.tsx` (Step 2, around line 578 — after RAG/time-config, before tags)
 - Insert `<NumberFormatPanel />` reading from `formData.extra_config?.customizations`, writing back to `formData.extra_config.customizations`
 
-**Modified:** `webapp_v2/lib/formatters.ts`
+**Modified:** `webapp/lib/formatters.ts`
 - Add:
   ```ts
   export function formatKPIValue(
@@ -309,24 +309,24 @@ def format_number_v2(
   }
   ```
 
-**Modified:** `webapp_v2/components/kpis/kpi-card.tsx`
+**Modified:** `webapp/components/kpis/kpi-card.tsx`
 - Line 281: `formatMetricValue(currentValue)` → `formatKPIValue(currentValue, kpi.extra_config?.customizations)`
 - Line 285: target value renders via same swap
 
-**Modified:** `webapp_v2/components/kpis/kpi-detail-drawer.tsx`
+**Modified:** `webapp/components/kpis/kpi-detail-drawer.tsx`
 - Header current value + target render → `formatKPIValue(...)`
 
-**Modified:** `webapp_v2/components/dashboard/kpi-chart-element.tsx`
+**Modified:** `webapp/components/dashboard/kpi-chart-element.tsx`
 - Verify the widget consumes value via `KPICard` (auto-inherits) OR directly — apply `formatKPIValue` if direct
 - **No `applyNumberChartFormatting()` call** — see HLD § 3.4
 
-**Modified:** ReportSnapshot KPI viewer (grep `frozen_chart_configs` consumers in `webapp_v2/`)
+**Modified:** ReportSnapshot KPI viewer (grep `frozen_chart_configs` consumers in `webapp/`)
 - Read `customizations` from the frozen blob, not the live KPI
 - Pass to `formatKPIValue`
 
 ### 4.5 Integration points
 
-- **`formatMetricValue` audit (M2 pre-work):** grep all call sites in `webapp_v2/` before swapping. Each site either gets the swap (KPI render contexts) or is explicitly documented as "stays raw" (CSV export, etc.).
+- **`formatMetricValue` audit (M2 pre-work):** grep all call sites in `webapp/` before swapping. Each site either gets the swap (KPI render contexts) or is explicitly documented as "stays raw" (CSV export, etc.).
 
 ---
 
@@ -346,20 +346,20 @@ def format_number_v2(
 
 ### Unit tests
 
-**Backend (`DDP_backend/ddpui/tests/`):**
+**Backend (`backend/ddpui/tests/`):**
 - `core/charts/test_number_formatting.py` (new) — every `(format_type × decimals × prefix × suffix × edge_case)` combination; ~30 cases. Edge cases: `None`, `0`, negative, very large, very small, `NaN`.
 - `core/alerts/test_rendering.py` (extend) — `{{current_value}}` for a kpi_rag alert with KPI customizations emits formatted output; without customizations emits raw-equivalent default formatting.
 - `api_tests/test_kpi_api.py` (extend) — POST + PUT round-trip `extra_config.customizations`; invalid `numberFormat` → 400; out-of-range `decimalPlaces` → 400.
 - `core/services/test_report_service.py` (extend) — `FrozenKpiConfig` includes `customizations` at snapshot time; editing the KPI afterward does NOT mutate the snapshot.
 
-**Frontend (`webapp_v2/`):**
+**Frontend (`webapp/`):**
 - `lib/__tests__/formatters.test.ts` (extend) — `formatKPIValue` for each format, prefix/suffix combination, null guard.
 - `components/kpis/__tests__/kpi-card.test.tsx` (extend) — KPI with no `extra_config` renders identically to v1 (snapshot test). KPI with each format renders expected string.
 - `components/kpis/__tests__/kpi-form.test.tsx` (extend) — submitting the form persists `extra_config.customizations` in the API payload in the correct nested shape.
 
 ### Cross-stack parity test
 
-Shared fixture file: `dalgo-core/tests/fixtures/number_format_parity.json` — ~12 representative tuples.
+Shared fixture file: `harness/tests/fixtures/number_format_parity.json` — ~12 representative tuples.
 - Backend pytest reads the fixture, asserts `format_number_v2` matches expected string.
 - Frontend Vitest reads the same fixture, asserts `formatKPIValue` matches expected string.
 - CI fails if either diverges.
@@ -392,7 +392,7 @@ Each milestone is independently shippable and reviewable as a single PR.
 
 #### Milestone 1: Backend — schema, storage, parity formatter
 - **Deliverable:** KPI model + API accept `extra_config.customizations`; new shared formatter module with babel; backend parity-fixture test passing.
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [ ] Add `extra_config = JSONField(default=dict)` to KPI model
   - [ ] Migration `00XX_kpi_extra_config.py`
@@ -405,7 +405,7 @@ Each milestone is independently shippable and reviewable as a single PR.
 
 #### Milestone 2: Frontend — KPI form + card + drawer + dashboard widget
 - **Deliverable:** UI surface where a user can set format options and see them on card, drawer, and dashboard widget.
-- **Services:** webapp_v2
+- **Services:** webapp
 - **Key tasks:**
   - [ ] Extract `<NumberFormatPanel />` from `NumberChartCustomizations.tsx`
   - [ ] Insert panel in `kpi-form.tsx` Step 2
@@ -417,7 +417,7 @@ Each milestone is independently shippable and reviewable as a single PR.
 
 #### Milestone 3: ReportSnapshot freeze + render
 - **Deliverable:** Snapshots freeze the KPI format alongside data; historical snapshots render with the format active at snapshot time.
-- **Services:** DDP_backend, webapp_v2
+- **Services:** backend, webapp
 - **Key tasks:**
   - [ ] Extend `FrozenKpiConfig` with `customizations`
   - [ ] Snapshot freeze code copies `kpi.extra_config.customizations` at snapshot time
@@ -427,7 +427,7 @@ Each milestone is independently shippable and reviewable as a single PR.
 
 #### Milestone 4: Alert rendering — formatted `{{current_value}}`
 - **Deliverable:** kpi_rag alert emails render the KPI value with prefix/suffix/format identical to the card.
-- **Services:** DDP_backend
+- **Services:** backend
 - **Key tasks:**
   - [ ] Update `core/alerts/rendering.py` to format `{{current_value}}` via `format_number_v2` + KPI customizations
   - [ ] Update existing alert-render tests with new expectations
@@ -440,9 +440,9 @@ Each milestone is independently shippable and reviewable as a single PR.
 
 1. **kpi_rag alert template behavior change.** Existing templates with `{{current_value}}` will start emitting formatted output as soon as M4 ships. User-confirmed but worth a release note.
 2. **`extra_config` is required on Create/Update.** The KPI form is being updated in M2 to always send it, so this is fine. But any external API consumer that POSTs to `/api/kpis/` without `extra_config` will get a 422 after v1.1 ships. Document in the release note alongside the alert behavior change.
-3. **Babel dependency.** New explicit Python dep in DDP_backend. Document in `uv.lock`. Babel is widely used and stable.
+3. **Babel dependency.** New explicit Python dep in backend. Document in `uv.lock`. Babel is widely used and stable.
 4. **ReportSnapshot back-compat.** Pre-v1.1 snapshots have no frozen `customizations`. Render path must fall back to "no formatting" (same as a v1 KPI), matching what those snapshots showed before. Explicit unit test required.
-5. **`formatMetricValue` audit.** Quick grep in `webapp_v2/` before M2 to find every call site — easy to miss one (mobile view, CSV export, PDF export if any). Each site either gets the swap or is documented as "stays raw."
+5. **`formatMetricValue` audit.** Quick grep in `webapp/` before M2 to find every call site — easy to miss one (mobile view, CSV export, PDF export if any). Each site either gets the swap or is documented as "stays raw."
 6. **Compact formats (`adaptive_*`).** Frontend uses `formatNumber` with `Intl.NumberFormat` notation=compact; backend port via babel + manual logic. Highest divergence risk — keep the parity-fixture coverage broad here.
 
 ---

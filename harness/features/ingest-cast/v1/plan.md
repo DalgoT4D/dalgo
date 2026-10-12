@@ -4,7 +4,7 @@
 
 After an Airbyte sync, raw tables often land with incorrect column types (e.g., numeric amounts as `STRING`). Downstream dbt transforms then need explicit casts in every model. This feature lets users configure column type casts per stream in the connection modal; the backend pre-generates dialect-specific SQL; Prefect executes it immediately after each sync, in-place on the raw table.
 
-**Services affected:** DDP_backend, webapp_v2, prefect-proxy, prefect-airbyte (Dalgo fork)
+**Services affected:** backend, webapp, prefect-proxy, prefect-airbyte (Dalgo fork)
 
 ---
 
@@ -27,7 +27,7 @@ The original design (M1-M4 below) stored the pre-generated cast SQL inside **Pre
 | `run_airbyte_connection_flow_v1(payload)` — sync `@flow`, reads `env`/`ops` from payload | Async `@flow`; `AirbyteConnection.aload(connection_id)` then reads `extra` from the block |
 | `_run_post_sync_ops` inline (not visible in Prefect graph) | `@task(name="post-sync-ops", retries=0)` — visible in UI graph, uses `get_run_logger()` for logs |
 | BigQuery `generate_cast_sql` fetches all live columns via `get_table_columns()` | Backend stores **raw config** in the block; prefect-proxy builds SQL at flow-run time using `bq_client.get_table(...)` to preserve Airbyte's partition/cluster spec |
-| SQL generation lives in DDP_backend warehouse clients (`generate_cast_sql` methods) | SQL generation moves to prefect-proxy — closer to where execution happens, uses live metadata (partition/cluster spec, actual column names) |
+| SQL generation lives in backend warehouse clients (`generate_cast_sql` methods) | SQL generation moves to prefect-proxy — closer to where execution happens, uses live metadata (partition/cluster spec, actual column names) |
 | Legacy env/ops fields kept on `PrefectAirbyteSyncTaskSetup` | **Removed** — task config carries only server-block + connection_id; block loaded at runtime |
 | No migration path noted | **Progressive** — blocks created lazily when user saves a connection with cast config. Existing connections without casts stay on the fallback (inline `AirbyteConnection`, no post-sync ops). No backfill required. |
 
@@ -87,7 +87,7 @@ User (connection modal)
   → expands stream → sets "Cast to type" per column
   → saves connection
 
-DDP_backend (connection create/update)
+backend (connection create/update)
   → stores cast spec in OrgTask.post_sync_transform
       {"cast": {"stream_name": [{"columnname": "col", "columntype": "numeric"}]}}
   → when building Prefect task config:
@@ -170,7 +170,7 @@ Shape when set:
 
 **Diff rule**: only ops where the user's selected type differs from the column's current type are stored. Columns where the selected type matches the existing type are dropped before saving. If all columns across all streams are no-ops after filtering, `post_sync_transform` is set to `NULL`. This filtering happens on the **frontend** — it has both the original type (from Airbyte stream schema) and the user-selected type, so it can compute the diff before sending. The backend stores whatever arrives; if the payload is empty/null, it writes `NULL`.
 
-### Cast SQL generation — DDP_backend
+### Cast SQL generation — backend
 
 No new module. SQL generation is added as **static methods** on the existing warehouse clients so dialect logic stays co-located with the client.
 
@@ -221,7 +221,7 @@ def generate_cast_sql(
 
 Type maps live inside each static method (postgres types are lowercase SQL keywords; bigquery types are BigQuery standard SQL names).
 
-### API changes — DDP_backend
+### API changes — backend
 
 **Schema:** `AirbyteConnectionCreate` / `AirbyteConnectionUpdate` (wherever they live in `ddpui/schemas/`):
 ```python
@@ -233,7 +233,7 @@ post_sync_transform: dict = {}
 - `put_airbyte_connection_v1`: update `org_task.post_sync_transform`; trigger deployment params regeneration
 - GET connection endpoint: include `post_sync_transform` from `OrgTask` in response
 
-### Prefect task config — DDP_backend
+### Prefect task config — backend
 
 **`ddpui/ddpprefect/schema.py`** — extend `PrefectAirbyteSyncTaskSetup` with two new fields (same `env` convention as dbt tasks):
 ```python
@@ -314,9 +314,9 @@ def _run_post_sync_ops(payload: dict) -> None:
 
 Each `post_sync_ops` entry carries one SQL statement (one table). The proxy iterates and executes them sequentially. `type` field enables future op types without changing the loop structure.
 
-### Frontend — webapp_v2
+### Frontend — webapp
 
-**`webapp_v2/types/connections.ts`:**
+**`webapp/types/connections.ts`:**
 ```typescript
 export type StreamColumn = {
   name: string
@@ -326,12 +326,12 @@ export type StreamColumn = {
 }
 ```
 
-**`webapp_v2/components/connections/stream-config-table.tsx`:**
+**`webapp/components/connections/stream-config-table.tsx`:**
 - Add "Cast to" column header in expanded per-stream column list
 - Per column row: `<Select value={col.cast_to_type ?? ""} onValueChange={...}>` with options from a `CAST_TYPE_OPTIONS` constant (`["numeric", "integer", "bigint", "boolean", "date", "timestamp", "text"]`)
 - Wire `onCastTypeChange(streamName, columnName, castType)` callback up to `ConnectionForm`
 
-**`webapp_v2/components/connections/connection-form.tsx`:**
+**`webapp/components/connections/connection-form.tsx`:**
 - On submit: derive `post_sync_transform` from stream/column state
 - Include in POST/PUT body
 - On edit load: hydrate `cast_to_type` on columns from `connection.post_sync_transform`
@@ -365,7 +365,7 @@ export type StreamColumn = {
 
 **Deliverable**: `dbt_profile_secret_block` moved from `OrgDbt` → `OrgWarehouse`; `post_sync_transform` added to `OrgTask`
 
-**Services**: DDP_backend only
+**Services**: backend only
 
 ---
 
@@ -599,7 +599,7 @@ block_name = warehouse.dbt_profile_secret_block.block_name
 
 **Deliverable**: `generate_cast_sql()` on warehouse clients + `PrefectAirbyteSyncTaskSetup` extended with `env`/`post_sync_ops` + `setup_airbyte_sync_task_config()` wired up
 
-**Services**: DDP_backend
+**Services**: backend
 
 ---
 
@@ -779,7 +779,7 @@ No changes to callers of `setup_airbyte_sync_task_config()` — signature unchan
 
 **Deliverable**: create/update/get connection endpoints round-trip `post_sync_transform`
 
-**Services**: DDP_backend
+**Services**: backend
 
 ---
 
@@ -1069,7 +1069,7 @@ No changes to `prefect_flows_runner.py`, `schemas.py`, or any other proxy file.
 
 **Deliverable**: "Cast to" dropdown per column in stream expansion; config round-trips through modal
 
-**Services**: webapp_v2
+**Services**: webapp
 
 ---
 
@@ -1346,7 +1346,7 @@ Add an `extra: Dict[str, Any] = Field(default_factory=dict, ...)` field to `Airb
 - **Type maps + column normalization**: move `POSTGRES_CAST_TYPE_MAP`, `BIGQUERY_CAST_TYPE_MAP`, `re.sub(r"[^a-zA-Z0-9_$]", "_", ...)` normalization logic to `prefect_flows_runner.py` (or a new module `proxy/cast_sql.py`).
 - Update `test_service.py`, `test_main.py`, `test_post_sync_ops.py` — async fixtures, `AsyncMock` for `Secret.aload`, add mocked `bq_client.get_table` for BigQuery path.
 
-#### M5.3 — DDP_backend: config-only in block, no SQL generation
+#### M5.3 — backend: config-only in block, no SQL generation
 
 - **`ddpui/ddpprefect/schema.py`** — remove `env` and `post_sync_ops` from `PrefectAirbyteSyncTaskSetup` (+`to_json()`). Task config now carries only server-block + connection_id.
 - **`ddpui/core/pipelinefunctions.py::build_connection_block_extra`** — no SQL generation. Builds:
@@ -1367,7 +1367,7 @@ Add an `extra: Dict[str, Any] = Field(default_factory=dict, ...)` field to `Airb
 
 #### M5.4 — Test updates
 
-- **`test_airbytehelpers.py`** (DDP_backend) — `test_create_connection_saves_post_sync_transform` + `test_update_connection_saves_post_sync_transform` — mock `upsert_airbyte_connection_block` + assert it was called with correct kwargs. Also add `test_create_connection_no_transform_skips_upsert`.
+- **`test_airbytehelpers.py`** (backend) — `test_create_connection_saves_post_sync_transform` + `test_update_connection_saves_post_sync_transform` — mock `upsert_airbyte_connection_block` + assert it was called with correct kwargs. Also add `test_create_connection_no_transform_skips_upsert`.
 - **DELETE** `ddpui/tests/utils/warehouse/test_cast_sql.py` — SQL-generation logic now in prefect-proxy.
 - **`test_service.py`** (prefect-proxy) — drop obsolete `update_airbyte_connection_block` stubs; add tests for `upsert_airbyte_connection_block` (happy path, missing server block, save failure, invalid payload).
 - **`test_main.py`** (prefect-proxy) — add tests for `PUT /proxy/blocks/airbyte/connection/`.
@@ -1384,4 +1384,4 @@ Add an `extra: Dict[str, Any] = Field(default_factory=dict, ...)` field to `Airb
 - Post-sync ops task is visible in the Prefect UI graph with logs
 - Existing connections without cast config keep working unchanged (flow falls back to inline construction)
 - `prefect-proxy` test suite: all green
-- DDP_backend test suite: all green (excluding pre-existing unrelated failures)
+- backend test suite: all green (excluding pre-existing unrelated failures)

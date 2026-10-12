@@ -5,7 +5,7 @@
 
 ---
 
-## M0 — Prerequisite model changes (DDP_backend)
+## M0 — Prerequisite model changes (backend)
 
 - [x] **M0.1** — Add `dbt_profile_secret_block` FK to `OrgWarehouse` (`ddpui/models/org.py`) + migration `0172`
 - [x] **M0.2** — Dual-write block to `warehouse` in `create_or_update_dbt_profile_secret_blk()` (`dbthelpers.py:208`)
@@ -21,7 +21,7 @@
 
 ---
 
-## M1 — SQL generation + task config schema (DDP_backend)
+## M1 — SQL generation + task config schema (backend)
 
 - [x] **M1.1** — Add `generate_cast_sql(schema, table, column_casts)` instance method to `PostgresClient` and `BigqueryClient`
   - Postgres: `ALTER TABLE` using `self.engine.dialect.identifier_preparer` for quoting
@@ -32,7 +32,7 @@
 
 ---
 
-## M2 — Connection API CRUD with cast config (DDP_backend)
+## M2 — Connection API CRUD with cast config (backend)
 
 - [x] **M2.1** — Add `post_sync_transform: Optional[dict] = None` to `AirbyteConnectionCreate`, `AirbyteConnectionUpdate`, `AirbyteConnectionCreateResponse` (`ddpui/ddpairbyte/schema.py`)
 - [x] **M2.2** — Save `post_sync_transform` on `OrgTask` in `create_connection()` (`airbytehelpers.py:264`) before `create_airbyte_deployment()` is called
@@ -50,7 +50,7 @@
 
 ---
 
-## M4 — Frontend cast config UI (webapp_v2)
+## M4 — Frontend cast config UI (webapp)
 
 - [x] **M4.1** — Add `cast_to_type: string | null` to `StreamColumn`; add `PostSyncOp`, `PostSyncTransform` types; add `post_sync_transform` to `Connection` (`types/connections.ts`)
 - [x] **M4.2** — Add `CAST_TYPE_OPTIONS` constant (`constants/connections.ts`)
@@ -83,7 +83,7 @@ Pivot away from deployment-param-embedded SQL. See plan `Architecture Revision �
 - [x] Use `get_run_logger()` in both flow + task for logs to surface in Prefect UI
 - [ ] Push to git + restart prefect-proxy + prefect workers
 
-### M5.3 — DDP_backend: block upsert on connection save
+### M5.3 — backend: block upsert on connection save
 
 - [x] Remove `env` + `post_sync_ops` from `PrefectAirbyteSyncTaskSetup` (+`to_json()`) — `ddpui/ddpprefect/schema.py`
 - [x] Extract SQL-gen into `build_connection_block_extra(org_task)` helper — `ddpui/core/pipelinefunctions.py`
@@ -104,7 +104,7 @@ Pivot away from deployment-param-embedded SQL. See plan `Architecture Revision �
 - [x] `test_main.py` — add tests for `PUT /proxy/blocks/airbyte/connection/`
 - [x] `test_post_sync_ops.py` — convert all tests to async + `AsyncMock` for `Secret.aload`
 - [x] All prefect-proxy tests green (247 passed)
-- [x] All DDP_backend tests green (2214 passed, excluding pre-existing GitHub-API integration test failures)
+- [x] All backend tests green (2214 passed, excluding pre-existing GitHub-API integration test failures)
 
 ### M5.5 — Move SQL generation to prefect-proxy (2nd revision — Nov 2026)
 
@@ -126,7 +126,7 @@ Pivot away from deployment-param-embedded SQL. See plan `Architecture Revision �
 
 ### M5.6 — Deploy + verify
 
-- [ ] Push all changes to `feature/ingest-cast` (DDP_backend, prefect-proxy, prefect-airbyte)
+- [ ] Push all changes to `feature/ingest-cast` (backend, prefect-proxy, prefect-airbyte)
 - [ ] Restart Django (`pm2 restart django-backend-asgi-ingest-cast`)
 - [ ] Restart prefect-proxy (`pm2 restart prefect-proxy-ingest-cast`)
 - [ ] Restart prefect workers (`pm2 restart prefect-worker-ddp-1-ingest-cast prefect-worker-ddp-2-ingest-cast`)

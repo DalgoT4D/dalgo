@@ -11,10 +11,10 @@ Checkpoint for `/engineering/execute-plan`. Mark items as `[x]` when complete. R
 
 ### Schema + model
 
-- [x] Add `KPIExtraConfig` Pydantic schema (with optional `customizations: NumberChartCustomizations`) to `DDP_backend/ddpui/schemas/kpi_schema.py`
+- [x] Add `KPIExtraConfig` Pydantic schema (with optional `customizations: NumberChartCustomizations`) to `backend/ddpui/schemas/kpi_schema.py`
 - [x] Make `extra_config: KPIExtraConfig` a **required** field on `KPICreate`, `KPIUpdate`, `KPIResponse` (no default)
-- [x] Add `extra_config = JSONField(default=dict, blank=False, null=False)` to `KPI` model in `DDP_backend/ddpui/models/metric.py`
-- [x] Create migration `DDP_backend/ddpui/migrations/0166_kpi_extra_config.py` (AddField with `default=dict`)
+- [x] Add `extra_config = JSONField(default=dict, blank=False, null=False)` to `KPI` model in `backend/ddpui/models/metric.py`
+- [x] Create migration `backend/ddpui/migrations/0166_kpi_extra_config.py` (AddField with `default=dict`)
 - [x] Migration applied successfully
 
 ### Service layer
@@ -26,14 +26,14 @@ Checkpoint for `/engineering/execute-plan`. Mark items as `[x]` when complete. R
 
 ### Shared backend formatter (`number_formatting.py`)
 
-- [x] Create `DDP_backend/ddpui/core/charts/number_formatting.py` with `format_number_v2`
+- [x] Create `backend/ddpui/core/charts/number_formatting.py` with `format_number_v2`
 - [x] Implement all 7 format types via babel
 - [x] Handle `None` / `NaN` / `Inf` → return `"No data"` without prefix/suffix wrap
 - [x] Refactor `echarts_config_generator._format_number` to delegate
 
 ### Tests
 
-- [x] `DDP_backend/ddpui/tests/core/charts/test_number_formatting.py` — 39 cases (all format types × edge cases) **PASSING**
+- [x] `backend/ddpui/tests/core/charts/test_number_formatting.py` — 39 cases (all format types × edge cases) **PASSING**
 - [x] Update `tests/api_tests/test_kpi_api.py` — KPICreate / KPIUpdate include `extra_config`
 - [x] Update `tests/services/test_kpi_service.py` — same, plus new `test_create_kpi_with_customizations` round-trip + `test_update_kpi_replaces_customizations`
 - [x] Chart tests (`tests/core/charts/`) — **42 PASSING** (no regressions from formatter delegation)
@@ -50,8 +50,8 @@ Checkpoint for `/engineering/execute-plan`. Mark items as `[x]` when complete. R
 ## M2 — Frontend: KPI form + card + drawer + dashboard widget ✅
 
 - [x] Reuse existing `NumberFormatSection` shared component (no extraction needed — already shared across chart types)
-- [x] Add Display Formatting panel in `webapp_v2/components/kpis/kpi-form.tsx` Step 2 — placed **above** Program Tags / KPI Type per user request, with an Info tooltip explaining the scope
-- [x] Add `formatKPIValue(value, customizations)` to `webapp_v2/lib/formatters.ts` — falls back to legacy `formatMetricValue` when no customizations are set
+- [x] Add Display Formatting panel in `webapp/components/kpis/kpi-form.tsx` Step 2 — placed **above** Program Tags / KPI Type per user request, with an Info tooltip explaining the scope
+- [x] Add `formatKPIValue(value, customizations)` to `webapp/lib/formatters.ts` — falls back to legacy `formatMetricValue` when no customizations are set
 - [x] Swap `formatMetricValue` → `formatKPIValue` in `kpi-card.tsx` (current value + target)
 - [x] Swap in `kpi-detail-drawer.tsx` (current value + target only; annotation snapshot stays raw per scope)
 - [x] `kpi-chart-element.tsx` (dashboard widget) — pass `chartData?.customizations` into `KPICardData`. Inherits via `KPICard` render
@@ -86,7 +86,7 @@ Originally marked out-of-scope; user opted in after seeing the inconsistency bet
 - [ ] `kpi-form.test.tsx` persist-payload test — deferred (manual smoke test covers it)
 - [ ] Trendline tooltip formatter test (verify ECharts gets `valueFormatter` callback) — deferred
 - [ ] Frontend half of parity fixture — deferred to validation phase
-- [x] **1423 passing webapp_v2 tests overall**; 3 unrelated failures in pipeline + DataPreview (untouched files)
+- [x] **1423 passing webapp tests overall**; 3 unrelated failures in pipeline + DataPreview (untouched files)
 
 ### Acceptance
 
@@ -99,14 +99,14 @@ Originally marked out-of-scope; user opted in after seeing the inconsistency bet
 
 ### Operational notes (out-of-scope but completed during this session)
 
-- [x] PM2 config (`dev/dalgo_dev.config.js`) updated — all Django services now run from `DDP_backend` (the worktree on `enhancements/alerts-metrics-kpis` where v1.1 changes live), replacing the previous `DDP_backend_alerts` pointing.
+- [x] PM2 config (`dev/dalgo_dev.config.js`) updated — all Django services now run from `backend` (the worktree on `enhancements/alerts-metrics-kpis` where v1.1 changes live), replacing the previous `DDP_backend_alerts` pointing.
 - [x] Service names dropped the `-alerts` suffix where it referred to the worktree (kept `django-celery-alerts-worker` since it refers to the alerts *queue*).
 
 ---
 
 ## M3 — ReportSnapshot freeze + render
 
-- [ ] Extend `FrozenKpiConfig` in `DDP_backend/ddpui/schemas/report_schema.py` with `customizations: Optional[Dict] = None`
+- [ ] Extend `FrozenKpiConfig` in `backend/ddpui/schemas/report_schema.py` with `customizations: Optional[Dict] = None`
 - [ ] Find snapshot freeze call sites (grep `FrozenKpiConfig(`) — copy `kpi.extra_config.customizations` at snapshot time
 - [ ] Snapshot render path reads frozen `customizations` (not live KPI)
 - [ ] Frontend snapshot KPI viewer consumes frozen `customizations`
@@ -120,7 +120,7 @@ Originally marked out-of-scope; user opted in after seeing the inconsistency bet
 
 ## M4 — Alert: formatted `{{current_value}}`
 
-- [ ] Update `DDP_backend/ddpui/core/alerts/rendering.py` — format `{{current_value}}` via `format_number_v2` + KPI customizations
+- [ ] Update `backend/ddpui/core/alerts/rendering.py` — format `{{current_value}}` via `format_number_v2` + KPI customizations
 - [ ] Update existing alert-render tests with new expectations
 - [ ] Add a release note (intentional behavior change)
 
@@ -133,7 +133,7 @@ Originally marked out-of-scope; user opted in after seeing the inconsistency bet
 ## Final validation
 
 - [ ] `uv run pytest ddpui/tests` — all pass
-- [ ] `npm test` in `webapp_v2` — all pass
+- [ ] `npm test` in `webapp` — all pass
 - [ ] Cross-stack parity fixture passes on both sides
 - [ ] No new lint errors
 - [ ] Manual end-to-end flow per plan § Verification works

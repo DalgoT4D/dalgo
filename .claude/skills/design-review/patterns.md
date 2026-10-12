@@ -5,7 +5,7 @@ Established patterns used across the Dalgo platform. Use these as the baseline w
 ## Component Library
 
 - **Primary library:** Shadcn UI (Radix UI headless primitives with custom styling)
-- **Components location:** `webapp_v2/components/ui/`
+- **Components location:** `webapp/components/ui/`
 - **Icon library:** Lucide icons, 16px (h-4 w-4)
 
 ## Color Palette
