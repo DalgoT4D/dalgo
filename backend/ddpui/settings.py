@@ -115,6 +115,8 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    # First, so a request waiting for a place holds no thread and has loaded nothing.
+    "ddpui.utils.request_gate.RequestGateMiddleware",
     "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     # Django only auto-parses request.FILES for POST; this lets PUT/PATCH carry file uploads too.
