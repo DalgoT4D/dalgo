@@ -171,12 +171,23 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        # pooled postgres backend: Django's 4.2 backend opens a new connection per request
+        "ENGINE": "dj_db_conn_pool.backends.postgresql",
         "NAME": os.getenv("DBNAME"),
         "HOST": os.getenv("DBHOST"),
         "USER": os.getenv("DBUSER"),
         "PASSWORD": os.getenv("DBPASSWORD"),
         "PORT": os.getenv("DBPORT"),
+        # per process; keep workers * (POOL_SIZE + MAX_OVERFLOW) under postgres max_connections.
+        # each in-flight request holds one connection, and audit-log threads, websocket
+        # consumers and background threads draw from the same pool, so leave headroom
+        "POOL_OPTIONS": {
+            "POOL_SIZE": int(os.getenv("DB_POOL_SIZE", "10")),
+            "MAX_OVERFLOW": int(os.getenv("DB_POOL_MAX_OVERFLOW", "10")),
+            "RECYCLE": 300,
+            "PRE_PING": True,
+            "TIMEOUT": 30,
+        },
     }
 }
 
