@@ -34,59 +34,39 @@ async def test_cancelled_trigger_manual_sync(
     mock_cancelled_connection_sync_calls, airbyte_server, connection_id
 ):
     with pytest.raises(err.AirbyteSyncJobFailed):
-        await example_trigger_sync_flow(
-            airbyte_server=airbyte_server, connection_id=connection_id
-        )
+        await example_trigger_sync_flow(airbyte_server=airbyte_server, connection_id=connection_id)
 
 
-async def test_connection_sync_inactive(
-    mock_inactive_sync_calls, airbyte_server, connection_id
-):
+async def test_connection_sync_inactive(mock_inactive_sync_calls, airbyte_server, connection_id):
     with pytest.raises(err.AirbyteConnectionInactiveException):
-        await example_trigger_sync_flow(
-            airbyte_server=airbyte_server, connection_id=connection_id
-        )
+        await example_trigger_sync_flow(airbyte_server=airbyte_server, connection_id=connection_id)
 
 
 async def test_failed_trigger_sync(
     mock_failed_connection_sync_calls, airbyte_server, connection_id
 ):
     with pytest.raises(err.AirbyteSyncJobFailed):
-        await example_trigger_sync_flow(
-            airbyte_server=airbyte_server, connection_id=connection_id
-        )
+        await example_trigger_sync_flow(airbyte_server=airbyte_server, connection_id=connection_id)
 
 
-async def test_bad_connection_id(
-    mock_bad_connection_id_calls, airbyte_server, connection_id
-):
+async def test_bad_connection_id(mock_bad_connection_id_calls, airbyte_server, connection_id):
     with pytest.raises(err.ConnectionNotFoundException):
-        await example_trigger_sync_flow(
-            airbyte_server=airbyte_server, connection_id=connection_id
-        )
+        await example_trigger_sync_flow(airbyte_server=airbyte_server, connection_id=connection_id)
 
 
-async def test_failed_health_check(
-    mock_failed_health_check_calls, airbyte_server, connection_id
-):
+async def test_failed_health_check(mock_failed_health_check_calls, airbyte_server, connection_id):
     with pytest.raises(err.AirbyteServerNotHealthyException):
-        await example_trigger_sync_flow(
-            airbyte_server=airbyte_server, connection_id=connection_id
-        )
+        await example_trigger_sync_flow(airbyte_server=airbyte_server, connection_id=connection_id)
 
 
 async def test_get_job_status_not_found(
     mock_invalid_job_status_calls, airbyte_server, connection_id
 ):
     with pytest.raises(err.JobNotFoundException):
-        await example_trigger_sync_flow(
-            airbyte_server=airbyte_server, connection_id=connection_id
-        )
+        await example_trigger_sync_flow(airbyte_server=airbyte_server, connection_id=connection_id)
 
 
-async def test_trigger_sync_with_kwargs(
-    mock_successful_connection_sync_calls, connection_id
-):
+async def test_trigger_sync_with_kwargs(mock_successful_connection_sync_calls, connection_id):
     trigger_sync_result = await example_trigger_sync_flow(
         airbyte_server_host="localhost",
         airbyte_server_port=8000,
@@ -115,9 +95,7 @@ async def test_airbyte_connection_instantiation(airbyte_server, connection_id):
     assert str(connection.connection_id) == connection_id
 
 
-async def test_successful_cancel_job(
-    mock_successful_job_cancel_calls, airbyte_connection
-):
+async def test_successful_cancel_job(mock_successful_job_cancel_calls, airbyte_connection):
     from prefect_airbyte.connections import AirbyteSync
     from prefect.logging import disable_run_logger
 
@@ -131,9 +109,7 @@ async def test_successful_cancel_job(
     assert cancel_result.airbyte_connection == airbyte_connection
 
 
-async def test_cancel_job_not_found(
-    mock_job_cancel_not_found_calls, airbyte_connection
-):
+async def test_cancel_job_not_found(mock_job_cancel_not_found_calls, airbyte_connection):
     from prefect.logging import disable_run_logger
 
     job_id = 999
@@ -143,9 +119,7 @@ async def test_cancel_job_not_found(
             await airbyte_connection.cancel_job(job_id)
 
 
-async def test_cancel_job_not_running(
-    mock_job_cancel_not_running_calls, airbyte_connection
-):
+async def test_cancel_job_not_running(mock_job_cancel_not_running_calls, airbyte_connection):
     from prefect.logging import disable_run_logger
 
     job_id = 45

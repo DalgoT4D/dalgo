@@ -11,6 +11,7 @@ def respx_mock():
         mock.route(host="127.0.0.1").pass_through()
         yield mock
 
+
 from prefect_airbyte.connections import AirbyteConnection
 from prefect_airbyte.server import AirbyteServer
 
@@ -227,12 +228,7 @@ def airbyte_get_cancelled_job_status_response(airbyte_base_job_status_response) 
 @pytest.fixture
 def airbyte_cancel_job_response() -> dict:
     return {
-        "job": {
-            "id": 45,
-            "status": "cancelled",
-            "createdAt": 1650644844,
-            "updatedAt": 1650644844
-        }
+        "job": {"id": 45, "status": "cancelled", "createdAt": 1650644844, "updatedAt": 1650644844}
     }
 
 
@@ -359,9 +355,7 @@ def mock_failed_connection_sync_calls(
 
 
 @pytest.fixture
-def mock_failed_health_check_calls(
-    respx_mock, base_airbyte_url, airbyte_bad_health_check_response
-):
+def mock_failed_health_check_calls(respx_mock, base_airbyte_url, airbyte_bad_health_check_response):
     respx_mock.get(url=f"{base_airbyte_url}/health/").mock(
         return_value=Response(200, json=airbyte_bad_health_check_response)
     )
@@ -613,6 +607,4 @@ def mock_config_endpoint_not_found(
     respx_mock.get(url=f"{base_airbyte_url}/health/").mock(
         return_value=Response(200, json=airbyte_good_health_check_response)
     )
-    respx_mock.post(url=f"{base_airbyte_url}/deployment/export/").mock(
-        return_value=Response(404)
-    )
+    respx_mock.post(url=f"{base_airbyte_url}/deployment/export/").mock(return_value=Response(404))

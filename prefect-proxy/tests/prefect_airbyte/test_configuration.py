@@ -6,9 +6,7 @@ from prefect_airbyte.configuration import export_configuration
 from prefect_airbyte.exceptions import AirbyteExportConfigurationFailed
 
 
-async def test_export_configuration(
-    mock_successful_config_export_calls, airbyte_server
-):
+async def test_export_configuration(mock_successful_config_export_calls, airbyte_server):
     with disable_run_logger():
         export = await export_configuration.fn(airbyte_server=airbyte_server)
 
@@ -27,9 +25,7 @@ async def test_export_configuration_using_kwargs(
         assert type(export) is bytes
 
 
-async def test_export_configuration_failed_health(
-    mock_failed_health_check_calls, airbyte_server
-):
+async def test_export_configuration_failed_health(mock_failed_health_check_calls, airbyte_server):
     with pytest.raises(err.AirbyteServerNotHealthyException):
         with disable_run_logger():
             await export_configuration.fn(airbyte_server=airbyte_server)
