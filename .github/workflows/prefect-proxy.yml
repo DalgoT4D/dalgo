@@ -50,12 +50,25 @@ jobs:
       - name: Create Google credentials file
         run: echo '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}' > /tmp/google_credentials.json
 
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            prefect_airbyte:
+              - 'prefect-proxy/prefect_airbyte/**'
+              - 'prefect-proxy/tests/prefect_airbyte/**'
+
       - name: Test with pytest
         env:
           GOOGLE_APPLICATION_CREDENTIALS: /tmp/google_credentials.json
           LOGDIR: ${{ github.workspace }}/prefect-proxy/logs
         run: |
-          uv run coverage run -m pytest --durations=20 --asyncio-mode=auto
+          if [[ "${{ steps.changes.outputs.prefect_airbyte }}" == "true" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            uv run coverage run -m pytest --durations=20 --asyncio-mode=auto
+          else
+            uv run coverage run -m pytest --ignore=tests/prefect_airbyte/ --durations=20 --asyncio-mode=auto
+          fi
           uv run coverage xml
 
       - name: Upload coverage to Codecov

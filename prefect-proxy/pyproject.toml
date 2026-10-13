@@ -9,7 +9,6 @@ dependencies = [
   "gunicorn",
   # prefect — pinned exact (the ceiling); integrations float to latest 3.6-compatible
   "prefect==3.6.29",
-  "prefect-airbyte",            # git source pinned in [tool.uv.sources] (rev = "v0.91")
   "prefect-dbt==0.7.24",
   "prefect-gcp==0.6.17",
   "prefect-github==0.4.2",      # not imported — kept for block-type registration
@@ -41,6 +40,7 @@ dev = [
   "black==25.12.0",
   "pylint",
   "pre-commit",
+  "respx",
 ]
 
 [tool.black]
@@ -64,6 +64,7 @@ disable = [
 testpaths = [
   "tests"
 ]
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 source = [
@@ -76,5 +77,3 @@ omit = [
   "logger.py"
 ]
 
-[tool.uv.sources]
-prefect-airbyte = { git = "https://github.com/Ishankoradia/prefect-airbyte.git", rev = "v0.91" }
