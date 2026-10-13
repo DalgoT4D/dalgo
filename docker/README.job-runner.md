@@ -5,10 +5,15 @@ Docker image for running Dalgo Prefect flows in EKS.
 ## What is this?
 
 This image runs Dalgo Prefect flows on EKS. It installs all runtime deps
-(prefect, prefect-dbt, prefect-shell, prefect-airbyte, dbt-core + adapters,
-elementary-data, etc.) directly from `prefect-proxy/pyproject.toml` + `uv.lock`
+(prefect, prefect-dbt, prefect-shell, dbt-core + adapters, elementary-data,
+etc.) directly from `prefect-proxy/pyproject.toml` + `uv.lock`
 — **single source of truth**. Bumping any dependency in pyproject flows into
 the image on the next build with no Dockerfile edit.
+
+`prefect_airbyte` is vendored directly in the monorepo at
+`prefect-proxy/prefect_airbyte/`. Workers clone the monorepo at flow-run time
+(sparse checkout of `prefect-proxy/`) so the package is available on the path
+without being installed in the image.
 
 `PrefectDbtRunner` uses `dbt-core` from the base env's Python — no per-version
 dbt venvs baked into the image.
@@ -35,35 +40,36 @@ Tags track the Prefect upgrade:
 Dalgo's EKS runs on ARM nodes — build for `linux/arm64` for prod, `linux/amd64`
 for local x86 testing.
 
-**Build context is `prefect-proxy/`** (the parent of `docker/`) so
-`pyproject.toml` and `uv.lock` are reachable.
+**Build context is `prefect-proxy/`** so `pyproject.toml` and `uv.lock` are
+reachable. Run all commands from the monorepo root.
 
 ```bash
-# From the prefect-proxy directory
-cd /path/to/prefect-proxy
-
 # Prod build (EKS, ARM)
 docker build --platform linux/arm64 -f docker/Dockerfile.job-runner \
   --build-arg PREFECT_VERSION=3.6.29 \
-  -t tech4dev/prefect-eks-job-runner:0.2 .
+  -t tech4dev/prefect-eks-job-runner:0.2 \
+  prefect-proxy/
 
 # Local x86 test build
 docker build --platform linux/amd64 -f docker/Dockerfile.job-runner \
   --build-arg PREFECT_VERSION=3.6.29 \
-  -t tech4dev/prefect-eks-job-runner:0.2-amd64 .
+  -t tech4dev/prefect-eks-job-runner:0.2-amd64 \
+  prefect-proxy/
 
 # Multi-platform build + push (single tag, both arches)
 docker buildx build --platform linux/arm64,linux/amd64 \
   -f docker/Dockerfile.job-runner \
   --build-arg PREFECT_VERSION=3.6.29 \
   -t tech4dev/prefect-eks-job-runner:0.2 \
-  --push .
+  --push \
+  prefect-proxy/
 
 # Build with a custom shared-volume mount point
 docker build --platform linux/arm64 -f docker/Dockerfile.job-runner \
   --build-arg PREFECT_VERSION=3.6.29 \
   --build-arg CLIENTDBT_ROOT=/dev/client/dbt \
-  -t tech4dev/prefect-eks-job-runner:<tag> .
+  -t tech4dev/prefect-eks-job-runner:<tag> \
+  prefect-proxy/
 ```
 
 Sanity check the version pins inside a built image:

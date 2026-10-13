@@ -7,7 +7,8 @@ FROM prefecthq/prefect:${PREFECT_VERSION}-python3.10-kubernetes
 ARG CLIENTDBT_ROOT="/mnt/appdata/clientdbts"
 ENV CLIENTDBT_ROOT=${CLIENTDBT_ROOT}
 
-# System deps — git is needed for the prefect-airbyte git dep pinned in pyproject.toml.
+# git is needed by Prefect workers to clone the monorepo at flow-run time
+# (GitRepository pull step in service.py).
 RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
@@ -18,8 +19,8 @@ RUN apt-get update && apt-get install -y \
 # frozen lockfile to requirements.txt so pip installs the resolved-and-locked
 # set into the base image's system Python.
 #
-# Build context is prefect-proxy/ (the parent of docker/) so pyproject.toml
-# and uv.lock are reachable — see docker/README.md.
+# Build context must be prefect-proxy/:
+#   docker build -f docker/Dockerfile.job-runner prefect-proxy/
 COPY pyproject.toml uv.lock ./
 RUN pip install --no-cache-dir uv \
     && uv export --no-dev --frozen --no-hashes --format requirements-txt --output-file /tmp/req.txt \
