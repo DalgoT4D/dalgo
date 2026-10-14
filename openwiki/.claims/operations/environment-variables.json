@@ -1,0 +1,346 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:0ff3460f2afde1cc0236c1bf8679ba82b9d43e5c24b38e5fa79d480bda105672",
+  "claims": [
+    {
+      "id": "claim_07efa3610e3249e0846021e5d4470884",
+      "statement": "Under docker compose, each service loads its own env file (backend/.env, prefect-proxy/.env, ai-llm-service/.env, webapp/.env), and compose `environment:` entries override only container-networking variables (REDIS_HOST/PORT, PREFECT_PROXY_API_URL, LLM_SERVICE_API_URL, CELERY_* for the ai-llm service, PREFECT_API_URL for the proxy and Prefect workers), so the same variables set in the service .env are ignored under compose.",
+      "evidence": [
+        {
+          "resource": "repo://docker/docker-compose.dev.yml#L15-L51",
+          "version": "repo-lines-v1:sha256:b8da568a921dc0bedae4cb3d66352eb596d1cac81d19ecd87388e765650d979c:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhNmUxMjcwYjU5MGQ0ZmY2MWRiNzQxMjU4NmY1ZjVlODk4Y2ExZGNhMDg3ODIyYTJhNjU2N2Q4OTgwYzZiM2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0OTg5OTM2ZmYzY2Y3MDQ3OGRkOGI5ZDVlMzdlMjViNmY0MzM4MDUxZmY2YTY4NDMxYWFhNDQxNGYzZDBlZWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQxZDIzMDM1OGM5MjZjNDIyNWVjZDZhYjQ3MTJlMjVlNWZlMzY0MDg0M2RhODE1ZmYzYTk0ZmVjNmU3Y2I5NzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZkNGFiNWYxOWQyYjQ1NGNlMmVmMjNmZmNhOWEyZWEyMGY4MDBlYmNkMDE1NjU4NTc3NTM2NmU0N2MwY2ZlNjcifQ"
+        },
+        {
+          "resource": "repo://docker/docker-compose.yml#L115-L155",
+          "version": "repo-lines-v1:sha256:1e630711f1dc16dd2fe1fa2acc7f434ea662cdb6d8be3015712b5c4a79b16300:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUzODZjM2FhZTZkOTA5YmFlM2E4ZmJmZjJmNzU3YTU2MzY5YjQ3Y2RmYjUwMWUxNTMzOTQ1YzUxODZmNTRlYmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1MzFlMjYwMzk4YWQ2MTA5MTRkZmMyOGYwNDhkMzkyNjRiYTdkNTAzMjc4ZGQyZjhiYjFjNGMxNGI0OTlkOTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI5Nzc2M2UyZjVlZGE2MmQ4Zjc1NmY5NWE1NTg0OTk3NDVmNzZkMzZlMGNjOTdjNGQ0M2ZlM2UyMmNhZGIzODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdhYzJlM2I3NGI5Mjg3NDE2MWViZDI3OGQwMTZiYWI0MzU5M2VlMDUyMzhlZDM2NzczYzMyODExZWVlNWQ3ODAifQ"
+        },
+        {
+          "resource": "repo://docker/docker-compose.yml#L12-L44",
+          "version": "repo-lines-v1:sha256:f418a6e9359a500ddbf43f37659f73815de04a0d2c91229a6fa02c80d6355bf7:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxZmRkYWEwMjE4ZjNiYjZhNTM0NWFlZjdkNTk4ZGFlMWUzMjY2YjU5YTMwMDEwMDg2ZmQ2MjA2OGY2Y2Y3YWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhYWFkOTA5M2MyNjlkNDU1MTc0MTNiN2RmMjk0Yjc5MjUyNTliZmU4OGJjYTljMGU1OThmMmU2ZGZjMmRmM2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQxZDIzMDM1OGM5MjZjNDIyNWVjZDZhYjQ3MTJlMjVlNWZlMzY0MDg0M2RhODE1ZmYzYTk0ZmVjNmU3Y2I5NzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZkNGFiNWYxOWQyYjQ1NGNlMmVmMjNmZmNhOWEyZWEyMGY4MDBlYmNkMDE1NjU4NTc3NTM2NmU0N2MwY2ZlNjcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_15c87484c38640349dcff717a6de69ea",
+      "statement": "Compose runs two separate Redis instances: `redis` for the backend and Celery workers, and `redis-llm` for the ai-llm service, so REDIS_HOST/REDIS_PORT point at different servers in the backend and ai-llm containers.",
+      "evidence": [
+        {
+          "resource": "repo://docker/docker-compose.yml#L1-L67",
+          "version": "repo-lines-v1:sha256:895fdadd84abca334057fd0dad2b30f4294c069156b7908f8cc7a790da33b7d2:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3Y2FmZTU0MDNhOWY3ZjlmNmQ2NDhhNTg3ZmY4OTQ5N2ExNzMxYmYzMjEyMjRhY2VlYWI4NWQ5MjU0MTRlMDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkMTk5ODIwNTlhNWEwZTYyMzlkYjI4MGI3MmQxOTQwZTE1YTY2OTlkODZkNzc2ZjVlNzdiYzE0NTUyNGU2ODYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg4ZjU5MjIzMWUzYjVhMTdkNjMxZDkzMzA0NGZmMzZjZTg4ZjU1MmYxNWM4NmRiNmQ1ZDkwNmUxYzc3MzE3NTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a3546d9e43114de3b46b0270f153b69c",
+      "statement": "docker/.env is read only by compose interpolation and controls image tags, host ports, the dev secrets host path and CLIENTDBT_ROOT_MOUNT; the client dbt root must be mounted at the same absolute path on host and container because paths are stored absolutely in Prefect deployments and the Django DB.",
+      "evidence": [
+        {
+          "resource": "repo://docker/.env.example#L1-L22",
+          "version": "repo-lines-v1:sha256:19d5615763f603d3ed4add70cb51b99844995642adc3747a17df05e04e2cce4f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImViZWE5M2U5NDcwYzFiMzliOGIxN2UxOTFlMzg0NWQyM2VkNWExNzY3NTlhZTdjNDMzZjg5MjQ2ZjI4MTkxZDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzOWQ5ODEwMGY2ZDE2MTI5MTc3YjJlM2FkNWJmYmU2NDkxMjI3ZDQxOTlkOTgyZjU4ZWRlOGQzNTAwOGVmYjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://docker/docker-compose.dev.yml#L27-L31",
+          "version": "repo-lines-v1:sha256:f59665aaf124ddcef0ce83335c0a55a7c098e157d34c1555b38aef8e5a4032ff:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGZlMWY5NWJiMTdjMWU4YTA4ZjFjZDE2NjA5OWZiNWU5NjliZTdmOGZjZGJjZGI2MmRiMDZiMzVkNjFmNjNiYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWIzYWI1MWY0MmU4ZjlhYzE1M2JkMDVhZDZkZDBhZTJiNjQwZmY5NGExMDI0Y2M3ZmY5MGY4MWFhNWY2YzI0ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTJlZGQ4MjUzNzkxNzUwYWVkOTQzNmU0MzYzYzI5ODk2YmNjMjY2Mjk3ZjFjNjZiNWNlOWI1ZTVkNmNlZmM4OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZmE5OGE5YTYyNDMxMGNmNmZjYjQzNTNiNmJhYzVkM2U4NmMwYjcwZWY3MzFhYjhmY2U1ZDA0ZTYxYzk0MjA2OSJ9"
+        },
+        {
+          "resource": "repo://docker/docker-compose.yml#L21-L22",
+          "version": "repo-lines-v1:sha256:a2cf498d40e58d216f81052d1511e926eefe2d5b059ac9cd5f8374239ad16606:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGZlMWY5NWJiMTdjMWU4YTA4ZjFjZDE2NjA5OWZiNWU5NjliZTdmOGZjZGJjZGI2MmRiMDZiMzVkNjFmNjNiYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWIzYWI1MWY0MmU4ZjlhYzE1M2JkMDVhZDZkZDBhZTJiNjQwZmY5NGExMDI0Y2M3ZmY5MGY4MWFhNWY2YzI0ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmViM2ZiZDM1N2ZjMWY2MGU4OGUyZmQ5ZWRhMGQ4YjVmMDY4ODhmOWJiYzBkNDBhMzU0ZjNlZWJkNzRjNmJhOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjRlMGI1Njk4MmNiOWZiMzNjNjEzMDcxYmQ5MTMyZjkyODI0ZTM3MjJjMjI4NGE5MjdkMzczNDQwYjhkMTU2MSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_093e651e9bf04ef4a2d256f887f80d26",
+      "statement": "The dev compose file overrides DBHOST (Postgres on the host), DEV_SECRETS_DIR and USE_AWS_SECRETS_MANAGER=False for the backend, so development uses the file-based DevSecretsManager.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/secretsmanager.py#L11-L83",
+          "version": "repo-lines-v1:sha256:a7df7cd3a8d7f35bb38d4aaada7e4f0169f2ef48e4eafe341b52e78aa7f83ffc:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3ODE4ZWY5OTFlODFlZWRmZWJjZWExM2UzZTE4NTlmMWY5YjYxNTAyZWI5NTIwMTkyMGRiZGE0ZTEwYmQ5MmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlMWRmYTMwMDc2NjY4NTA1NjcyZmRjOWI5YjVkMjBmNWZiMWRhZWM2NWNlOTk2ODcwNzJmNDM0ZjRkYzIxZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwMDFiYzMzMmM5NmY5ZDQ0NjMzZWE3NmVmNGRiOTA3NTkyMTE4YWU5MGYxZWM2M2Q4NDIwNGI3YTE0MjQzNjQifQ"
+        },
+        {
+          "resource": "repo://docker/docker-compose.dev.yml#L15-L31",
+          "version": "repo-lines-v1:sha256:53c1caab30d0aee1548439ddb8eefe1fa51be05871fb891251fac78ff2b0c25c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhNmUxMjcwYjU5MGQ0ZmY2MWRiNzQxMjU4NmY1ZjVlODk4Y2ExZGNhMDg3ODIyYTJhNjU2N2Q4OTgwYzZiM2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiM2FiNTFmNDJlOGY5YWMxNTNiZDA1YWQ2ZGQwYWUyYjY0MGZmOTRhMTAyNGNjN2ZmOTBmODFhYTVmNmMyNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQxZDIzMDM1OGM5MjZjNDIyNWVjZDZhYjQ3MTJlMjVlNWZlMzY0MDg0M2RhODE1ZmYzYTk0ZmVjNmU3Y2I5NzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZhOThhOWE2MjQzMTBjZjZmY2I0MzUzYjZiYWM1ZDNlODZjMGI3MGVmNzMxYWI4ZmNlNWQwNGU2MWM5NDIwNjkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_70a9f26ab3304afbbb900747de6f87c1",
+      "statement": "Backend settings read DJANGOSECRET (no default), DEBUG (only the literal True enables it), ALLOWED_HOSTS and CORS_ALLOWED_ORIGINS (comma-separated, credentialed CORS with no wildcard), and the DB* variables for Postgres with no defaults; JWT lifetimes default to 30 minutes/7 days and the JWT signing key falls back to DJANGOSECRET.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/settings.py#L172-L181",
+          "version": "repo-lines-v1:sha256:8f63bafc7ce3cbaac1e65d628ebe0be33bf7747e4cade74e756bc1440f0e0bb5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhOTBiOGRiOTBmMGNjNDViOGYwOGJjMjhjMTkzYzhiNmRlMzk5NzQ0ZTM3M2MyMDQxZDQ5ODhjM2NiYjQxODUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjczYzNjMDZmMGQ3ZDRlNDcwZjhlMzllNzdmM2JiNzU3MTY5NmM4MDRkN2ZjNjAxNGIwNDkyZGUyOGIyNjEyZGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFmYjVlMDA2OTY2YWRhOTVlMGQzMDYyMmViMjc5M2EzMTE0NjI5YmIxMmQyYjUwYjllYTVkZmU2N2RiYTZkNTcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/settings.py#L28-L94",
+          "version": "repo-lines-v1:sha256:4a7e1861c53d99fee2b35d1436c21aeef2227cf804119d78b4b57d04b8489db5:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhYjM5NjBlODhjNTBjNjdmMjNkY2EwZGQzMTBjZTJiMTU0MDBkZjdiZjE2NjMzMGRiMzEyZGE0OTIwYmU2NDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljOTFlZmFhYjg5ZmU1MThlNGZjNzYxMWY4OTE3Zjk2ZmNhNTNiZWQ2YzUyZjUwMTY4MDM1NmVlNjY1M2IxNmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcwNTY3NjQ1NTgxY2RkNDEyY2RiOGE1MzEwNWM2NjFmNWYzYmUyZjY1OWJlOWQ4OGViMjIwM2U5MWU3ZDQzODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc0NDJlNTBiZjc4ZWQzOWZkYTgzZjMzOWIwOTkyODQ3N2Q0NzRlZDA1ZjFjMTY5YzRkNzk4NWYxYjA5NTE5YWYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/settings.py#L324-L335",
+          "version": "repo-lines-v1:sha256:92dedcda7cc61c6fbc0794a4081f98f9eaaa0ed0c340c9871ab5641caa9096e2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3ZTA2NDRhYmY0NmVjOWVlNmVhNjRhMDk4NmQ0NjFlNDU5ZjQ1YmYwYWNkNWNlZmI0NzVhNzA1MTdjNTNmYzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzYWFmYmRjNDE2MzYzYzQxODNjN2Y2NjU2ZmE3OGJlN2FmNWI5OTBjN2M1NjAyZmUxMGYxZjBmYWIwYzA2N2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY5YmJjY2QzZjhlOGIxMjU4N2U0MjMwMGFmNDRjNGRhZTJiYTIyNGMzM2UxMTgwODg2N2Q4ZGEyYjM1OGI2MWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ec17de42d8784440ac3c4e0ab6f08ff8",
+      "statement": "ENVIRONMENT=production sets PRODUCTION and changes the auth cookie SameSite policy to Lax (None otherwise); it also tags Sentry events.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/settings.py#L324-L355",
+          "version": "repo-lines-v1:sha256:3450aad45a8ee3b9dddc3fb403480fa7739567381b0ee59e154620507de792af:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3ZTA2NDRhYmY0NmVjOWVlNmVhNjRhMDk4NmQ0NjFlNDU5ZjQ1YmYwYWNkNWNlZmI0NzVhNzA1MTdjNTNmYzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlNTExZDhhYWNkM2M4ZmVmM2ZlM2ZkNTE4MGJiZDY2OTg5ZmM0Y2M4ZmM1MThkMGNlZjYxODgwZDNlMWQ0MTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzYWFmYmRjNDE2MzYzYzQxODNjN2Y2NjU2ZmE3OGJlN2FmNWI5OTBjN2M1NjAyZmUxMGYxZjBmYWIwYzA2N2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk5Y2ZjMGM5YWUzMmJkODA4ZjExNjIwZWY4YTc0MjVhNGMzNWE4NTJhMmZmNWE5NGZjMTJlZWFkZmY1ZjM3ZTYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/settings.py#L50-L53",
+          "version": "repo-lines-v1:sha256:3f0812aed9283991e9bd59f4d71894ea414e97ae0ff0dd82c254c9844843be9c:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2QzM2E4YTEwOGM5OTM1M2QxODgzYTJkODhjNWYyNTg2OGY0OGU3Y2ZiN2NkMWE4ZjRlZDcxYWM5YTNlOWEzYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmFmYmEwNTI3YzM5NTNjNGI2ZTBlNWI1NzM5YmE4MzYxMmY4MDUzYmNkYzk0NjY3MzAxOTNjZDFkNTkwYjQwOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjA2YmVhZGYyYzA4NzY3OTdlZmJiNGZlNTUwM2NmMmJiMjRhNTM1MWZlY2Y3MTM4OTE3Yjg1NGUzN2Y4Y2IxYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmNhZGM1NTExYWZhNjYxNDI1YzdlOTNhNzk3MjI1MzNkMWViZmZjZTE2ZTk4YmZiZTg4YmY0NmFmNGVmNmE0NCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_3f9cea6d7634445591dc687ec1b847c7",
+      "statement": "AWS clients are built per service from separate credential pairs (Secrets Manager, S3, SES) and raise a ValueError naming the missing pair when the service is first used; SES_SENDER_EMAIL is the From address for email; USE_AWS_SECRETS_MANAGER set to the literal True selects real Secrets Manager, otherwise the file-based dev secrets manager is used and requires DEV_SECRETS_DIR.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/aws_client.py#L73-L106",
+          "version": "repo-lines-v1:sha256:81d324b8c6a6fd499b418d36748c59dd0da3bc295067d22bde4a40abc8abf116:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyMGI0NTNmNWUwYzkyZDVmNmMyNTFhNWVhMTk2MGQ3MmYzYmQwNzk1NmFlODU3ZGEyMGUzMWE4OGM1NTk2OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkxMGRkZjlhMGYwOTYyNTc0ZWEzZGQ5ZmI2NDNlOWI4MGZkZTZjNWExNWQwYWJkM2Y2NTZkZjA0NWJmYWI1MDciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU1NDUyMDMzY2E1ZWExN2E0YTNiYTg3ZjcxODI5ZDc4ZmM2M2RiNTcyZTk1YjRmMjJkZmI4ZDdiMmE0ZDg4MzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU5NWUxMWU3MDFjOGQxN2IyOWYyYTQ1ZjlmYjM3ZDFiZDI3ZDViNDhmNDg3NTlkNzgwZjliZjRhOTM5ODYwMmIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/awsses.py#L37-L71",
+          "version": "repo-lines-v1:sha256:97e84fd133ace8b7bc9e5c3c8f2100fdc72e4f16d7fe43420c2e962d8dd3ae15:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlZGEwMjhhMzFjMjUzZDc1ODZiM2Y4YTc5OGFkYjNiNDhlNTYzNzFjNzkzNDg5MzhhOTYyNTA2ODEwN2QzY2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc2YTcyMDc2OGQ1OGYwYTFjYzllMWFlNGI5NDEzMGI3YzEzZjMyZWIwODA2ZDUwOWRmNWI0YzE4Y2ZhNzBjY2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNjNTgzMzQxOTlhYzNhMjkwMTdkNjM0Mzg4MDg0OGI0ZGM5YjJmYTY0MTZjZTk0MzMwOTZjYTJhODQ1Mjk0NmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhmZjJjMTcyYzExNzJlOGMyZTkyNjY0OGMyNjA5MWRmYWE0OTZmMjYzN2RkMWQzOTU4ZDg5MzMxNzg1YTgzMzcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/secretsmanager.py#L11-L83",
+          "version": "repo-lines-v1:sha256:a7df7cd3a8d7f35bb38d4aaada7e4f0169f2ef48e4eafe341b52e78aa7f83ffc:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3ODE4ZWY5OTFlODFlZWRmZWJjZWExM2UzZTE4NTlmMWY5YjYxNTAyZWI5NTIwMTkyMGRiZGE0ZTEwYmQ5MmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlMWRmYTMwMDc2NjY4NTA1NjcyZmRjOWI5YjVkMjBmNWZiMWRhZWM2NWNlOTk2ODcwNzJmNDM0ZjRkYzIxZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwMDFiYzMzMmM5NmY5ZDQ0NjMzZWE3NmVmNGRiOTA3NTkyMTE4YWU5MGYxZWM2M2Q4NDIwNGI3YTE0MjQzNjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_eb71eda990a44006a58abe860908b97b",
+      "statement": "The backend reaches Prefect only through prefect-proxy via PREFECT_PROXY_API_URL (with PREFECT_HTTP_TIMEOUT), and passes the AIRBYTE_SERVER_* settings and AIRBYTE_USE_SSL to the proxy when creating Airbyte server blocks, so Airbyte host config must be reachable from Prefect workers too.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbyte_service.py#L36-L46",
+          "version": "repo-lines-v1:sha256:48c384b5d9391fcb1c277b4e1cd7d02ef3b52c5d8d8adf4e76fa160e515f4b02:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwZjMyODMyODk0OTdlNTE2MmIyOTljM2E4YjFjZjNkYWU1NWYxYWQ0N2I5NGE3ZDc0M2VkYjIxZTZiODUyNTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzYzQ3OGQxYzY1ZDE2OTFiNTcwZWYwYWE4MTlkMTk3ZWE2MDcyYzg0YTUxYzgxNTRlNjdlOTAyMmI0MjUxZTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3YzkzMTAyZWY1ZDNhNDQ2NjQ0OWRhZWFlN2IwY2E5MWVlOTJkZGNmYjk4NjVmM2QwNDg1OWUyNjZkMmNmMDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyZTg3OWVmYjNkYmZhYzlhNDM0NzMzZTdjMjkwMTQxNTBjYWMxYjg2MWE4NGMyNjIzMWVjN2M2YWVjODMzMWUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/prefect_service.py#L225-L255",
+          "version": "repo-lines-v1:sha256:57150abc0a595e732fdeaa50cf8d35c582998de3fdcf91f952125fedf69b571a:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4YTRiZTg3Yzg3MDQ1NGZmNDhmMTkyZDJjMWMyMWE3OTNkOWMyZDI3Y2M0ZTlmZWNjYmY4MWQ0YTY2ZWQxODkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjczMDMyNWY5ODBiNGFiZTBhNWJmZGViMmQzZWI5MzQ4NzZkM2EwNDMzMjU2NDQ0NzJjMTM2Y2NhMDJiOWE4MGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmMzM0ZGUyNDBjZjRkZTcyNjM5MzIwMDNiM2ViYmQ3NDZkMWE4MGY5MjEwZmJlNDk3Yzg0NjkwOGQ3MTMyMDYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/prefect_service.py#L40-L43",
+          "version": "repo-lines-v1:sha256:34359d88c57e42c13a433c10af7fad2622acc8d9f28612ebc87830cdffecad65:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWFiMzk2MGU4OGM1MGM2N2YyM2RjYTBkZDMxMGNlMmIxNTQwMGRmN2JmMTY2MzMwZGIzMTJkYTQ5MjBiZTY0NCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZGQwMDNhZDIxOWMwOWVjMjNiMmUxM2JiOTM5NzUzNmY1MjRiMDgyYmQ1NjEwNGM4OTZkNTkwODcwYzU4NzMyYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2MzMjQwNTEyMTU3YzVhYzk1ZjllNmQ2NDlmZjllZmU3NjI1M2NhZTA0NjMzZGEwMDNiNTVlNjBmZTEyZGUzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGU2NTk5M2ZiZjc5Y2Y2NWViM2IzYzMyOWRiOTlmNjYyYmFkNTdjZjNiNmY4N2NjNmVkOTI1MzljMzY0NDJmOCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_8d4c550336db4633b734b080368dacf6",
+      "statement": "The default and EKS Prefect work pool names (PREFECT_WORKER_POOL_NAME, PREFECT_EKS_WORKER_POOL_NAME) are read by the Org queue-config defaults and a migration, so the names are persisted per org and the pool the workers poll must match them.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/migrations/0151_alter_org_queue_config.py#L10-L20",
+          "version": "repo-lines-v1:sha256:1ccc595fd65093b148799de9b1be9f38e497ce91ddb28a05633f888e13809d3d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1MzEyYTJmYzc5MGFiMDY2Yzc4MWMzZGY4OGUzNDhkODQ0NGFkMTEwYmE2Nzk2ZjVmMjk1MzY5YTdhN2ZjZGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVjZTEwZjFjYjRjYTM4NDM0ZTRjZGE1MWVlMTU1MWM4N2Q0OGZjZGRmOGVjNDYxMjU5OTBlODllMTQ4MGFkZGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM4YjU0YzY0OWZjNDg5MGNmMzIzY2E2NzBkYTk2OTU4OTJmNzExYzg4NGFkYzRhYzFmNjE0YjYzMTNmZTFiY2MifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/org.py#L50-L60",
+          "version": "repo-lines-v1:sha256:b3e20037cae6d208f3d49963bf14854fdb37e2485b72366aee1982dfbd35646d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5ZjM2ODc4ODA4YWYzMTc3ODg5NmY1MzNkZjk0NmVlN2FjMjhmOWY2NGY3ZDA5NzU5OGEzOWNjOTc1MGE1ZjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkMjZmM2Y4ODA2M2RhMjg2ZTQ2ZDkxMWQyNDhkMTNmMjFjZmMxYzE4N2MyZDdhZWZiOGVmZTViZjM3MWZhNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZmOGMwYjZjZmQ0OGQ2ODhjNWU3MDNkYTU0ZTliZTU1NTEwNTJhOGMyZWUxMTc1ZGZlMzM1YjI5MTFhZjdlNTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk4ZGZmMDQ1YjJhMTBlMWFkMTBjYjI0ZTc0NWRjMDJiZGJlOTQyYjIwNTdlYjQyOTI3OGZjZWE3N2VjNjBmN2UifQ"
+        },
+        {
+          "resource": "repo://docker/docker-compose.yml#L131-L148",
+          "version": "repo-lines-v1:sha256:894513b8f549eec7b4bb5c2d05372f738c894e52ba9174f935aa65f557f7de4b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0NGU4OTUwODg1ZTcyMjg4MTRiYjgxN2I5ODNmZjYxMzM0YjljZjFjZjI5NDNhZWY5YTcxYzNhODViMjAxNjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgwMjNkNmJlM2E3YjEzMWE4MjkxYWZjN2Q3YzcyMzllZDM0YzIxYTE2MzlkN2UyN2ZiY2UzNmIxMDUyMjBlYWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVlNjNmNzBjZmUzMGIzMjg3MzEwYjM0ZjVkZTkxOWU1NGEwNDQ0MzU1MjFlMmZlYzZiZjMyOWQ3MzI5MmVlODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYwM2UyZjA0MmU1MWIxZDVmZDMyMGViNWQ0ZmFkZmQ3ZTllMGU2MGRkY2QxZDI0NmMxMGIwM2I3NDc1MDM3ZGUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8ffd2c795ef440f3a46a62e61739cdb3",
+      "statement": "The Prefect and Airbyte notification webhook endpoints compare the X-Notification-Key header to PREFECT_NOTIFICATIONS_WEBHOOK_KEY and AIRBYTE_NOTIFICATIONS_WEBHOOK_KEY respectively; the Airbyte key is read by code but absent from the backend template.",
+      "evidence": [
+        {
+          "resource": "repo://backend/.env.template#L114-L117",
+          "version": "repo-lines-v1:sha256:4840f15d676e038e7adca52ef3aa18303cc499e3fa1737648d58565af21d52b3:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWU4NDg1MmY4YTZjN2RjYTExZGUwMDI3M2M5YTFhNjMzYWZmY2I4YjQyYjI5NmMxNzUxMWU3ZjBhYWEyYzAwNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2EwZjBmOTFhZGMxMjQ0OTE4ZDI4MTMwOTNhZGVmOGRlZDllMDQ1NTBiZmM0YjYwMTZlMzYyYzZhYzZiNmY3OCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDcwNTRmNGI3OTM2MTNiNWMyMjc1MDMyYWZlNTdlYzNlYjQ3ODc4OWY2YThiMjNhOGRjYThmNmFjZGE4NmIzYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2QyY2ZkMjY5ZTg4MTc4YTRiNzNkMmMyMWE2M2Y4YmRmZGYyMzIzMGMyZjEwOWZiODY5MTFhNjY1NWIyY2M1ZiJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/webhook_api.py#L15-L25",
+          "version": "repo-lines-v1:sha256:77fb5723dd36334f627bdf29d5831bb39983b8855eccf93adf155cf53d0e6ec9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxNWFlODUzNWQ3OWRhMDc2ZmM1OTc5ZmRhYjBmOWE0OTgzZjZhNjY4MGI4ZDliZTIwMjk3NWFlMWQ4MTRlZjgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM1ZWMxYzdjZjU1YTVhOTNhNWU0YjkxNGE0YTI3ZmI0YTA5YThiZDk0ZjRmZTUzZDVhMmFkMGVjNzdmNjBiYjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY2MjJkMWViMjU1ZTRlMGZlZjI5YTBiZGE4YTg3NDM1ZjBmNzY5Zjc2NGQ0ZGQxY2VlMDA1ZTk2OTk3Y2VjZmYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/webhook_api.py#L70-L78",
+          "version": "repo-lines-v1:sha256:2502e231e77b46bbd20f39632768f225f5b311e1fb8fc9b714fd14d96ef2d1ae:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTU2MmE4YjAxMTFlOTc3Y2JkZjNjMTQ1OTMzM2RhZTg2ZjMwMDI1ZWQ0ZjNhMjU2YTU1M2Y4MjU4ZDJkNDZmZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGU2NGVkNmFmOGQzZGVjNzA3MTIyOTU5NjVkMmM3Yjc1MzM0NTUxMTI2ZTZmZjM2YWNjNThlMmYxN2UwZWEwNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_83bcf4b6b5104e6ca3a403c1b8dc4f59",
+      "statement": "CANVAS_LOCK, EDR_TTL and ESTIMATE_TIME_FOR_QUEUE_RUNS and DBADMINUSER/DBADMINPASSWORD appear in backend/.env.template but no os.getenv read of them exists in the backend Python code.",
+      "evidence": [
+        {
+          "resource": "repo://backend/.env.template#L147-L150",
+          "version": "repo-lines-v1:sha256:c0eef304a1bf989c2c7853b1f71e903819f611673bd2d5e9535848d770675329:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2U0Y2EwOTgwZmJkNjg1ZTc5ODdhM2I4MGI0MDUyZDM0NTE0NmVkZDliOTA0NWJkMWY1NzZmYzJhMzZjODZlNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDNjMjIzNzY2N2YzOWMxMDFmMTE2ZWQwYTViYTVhYjg0NTljODY5NWRlY2JhZThiZjE1M2Q0MTg3MmYzMTFmMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNGNjMTkwOTc0NGU1OTQ0YzA3ODBhNWVkYmFkZWVkYmQxOGU4ODhmMTc4ZDgwNTU1NDRiNTA3MTQ4MmUyYTI3OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjU2YmRmMmMwODkxMjg0OGI3YzEzZmU4NzFiYjUzZjU1YzcwZmViNTA3ZjRkMjljMmFkZmVjZDI4ODZjNTMxOCJ9"
+        },
+        {
+          "resource": "repo://backend/.env.template#L34-L40",
+          "version": "repo-lines-v1:sha256:d12caa5abe1bd7665d4eb3a5e5fde279ffdc222e84f5b847ac90892aaca170fc:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDljNTYxMWRiNzZhODI4NzkzNTk4NDQ5YmIxNmVlN2E5NjM4ODhmODRiNjZiZWU4OGM4YTU2YjljZTFmMjExNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDYzN2Q0YTJhYzBlODIzZjg1ZGFiMDJmMzgxOTNlMWJiODM1ZjhiNmFmMzU2ZTJjM2FkNDMyYmVhYzY3NzE3ZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDlkNWNhNjc1OWM2NjhkZGYwY2MzODVlMTlhMjU4ZTY5OTFhMWY4ODZkYTJmMzMxMDIxZDViMjEzZjY5MTA4MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmZjNzE4NDUzMmIzOGVkMmZmNzNiZTZhNmM5M2NlNWI2NjI0YmY5NWIyNmNiZWRkYmQ4OWI1NzU3OWUwNTUyYyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_c49af0016f32494aba2bd67f5dd47971",
+      "statement": "Schema-change detection timing variables are parsed through get_integer_env_var, which logs an error and falls back to the default on invalid or negative values; AUDIT_LOG_RETENTION_DAYS drives the purge_old_audit_logs command.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L1278-L1284",
+          "version": "repo-lines-v1:sha256:ca4d78a3449b3675b937582ee9656a652b8ed44f971d9d2e020b1d01422d065b:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGI2NjlmYzU5MTEwMzVlZTVmMWM3NThhMjZkMGE1OWRjNDA5YzBlNzY5ODMzZmZiMmJhZGNlMDBmMDM3MjkxYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTQzM2QwZWE5ZWNmMmYzOWM5YTUwNDA3Mzk1ZWU0MTE3MmZlNjgyYzljODg1YTM1MDhmNzViZGVlMTUxZWZmZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTg3NGRlOTUyYWU1NmUzMzFkNjEyMDVhN2RmZGMxMmI0OTE3ZGY2Zjk4ZjhlNGJlOTIyNDc2NTQ4NGMwZDk5NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjBmMDc1ZjA1M2FlMDgyZGY1N2JkMGY5ZGNiYjA4NGZkNzUyODI3YTE0ZThlYzk1MDkyZTgxOGVjYzBkNDA5ZSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L430-L433",
+          "version": "repo-lines-v1:sha256:89bc075ada93cfc47531d6437041013dc8b6d7fcc198a94227b8c027dab79fa6:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWU3N2YyNTdiNDlkMTlkZDE1NmUwZGQwYmJhODk3YmJiYWRlNTA4NzYxYjQwYzBjMzBhMjBhODFkOTNiMTUyMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjEyN2Y4YTI4YTNjNzY0MzcxNTllZGJiZGYyZjY4MDNkODhhOTk4MjhmMGJmMWY2M2Q0OGViNmYwNDk5ZjczMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGU4MjIwZDlhZmJmNGJjODcyOTRhZmQzMjI3NjI3ZGM2ZmZjZjk1Zjg0NTIxNjQ3MWU4YWQyMWFmMDBhYmEwMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTQyMjc0ODIxNmE0MTQ5NWVhODI4YWMxNWIxNDAxNDQzZDQ5MDYzOWY1NGM5NzcwYjE3NWJlYWQ3MWM1NmE2ZCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/management/commands/purge_old_audit_logs.py#L41-L41",
+          "version": "repo-lines-v1:sha256:6b9a700c4d571f7ec4d276a8e511a76a57308792a9afb7b0a675e1544e8f83b8:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmI5YTcwMGM0ZDU3MWY3ZWM0ZDI3NmE4ZTUxMWE3NmE1NzMwODc5MmE5YWZiN2IwYTY3NWUxNTQ0ZThmODNiOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmI5YTcwMGM0ZDU3MWY3ZWM0ZDI3NmE4ZTUxMWE3NmE1NzMwODc5MmE5YWZiN2IwYTY3NWUxNTQ0ZThmODNiOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTY2ZGRhMDU5NjgzZDE4Y2M3MmM1MDZhODJhMmMwOTg3ZTAwMGM2NDIzZDlhMDMwNmM3NjAzZGEyYTY3MDdkNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWI5MDFiMGU1OGVlY2UwNGY2N2RjOWU0OGNhNzgyZTNiMmY2Y2IyODc1ZWVmOTIzMDY4OTkzZGZlMjZiM2ZmNiJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/helpers.py#L224-L236",
+          "version": "repo-lines-v1:sha256:107d35e652660cb217bfada85a436df2bedb922c77eaec6f6b92bccad21ef75f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3OWVmN2U3YWI5MzYzNjk4OWFhMGIwZjIwNzBjNGIyNzFiZjFjMzEyYjk1ZmEwZWYyZDU2NTBkYjA0MTY1ZDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkZDBhN2Q0MmUwNjNiZjA4OTI3NjYxZmYzNzdlYmNlNWUzOTk2NjNiMjYyNjMyYzZjYTBiMzVjZjE2ZTE4YjIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3MDE0OWUwNjlhZDY3ZWNjZjQ3MzY0NmZmMWM3NTAwNTBkMzI5ZDExMDAxOGRjNTc2Njg3OGVhZmExZDYwN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU2NjE3Yjk5MGNiNGE0ZGUwMjA5MmIyMDZhMjc2MTg0ZDk5NjMxODg0NzJjZDM5Yjk2NjE5YmRjZDAyM2E4MjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2d459f18a7554de4a99b692ae76bd8a6",
+      "statement": "The backend calls ai-llm-service using LLM_SERVICE_API_URL (endpoint building raises if unset), an optional LLM_SERVICE_API_VER path segment, and sends LLM_SERVICE_API_KEY in the Authorization header, which the service compares against its own API_KEY and rejects with 401 on mismatch.",
+      "evidence": [
+        {
+          "resource": "repo://ai-llm-service/main.py#L74-L82",
+          "version": "repo-lines-v1:sha256:3759f916724dc0c685a868585e6601ff60bd7f8a172aa49028112b69e2bd3163:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2YwZjI5NWUyMGJhZDk3ZDUxZTljZWExMGRmZWNjZDYxYjRmMjUyNTNkM2JlMWQ0M2RlOTQwYmYzNmE0N2Y2YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjdhYzg2OWUwMmU2YjgyMTk2ODg3MmI4MTBhMDgzZDg1OWQ4NmM3NjlhYmMxODNmNzI1MDkwYmIwODlkOTdkNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiN2VkZWJmOWRjZmVlYTQ2YWZkZTRjMjU4NGQwMTQxODE4NGI2YjE4YWI0MWNmZTc0ZTEzY2JjZjQwYzJhMTA5OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGIzZjllZjFiZjkyZmQ5YjJlNTI2NTlhMGRmOWRhMWUyMDNjMTM1NTEwZjFlMjFjZjQzNmJlYjA4NzM2OGM5OCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/llm_service.py#L13-L33",
+          "version": "repo-lines-v1:sha256:6ac0413e547a7f13e9c53fe7e1693eb98513365e959b4fddd0bff0d696326132:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjMTYyZGI1ZDcyZjcxMGRhNWVlOThkZGM0M2FhZWMwNTBkZTI5MGFmMzhiMmE0NzNjMDJiNmQ5YzRjMjdkZmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIzZWRkYzcyZDc1OWFjYjllYzQxNzdhMGRkYmMxY2ZkN2QzNGM1ZDAzNzY4NWQ4MjExOGI3ZWM3M2MyZmY0NmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU3MGRjZDcyMGM0YjQ3OTRlMmNjYWIzZmNmYmRjNmZlYTg4MDBjM2FiZmRlMWY1ZmRlYmMzMjZiM2QwYjg2YTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyZWJkMTk5YjJiMmQ4MmNhMzMyZjc3ZGM2MmNlODExMThiZTVkNTRhYmYwNmJhMTg0NTcyOTkyYWIzNDg5MWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d5d97dbef9b2425ebc4fc078481b6d2e",
+      "statement": "Chat-with-data models are chosen via optional CHAT_WITH_DATA_*_MODEL env overrides whose model id selects the provider; a user-selectable model is offered only if its provider key (ANTHROPIC_API_KEY or OPENAI_API_KEY) is set, and these keys are not in the backend template.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/base.py#L27-L43",
+          "version": "repo-lines-v1:sha256:9f0b351ff07aab34c45466379b827b949c6201409a651ebf05cf37b7cab1f513:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ0ZGEyMmUyNjFjNmMyYmY2YmM3MzgwMGI2NTNlZWE2MmE1NTNhZTZhYTg1OTcyNTQxNGM0YjgzNjk0Mjc1YTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NjI5ZjA0ZGEyMTU0ODM5YjllMGQ2ZmM4MDQ0MjY4ZjlhNWUyOWExYjVhMDVlNGM4OTdhNmE3M2RhYWUzNjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk4ZDM1NjMzZTllMzUzZjk5ZDJjYTRiMDFhZjA5MmQxOGIyYmY3NzFiODA1M2U4MjhiODFkNjJhNDEyMTQ4OTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/chat_data_agent.py#L34-L58",
+          "version": "repo-lines-v1:sha256:c839fc1784c83f2f481b894badf9a47de7bda430ed948bad9ee4b4b05d4e5a68:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3OGNhMTZjZjZmZDA2YjFhM2EzYmU2NzI4ZjQwOGJkOGY3OWEzZjFkYmQwY2Y2ZGI5MTYyZWY5ZmNiZjZmMWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzOTllNThiNWYwZmYyYWQwNjFkNzA4NWE4NjNmNDRiYTE1ZDQzMWI1OTE1N2IwMTliNmM1NzQ4YzlkZmE4OWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ1MmJhMzNiZDgzZjcyZmNiYjViYjljYzhmYzBkMDFmZGE2OTk5ZGQxM2NjNDczNmFkNWM3ZWM5YzY3ZWQxNmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjZGU0Mjk4MmI4YWIyZDdiMjYyYmMzN2Q3NDA3NDNlNzkwMThiM2YzMzBjNTU0ZGZkNDM3ODg4MWQzZGI1YTkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/constants.py#L23-L50",
+          "version": "repo-lines-v1:sha256:01ab690c56ba63709969fe0259decdf8d1f55584f532dff9a17612eb131304a6:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUxNjViMjgxZDBkNGQ4ZDY4ZjhjYTA1MWQ1NmYwZDg3NmFmMzJlMTJjMzYzOGYwODJiZjAzMmIzNzlkYjI0YjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEwMWE1Yjk5ZDM4YjFjZjcxMGNjNmQ0OTIxNGRmM2UyMGM3MTAwZDY3YzBlZjI0ODE0YzMwZWYzMGQwMWJiNGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5OWFiNTBjNTE0MmNmMWNiNDBkMjc1MzJhZDE0NzY2ODcwMmY1MmU3YmI4OTAzMWYzNmM4YTU0NmU1Y2RiY2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZlZTAzYTc5YmEyMTY2OWUzNTk5OWNjZmUwMWFjZWQzMmVlY2JmNzU1Y2JiNzBkNjM3Y2FhZTUzMDVmNjI3YmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8cbdfacefc7d43028fe3dd56c42f1260",
+      "statement": "The prefect-proxy reads PREFECT_API_URL for every Prefect call, plus PREFECT_API_TIMEOUT/RETRY/RETRY_DELAY and PREFECT_PROXY_GIT_BRANCH, and Sentry settings; its template spells the work pool variable PREFCT_WORK_POOL while the compose worker commands read PREFECT_WORK_POOL, so copying the template verbatim leaves workers on the default pool.",
+      "evidence": [
+        {
+          "resource": "repo://docker/docker-compose.yml#L131-L148",
+          "version": "repo-lines-v1:sha256:894513b8f549eec7b4bb5c2d05372f738c894e52ba9174f935aa65f557f7de4b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0NGU4OTUwODg1ZTcyMjg4MTRiYjgxN2I5ODNmZjYxMzM0YjljZjFjZjI5NDNhZWY5YTcxYzNhODViMjAxNjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgwMjNkNmJlM2E3YjEzMWE4MjkxYWZjN2Q3YzcyMzllZDM0YzIxYTE2MzlkN2UyN2ZiY2UzNmIxMDUyMjBlYWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVlNjNmNzBjZmUzMGIzMjg3MzEwYjM0ZjVkZTkxOWU1NGEwNDQ0MzU1MjFlMmZlYzZiZjMyOWQ3MzI5MmVlODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYwM2UyZjA0MmU1MWIxZDVmZDMyMGViNWQ0ZmFkZmQ3ZTllMGU2MGRkY2QxZDI0NmMxMGIwM2I3NDc1MDM3ZGUifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/.env.template#L1-L18",
+          "version": "repo-lines-v1:sha256:00f59de10bfaa1e8fd96b41eac3cdb324c5a7e23c1997adc5b5816038feef74e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1NDJmYzRjYWMxNGNjMTNhYzMwMjFmOWIyMTQxOTQ2YzNiMjI2NmQ3OTNkYmJlMGU3NDYzY2RhYmU4OWQ2ZjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlNjE3MDg2OTMyYzk5MmZkZmEzMWY3YTUxMThiZTJiYjM2MWMyZDc4NzNkMGQ2MTA5MmYwODM1MGFiMmE4ZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/service.py#L46-L67",
+          "version": "repo-lines-v1:sha256:4c3b32f9a367edaf75a91ea4930ade156154087fe1f6dad59c3e59279b3aaf0d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhYjM5NjBlODhjNTBjNjdmMjNkY2EwZGQzMTBjZTJiMTU0MDBkZjdiZjE2NjMzMGRiMzEyZGE0OTIwYmU2NDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljZDhjZWM5ZWNhYWQyOGUxMDU5N2YwZWEyMTU0OWI3MzZkMWZjYTcwZWQwMmE5ZDI0N2QyODUyNzNlNDU0M2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRiNDVjMTQ0YzQzNGQ0ODQwMDc0YmNlZmJhYzRlYmNkYTY4OTg5NzczOTVmY2NmMDM4MGRhM2JhODRlNGFkYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE4ZTAwMTkzNmU5OWNmMmQ1YmU2MWZiOTYzNmQ3MjkzODcwMWQ0YTE2YmMzMDU4ZTkzMmZkZDM2MGZlNjliMTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1068a0405e42465f9f54d5e9335324f8",
+      "statement": "ai-llm-service requires KAAPI_BASE_URI at import of ai_platform_src.py (raising an HTTP 500 error if absent) and rejects every Kaapi callback with 401 when KAAPI_WEBHOOK_SECRET is unset; callbacks are verified by HMAC-SHA256 over timestamp and body with a replay window; AI_LLM_SERVICE_PUBLIC_BASE is used to build the callback URLs sent to Kaapi.",
+      "evidence": [
+        {
+          "resource": "repo://ai-llm-service/src/apis/callbacks.py#L42-L80",
+          "version": "repo-lines-v1:sha256:20d2c20f51076da83b64766968edb0d30263425dcbb134a23bd353bc7b473426:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg2NmUxYjkwNGNiNmIyNmQwMDg3NzhjZjg2NGU4NWMyOWExNTRkMTZhMmMzMTgzMjgzZDdmYjcyYjgwM2ZiZDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkxODdhZjM4NDI5ZTY4YTU0YTU3NGM5MjUyYjEwYjBmMjYwYmEyY2M0YmE1NzkyY2Q5ZjUyYjE3NzQ5ZGU3MjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZhNGY4YTZlYmE2ZjBlOTU2MmZjMWQzNzg0MzE0OGJjMGY2YmJhYjRhN2U0OGEwZGY0MDI3YzA2ODJkNjBiYjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYyMzRhYWZkNTFlNWMyMjI3NGFmOWVkZTNlMjRlMGRjODYxZmVmODVkMmU5YjAwODdiZDY5ZTdiOWQzMWE2MzUifQ"
+        },
+        {
+          "resource": "repo://ai-llm-service/src/services/ai_platform_src.py#L11-L56",
+          "version": "repo-lines-v1:sha256:0041021f9a57e7de0a9a11aabb9e5a18632339d812536d9e5d96e49c44270004:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhZWVjMWJlMGM5YTc4MWJkMzNkYTk0NmY1OGFlN2NmYTk2YWY3NWRjNmViNTgyMDI4ZTM2ZDE4MjM0MzU4NTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg0NzFlYWVjZWQ1MjNiMmQ4OThhYzExMWRkZjljZDU3ZTAxZTM1ZGJjZTg4NjA1YzJlN2RmNzhiOTEyYWJiNzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNlM2ViOGIwMmMzMTc5YTZmZTlkNjIyMTRlNDNlNjk3Y2NjNTU4YWM3ZmJjMzc5MTE2MWM5MWNlY2M5ZTdjOTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e1837c4aedba4109b70dce4d1e8274da",
+      "statement": "ai-llm-service reads Celery broker/result backend and Redis host/port from env with localhost defaults, and OPENAI_API_KEY is passed into its LLM API jobs; PROJECT_ID is only consumed by the service's own docker-compose.yml.",
+      "evidence": [
+        {
+          "resource": "repo://ai-llm-service/config/celery_config.py#L13-L14",
+          "version": "repo-lines-v1:sha256:48c6b02f186b522cf3450017f49f5b372721664cb04b6f175b0f1d2dfb405ff7:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWJlY2RmMWJkOGFkZThiZTNjNDc1M2UwOGNhNTNjMDc4Y2FiYTc5OTNlMTdjYzBiNjhhM2Q3NzgxZGI1NzBiMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjU0MDA1ZDU2MmY2N2VlZTAzOGZjNWQyYjgxMjE5ZmVhZWM0ODFiNzJmZTA5ODY3M2VlZjRkYzQzZjVjNjlhMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2JkZDE4YjIwNjFkYzA4ODYxNzdmMzllMzgzNWZkNTM3MzljOWRjNmE0MzI5Y2VjNTM2MWI2YmNlMGY3NWEwZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDFmOWY1Mjc4N2I0YjRjYzVlMWZlMTQxZDY0ZDU1MTk3NTQ0OGI3MjViZTliYWVmYzc2ZWFlZGFlYmE0NTA3ZiJ9"
+        },
+        {
+          "resource": "repo://ai-llm-service/config/redis_client.py#L31-L32",
+          "version": "repo-lines-v1:sha256:aad4872b1f9e44e54353f4b6140b6846f8c2b2ec82cc52a591aee44c7b1d56f6:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjRjYTI3YTY1ZWMzYjVjNzdmYWVhYmJjN2E2ZjRmMzZkZmJjODY1ZWZmN2IxYzU3ZDRlN2ZmNTM0MWQ0NThlYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTA2OGE0NWVmNTFiZDg3MTE5ZjkyNjE0YTMyODZkYmEwZDRhYzRjMmZmYjJjNDM4Y2QzOTUwZDc5NmE5ZWI3YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2FkNzg3ZTk5OGFmZTFmZWM4NzA0NDRlOGMwZTQzYzUwYTI3NDNmOTIzZmFlOTIyYWNjNWFlZDdlMDlmZTI2MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTg1ZWY1Y2Q4Yzc1M2I4YzI0OWZmOWRiNjEyZDlmMDIzMWMzZDBkYWQyNDA2NjZhM2EyNTM5NWE2ZGFiYjA1MiJ9"
+        },
+        {
+          "resource": "repo://ai-llm-service/docker-compose.yml#L38-L60",
+          "version": "repo-lines-v1:sha256:e0448c95e2aa957a70123f9550d35a797f43c69ade67ac5c6240bcdc321812be:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0ODk5M2QwNzE2NTQ2ZWNhZjdkOGUxOWJlMzg4MTI1N2YwNDk4MjJlODhlMGM3NmEwNTUzODk4MTZhZTA0ZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0ODk5M2QwNzE2NTQ2ZWNhZjdkOGUxOWJlMzg4MTI1N2YwNDk4MjJlODhlMGM3NmEwNTUzODk4MTZhZTA0ZTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3NWFlNGM1OTg3ZDZiMjRhNzgwN2M5ODU0MDE2YjNkNzNjNjVhOTI2MGE5M2UxOWJiNjY4NGM0YzViMzI1ZjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYxY2M2MjYzODNiYzk1YWUxOWY4NWFmMWJmNDc0MzQxMmM2N2FlMDkzMTk4MGE4MTZmMzZlYjU3NWQwOWIwYzQifQ"
+        },
+        {
+          "resource": "repo://ai-llm-service/src/apis/api.py#L43-L66",
+          "version": "repo-lines-v1:sha256:44f6b9e0758c789bd22fe9120bcb39619ce04d8dbbf463bc82ded89a00a3ab9e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhNjE5ZWRjNTBmOWI2OTE0ODM1MDM5ZGFhMDg5Y2I0ZTc0NzZhYWYxZjI3YmM2MjllOWViMTliYmIyZGU5MjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkYzhhOTI5NjExNzMyOTE4NDQ0NGE5Mzk3MTQ5ZjI3M2FhZmQ2MTQyYmI1ZTg2NDU5MDIxZGM5Yzc4NzJjNzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjExNDI3NDEzZWQ2Yzg5Y2RkYWRjNjJhYjlkNjc2MWExMWQ1NDM4ODE0YmE2ODRkZDVlZWY0ODc0YWZhMDhkZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVlYzEzN2JkMzNmMTJjNmEzMzU1ZmM1Y2YzNGI2YTM5ZjAwZjNmNWYxODBlNGUxMTk2MWJmNTAyMjI4NjY4NjUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7061336d2a4249849b24d9cb0d722d3c",
+      "statement": "Webapp NEXT_PUBLIC_* variables are baked into the client bundle at next build (Dockerfile.webapp declares them as build ARG/ENV), so changing them needs a rebuild; NEXT_PUBLIC_BACKEND_URL falls back to a localhost backend address when unset.",
+      "evidence": [
+        {
+          "resource": "repo://docker/Dockerfile.webapp#L1-L48",
+          "version": "repo-lines-v1:sha256:bbfb63a0f1da11fb17e66d30f752860c7e519eaf54d4bdb69102261d20fc247a:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg2NTU5OTVkYWQyOTA0YWY3NTFjNjlmYzIyZWU2YzVmZTcwZWQyMTVmZDFkNmJhYjNlN2UzOTAwZTI2OTY2NzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZWFhMWFmMDA3NDQwZmQ1MmYwYjk1MmU2N2UyMjNjN2ZjOWU1NjQ0OGMyN2JlOTMwMDMwYjZlMTM0MmFiNmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlkOTg0YjhlMjU5ZjAzMDcyM2JlNDUzNGI0Mjg0YTBlYjIwYjJjZDM4MjkyNWE0Yjk4ZTdlZTU5ZGZiMjU4NzAifQ"
+        },
+        {
+          "resource": "repo://docker/docker-compose.dev.yml#L179-L192",
+          "version": "repo-lines-v1:sha256:d7d4351067790d1aa236e4055b4affca439e86330aab16ae14e7fe66e89abb2c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3ZTI2NjNlYzBiZWM2YzlmMzRiMWFiMDk4YWJhMzUxZmZhYmQ3NzMwOTMzYTQ3YjE4YTRlODc1ODRmNTE5NTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1MzFlMjYwMzk4YWQ2MTA5MTRkZmMyOGYwNDhkMzkyNjRiYTdkNTAzMjc4ZGQyZjhiYjFjNGMxNGI0OTlkOTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxYzE1ODhjMTg3NmEwZDJkYmQ0ODczZTJjOWNlYzk2Yjg2YTdkZWU2YzJlOGJmMTE3NjE5NTJiNWI5YzRkMjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUwYmI4OGFhYTQyNjQwMjg4MDZiYjIyOWI4OTAwNjQ3MzMwNTE2NWFhMWNlMjJkMjQyNmNmZmEwMzcxOWQxMjAifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/config.ts#L5-L9",
+          "version": "repo-lines-v1:sha256:1b8c6a97c7cc56428914c085c6a75453caada66cfc092cc5f540541c386aa2c6:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWFmMjJjZjA3MzI1OTJjMjQ3MTQxY2JlNjFlZmExMTAxMjYxMmY1YTMxMjJiOWFmOWJiYWY1MmY1NzI0ZDE5NCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzA3MDU0N2JjNDZiMjc4ODJiM2RiNzc5ZmJkYjU4MGJhYmU1MTZkZDAwNDAwMGQwNjc5YWFiZjE5MzJkYWRiYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDYzMDU0ODAzNDdiNmIwNTI2OGJkODE3OWEzM2M2ZmFjNTRjZDEzNzVhOTk1NDhkNTQ4ZTFlY2YwNjFiY2JiYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4585e5237814489ab7dd70667008bdfe",
+      "statement": "The webapp's next.config.ts uses POSTHOG_PROXY_HOST and POSTHOG_PROXY_ASSETS_HOST for the /relay rewrites and wraps the build with Sentry (SENTRY_AUTH_TOKEN for source-map upload, maps deleted after upload, /monitoring tunnel route); PostHog provider uses NEXT_PUBLIC_POSTHOG_KEY/HOST/INGEST_HOST.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/app/posthog-provider.tsx#L9-L25",
+          "version": "repo-lines-v1:sha256:2280689ff1409ac7a5dc2928d720c405453cbf6f4d522472bece11da952afb8e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI4MmY5ZDUwYzQ1NDQ5NGY4MTFmNzg0ZmU1MmUyZTQwOGRmOWFmNTU3OGQyZTkyNTU5ZDlkMzI1YWZkMjEwZWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjczMDg0ODcwZDhlZDQyYmFhMzNkYzQ2MzBkODk4ZTJkYzUxOTg0NWQyMDM3ZmQ5MGVhOGE5ZWZjZGNjZGUyMDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM5ZTIwYmUyMWFkYmNmNzVhNDg4MTJmYmMyZGJlMjIzNzA4ZGMwMWE0M2FmYjI1MzVhZDdiNDU1OWY3NTY1ODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZkOGQxZmEzNzZiYzZhZWIzNWJiMjRmY2I1YjAyYjEyMTUzYWY1Mjc5NTk0ZTYxNTk3MDg3ZWE5MzczYTg1MWMifQ"
+        },
+        {
+          "resource": "repo://webapp/next.config.ts#L13-L23",
+          "version": "repo-lines-v1:sha256:550b2cd231346d4c14b429dfc25dda72233f843114306da9f24220241a65c6ad:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlMGIzNGE5MTNkZGE3MzQ5MWRiNjAzYTU5MWY0YmU5MDI3ZGEyNGU3ODViYzYxMWVjZTc0Y2M1NWYzZThmMjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE1YzU5MThiOWRmMTMyODg5ZWViNjhkMTdkZTFmOGMwNWU2MGU0YTdjMTU2YmExYzRmMTZjZDI5YTQ0ZWY5NTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjExZmVmZGM4ZDJlNDQ4NWNiYzUwZWQ0OGIyMjQwNThlM2YyZjIyZTFmMDlmNzk3NDBkNWQ1NGM5YjY4OWU5OTAifQ"
+        },
+        {
+          "resource": "repo://webapp/next.config.ts#L46-L74",
+          "version": "repo-lines-v1:sha256:7b876826258cec93dab145db5d33ae0f07f886fb102bc9ef6dc2973c92baa1ce:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxOWY0ZGZmNjY5OGNiZDkyYWRmMWMwNmZhNDlkODNmOGU5NzQ0MzYzNWQxYjBjY2VlZWQyYjBhZTAzNDJlNzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhMzhlZTljYzczYzlmMWYyYzhmOGM1NmQwMGJkMDBkZTViMDczNjlmMTJlMDgwYWJiZDc5YzhjNDM3NTZjMTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_eccdc7ac6aff4652acdd8afaf361e15e",
+      "statement": "E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD and E2E_BASE_URL are used only by Playwright; E2E_BASE_URL redirects tests to a deployed instance instead of a local web server.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/e2e/helpers/auth.ts#L1-L5",
+          "version": "repo-lines-v1:sha256:7f656f167b81c61dd3772aad709685003ae00e81b831e29ba1812ef3472e952d:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTYwMzVkNWNlOGNlMTVjZDRhOWMwM2E5N2I2NGFlMzNjY2FhMzFmMzQ5YmZlNDBjMTUzYzRlZWRlMDIyN2I4ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWNjNTIzNjczNjc3NzI4NzY4OGE3MTM3Y2RiMGJmNjAxM2M1ODZiZDI3Zjk2OGRlYmYyNDRjNWVkYmQ3NTI0YiJ9"
+        },
+        {
+          "resource": "repo://webapp/playwright.config.ts#L19-L60",
+          "version": "repo-lines-v1:sha256:57ac249ef5b69f181524fc2e078dbf54c3b443192d911a35cc993bc92f8cee8f:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY4NDVhN2M0YzZhNTJmNDU0NjEwMWMwNjkwZjc5YjcyODhkM2RmNGYyMGNkNzIyYmE0ZDQwOGY0MzgwZDhjYTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5NzhlMjUwM2I4Y2YzN2EwNmY3ZDZmMGEzYTZiNmZlMzU2OTFmYmNhYjUwYjg3NzVjYWI2ZmFiYzcxYzU5MmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzNjc5Zjk3MDQxMmI5NzUzNDRhNGZjOTVkNTkzZmJhMzJhOGVmMDc4MTM4OGVkNzliNmI3Yzk0YWM1NjZlNjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

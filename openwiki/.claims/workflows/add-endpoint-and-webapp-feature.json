@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:99ee4dc3931501cd3dd84fdc64ad7cfd14f45c2cdb7092ae7cdc80db8fc1f7ff",
+  "claims": [
+    {
+      "id": "claim_a5e2480de80a42cf9ec0c7b2453afc1c",
+      "statement": "Every new endpoint needs a new slug added in two seed files: backend/seed/002_permissions.json (a Permission row with a unique pk; the KPI slugs are pk 78-81) and backend/seed/003_role_permissions.json (RolePermission rows referencing role and permission by numeric pk, e.g. can_view_kpis pk 78 granted to roles 1, 2, 4, 5).",
+      "evidence": [
+        {
+          "resource": "repo://backend/seed/001_roles.json",
+          "version": "repo-file-v1:sha256:370fe180b98cecdc0ebef92c0f2bbfb3c55b2e85bca616f3e384fac4bc3fa8b8"
+        },
+        {
+          "resource": "repo://backend/seed/002_permissions.json#L618-L649",
+          "version": "repo-lines-v1:sha256:276f7650abdd489e9f516591c9392544ef73c5a39123f0a45bdf1500b5080b84:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5Y2E4OTFiZmY3YWMxZjdjZWFhZTQwZWYwNTEwNjZiZTllZmU0N2I0ZTQyODFlODZjMzE5YmUyYzU1ZWJjZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFmMGNkYjk3MmE3YmZiN2VkMjQ2ZjlmZjY3MjM4NWU1NWY0OTY4ZmMxMTA0M2RjNWI2ODRkNTFkZmEzMWRiY2IiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRjMDYwYWFiOWUwMDkxOWUzZDUxZjc1Njc5MTQzNTM0YzQwY2ViODg0ZTEwY2U0YWE1NDBmMDE5ZTVjYWE2NTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ3YjgxN2M2NWE4NzUxNDJiY2NhOTllNjdjNjVmZTJhN2VkMjYwMGZhOTU4M2IxMWM4ZmQwY2ZmMzI5NDYxM2IifQ"
+        },
+        {
+          "resource": "repo://backend/seed/003_role_permissions.json#L609-L617",
+          "version": "repo-lines-v1:sha256:da16b8eb1f714e245f53b8120a7a988c3a4ac75834145176dba244144ada5fdd:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWYwY2RiOTcyYTdiZmI3ZWQyNDZmOWZmNjcyMzg1ZTU1ZjQ5NjhmYzExMDQzZGM1YjY4NGQ1MWRmYTMxZGJjYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWYwY2RiOTcyYTdiZmI3ZWQyNDZmOWZmNjcyMzg1ZTU1ZjQ5NjhmYzExMDQzZGM1YjY4NGQ1MWRmYTMxZGJjYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmZmMDE4Y2JjMzU5YjdjMTBkYmIyZDY5ZWZlMWFkOTgxMzliZjgwMWEzYjIzODg1NDljOWM4MGY4NzFkYzExMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjI0YjYzOGRlMWIwMDQzMzJmMGY5NDNmMTExZDVkZGMwYjYzNDQ0ZWVmY2U3OTE1NjVlNTlhY2VlYjQyYzU4MiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_208d83bc16024047999953af9f6197c5",
+      "statement": "Deploys run migrate, then loaddata of seed/*.json, then create-system-orguser, then clear_role_permissions, so new permission seed rows reach staging and production through loaddata (which upserts by pk) and the Redis role-permission cache is cleared; locally the cache must be cleared by hand.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/auth.py#L126-L136",
+          "version": "repo-lines-v1:sha256:3bb9d3f37a2bcc7218fa64d88c3e045d4db52c5054511145427f88e95b5a96b0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUxZmZjZTZlNjI4NTU5OTdkYjJiMzMyNmU4ZGU3MDQ2NjFlNzc0MTAzNzY3OTRhZDkwYjgzNGI2OWU5Y2Q4YmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjNGUwZjhmZGY2YTA2YTg1Nzc4ZGE1NDA1NDZhNWQ3MTBkNjNlN2Y3YWM2NTc0ZTUwYzdhZTEyMDNiOTZhM2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE2MDVjNmFjN2JmYzk3NjEwZjBhN2YyNWFiYmMzNzM2MTY4OWUxYjNlYmJkZDU3MGRiMzU2MTE5YjQwYzllNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRiZWUwMGU2M2Y1NGUzNTUwZWJhYThiMDg2Y2QyMDFmZjhjM2YxNDVhZTFhMDdmNzg1MTE3ZWI2NGRmZjg1OTMifQ"
+        },
+        {
+          "resource": "repo://backend/scripts/post-deploy.sh#L9-L21",
+          "version": "repo-lines-v1:sha256:8448f9005820426744f859f1e4065c0ef9b38fe0b9c6d9a5e8cbf1b166768a2e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMxZTRmZmUyNWRkYmNiZDgzOTA5ZjE1N2U2M2M5YTE3NzIzODVkZWFhMjY2OTYwMzBkNTMyNGE5ZjQzNTI5NDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljMzJkYjA3YmRkNjg4MjllNWY4M2I5NzdkZjc3YWY4NDM2MWU4NmM4YzQ0MWM3N2M4NjMyYmY0NGU2MDFlNzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRjNjU2NDg3ZDUxMjkwOWExN2UyZjZhOGE5MmQ2N2JjMmQ1OTVkZjg1NThhN2E3MWM5NTFiNTgyZmNiYTc3MDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c999e029dae44dc1afb118f13e367764",
+      "statement": "has_permission requires request.permissions to be a superset of the listed slugs and converts its own 403 into HTTP 404 'unauthorized', so a missing seed row or grant shows up as 'not found' rather than 'forbidden'.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/auth.py#L41-L75",
+          "version": "repo-lines-v1:sha256:317a6ad3c29501e185a3b775f99cfebf2efd56e9135f379b2e4ba116c8135364:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwOGUxZDNlYjA3ZWEwZDgyNGFmYzA4ZDdmMGNlNWUwYTBiOWUwNDM3MDU5OTI5ZjI1MmRiYjM5NzRjYmY1NmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1MDFiYzg4ZmNkMjgzNTU4NjBiZWI3ODYzM2I3ZjBjNzQyZTE1NDU4MDZjMmIzM2Y4MTg2MGZiZWJlYjY0YjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYzY2M5OTI3NDdiOTg0NjJlMmI3NWMyYjliOWZlYmYxNDU2NTU4ZjQ2NDc3YTkxZGJmZGZjMTA3YjA2YjA3OTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNjOTU5MGVlZmQzZDc0NDU0NGQ2ZjdjNWQ3OGNjZjcxNmZhOTQxMGU4NWQ1MThlMmJkMTQxNWZhNmY5N2RmNzIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6337570ed6e346d98e898721bca62694",
+      "statement": "has_access is stacked under has_permission for individually shareable resources; it requires a get_resource_id callable, returns 404 for missing or cross-org resources, 403 for no access or insufficient level, and sets request.access_level, which kpi_api uses when building responses.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/kpi_api.py#L113-L125",
+          "version": "repo-lines-v1:sha256:f4809bf84d3e1eccdc4fd7e0e0755ed9eca4cbcdec2e085a15b0795a39c5643d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyODY2MDI4YTM5YjM3NmY0NjlhY2UwNTE3NzFkZDdiYTViMWYyNzhiNGU3NmNhZjI2MWQzZWNjY2QyNjQ1MTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzNjg0YmIzYzg3MWU3YTBiNzdmNjBkYzhjY2NlYjAzODI2OWEyYzU1Y2JlOGRlZWFlNzAxZGU3MzU2YmIzNzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmNWNhN2Y0MzdmMjA5NWU3NGExNTEwNzFkOTBmZDk2OTViMzVkMzcwZTAzMTUwNDU1NWM0MzllMzZiZmJiNGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFmYzY4OGE0YmUyY2RmYjI3MWEwMGE4MDE1MTcwOTBjMzEzZjExMWU3MmE2MTUxMGFkZWFiZTI3MWU0NGM4MDYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/auth.py#L86-L123",
+          "version": "repo-lines-v1:sha256:34f166db08e11a2736e400652839b01e4720d4660c9a4c430e54df79f1cac150:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4MmRmZTQ3YTQyNWYxNDE4MGUyZjVjYzgzOTZmNzJjODJiMzY0ODJiOWM5YzU0NjRiZWRlODgyNWVlYzE1ZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1MDFiYzg4ZmNkMjgzNTU4NjBiZWI3ODYzM2I3ZjBjNzQyZTE1NDU4MDZjMmIzM2Y4MTg2MGZiZWJlYjY0YjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM0NDZkZDE3YWFlZGZiN2Y4NTNhZDg4MzQ0ZjY1NGY4NzAxNDJiN2U4Y2NmNGViOWJjNzdkYjllZTlmZmQ1MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY3MTRlOGZkZWIwYTgwNjA5MmEwMDdjM2YyZjg2YTQyMTMyMmUxMGU2ZDYzM2RkYWI4N2FjODRiMzkxMmE0NTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a68a1ea9b698439994b8a2d6dc162793",
+      "statement": "The KPI API departs from the api_response rule: most KPI endpoints return their response schema directly (response=KPIResponse, KPIListResponse), and only the delete endpoints return api_response(success=True), so frontend hooks must match each endpoint's actual shape.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/kpi_api.py#L48-L201",
+          "version": "repo-lines-v1:sha256:ea93e1f3c957c603ad320c3ff356cc9b6bd4cf155ee9cee750f1a87ef920624b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTU0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkZTA3YWQwYzY1Yjc3YmIzNDJkNDJmYzk4ODE2ZDNlOTUwYzhjMzk4YTUyYmJjMDU2MGU3Mjg3ZmFhMTg2NGUzIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwYzk3ZjBkZjVhMzM2NGRmNGQ2MmM1ODAyNWZmYjZlOGNkY2VhNDFhMTE4YWM2NTI2NjQyYzhhYjAzYmNjNjc5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJmODg2M2UzZjAzMDY0N2RlZGYyOGU1NDA3ZTQ2YzYwMjYyZGZhZGRlMmViMmRlM2NjMDM4MDI1NDhlOGVhOGM3IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIxMzJiZjk3NjBkMGNmNWIyYzdkZjhmOTZjODg1ZGNiZThiOTVkNDZmYTUxMGY4YzRjZmJiMGJmNDM0NTc1NzFmIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/response_wrapper.py#L8-L42",
+          "version": "repo-lines-v1:sha256:e241a914a21e032a3020fc901b127fe22bc88bffb55d2965078eff1092de73b6:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3NjBhOGUwMjhiMTQ0ZTgxNTZjMTFmZTQ4OTg0N2IxMzViZTE3NGJjMDMzODAwOWFiZGI5ODBhZGM2N2FiNDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyMDg1MzI5MTBjZmNlZmU1ODcwM2Q0MzQ0NWE5YzIwMmIxMjQ4NzcyZjE2ZWY1YTE2MzBlNjJmMjVkZjAyNzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNhYzM5ODI5NGI0NzYzNmRhYzlmNTM1M2FiYTBmNzIyMGI5NzYxMDJiMmVkNzZlN2U5ZjRmZTBlMmJiMzFjZGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8de5da8ef9ab4c2793eaba1de7be843e",
+      "statement": "KPIService enforces multi-tenancy and business rules in the core layer: get_kpi filters by id and org, list_kpis combines Q(org=org) with accessible_filter, _validate_fields validates direction, time grain, tag and threshold ordering and raises KPIValidationError, update uses model_dump(exclude_unset=True) for partial patches, and create/update reload with select_related before response conversion.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/kpi/kpi_service.py#L98-L295",
+          "version": "repo-lines-v1:sha256:8dbfb3a3821b16a250a6bed9760ebb811be09dedf5a68b1c1db9df2116803419:eyJzZWxlY3RlZExpbmVDb3VudCI6MTk4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJlMjA5MzMzMzNiZDNjNTU4ZDBkNmFkZjA5Y2UyNGE3NDlmYzlhM2VmZDM4MTJmYTczYzVkM2VhMjE2ODAyMjE2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI1OTA5YTUzYTYxOGQwMjhlMWQzMDAwYzBhN2FiY2VlY2JlNWZiMzdmNGU1MTFlZmU0NjY0M2ZhZDZlNjY4NzJmIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwNTgzNDFkYzdiODVmYzFmNWM2Y2EyNGE4YjViMDQ0NWU0ZmU3MGQyYjg0ZDQwMjg4ZDIzNzFhYWU4MDU5MmY4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIxMDk1MmUwZmQyMWY2MGM5OTVlYWQxNmZiNWI3MGM4MGQwNjAxZWI1NWRhNTU2Mzk3ZThhYWMzMGVkNjhhYTdhIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/schemas/kpi_schema.py#L27-L74",
+          "version": "repo-lines-v1:sha256:35af1a94f7cdba14e5fe27afb5b2337728afeb37928742fec73eb18109c69069:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3MjRlYTQ5ZjczZDRmMmM1MjYwNDM2ZWYwZWVjYTY2NDBlNmRjNDZiMTk2Yjc2MjI5ZjYyMmJkMTlkZmJiYjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4M2JiOGI2OGFkZjEwZjI0ZDg4NDBlY2NmMjI2NWQ0MDdiZmRiMjRkYmNmZTA1NzAwMDI0MDUyZWU2NjY1NjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU3MzQzNTYyOGVkZTM4YmZmNDQ5MGUwMzg1NTQ4MzNhYjRiNGFhZDY5MjE3Y2UzN2U1MDE3OWEzYzU0ZDkzZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU3OGU0ZGE1OGIwM2E2YzAzNjI4NzA5ZTY2MGVmYmVjNWFjOWRkZGVlM2I1ZmQ3OGQ5NDg4OTI3MjA0MzNhMTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2028d9429539482d8768dc84db5a5f0a",
+      "statement": "The router is exposed by importing it in routes.py, assigning kpi_router.tags, and calling src_api.add_router('/api/kpis/', kpi_router); src_api uses CustomJwtAuthMiddleware as default auth and has global handlers that return 422 for validation errors and 500 with the exception text for unmapped exceptions.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/routes.py#L29-L70",
+          "version": "repo-lines-v1:sha256:6ff47bbe7e660025fd8147600cca70d5a5caaeceb04212e6c3cbd55560b2b1b9:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzNDA5ZjE3MzBlZWEyMDNhMjEwNzRiZDI4YjMyNzUxNzdlNTBmMjNlN2VkN2UxNjJjMDZmYmNhNDA5YmVlMDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEyNzIwNDRjMzVlZGE4MmM4YWNkN2NkY2JkNjE5ODAxNDMxN2Q0OWE1NDhiYTY5NDU0NDdkMzE0NjdkOWY4NjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY5YTI2Yjc3MDkwYTg2OTVlY2Q4OGYwNGQ2YWRjMmZhZGY1OTBjZTI4NWYwNjFlZDVhMWQ2NDMzYzQyZDE4ZGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUxYmE1NGEzOTU5MWY2MWE3NWEzMmE2YWRiZjA0NjcyYTRiMDE5MmQwMjVjMDljYWFmZGFkMDAyNDE2ZTlkYWUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/routes.py#L95-L121",
+          "version": "repo-lines-v1:sha256:02fb2e80b08e213424e94a082d034c518c2ee8b1178f70b790b1e2dc373e89b9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxY2YxYmI3NzRkMTgxZTU2N2FkOWUwMmRmYmUyMmUyYzc2YzhlM2ZjOTUzMTUxNjFmZDQ1MTA1NDk2MWY0ZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3YmRmNjllYWM2NmE5ODE5YTc0MTI5MzBlZTZkNmE4MmVjNzA3MDk2NWZlMWIxYzNmYmUzMjFhMjBmYThjZmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImExMmE1MTNhMWIwM2FkZmVmNjNkOGM0NGZmYjUxMWE4ZmYxMjFjYTc5MDg2M2Y3YTZjYTJiMDM4ZjFlZTM4MmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA1NDNkY2YwNTE1OWM5ODE4ZDIzMjQxZTBmMmM4MDc3NTFiMDMwZmQwNTE2ZTk0ODNmZGY3MzY1ZjgxZTE2ZTkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5cfc503fdfbc48fc86e025906c178b79",
+      "statement": "The v1.1 KPI extra_config change is a vertical slice: a JSONField(default=dict) on the KPI model, migration 0166 that adds it with a default so existing rows backfill without a data migration, a KPIExtraConfig schema with extra='forbid' required on create and update, and a matching TypeScript KPIExtraConfig type.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/migrations/0166_kpi_extra_config.py#L1-L19",
+          "version": "repo-lines-v1:sha256:d3400c9d0559f7402b0351e1976eca28c35b560ded3e12407c2be72bd47cc30b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJmZTU4MTQ5ZTQ4YWZiZjBiZWY2NzJhODc4N2Y4NmQ5ZWIwZTJhNDQ4YWRiMzdiODA4NTBjZGVkZGE5OTBhOTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkZDI0NDU4MmI2ZmIwM2QyM2I4NDE1YWJlY2QzNDZiMGM5ZjQ2NmI2Zjc1MmIwNjgxODljZTdlOWEyZGMzNTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/metric.py#L112-L115",
+          "version": "repo-lines-v1:sha256:6bb971c472fcd6593554b3a9405c382aec6d505154cf27e1e5817fec5c906f08:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjJlMDMwOWJhZTg4NWUxZDJmYjRlNjVjYmQ0ODZiODJiMmIzOWZhNjk3YTFlZjMzMDUyN2ZjNmQ2OGQxZjM3NCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZGE0OTM3MWJiNjAxODQyNWJhYjQ4MDQ3MmE5MzY2ODhhMzMxMGQxMDA0NDk4NWI4NWNiZDlkMzU1OWQ2OTQ4YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTE3OWRkYTUyYzMzNDc4ZjE4OTk2NWY2ZDAxMmQ5MWVlMGFiNjJiNTM3NzU0NGUzMzY3YTQ0YmFlZDgwMGQ1MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmMwZDBhZDdkYzZkOTdhZTllYzMwZGY3MTk1ZjkxZGVhMTI3OTQyNGQ3ZDgwZjNlNGE5YjNkZmNjOTg3NmJhNCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/schemas/kpi_schema.py#L15-L25",
+          "version": "repo-lines-v1:sha256:9f77a15c32a47bfce4fb9107699c85732a58808c670dbb045750afed6356e827:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwYTc2MDQxODQwNzg0ZmViMTdkN2NkZmRiOTFhN2JmNjA2MGQzOWU1MmE4MjIxY2QzNWEzMWQ4OGUxOWI2MTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIyMTJmODFiYWUzNzM5ZTg1ZTVjNzFkZTI1MTZiNTZhYWEwMmVlMzg1NmFlMzU5ZDNkZDI0OTdkNWRkNGNjOWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM4MTg1NDM4ODlmMzAzMmUxMzRmZjlmMTc2Nzk3NGU4NDgyOGMxYzI3NDM3MzM3M2MzMTg0ZjgzZjEwMzQzODkifQ"
+        },
+        {
+          "resource": "repo://webapp/types/kpis.ts#L40-L59",
+          "version": "repo-lines-v1:sha256:9db9ed696bc2975de383f642e2052bc0db9262872e3a2394faecf601df6a81e4:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJiYzdiZTJjNjQwNDEwNjBiMTIzNTcxMWQ0NjNmY2EzY2E0ZDgzZDEyOTcxMWUxMmMwNTlhMzlmMzg1MTJlOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE3YzM3MzdlNTA2MWM1NTViNTg4MDUxMThhZWM1NGU2YWI0Y2EzZTg4MTljYzRiYzlkYWEzMDMwODkzYTJiZmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_cbabf51627534f5b8d990b65fe04d4db",
+      "statement": "Backend API tests call the decorated view functions directly with mock_request(orguser), which fills request.permissions from the role's RolePermission rows loaded by the session seed_db fixture (001/002/003 fixtures), so has_permission and the exception-to-HTTP mapping are exercised for real.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/tests/api_tests/test_kpi_api.py#L131-L184",
+          "version": "repo-lines-v1:sha256:e922f0c5a11cfbc1bfe7b3d63e84ef4a131379a997bea27e340ea6d7c16573b8:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxZTA3ODBhZDJjNjdhYzI5MDVjMjhkYWQ2MTg1YTc0OWRlOWJmYjZmYmQ1OTljOGYzYWEwNWU2ZTM2Y2E5NmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIzMjZiMzhhMjQ2OTIyYjQwZThhMGU5NTAwODQ1MGE3NjM5OGY5MTRlZGMwYWRkMmQyZTRmNDMzZGY4ZDg1NzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZkNjM5NWNlZjg5ZTJkZWJiOGYwMzJlNzNkZTliNWJhN2I4ZmQ1OGRlNzliZTdiNDQ4M2NkMDI4ZTdjM2E4MDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMzOTBmZjVhNTZiNjk2ZTJiYTEzN2EwODMzMzllYWMwZTAwYjQzODlmNWY4YmQ0OTk0YTkxOWY1YWExNjUyYWUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/api_tests/test_user_org_api.py#L169-L179",
+          "version": "repo-lines-v1:sha256:ebd2f69e6809da90dad865a6404a0573814c6b5d4eedfcdb59e33ff37fa59d4c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzZDQ4ZmM2MTk4NDdmMWM0NmZmMWM4ODRlYmRlNTFiMDA3NzUzZGM3N2MwOWY4MWZjNjZiMzU2ZmJjZjAwZmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyODUxZGQ1NWQwZjM4ZWNiM2JiZGVjZDQwYzNlMDRiNGVhMjRhMjNlZDA3OGU4MzM1ZDlhMjQ2MGI1MDUyMjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE0ZjQ1MGMxNDAyMDllY2RlMDI0N2EyNmZhN2JkY2NmOGE1ODY4YzhiOTRhZWQ1NWMxMjg4Y2IwODdhOTJjNzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU5Y2YzNzNiYzdkOGE2MTczYzRkNzFjZDMxMTY0YzUzMTlkMTY5YTM1ZWM4ZDNhNGEyODJkYjNkM2Q2NzQ0NmQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/api_tests/test_user_org_api.py#L90-L97",
+          "version": "repo-lines-v1:sha256:80f282f5f430a5d93428e782359f5fab9aedb4ed77e62196cb24a5976f021515:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTMwMzY1ZDE0YzdkYWIzZDY1YjIwZWViM2FmZTdlNWQ0ZTMwZThmNzk4ZTc5YWQwNmU1OTQyMjg3NzRhNzQ4NiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2UwOGZhMmI4NGE1NzgwNWUwM2IyMjdmMjMyZjk2NWQxNjdkOTM1MmVlNGYzZThmMTJlMjA2NWM1NmIwZmNiMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjEzNmIzN2VmODQyMzEyNGJmN2RmNzI4NWViNmY0ZmRjNmJjOTI4YmIzMjM4ZmIwOWExZGJlODM2YzQwMDE4ZCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_2e55518af7ad4fa2b9f6d52620401c4c",
+      "statement": "test_rbac_v2_roles.py pins role grants (member must have create/edit/delete KPI slugs and no infra write slugs), and migrate_rbac_v2_roles sets the member role exactly from MEMBER_SLUGS and raises if a slug is absent from the Permission table, so changed grants may require updating both.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/management/commands/migrate_rbac_v2_roles.py#L48-L80",
+          "version": "repo-lines-v1:sha256:cae3c0930282e75542f9ee516a3c7f141c0eee691a145e0eda56c9fddc4eb3fe:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3ZDgyODYwYWE0NjI0OTkwMDgwNGY1ZmRjZTc2ZGZiMTNkZjQzZmQ4Njk5NzUyZTliZWViODE5MmVkNmJhMTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNjOTEyNTY4YjA0MzI1ZTc5OGJkMzZhY2RkOWI4ZDUzOTVlMjJjNjRkZjc3YzVhZTk3ZGY3NjExZTQ4YWQ2ODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxNzQ5YTNlMTZlNjA3ZjFiNDM4NzgzYzI4OTlkMzQ2M2M4YTJkZDEyZmZmYWMzNTIyMDY2NDFhMmMxZmE4NzkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/core/test_rbac_v2_roles.py#L98-L118",
+          "version": "repo-lines-v1:sha256:79078d7fc7b1b59a80038ee0365ac345c7821c2c834e95928309bb8fc797d41b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwOTc4ODRjZjZmNDZlMWJmZGYyZjJmZTA2ODQyMTgyODZkZDc3MTZjOWE3NjE3MTg2YzhhOTU1YTQ0ZjRiZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImViMzIxM2Y2MjlhNDliYmM2ZDI1NDZhZjliMDZjM2I4NDBlMGYzZDNiMDM3YTA5OWUzYmQ3MDY3NDE5ZWQzMWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEzNjdlMjk0MzdlODA4NjM2NTM0OGVjZDhjYWI2ZjYxMGU3NmI2OWFjYTgwYTE0YjY0YjhkZGVmNjBkYWRiMjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8ff8882e20ae4b59be821aac4a8ec2ca",
+      "statement": "Webapp permission slugs are mirrored by hand in the PERMISSIONS constant in lib/rbac.tsx, and useRbac derives hasPermission from the permissions list on the current org user; kpi-page gates the CREATE KPI button on PERMISSIONS.CAN_CREATE_KPIS and per-item editing on the row's access_level.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/components/kpis/kpi-page.tsx#L229-L233",
+          "version": "repo-lines-v1:sha256:36c8d27d7866700e16639ec1b061e976c293091d5401aab9d0e8287a8d8fd956:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTE1YmMyZTgyMWZlYjA2MWYyNzdhNGQzMjUyOWQ3YWZiNWRiYTE5YTVkZDYyMzE3YTMwODFhZGE5NmQ2ZmU3NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzk5MDQwY2U2MWQ5OTY1MGRkNGUyOWY2MTczYTE5ZjMzMGNjNGZlMDljYjQ1MDFmOTA3ZDhjYjQ2OGIxM2M3MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmU3NjQ2ZjI3ZWVjNzgyMzU3NWNlZTNhMzcxOWEyZDNmMDc2OWE4Zjc3ZDM5ZTY1YWFkOGE0ZWEzOTBiOTEzNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDg5MDNhNjU5ZTU5YjY4OGRiZjNmMzI4Zjc4ZjY3MTBhYjJkOGNiNDVlMDE1NDIyNzUxZTU2MDA2NjQ1YTIwMiJ9"
+        },
+        {
+          "resource": "repo://webapp/components/kpis/kpi-page.tsx#L525-L530",
+          "version": "repo-lines-v1:sha256:a369c7621e3a507e0aa05178a72a6ea570b745032aee9f56366cb01b08cb2fad:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzlhODUwMDQ3MTlmODAyOWIzMjYwZGZjNDJmMDNhMDllMjM0Zjc3N2VjZTZkY2RiY2YwYjdjNzk3M2Y2NzU1ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDg4M2U4M2E2MzY3MWUyOGM5NWZmZWZmMDY1MDc4MTczNTUzOTc5MGU1NTgxNTVhOTVkZmJjMmViMDRlNDY1OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWRmMDM3YmE5ODRmZGNiYWFjNTNhMTMzYjQ1MTVlMTYyOTZkN2VlY2IzYmZkZDg1NjcxNWFmZmE2ZmJjOWU4YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjdjMjUwMWJkMDA3YWU3MzZjZjhmOWE4ZWQyOThjNjcwNjIyODUwMzRmZTU3Zjg2NWM4NDZkNWE5YjU4ZmJiNiJ9"
+        },
+        {
+          "resource": "repo://webapp/lib/rbac.tsx#L138-L142",
+          "version": "repo-lines-v1:sha256:cb0b43fe7b53e1039f2d7b95348c081ee8fe0a56dc236b8cf653eee8035decd1:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2ZlZDk2ODVkODQ5YjljYzhhZmVjZGE3YWJjOGVjMzZkYmNlZTBiODU2M2VjYjFkY2M5Mjc5OTIzNTUxOGIxYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOGMzM2IyNWU5ZmY5NmU4MDY0MGViMjE1MDhmMDFmZjBlZmUzYTUxNzMyMGI4YjBhMGFhYmFlZjVjZTI4ZjA1OCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzg0Y2I1ODljMzIwMDNjZmU3ZWNjNGRkZDE0OTFjM2MyZWM0YTYzYmVmMDU5NzZmZmNmMzgwYjM1MmE3NzRlMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYmY5MGI2OTcwOWJhNTg0MThmNzIxMzRiMzUxYTAwYzZjMzU3Yjg4NGQ2NTc5OWM1NGIwODdhNWQ5YmQyNDE3OCJ9"
+        },
+        {
+          "resource": "repo://webapp/lib/rbac.tsx#L167-L197",
+          "version": "repo-lines-v1:sha256:501311198e1912bf8a35f5a80f3f3411f442f48c2bfd628291196a6a1ad06bef:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhjZmU3MTVkMjUwOGUwNzQxYmI2ZDEzOGNiNjUwNDdjODlmZDIyZjg2NmY3NmViZTJlM2VjZjAyZjMzNzYwN2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1YzE2YWY0MmRkMDE4YjAyNWQ5MDAyYzQ4ZDBlMTczMWEzN2ZlOTA1M2YxNzRmODlmYzZkZTY0YWE0NjVlMGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQxYzE4MWMwM2E0OTM2OTg0OWQ2ZTdiMjA0MTU4ZmEyZWU1Y2U1NjAyMzJkM2Q2MzZhOTkxODQxYTQ2NjAwMTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8da41a1af03849e6a140227bcb4fce30",
+      "statement": "All webapp network calls go through lib/api.ts, which sends cookies and the x-dalgo-org header, refreshes the token and retries once on a 498, and throws Errors whose message is extracted from detail, error or message; hooks in hooks/api use SWR with a null key for unready ids, URLSearchParams for query params, and standalone async mutation functions (createKPI, updateKPI, deleteKPI).",
+      "evidence": [
+        {
+          "resource": "repo://webapp/.claude/rules/api-hooks.md#L9-L27",
+          "version": "repo-lines-v1:sha256:f9755082b6548a38e4cc7118bb115c9c3af8834aa1c8518f007e76ed6d7141d9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjNzEzMWJhYTNlNWUyMmIwZDc2NmI2N2Y5ODdjZWExN2NmNDBjM2RkMzllYzJkZTM2NmI2ZWQ3N2E2NDM2MmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhYzQxNmU0OWI3OTg2OWE4OTk0M2E5MTA1NTU0ZTA2NmMyOTRmMjRlNzkzNzMzMjIxYzdlMTgyY2Y4YmU1MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2ODI2OTRhZDg0YjE5ZjFjMjE3MmUzMTliMDgxMjNhN2E2MDdmZmFkMWMzNDkxODA1MzFlMDE3YjQzZjgzZTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE3YmFjNDU4MWNlODBmYTJmMzA5NDlhOGFjNzIwMGI1MWE2NWE3OGQ3MjVlMGVhODRkMmFiNjg1NTRkMDU4YzgifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/useKPIs.ts#L132-L142",
+          "version": "repo-lines-v1:sha256:0768e262fac3a78f4cf0333612e561bac951f564c2d509ef8a12eb78e7995aca:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNmQ4M2ZhMWJhZmViYzliNjI0Y2ZmYTU0MjIxMTQxODEzODEwMmIzOTU5YTkxMTg3N2FhYzhiZjdjYWI4YzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMDQwZTA5NWE5NGUyYWRhNzRlNDIxZjM3MTg3NTFhOTFhODEwYmZkNjZmNDhmNGU5MzljN2I3NDgwZWI2NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0ZjcwZjRiNTJhMGZmNTA1OTAwMzMzMThiMDAxYWJhYzEyMWNkODY0ZjM3MjVjOGNiMTk5ZTk2NTNhNzQ5YWUifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/useKPIs.ts#L22-L56",
+          "version": "repo-lines-v1:sha256:1ff28dbcd07a0a876a5c3256b1c84098da3512dcbffc6fb50469b67f5a7b4e8e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3MGMyZWFkMzAyMTQ3YTliNzM4NGU2NmM4MDJmZGE5Y2IwYWNlYTUxZjg2NjA4YjQ3ZGZlMGY0ZThmMWM2YzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRkYzQ3ZTlmMWZkZWI1YTNmZDIxZDYzNjc4MmQ2Y2EyZTczYTNhNWUzZTdiZWMxNTNkZGY3ZGY0MmRjYmE5YjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM5N2Y5NTQ5ZDM1OTIzMjg5NTg2YmM0ZGFkZDljYjVhYWNiODYxMzFjMmRhNWIxYmJmNTY3N2M4MWQ2MGJjYTIifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/api.ts#L11-L46",
+          "version": "repo-lines-v1:sha256:d9feacc1c16e4d1c13adb1142fa2b3b4bcbff2459012ff2e0aef69b8aa76b9ca:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2MmUzOTNkZWQ4MjIzNWM3MzU4N2Y2MTRkOTJhYTM0ZGY2MDllY2E3Y2ZjNGI1NDQ0NmRhNjQ1NDNjNzYyNDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRlZDZkZjYxNjdjOTQ3NmNmMDQyNzgxYzFmZWUxNzVmMzRmMjRiYmZjYWVjOTM5ZjRiM2EwZGU5ZjZhZWY3MWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhODE1M2VmNjMyMDIxNzFmMWNhM2Y0MGM1YWI3NGIzZDk0Y2Q4YjFjNjM2MTMzYThmYjRhNTQ1MjgzNDMwODMifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/api.ts#L75-L203",
+          "version": "repo-lines-v1:sha256:a35eaf1d68fd00690cd6756bd6df03a307b9240d3b28e08f9bbd648803c3bbca:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0OTE4MDI1YzVmNDhlODAwNmMzMjRmYTZmODk5ZjRkY2FhOTQwNDg5ZmM2MzgxOWJiNzkyZWU5Mzg1ZWNhNWYxIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJmYjU4MGU5NjRmODNhNDczZjQzZDQ0Mzg0NjI5NDlkNjhiNTYwMGZkYTc4N2YxNjM3NDVkMDBkZTg5Y2JmMzZhIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIxNjA4MWVlMzUzM2RjNGZkMTM3ZGFmOTIyOGM4Y2M3OWVhYzI3NjkzZDEwMzhhOTQwZjFiN2ViMWQ3N2M3MDczIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_bbc5239a24a548de81ea6288b1877d70",
+      "statement": "Analytics events are fixed-name constants in ANALYTICS_EVENTS and fired fire-and-forget on the success path: kpi-form fires KPI_CREATED with the id from the create response (only on the create branch) and KPI_UPDATED on the edit branch, and kpi-page fires KPI_DELETED after deleteKPI resolves, reading the id before mutate() removes the row.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/.claude/rules/analytics.md#L10-L20",
+          "version": "repo-lines-v1:sha256:2f616600f3ba06f279c60824a5c2a1f8ba2618aa62bef1945feb0a7216795f0e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwOTI5MDg5M2UzOWYwZWE5ZWRlZTczNDU2NjEzYTEwNDcwMjQ3MmZhMzk1NzczZDVkNGQ0Y2FiNzJjMmI2ZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjY2Y3ZGEyNjdlYmM5YTAzMjFmM2Y5ZWZkNTk0ODYzM2ViZDkwNzljYWUwOTc0OTNlZDEyY2E1NTVmYWQzMDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY1NmM4MDhmMzUwODk2MDQ5ZmE0ODljZTEwNTM0OTYxM2VkZTUxNjM0MWNlODg0YzU2YmUwNjU0OTkwNDJjOTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyZDQyZTJiZTg4YzRiYTZmOWNmMjgwNGEwOTUxNTdlZDJkM2NiMGYwNTEzNWNlMmIyNmEyNzM4ZGRlMzlmMjYifQ"
+        },
+        {
+          "resource": "repo://webapp/components/kpis/kpi-form.tsx#L425-L485",
+          "version": "repo-lines-v1:sha256:537c89422d7a190ce3b982a8d28f3fd660f95b5992531886a7a8e11bba5b3f89:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExZGY4N2E0NzMxNmM3MDhjNTUwMjA5OGU5YWY2YzQ0NTM0ZWI4MGJlYWRjZjYwNjMwMjhlZmNhODU5MzdhYmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjliNjJmNjBkODU5MGE1NzljZjQ2ZjhkNjczNzhjNGM1NzJiOTYyY2VjY2RiOTBjN2E1ZjdiNDJiOTYwNzgyYTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQzMTlhMGVjMWFmMzMyMTIwODg4ODBmOTBlOWMxZjQwNjA4MTIwZGQyOGFmMTkzOWNiMTdiZDNhMTY4OGFiZDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM5NzFiZTI0YTJhMGEzNDFiNDAzMzkwYzI5ZDVmYWMxZWY0YzMwNjJlNmI3NWVhY2U1MjE2OTQ2ZDhmZjkxYTAifQ"
+        },
+        {
+          "resource": "repo://webapp/components/kpis/kpi-page.tsx#L463-L484",
+          "version": "repo-lines-v1:sha256:261574f39b2d9bac9acca84c5cac133e63a0cc134117da4cb9eb41e63fed9ca4:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiZTdkZDdlY2M0NmI4NjZjYjA1NDNiNmRiYzU5NmVhZTRkZTI2YjIyZjFlNDVhZTIwZGIyNmE2Y2Y4Y2M4NDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM2M2RkMjZmNTVlNDk0ZWE3ZDFmY2Q1NDc2MTdlMTc4YmNiOGExOGQ1NmVjMTc4NWQ0YTRlYmFiNTZkOTBlZTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNiMTUxYjFjZmY4ZWY4ZjVhZjk3ZDQ5Nzk0OTY2ZWI2MDM5YTViYzQ0OWYyNTY2ZjEzOGU4ZTU3NTQyMTg2YzkifQ"
+        },
+        {
+          "resource": "repo://webapp/constants/analytics.ts#L247-L266",
+          "version": "repo-lines-v1:sha256:0e3e5009e63b36e26972de69c2f54b609d95214551a903e8a391a4845cc89bda:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3ODk0ZTY1NDI4NTk5NzI1OWI1YTUyMGRlMjMyMjhhZmFmYzQyZDE0ZjAwOTBjOGQxOWUzNjM2NGU4OGRjZWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIxZWQxYmIwYjU4NGRlMGJjNDM2NWE1MjMyZTZjNzg5Mzk0ZWVjMzM5NzMzNjQzMDViYTdjODA4Y2FhNTEzNmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg5NzdhOGI4MGRmMGZiZWQzOWYyMmVmMzE3MWQzMDcyMDgzODI1YjVhMWU0MWNkNWZkNjU4MWM0YmYxYmYwNjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM5MTA4NDY3OGJlNTY3ZGZjNzQ5MTNmNTczYmVjN2EzMjFlNWE4Y2Q2MGZiNGUxYjM3OWQzYzUzMDIwZWM0Y2QifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b04bf4d178984ed296a87d2c3ad56657",
+      "statement": "A new page needs a FEATURES entry and a PATHNAME_TO_FEATURE prefix so feature:viewed fires on navigation; the route-coverage Jest test only walks app/settings pages on disk, so other new routes depend on the author adding the mapping. Value-adding events are additionally listed in VALUE_ACTION_EVENTS.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/constants/analytics.ts#L667-L777",
+          "version": "repo-lines-v1:sha256:3afdfd89e20cfc358804b6eefa14150bf9813b6fca3bce49204778fae1a0c989:eyJzZWxlY3RlZExpbmVDb3VudCI6MTExLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI2MGY5NzY2NGFlOTJmOTEyYTkxY2IxNzhlMjhiYmJjZmFkZGQ5ZTY2YmMxY2VlMTBmYmZmOWU1ZWQyY2FiY2U3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI0OWQ2MjdkZWRmMjE0OGM1YTNmYjBkMGQ0YzFlY2QzMDE3YTNkM2QxMzA4Y2UyZTdkZjZlZDExMTNiNGM0ZWZkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://webapp/lib/__tests__/feature-route-coverage.test.ts#L1-L31",
+          "version": "repo-lines-v1:sha256:3e649277c11fc57e549e69dc30dace1ef0cf7e062524f780ffde1191c68da987:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NTRhMTI4NGFmY2JmODQ2MTI3OTBhZWNmOWVjZmYyZTMwNGI5YTdhN2E0NGY1MDEzOTUxZWVjNDQ3YmU4YWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhM2U0NmY5NDI3NmI2ZjZmNGVkMWYwMmFmNzhiZWY2YTJlZTFjNDM5ZGQ1NTg0Yjk3Mzk0ODMxMzIxNGQyYjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQzMjI4YmVhOTRmNGUwMDgyYzk1OGEzODNiOTM5M2RjYzA0ZjZlODlhMjUyNGEyNmE2MzNlZDdkMjE2YTYyNTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_82bcf94142d945ccab72a6a62f50dce5",
+      "statement": "KPI webapp tests mock next/navigation, the list hooks, toasts and analytics, mock useRbac while spreading jest.requireActual('@/lib/rbac'), use an SWRConfig with a fresh cache, select by data-testid, and assert that trackEvent is not called when an export fails.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/components/kpis/__tests__/kpi-card-export-analytics.test.tsx#L100-L114",
+          "version": "repo-lines-v1:sha256:dc0cc2025c1e916323b81abc3dc9877a257f95a89cc9648168c9b9649a9849fd:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhM2U0NmY5NDI3NmI2ZjZmNGVkMWYwMmFmNzhiZWY2YTJlZTFjNDM5ZGQ1NTg0Yjk3Mzk0ODMxMzIxNGQyYjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM4OGYxNTEwN2Y0ZDIxMmQyM2ZiYzY3NTJiOWU4MzNjMzA0YzMzN2UyNTFiODg3YmI2ZGFlYzIyZDY0NzU1NjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/components/kpis/__tests__/kpi-page-deep-link.test.tsx#L14-L126",
+          "version": "repo-lines-v1:sha256:978c8f188310b94efa43735b412167a3eee14fd08190ca5293c62ab39080fb82:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJjNmIzNjA2Zjk1YmYyNjgwZDdmYjI5ZThlNGZmNTcyMzdjNjJjNDU4ZDkxMTg2MTVkMTIwMzljNGY4MzFlYzY3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI3YzUyYTM1Y2U5YzY5YTczYzNlYjA1ZDYzZjc2ZTJjN2U4N2UxZTc4Yzk5NzdjMmI1YThhMWVjZjJhOGU3OWI0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4MWY4MGY1ZDgyZmQ5ODJmZjM3MTg0MWQ2Y2FkNTdjZjA5NzUwNGFjM2YzZDEyNjA0MmJiZmFmZTRiM2FhNDZhIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIxZGE0NTM5YjkxMTNhMWUzNzBjMTRjNGFlYjYwMDUzMWJjMTI1M2FiYTQ0ZjE0ODExODcwMjRhZGI1OGE5MTVmIn0"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

@@ -1,0 +1,530 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:b7a3b97bd1e5c7cd09b3aa026895c1be98938019cac1d005be0f4f547bce2a87",
+  "claims": [
+    {
+      "id": "claim_919a600d095b4250b21af76bb7db5231",
+      "statement": "Chat with Data runs in-process in the Django backend via the core/ai package and calls model providers directly; it does not use core/llm_service.py. The separate ai-llm-service is reached only through core/llm_service.py, which is used by two Celery tasks (log summarization and warehouse-result summarization).",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L1015-L1047",
+          "version": "repo-lines-v1:sha256:b17bda9dfcac7fe79a31fa1bf821beda3c5239565ea5be8745c792e2a3a81a68:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkYTVjNjZlMTdiMTQ1Mzk3ODM0YjhjODU0ZGM0MTkzZTIxMjUxODBhODk5NmExNGMzMTg4MzMyNmIyZWZiY2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3OWNkYzc3YTViZmJhNWJhODg5Mjg0N2VjMGExODZmNGVmNGRhNmU2MGYzNWJiNThiYTNjOGYxYjg0NzIzZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZhZTk1YTAyNTI5NjJmYjRhZDFkNjU2ODEzMjZjZGFhMWU0NWI0MmIxOWZlN2M5NTI5Mjk0NGMwNDFlMWFkZTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdlMjc0YTE0ZmNkNzlhMTRiNDdlYzk4ZGMwZTRjOTQ2ZjFhZGI4OTJkYWY1MGMwMGRmMDYwZjMzYWQwN2YxOGMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L776-L794",
+          "version": "repo-lines-v1:sha256:5c43f343b65315a3a3ffdf14ce9554f7960264e893236b363bd347a91e14983f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlmYWZlNWVkYzQ4ZGQzODI1ZmI5OTgyZWEyZjM0OWFkOGI2YTZhNmYwNjQ2MTE0OWVhYjIxYWJkY2E5YmIzYWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3OWNkYzc3YTViZmJhNWJhODg5Mjg0N2VjMGExODZmNGVmNGRhNmU2MGYzNWJiNThiYTNjOGYxYjg0NzIzZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM2M2IzZmU2ZDBjYzc1NjUyNmNjYjQ2NjhiMzhjZjk0YjRmNDJhOGQzOTZmMTZmY2UzZGVjZmZiMWU5NDIzNTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdlMjc0YTE0ZmNkNzlhMTRiNDdlYzk4ZGMwZTRjOTQ2ZjFhZGI4OTJkYWY1MGMwMGRmMDYwZjMzYWQwN2YxOGMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/base.py#L27-L43",
+          "version": "repo-lines-v1:sha256:9f0b351ff07aab34c45466379b827b949c6201409a651ebf05cf37b7cab1f513:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ0ZGEyMmUyNjFjNmMyYmY2YmM3MzgwMGI2NTNlZWE2MmE1NTNhZTZhYTg1OTcyNTQxNGM0YjgzNjk0Mjc1YTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NjI5ZjA0ZGEyMTU0ODM5YjllMGQ2ZmM4MDQ0MjY4ZjlhNWUyOWExYjVhMDVlNGM4OTdhNmE3M2RhYWUzNjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk4ZDM1NjMzZTllMzUzZjk5ZDJjYTRiMDFhZjA5MmQxOGIyYmY3NzFiODA1M2U4MjhiODFkNjJhNDEyMTQ4OTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/llm_service.py#L1-L52",
+          "version": "repo-lines-v1:sha256:996bdcd56cd83619b878fefad632f4bd9b83b0b8a01cb115a9ce694f763133fd:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzZjU4Njg0OTc5YjY1MmNkNjY0ZTI4MTM2ZDg4MzViYWYwMzRiYzQ1MGI1ZmQ4ZmY1YTE4YmExNGQzYjc5OTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY3OTQ5NGQzMzQ1MzYxNzIwNWNhNTk1OWFhZWJjZjdlMTNmOTFmYTNmNGM4NTNmMmFiMTMyY2RlMTM3MmRmYmEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4b8fdeedb9de4f529bf35f975f85c939",
+      "statement": "The turn pipeline is a hand-built LangGraph (TurnGraph) with nodes route_node, casual_reply_node, clarify_node, retrieve_context_node, sql_agent, guide_agent and validate_node; the SQL and guide agents are create_agent subgraphs and only the parent graph is compiled with the checkpointer.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_graph.py#L127-L225",
+          "version": "repo-lines-v1:sha256:afbdc79d3e0b03069e5c5012f84b27f61f42699e19de5ef664c2dbaaa5c614a2:eyJzZWxlY3RlZExpbmVDb3VudCI6OTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgwOGQ5MzFjODhlOGFjOWQ1NDUwMDNjZWUxMDNiNDI3NzYxMTExMzY0NGM4MTZlZTFjNWNhYTUyNDMwYjM5MWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhkMjMxMTczYmUzYTIyNTVkNjQxNDM1N2ZiZWI4OGRmN2YzMThjMmM3MGU4MjhiODk1YzE3MTFiZjFjMmVlZTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzZDE3MWRlNzU0MzFhMDIxYTBkOTRmYTc2ZmFiZjBkNzEzOWM4OThjMWEwYjQ0YjQzY2E2MDkwM2ZhMWI4NDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_552d61360d964226844b50a370c85acd",
+      "statement": "Routing from route_node: small_talk goes to casual_reply_node, needs_clarification goes to clarify_node only on the first turn (no history) and only when clarification text exists, platform_help goes to guide_agent, everything else goes to retrieve_context_node then sql_agent. retrieve_context_node is a no-op placeholder.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_graph.py#L167-L224",
+          "version": "repo-lines-v1:sha256:71ff64d98e5a1b98363b7dbd95f3788f077bc08ecfab6fa3c2f10021dfd4f262:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyN2IzNTZmY2ZhMmUyNjIyODJiM2IwMjVhMjBiZTc4NWFjYzZlZGE2YWY1YWNjOTY4ZjZmMDc1Mjc3YmU2N2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZmOTNiYTU5NzA3Yzk5MzdjYWViMWM2OTkzZTQ4MTVmNmNhOGY5ZjI2N2I0NmI0NzAxOGU4YjEwYmRjZjFiNmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhkMjMxMTczYmUzYTIyNTVkNjQxNDM1N2ZiZWI4OGRmN2YzMThjMmM3MGU4MjhiODk1YzE3MTFiZjFjMmVlZTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f7166a16b48b477b80a6b3c76f53a09c",
+      "statement": "The router is fail-open: any error or unparseable reply routes to data_question, and a deterministic regex backstop forces platform_help for unmistakable creation requests (create/make/build... a chart/dashboard/kpi/metric/report, or 'chart this'), even when the model misroutes or fails open.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/llm_calls/router.py#L27-L99",
+          "version": "repo-lines-v1:sha256:78745c866a2299aaaa98363ef6145b24f226d00e85ea9310b9847b37a379dcef:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlYmJlNWVkODRiYTJkOGZjMDA0YTQxYzExYzQzODY5YzgyNDRlNzczZTdkODNlYzliNTNlYjMwYzJkZGU5ODQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5MmQ3YzA0ZDZhZDE4YTdkNGNiNWE1MmQ1NDMxZjQ1MmE5NmIzNjBlNjFhNjc4YTkyYjYxZjI2ZDAyMzAwYTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRlNjU5OTNmYmY3OWNmNjVlYjNiM2MzMjlkYjk5ZjY2MmJhZDU3Y2YzYjZmODdjYzZlZDkyNTM5YzM2NDQyZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6a2424438d5e4812840f67c968ae990e",
+      "statement": "The router is told which agent wrote the previous answer (via last_responder_line appended to its history) so short follow-ups stay in the right lane.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_graph.py#L145-L158",
+          "version": "repo-lines-v1:sha256:55678d8be685d900c4e2992fee94e5a8ddb4e405c1140f09c41391ba5ff29ef6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkZjEwM2UwYmI4NGRkZmUyZGNjNWYyZmFjMmE1MGEwNGNmZmRhM2I1Njc0YTZkYzM4YTVkM2VlMGIxNDk5NmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0YzI3NTYwZTU0ZmU2NDU4NzJmZDhhMTgwOGFhZTA5NDEzZWI2NzcxMWM1NjRjYTQzMGE3N2NhMzk2NGU1YzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE3NzUxODM5Yjg1YzVlOGQ4ZGZmMGUwZTMzYmU2OTNiMGIyNTBjYmM3ZDA0N2I2NTU2ZDk3Zjc5OTMxMjhmNjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdlZjdkNjYyMDA1MGU4YzU1N2MwMzBiYTdjZTI4MjM0YWIzZTQ0NDM0M2I2MWYxMDg4MzhlZTc3YzViMzEzOWYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_graph.py#L61-L76",
+          "version": "repo-lines-v1:sha256:67eab4bca4e1f311b7110c506d542da4f465a66db10cd9d9f86c8ced1fd53be3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxNjc2NWY4NjY5NmIxNjJiZDg1Y2Y5ZTc4Y2E0NjBlY2M5NzM1YmVmYWU5NjhmOTY0NzQ1OGY5MDAwZDEyYjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTYwMGE3M2QyZTAyZjM1MmI5MGZlZjFkOGQ2MzgxMWJhNGE4ZWUwYzFiZWFhN2FlNDY1OGYzNmFhMmUxOTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRiZWI3ZDdkZTE5NjhkYTdiZDMxNTU2M2I3ZThkNjE5OWY0NTFlOTJlOTQ4YThiNTg4MjQwNjMzY2I2NWFiMjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9460830d5a9a40d59383a862bd55f731",
+      "statement": "Mid-turn handoff: when the SQL agent calls handoff_to_platform_guide, after_sql_agent continues the same turn in guide_agent and skips validate_node; otherwise sql_agent flows to validate_node.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_graph.py#L197-L223",
+          "version": "repo-lines-v1:sha256:0380ca32f234aeed1702a2cfdfb6d13945516ec021168ab623a33564a237c376:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhNmIzYjY3NzJlMjZmYTk2MzhjN2U1YTM0Nzg4MmRkZWUxYmI0ZTBjNmM2NzliODJmYWE1ODYwZmQ5MDk3NTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdkYzllYmYwMDIxMDFlYzk5N2M0NDRkZTRiNzZmMDBkZGJlM2YxMWUxOWIzZGI2MTYzNzQ0OGQzYTcyYjJjMmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZkOTY3NmMxMWFhNDQ5ZTlhM2JmNWNmODUzYWNjZjhlOTZhNWQzY2VhNmJhZDBjNDI3NTVhYzY5ZGE2NzU4NmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNhYzIwMWQxMjJiMWM5ZGJmYjEwZmE3M2RlYzgwMjYyYzkwY2RlZWMwNmMxMDI2YWY0ZmRmNWY2ZWYwNGE4YTQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_graph.py#L52-L58",
+          "version": "repo-lines-v1:sha256:4d777f96288c80af8aa36ba1e809e1bdf38cf1806b1e267c92b7b858c0b32bdc:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjExZjAwNGMyNjUwYzhkMDUyNGYwYTMyNDVmYjFjYmIyMGU0N2MwZWRjZmI0NjRmNzMzOWY0ZDlkOWNmOTIwMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzBjMWYxODhmMTQyZWQ3YTgyNDY4MGIyMDcxNzJjNTUxOWJjNjE0YTQ4ZmRhN2NmMTY3ZWRiOGRkZjc5OTU2YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2NlNmQ1OWUyOTYzMjNhZTk1NzMyNmNiMzEyYzJlMDM3ODlmZTRjMGMwNjM4OTZlYzc0MzNjNzViOTEwMzM5OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGY4ZWM2NjQ4ZmVlY2U2YWEzNjJkNzMxMjNmNGJhM2Y5MWFlOTJkNDdjYzQ0NTc1MGExN2I2MmNkOTQxYzM3NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_c0ed5cebc3da47eea2550e9c7a39897f",
+      "statement": "Router, casual reply and audit functions are injected into build_turn_graph (the runner passes its own module globals) so tests can patch them per turn and to avoid a circular import; validate_fn=None skips the audit.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_graph.py#L23-L27",
+          "version": "repo-lines-v1:sha256:2d55ad6cfe77095ecda35b35ba04252430d940a93d2a673eeedfb3529b192683:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzZmODQ0MDFjMThmOTU0Zjg3YzQyNGE1NzQ4MjUxZWZiNjg3ODk1Y2MxZWFmYzliMGRiMjc4MDk0YzkxNzRlOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTMwM2VjZGQ0YTRkMTBmMTljNzNmZDQyZmQxMjQzN2ZkMzM1NGE4MjY4MTYwNWRhNTI1NWE5N2EzOTA2OGRiYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNGI5MzA2MzRlMjdlZTFkOGQzMjU0NWM0YzcxNWY0OTRiZGYyZGNlZjI5YjIwMDcwNWRjNjM4N2U4ZmY1Y2Q2NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjA5YWViMTAxNWU3NGRkOTZlNTEyNTBjOWU4MmYzODg2OWYzMmIzNjU5MzM0ODQyZDVmNmMzOGYxZWI2OGViNSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_runner.py#L103-L118",
+          "version": "repo-lines-v1:sha256:e1fa446bed1f38aee1bc5126727fb3c8c68039ff1e77baba31ce45b104af2ee9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwNGM4MGJhYjIxMjk1MWQ5NDhlOThjNzhiZDU1Yzc4MDRjNGQyMjBhYjgyYWZlNmY2ZTczMjg4YWQ2Zjk4ZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjczODRlYTRlNTNmOWE1OGYxZDY4ODY0YmUyMmEyZTZhZWM0NTBlODZmZTNlY2Y5NmZlMWM3ZjFmNDZhNTAyODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIzMWY0ZWM3MDk3ZDNkZDU1Y2Q4ZWFkMDBmY2EwNjE0MTcxOWMwZjk5NzY2YjNlMDg2YWM5OTc5NzE5NzRiN2MifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5b092961132c4a09be5231310adbaacb",
+      "statement": "The SQL agent's toolbox is list_schemas, list_tables, get_table_details, lookup_column_values, execute_sql, ask_user and handoff_to_platform_guide, with middleware sql_retry_limiter, dynamic org prompt, trim_history, clear_old_tool_results and an optional HITL gate; the guide agent has docs, inventory, discovery and the create_* tools but no SQL-running tools and no sql_retry_limiter.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/chat_data_agent.py#L72-L96",
+          "version": "repo-lines-v1:sha256:8b0fb0013297fa48d4a98ba289436f0b0ce0f02f89106c662cd9733b36a89d19:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3YTY3M2I5NGYzZDBiYzRiZTcwMGRjOTVjZDQ4OGM5NDcyMjVhMDY1MGYzNWFlZDU3MWUzZDM2NDQzN2EwNDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE0MDk2M2Q3OGM2YTZjNzk1OGMxZTc4ZGNiYTk4YjNmMDg3NDgwNDhjMjkxZTQ3ZWU2NmIzNTkzYzRiNzc5ZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/platform_guide_agent.py#L39-L59",
+          "version": "repo-lines-v1:sha256:d7968b0b61d1582abbb376e075d91d4fc0d4861a6e78dfe485daa522c87587e8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlYmQ2ZWU2NzRkYzI4OGNlYjIyZjZmZGEyMDBlYTNhZmI3MmU5NjJjYmM0N2ViZmUzYWRmNTRhZWM3MDQ0ZDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMwOWUyZTcwYjQ2MGMyMmNiNDI2Nzg5OGE0Njk5YTc5OGZmOWNhYWNjNjYyNmQ4ZTM1ZDhhZTZkYTZkZGZlMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/toolsets.py#L14-L67",
+          "version": "repo-lines-v1:sha256:0df43971ac237748f19ef860e2a17efc52542e81c600ac6320b55d5107615291:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJiYTJmMjllM2Y4ZWM3MWMyMGExYzc4YTllN2Q1MDlmNzJkZDA4NTg0MDg3Y2ExNWI0YTc5YTA4NzFmZmE2YTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM1ZjBhZDljOWEyNjllY2U0MGYwYjM0NTQ3MWVkN2JhOTRkOGZhZjhiNmNlYWZjNzIyNGEzMjU4OWY4NDAyZGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIwMWY0NmEzNjUwODYyM2Y4MjEyNjAxNDhiMzI5N2I4YWY2N2U5NzY4NjVmNDk2MGRkY2NmNmNmMTMxYjI5MzQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e3264866e124453eaa92775f0d6cdc80",
+      "statement": "sql_guard.validate is a purely structural (sqlglot AST) guard: it requires exactly one statement rooted at SELECT or a set operation, rejects forbidden node types anywhere in the tree, requires schema-qualified tables whose schema is in the allowlist, and injects or clamps LIMIT while keeping a smaller user limit.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/guards/sql_guard.py#L19-L138",
+          "version": "repo-lines-v1:sha256:ef7c3b3152108a59728b1088d371c7ac43d9a16dd44a4762964f0c79b25e668e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwYjY2MzE3NTcyZjU3MTIyYTNmNDc2ZTRhOTk3MTk1ODY5MDUwNTY5YWMwZjM5MDk2ZDMxOWY1Y2Q2Y2I2MzFiIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI5NzRiZWNhYjg3MTdkZjhkYzhkOTgzNzg5OTc3YmY4MjI1MTA4MTg2NmU3NjYyNzAzNjJkZjY3MTk1ODE4YjMyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5MTU1YjkzMGY0YzU2ZGNmZTVkMGNlZmVjNDQ2NTk2ZGJhYTVmODIxM2Q5OTg2YTIwZTM5OTgwY2VjNjMwZmUyIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_320c4a1611f645958dbb3632ce9c97f2",
+      "statement": "execute_sql is the single path to the warehouse and runs PII hashing, then the AST guard, then (only for complex-lane questions) LLM reflection, then execution; Postgres gets a statement_timeout, and warehouse/guard/reflection errors are returned as tool text so the model can retry.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/tools/sql_tools.py#L23-L117",
+          "version": "repo-lines-v1:sha256:4832c9d8d7f2bc9a1b11f1a9082b21e66500be96b89b9c2514ef2e6c648372db:eyJzZWxlY3RlZExpbmVDb3VudCI6OTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhhMTkwYjYzNmI4MWE4ODZiMDcwOTMzMDNhODNjYjY2MDUwNzQxZmI0MmQ2NDA4YTgzNGYzZjM4OTVmMTUwNzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyMTg0YTU1ZTE2OWJkZDk4NDA4NTc4ZTZkNzE5MGMyZjExYTc1MTIyZGRhOTVjNTVhNDY3NzljODhlNTBkYmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk4MjljZmUyMjA5NGY1ZTcwYzJmOTBjMTQ3MTJhMjFhMmQ2ZjEyN2NmYmFmMjUyMDI2MDQyZWJlMzM2ZTQ4MTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_680b3ebf4947424aa1ea0d34bc400ce4",
+      "statement": "sql_retry_limiter deterministically ends the loop with an apology after MAX_SQL_ATTEMPTS (5) failed execute_sql results since the user's last message; RECURSION_LIMIT (160 graph steps) is only the runaway backstop; trim_history and clear_old_tool_results trim only the model request, not the checkpointed conversation.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/middleware.py#L24-L97",
+          "version": "repo-lines-v1:sha256:47b5ad17d295adc2562dcecef1a101a3b397267af3bfba7ba28461516ccb0937:eyJzZWxlY3RlZExpbmVDb3VudCI6NzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlN2FiNDFmYTJkOTJkMDZhZTFjNWY1ZWMyOTU4Y2JlNDFiZTZhOTcwZTkyZmQwOGU0ZDU1NjFkNzQ2ZjE1Y2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ5Y2ZiYjgxNzM4Mzc3YTdjNGYxY2I1NzBlNzJmMzEyMjM5MjBkZTI4M2E5NmQzNGQwNDNlNTIyY2E0ZjI0MWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/constants.py#L57-L86",
+          "version": "repo-lines-v1:sha256:5334e0f5901c2b69b88fb1e55c43dc8565aa1a084f2f846c91f54d7f4641567f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzYWU5ZTlkOGI0YzVhNzk3NTQ4MTFlZDhhNmNhZGI5NWI5NWM5YWQ1NDhlM2YzMGZjMTA0NDMwMjQ4ZGMxZDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxM2NhMGY5MmI1MzY0OTlmOTY2NzcxYzViNDlkNGE1NjU4NjljYjE1YjRjYjU5ZDA0MTc3N2M0MjFjZmIwZGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzMzFhYWU4YjNhMWFhNWZmZGVmMjFkMGRhMDMyODdiNjVjYzA3MGJkNTYxYjE0YTEzODRmM2RlMzhkOTNhZjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA0MTc4NzE3OTI4YmNjMTdiZDNlNGI0NmNhMDI3YmM4YmVkMTFlMTg0YmRlODA1OWIzMmRiYWNkNjFkZGI1NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_92bb1506122d4f1ab3d7917522a8701b",
+      "statement": "Turn audit is a non-blocking post-answer check by a small model that yields a verdict/caveat (None when no SQL ran or it fails); it surfaces as a validation WS event, an audit column and a Langfuse score and never changes the answer.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_runner.py#L285-L299",
+          "version": "repo-lines-v1:sha256:79b980d15bb717362e13358ef4560930a58813bb3a873df79120cce65496f4f1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUyMDYwY2JkMzlhODNjZWViZmJhM2FiMWFjZWVjZTY0N2Q5NzM2MmY1MzcyMzZhMjEwNTM4ZjNhNDZkNDk4MWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzNGM1NDNhZDI3YzMzODFhNTAzMjMxOTk2Y2Y2MjIyNjVkMWQzOTMzMzUxMGEyZGEzZjFjZDBjMTBhZTdmMDQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE3MzA3OGJmYzJhMWFhOTNkYmNmN2YxODM3ZTZhZTEyYmVjYWEzODk1MDQyZDE5MDZmZjQ0YzFjNzRmY2IxMTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFmMDY4MTE0ZDI5NThjNWJmZDZjMWQ1OTY0NTdhMTQ5MGZhNDBiMzc5ODg3MmZjODk2MWM2ODg1OWE3MWViOWYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/llm_calls/turn_audit.py#L1-L80",
+          "version": "repo-lines-v1:sha256:9f76c34c7a8a18d82d19b468bb9160d461bf4c1d4fc43e7a5f8f25569b8e3271:eyJzZWxlY3RlZExpbmVDb3VudCI6ODAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1MTA4ODg1ZTBiMjEyNmNjMTM4NDkzMmIxZGQ1NTM1YzJjNWUyZDA2Y2I1Njk3NWFhYTA1YjVmM2RmNjJlZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyMjY3ZDJiMjM5MWRjNzJmNzQ5NWMzZTY3Mzc3ZWNkODEzNGNlMTk5ZTdkNDYzYmZmOTIxMjJiMGViNzgyMGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFkZWM2MTkxM2FmYmQ0OTA4YmU2ZTI0ODFkNzlmNDhkNWU1OGI1OTk4MDdmZTgxYjM0YWI4YzAwYWEwMjUyYjcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a54f692f73424d76ad3e04154c7309cd",
+      "statement": "RunContext is built server-side by context_builder.build_run_context, the only module that reads the ORM and resolves warehouse credentials; allowed schemas default to every non-system schema (excluding information_schema, airbyte_internal, pg_* and _airbyte*) unless an admin pins ChatWithDataOrgConfig.allowed_schemas, and an org with no warehouse raises ChatWithDataNotReady.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/context_builder.py#L1-L83",
+          "version": "repo-lines-v1:sha256:7a601f970d7ccbb005930ed466e544836bccc08eb02b0dc0db42b3fd5fd63515:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2ZDE2YTMyNTBhMjRjYTIxZjliMWNlMjk1N2Y0MTRhYWFkYjQ3MDNlZTRkODQwNjhmMzg3MDZmMzdjNDVkYWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/run_context.py#L12-L36",
+          "version": "repo-lines-v1:sha256:7c067152f5e8c0aa8385500ae49ba28945157b89634b0bd2cf25cb9d2a6af093:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2ZmJhZTBiOTFkNDRmYzBkNDlmNWRlNjkxZGE2ZmM0MzFmMjYwMTM0YmY3MzFlMGUyMWY3NjQ4MDk0MzM0Y2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4NmIyZjY0NTIzZWJiNmE0MGEyY2UxNDA2MTk2YzA2NjA5Y2VkODBjZTgzM2ZmZDBmNGIyYjk1MGRjM2ViNTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlkMzdhMzNkMDczYWI4ZGEyOWRjNzRjZTZhODkxMzE4MThhNTJhNWMxNjVkMTZmMzFkOTkxOTk3ZjBlNjZjZjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9483d2048b3141c89e4923e0ae3ad4bf",
+      "statement": "Human-in-the-loop uses one middleware for two pause kinds: approval for execute_sql, lookup_column_values and all guide-agent creation tools (metadata lookups are not gated), and question for ask_user whose typed reply becomes the tool result; typing a message while an approval is pending rejects it with the message as a redirect.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/hitl.py#L123-L199",
+          "version": "repo-lines-v1:sha256:cbe8cbda7424fd74b294627d5b4ee01d6f809be95b75af3c0a6014243af02ecd:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImViMTUzNThjNjA1OTJmNmMwZTk4OTczM2EzOTAxMWRmN2Q2NDNiYjI2ZDdlNzBmMDI4NjI3MjVhODE2ZDhkZWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1MDVlYmU1YzlmZmQ4ZDljMmJmYmQ2NTVhNmRkZTk5OWE0N2Y0ZGI3MzkzOTYwZjlmOTcyNjM0N2NjZDg3ZTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1MTljZTU1ZjY4YjYyNzEzYzc0NzU2MGQzZTE3MjIyYzZiODIzNDY1M2VjMGZlOTVhNGIzNmYyNWM1YzNkMzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/hitl.py#L63-L75",
+          "version": "repo-lines-v1:sha256:d1c9f966b0ad2e04e55b8c076043d95b5774181657507882938b992a28479f6d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQxMzY0NjQ5ZTFiMDRlOTY4ZTg0YzVjMzgwOTQzMGRiZDg1OTkzODQwNTlhZmQwZDFmMDJjNjFkOTJhMTBlYWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQzYjg0OWE2OGQ1MmY1ZmI2YjIxMWUzZWMwNWVjMjkwYjM1MzY4NzE3Zjc0NzI1MzdjMjFhNWNhZTAzNjliMjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRmYmFkMGVhNmE2N2YxNzg1ZTczYTFjZDM3N2U3MDAyMWQ5ZjU5NDc1YTdkNmEwNTQzZDJjYzAzYjczYWJkZDQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/toolsets.py#L48-L74",
+          "version": "repo-lines-v1:sha256:8cd7c7b0029c60255e5231b62fb8ec0a9c16cd06cc8af66e7b2915522abd1d7a:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMGMyMWFlYzI4ZTY2MjBmZWMyMjQ1ODllOWEwMjQ2OTllZjNiZThlZmNhZGRhYTE2YjQzNTNiZWFiMmU1NWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA5ZTJkMjg2ZmM3NmJiYmQzZTE1ZDMzYzZlYmFkOWI2YjE1YzZiMTVlNzFlNmY2NTlmMjkyZGZjMmU1OGRiN2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1NGY1OWM0NmRlNTdjNGIzYTg4Njg3ZmI5YzkyNGQ4OTIzMDAyM2QzMDI1MGFmZTVhZGVhYWQ1NmYyZDQ2NWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE3YjYyY2E4YmQ5ZWY0ZGY3MTE1MjJhNGQ5OGFlMzVlMGRkNWIwMTk5ZDJmODYwNDQyNGFkOTQ4ZGUxZmJiMjQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/websockets/chat_with_data_consumer.py#L151-L175",
+          "version": "repo-lines-v1:sha256:f8618045f6e3c6f8cc5e2bcce5f149768c6265c160e57b67648372a1838e557d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3NjU5NGFiM2Q5ZDYwZDg1OGRhOTYxZGI4MDUwN2VlYTM3NzQ4NGM0NzA5YWJhM2JkMjVmZDA5M2ZmNmU0MDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc4Y2IzZTBhZGM4MTkxZTNhNGI1NjgxMjI1NGRlMGM0N2U4ZGQ3ZDVkN2ZiMDRkYzNkOGI1ZGU0NWYwMTViNDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ4NGE3ZDcyYmNiY2JiZjZkZGZiYzFiNmE1NDlmMGVlOWRjNzE4YmYzYTg0MWM1OGNkMGRjNjUyYzI0NGIxNzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM1ZGJmMTIzMmFlNDg5YWQyMDVhYTJkNzA2NGMxNzA3ZDdjMDIwZjg5NGE3ZjI3OTczYjYyMDQxYjgyNTA1ZGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fb673a7f8ca8463e9aa9db7855c224de",
+      "statement": "A paused turn is durable: graph state lives in the Postgres checkpointer and the pending card in Redis with a 24h TTL; a reconnecting client gets the card re-sent on connect, resumption reuses the original Langfuse trace id, and if the Redis record lapses the next message re-triggers the same interrupt.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_runner.py#L179-L198",
+          "version": "repo-lines-v1:sha256:1472632e4f520efb28d30743c8c6c6f4aecebe6d22c2198224aeebf585adb801:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiY2UyMjE5MDU2ZTg1YjAxMmNlNDRkOGY4ZWNhYTZkYzJlYjE5OTExMGMzNTk4Mjk1NDYxYzk0ZjkxMGU0MTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkOGE5ZTljMzI1MjgyMGM2NWE4MTY1MjBiOGRiNDkzMjI4MDg0OWVjOGM3ZDJlYjYyNzJhZmRmZWJlMDU5YzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJkYTIzNGUzNDE3MGIzOTYwOTg1MTRlMTgyMTE3ODg2Yjk2Nzg0ODg4NjM4ZjY2OGEwOTM0NjUwOTJlM2RiZTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRkNmNlMGVmYWEzMzhlODNjZWZjNGFmNjcxMjVkODhlYzg4NWEwZGJkNzE4ZjNlNDA3MmI2OTA3NDA0ODM0MWUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/websockets/chat_with_data_consumer.py#L131-L135",
+          "version": "repo-lines-v1:sha256:98dd79a9803052d37915c0dfa8a7a1121d4103dece85a7ed81ff3a984b356fd8:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTgyMzkyMDA2NTk1OTQ5YjY0YzU1OGNjOWZkNjI4ODlmOGNiNzNiNzg5NjAzZjlhMWYxYjkzZTc1ZDFhY2IwNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmFhM2UyYzc5MmJjNmNlMGYyYWFiNzU2ZDNmNGQzZDg2YmQyN2UxNTM3ZDFhZGJlNWM0MDc4N2JhNTg2ZWUyYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWE0YmExOGYxODJhZWY2Njg3YTdjYTJhNjUzMzlhMjQ2OTZkMTMwMWNlN2E0ZTA4Yzg5M2E1NGI0ZmRjZGNhYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWM5YWY4Y2I0OTJjMjQ4ZjM3YTdjNDg3YWFkNGEwYmQ0NmJhNDQwNWVhZGRiYmYzM2IyYzczODVhMzYyNTE0OCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/websockets/chat_with_data_consumer.py#L343-L366",
+          "version": "repo-lines-v1:sha256:ccf399dd259157105238727f55f83a0170fe96690d8e991fa20c5ae611eaf25e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc4ZWJkYTBlMTVlYjBhODlmYzY1MzhlYzIzNGNiODYzZTU5ZjFiZWNhYWMwNGVmYmIzMzA5Y2NjMGYyYjhhYmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExNTExYTEwZTM1NGY4MjZlMDA4NGQ1ODZjYmJmYmM5OGNmNGZjZDMxMTc5NTc2YTM2NWVlYjE3NGRhNjYxYzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4MDg2OTJlZjA5NDkyNTY1NTg0NDU0OGNmMThkMDY0ZDlkOTlkM2NkMjMyNWZkOTU4ZTkzNjFiZGE5MzUxYWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkzNzhjNDRlMmE5YzhhMTZmODRhMzViZjJhYzQxMzMwMzgxNmU3MjhhMGVkOWYxNWE0MThkZDJlOGIyNTkxZTYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/websockets/chat_with_data_consumer.py#L62-L69",
+          "version": "repo-lines-v1:sha256:e275be3dc6231eb7a34489f94ce691246142b3904ee9f4fcf34b81979c1e65bb:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjkxNzFkMjQ5YTk4M2NlNTZjMzA4ZmRjMWFkOGFkZmExZTU0MTJmMDQzYWY5OWVlNDYwNTdiZTgyNTFiOTRmMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjFhNWI5NDA4NTQzZjhkM2ZhZDdlYmYxYWIyNzM2N2I4YWRhODU4YzkyOWE3MjdiYjU2ZmQ0OGZiZDM0OTBhYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzU1NTE3MTJiNWNiNDU1MGUzM2FlN2MwY2YwNjA1Y2QzZjg0MTY3NThjOWUyZTQ2YjMxODhkNmJmZDFkNDNlNiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_a09ad17f94e74f23b9a716fbaa3ee789",
+      "statement": "PII handling is user-marked rather than detected: the approval card lists schema.table.column entries, the card fails closed (columns null) when the list cannot be built and the consumer refuses approval in that case, ticked columns are narrowed server-side to those the card offered, set on RunContext.pii_columns only for that resume, hashed in the projection by pii_rewrite, and not persisted.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/hitl.py#L78-L99",
+          "version": "repo-lines-v1:sha256:dce58fd1e9745161f7a6d04a7c6423328aced5b9ebf7ba875428f95af344b0fa:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxM2U2MDVlYjRjMzc2NWE2ODY3NmRhNTk0MGY0NjY1NGZjMDZkMWJhOGE3OGMwNDgyMGI4MDYyMmEwNmQwZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhZWY1MmJmYzdjNWQyOGVmYWFlMjdjMmM0MWFmOTU2OWFhZWZmYzRlMjExOGQ0ZDc2NTIzN2E0M2MxNTU3Y2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYxMTE1MDFjNmU0ZDIyZmFhMWQ0MzBlMzgxNWY3MzBlNzQ0NDlkOWZiMmU5ODE5NzE5MTlhYmExYzBiNzA5OWYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/run_context.py#L27-L30",
+          "version": "repo-lines-v1:sha256:7384c987ea9766b19d2119cd326f52be775fb148352662577d9d6b5c1abddbc5:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgyODdiYjVhOWRkMDE0ZjMwMzY2NDMxYTM1NmFmYjgzZTAwNjhjNDg2NDIyN2M2NTc5YzYyZWFlMjU1M2Y4MyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2ZmMDliNTBhMGIzMmFkM2NhMmE3ZGYwNGRmNGRjZDFjNmEyZjY0ZmRhZDI4NThjNjcyNGFlZjc2YTI1ZWVlYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTQyZGM3Y2Q2ZGExYzQ4NTc3YjUwODdkNmUxZGUzOGRkZjVkYTE2Mjk0MmEzYzA2NTZiODliYjg2ZTUwNTNkOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2Y5MzgxZjY0ODgxY2E3ZTk0NWZlODQ2NDI3NThlMGJiMGM0YWJlNmE2OGM0YTY5MTczY2E3NTYwYmMxNzgyMSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/websockets/chat_with_data_consumer.py#L176-L203",
+          "version": "repo-lines-v1:sha256:4230ed8e2075567677c568b0bc0f584f7cd9d5f45b0805d9ba4688198af8991b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhZGI4MTUwMDYzMzk1MTgwZTU3MjI3OGVkM2I0YmY5MDk2ZDE2ODg1YzAwZGNjOTVjNjY1MzQzNjlmYWRmODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiMWEwYWQxN2QyY2NjMjE4Njc1ZTZjNzRlZjdkYWYyYjA3MWMyZmQwMDU2ZGY2MWUwYmEzYTBiZTNjYzk2MWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdlMWQ0NWE0OTgzZGIxOGRkMDJiMGI4N2FlYjU4MTMyYTIxMjVkNTZjNzg0MDk5NjZjNWJhZjU0MTEyMzdlZTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA2ZmM4YjJhZTllZWRiNDBlZGNhNTc1MzMxNTFiMzM3MDcwNTA1ODY2ODA5NDljNzczYjFiYjk0NTA5ZDVlZDcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/websockets/chat_with_data_consumer.py#L79-L94",
+          "version": "repo-lines-v1:sha256:e99c2a026d5be7697bde535baac588ab7652e455e5b62726ce05f2884329eb87:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiMDUwNWU2OTYzZmJhNWFiMzE1ZmQ5OGJlNWI0ZjFiYmQ4MmQ0OTAyNWU3ZjRhZDhlMzkwNzFkNGE4NjdhODUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY4M2EyYzg4ODk0YWIzZjU3NDQ1ODg1NmNlMzc5ZTJhODcwYzc2YTZlZGE4YmFiZmMxMzlmOWNmMGQyMmU3NmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQwMzUwMWMwMDE2ZjhlMjViNmUwMzUyMDg5MzkyZjc2YmFkZWJmYWZhMzUxOWFhYzk1NzViODQ0NDI1NWVjMjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRiN2FlZDA0ZWRjNDZmMWIzNzcwY2ZmNDViYzMzOWJkZDgwODY5NDIwN2MwMWVhNGQ5MTE2NDU5NTFjNTczOTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a283021c86fe42de834dba04c7d6607a",
+      "statement": "The chat WebSocket consumer authenticates via the access_token cookie (no query-string token fallback), validates the JWT, resolves the OrgUser by orgslug, requires the can_use_chat_with_data permission and an enabled status, loads an org-scoped session, and closes with NO_TOKEN/INVALID_TOKEN/FORBIDDEN codes on failure; it is routed at wss/chat-with-data/<session_id>/.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/urls.py#L43-L43",
+          "version": "repo-lines-v1:sha256:bc58cae886e8ce92dc125499c29014a390b056a9e4bec2cb4bb71c5d5b0fef35:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmM1OGNhZTg4NmU4Y2U5MmRjMTI1NDk5YzI5MDE0YTM5MGIwNTZhOWU0YmVjMmNiNGJiNzFjNWQ1YjBmZWYzNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmM1OGNhZTg4NmU4Y2U5MmRjMTI1NDk5YzI5MDE0YTM5MGIwNTZhOWU0YmVjMmNiNGJiNzFjNWQ1YjBmZWYzNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmFmNWFkODRmZDhjMTUzNTU1MTk5YTNkYWMwMmJhYTIwYjg3MzFlODlkNjg4NTE0YzMxMTkxMWE1MWYxN2UxNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjk0MTZlMDlmNzhiYTMxNmMwMzI1NjgyMTNiODU1ZWU3NTZlNDE1NjVkOTE4ZjA5NTE5YzgxZmQ2MjBmNDA2MCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/websockets/chat_with_data_consumer.py#L100-L135",
+          "version": "repo-lines-v1:sha256:31bb07b25686712730752da3cc7a07cf746ac3f9c1c97b9ec6c8abe4af2b9c46:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlMDlmNDlmZDFlMmFiZThmYmYwOThmYzk5OWVkZDI1NzBkNWExZjQ2ZmM1OGRkZDFjMDE2NWQ5YjFlMjUwMGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZhYTNlMmM3OTJiYzZjZTBmMmFhYjc1NmQzZjRkM2Q4NmJkMjdlMTUzN2QxYWRiZTVjNDA3ODdiYTU4NmVlMmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJlYjNmNjExZjhmYTE2YmNkZmEzZjJlMzA1N2JjMTcxZDI3ZDFhY2QzNWVkMzU5ZTQ2NWQ3YWU2YTNhNmRkNTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjOWFmOGNiNDkyYzI0OGYzN2E3YzQ4N2FhZDRhMGJkNDZiYTQ0MDVlYWRkYmJmMzNiMmM3Mzg1YTM2MjUxNDgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/websockets/chat_with_data_consumer.py#L285-L318",
+          "version": "repo-lines-v1:sha256:64cdb394ce547224dfe97945ec5edbc6b28bc7aee27b88eb0aab9e5fd0c7e299:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmY2YwODhiYjE2NjMzY2U1YTEzYTBlYWNlYzc4ODc1MWYwZDI2MTg2NGIyOGFmYWJkMGE2YTE2MTY5NDJjNGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlMTExY2NmOTNiZDgxMTcwNWNiOTlhYzMyNDc2NzBiYjZmMTcyNjZjZWQ4OTc2YjY4NDljYWUyMTlhZmUyZWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhhZjM3NmJhMDdhN2VjYTM5N2NiMzEyMWY5MzBmMDMzMTEzZTY1MTI5OGE1YTcyNmU2MzE5NTFjYjg2N2QxZGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhYWE4MjlhNmUxMjIyMGQ0NmMzMzA0ZmQzYmZjYWJkZTM5MTQ1YjBhMTVmOWUzNmVhNjkzNjZlM2QxYTViYTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_49adc3c14545453eb7a3349de41bd931",
+      "statement": "The consumer enforces one turn per session with a Redis lock (180s TTL) and never trusts the client's model choice: resolve_selected_model only accepts MODEL_OPTIONS ids whose provider API key is configured, falling back to the default.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/chat_data_agent.py#L34-L58",
+          "version": "repo-lines-v1:sha256:c839fc1784c83f2f481b894badf9a47de7bda430ed948bad9ee4b4b05d4e5a68:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3OGNhMTZjZjZmZDA2YjFhM2EzYmU2NzI4ZjQwOGJkOGY3OWEzZjFkYmQwY2Y2ZGI5MTYyZWY5ZmNiZjZmMWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzOTllNThiNWYwZmYyYWQwNjFkNzA4NWE4NjNmNDRiYTE1ZDQzMWI1OTE1N2IwMTliNmM1NzQ4YzlkZmE4OWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ1MmJhMzNiZDgzZjcyZmNiYjViYjljYzhmYzBkMDFmZGE2OTk5ZGQxM2NjNDczNmFkNWM3ZWM5YzY3ZWQxNmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjZGU0Mjk4MmI4YWIyZDdiMjYyYmMzN2Q3NDA3NDNlNzkwMThiM2YzMzBjNTU0ZGZkNDM3ODg4MWQzZGI1YTkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/constants.py#L29-L35",
+          "version": "repo-lines-v1:sha256:4d323fca9e016e0de91f52e85d051f792454d396b74d7f464c452f4d181a6222:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmE2NjU4MjUwMDcyMDgwOWY0NjBjYjA0NzBiOTRmNTZhZmE2ZmZhNzYzODdlODZmNTE3N2Q0OGEyOWNjZTEzOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjk0MTZlMDlmNzhiYTMxNmMwMzI1NjgyMTNiODU1ZWU3NTZlNDE1NjVkOTE4ZjA5NTE5YzgxZmQ2MjBmNDA2MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGZkN2UxYmYwMjg3MzA3OWMzYjhhNGNlNzI0YjM5ODY0NWEyMWEyNmVkOTcxMGUwOWM4MjZjZDA2NDlmYWM4NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzRiMzQzYjg4MWJlMGU2YWQ1MjEwNDI0M2E0MTg4MDlkYWVjNzkxY2ViZWFiZGFhNmMzYmI3YzI4MzhkYmQyMyJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/websockets/chat_with_data_consumer.py#L205-L225",
+          "version": "repo-lines-v1:sha256:758a97dc2de065a9a734212a4fd93e1a226aa492b674076a91364e33499d5803:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjczNzAwYThkMWU5ZDQyZjQ2NmZjMTg2NTY5MDdmYjJhYTEzMzQxNGY2OGNhZWVmZDNmNDJjZDJkNjUxYWZlM2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlNzVkMWFlODYyYjBhMzI5Y2JkOTExNzg2MGFjZWY2Zjg4OGYyZmEwOWRjOGI5ODk0YWVlNmQ3NzRjMDcyOGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJmYTE5MWVkYTEwMzkxNGViMWE0NDYwYTU2Yjg4YjEyZDljNTkzZGUxZTY5YjQ5MTYxMmM2YmFiNjk2ZjIwZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhmMTkzNTdmMGEzOTAzMzUzMzMwNmY5MTc1ZGI0ODcwMTA1N2I3NzViY2QyOTBmYjA5NjVmYTg3NjM3NjUxMjMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/websockets/chat_with_data_consumer.py#L368-L373",
+          "version": "repo-lines-v1:sha256:c92e2421aa14985478eb16a8543947b2dcbcd2a452d3b0676f4c9b8c141bc393:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDUxMDViMDcyMGVhZTNkOGFmNTY0ZTZjNjZmMzAyYTgyN2JmZGI0MzUzOTc3ZmFjZTkxMjUzYjdhNDI5YWEwOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTgwM2YyMjU2YjliNTEzYjA0MTkyMjYyN2Y1NWVkYmQzZjFlMTMyMjQ0ZDdmMTliMmQ5NDFiOGU5ZjVhNTViZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjM5N2I2M2VlZjZjNmJhMjdhYzlkMzVhYmE1YjdkMmVjM2JjM2Q3ZDNmYzEyNjQ2MzRiODZiMjlkZDRlODAwYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_2eb3035a60954a3a97ffdc67ec141ec5",
+      "statement": "run_turn streams the TurnGraph with messages+updates modes and subgraphs, emits typed events (token only from the agent model node, tool_start/tool_end, message_complete, validation, input_required, error), and in a finally block always writes a ChatWithDataTurnAudit row with status completed, failed, aborted or paused.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_runner.py#L1-L21",
+          "version": "repo-lines-v1:sha256:dce89d3118511c5e30185b4710015a9b04554df3536ee94b789853b03bc3c2fe:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2ZGM4NjMzZTFmZDIyMzE3MGVlMWM0MWMzNzY3MjJhMDMwMjUzYzk0ZGE0NDE5ODdjYmZmYTIxZDBhYWQ1OGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk2YjVlYzdhZjMxMGVlNDc4ZjEwMjRkNDVjMzk3ZmQxODIwMWIwZjdmYzdjYzEwMDVmNzliMWY1MzgwYWEzYjAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_runner.py#L171-L338",
+          "version": "repo-lines-v1:sha256:1033267470af373da6090118e1d8f5df780ea12151124163e0b08334eb5d14fa:eyJzZWxlY3RlZExpbmVDb3VudCI6MTY4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJhZGE1YzY2ZTE3YjE0NTM5NzgzNGI4Yzg1NGRjNDE5M2UyMTI1MTgwYTg5OTZhMTRjMzE4ODMzMjZiMmVmYmNmIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI4MGRiMWIzNGY1ZmM5ZTNiOTY5ODQzMDIzZTFlZDI0YmUwMmQ1NDFlNTQ1ZTMxOTgxYTA1ZDhhMTA5YWJhNzM2IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIzZTY2OWVlN2M1M2QxZmExYzZhNTM1Njk4NzAyM2VjOGM4ZGFlNGFhOGFjNmRhZjljYmVlZjJjNDc1MjUzYTliIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/chat_with_data.py#L35-L59",
+          "version": "repo-lines-v1:sha256:b9a3e019b5716b63e4c1a6bc8bc55f689219b4b0862fc6ac6b552ae91c83d659:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA4YmJhZjkzYzg3NTE5NTAzNzQ5ZGI0NmNmYWMyNjEzYzk2NjM2ODUwZmYxODlmYWU0NWViZWIyNGM0MzNhMmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhMjY4NjY4ZTM0YTFjZTk4Yzg2MDhkMDVlNTA5NWFhYjE4Y2QxZDM4NmQ5ZTZlMGFjNTExNTliNDhjZGExMzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5ZWYzOGFiY2IyM2UxZWFiYjg4MmFjMmMwM2NjNTJhNDc0ZjlmZTVkY2E0MDUxNTM3Mjc4MGQ1YjNjZGUxMGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxYzVmZjYzZDFjOTA3ZmE3M2EzNmVmZTllMmQ1ZmZhYjIwMDk1NDQ5YjExZTk2NzZhNWE2ZjkwNjhjNzVjYmEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2752ff42cdae49a9a3a2c0878b164f4e",
+      "statement": "Chat availability requires the org's CHAT_WITH_DATA feature flag and an OrgWarehouse; OrgPreferences.llm_optin deliberately does not gate it because enabling Copilot in settings is the org's consent. Sessions are org-scoped soft-deleted rows holding a thread_id into the checkpointer, where message content lives exclusively.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/org_memory.py#L41-L66",
+          "version": "repo-lines-v1:sha256:1703038808d557ea6a3e9d1e581548cdf8cae378e8da67b93c8e0a2f3a0c6dd9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwODIxMGE1OGI5OTA5Y2I1OTdkZDI1ODZiNmYyOWMwMzE1MTA2MjNmZjEzNGYxM2U4ZjUzNzYwNzk2ZjIyYmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiMGE4ZmYzMDJkYmRmNTQ0YTBhMDQzY2EzOGI4NTg4OTAwMjU1MDU2YzI2OTYwMTUyMWYwODBlYmMwZGM2NWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/sessions.py#L16-L82",
+          "version": "repo-lines-v1:sha256:6fb3242777e2badd4714154c4996c7766ab018034d47b15e279cf3caee0fff24:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwZTM2ZDM3M2IwMmM0NDhjODY3YWI0NjE3NmI2OTIyM2U5YTVlYjQyMDkyNzNhMjM1Yzk2MzY3MmZkMWY2MDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1MjMyNWZjYjk4NDYzZjZkNzA0N2UxMTkwMjNmYjQwZmU0Y2M3NThmNGYwYTU5MGRhOTY2YTZiNmM0ZDNjMDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBiOTVmYWEwYzdjYTIyMWVjMTI3MDM3MWU3NzcxYzUxOTUzZjhhMjhjYzg2N2ZjMWU5OTVlNzU0N2E4ZmY3YzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/chat_with_data.py#L1-L33",
+          "version": "repo-lines-v1:sha256:ebc5eb044445879c164b6fee5352f020909faa558d104ea3c7c0be1301901674:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4ZTIwMTRmMjg5ZDNjZTViZmU3MTA2ZGI5NGUyMjRkYjExNDJhNWJlNjRlMDU3NDIxMzg2ZDY0YmU0Zjg2M2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEzMzgzYjMyYzI2MzYzYjAwNDEyYjY1MzkyYjg2NTc1OWQ4ZGJjM2E5Y2I4OTQyMjRmNmY5MTM3MTNmYjRlNjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5343dfc776c34f00ab96c220c076886c",
+      "statement": "The REST surface at /api/chat-with-data/ (status, settings GET/PUT, session CRUD, session messages replayed from the checkpointer) is gated entirely by the can_use_chat_with_data permission, which is also the permission for the WebSocket.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/chat_with_data_api.py#L27-L116",
+          "version": "repo-lines-v1:sha256:4ee7ae958432be78429fae00485fb9af398b6047cc036a66fbe65c54fe30b2a5:eyJzZWxlY3RlZExpbmVDb3VudCI6OTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3YzU0YWQyMjAwZDU5MjkzN2M4MzQ4ZjMxNWRjZjlmZjVmZjk4OTc1ZjQ2MmM1NjMxYTE5Y2EzMzdhYzE2NGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI5NTE1NDZjMTQ0OWNmNjJlYzg0OWU3MDVjZWRmNThlOGM1NTcxZjJkMTc1Yzc1NDMxOGQ1Y2NlNDBhYTE3MGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRlNjU5OTNmYmY3OWNmNjVlYjNiM2MzMjlkYjk5ZjY2MmJhZDU3Y2YzYjZmODdjYzZlZDkyNTM5YzM2NDQyZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/routes.py#L123-L123",
+          "version": "repo-lines-v1:sha256:aaff49075b42411634d40fac47fd1354280eb111af7f496d9ddf19f572cbd88d:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWFmZjQ5MDc1YjQyNDExNjM0ZDQwZmFjNDdmZDEzNTQyODBlYjExMWFmN2Y0OTZkOWRkZjE5ZjU3MmNiZDg4ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWFmZjQ5MDc1YjQyNDExNjM0ZDQwZmFjNDdmZDEzNTQyODBlYjExMWFmN2Y0OTZkOWRkZjE5ZjU3MmNiZDg4ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDI2NjhhMjA5ZWZhYjQ5ZjVkZTEyNGVmMDdhNDU0YmRjZTdiMDc1MDU2NzFiMTMyZWJkMzYwY2YzYmY1NGNmNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjI4OTk3ZjBmNDNmZmIyZDUwNjFiZDM1NDkzYWRhYzc5Nzk5MzFjZDlkZjQzNzVlYWY1MjQ5Nzg0Y2NjMDhhZCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_379195b760e44005bc4679b7e4ea8fae",
+      "statement": "Conversation memory uses a process-wide AsyncPostgresSaver on a small psycopg3 pool separate from Django's connections; its tables are created once per environment by manage.py chat_with_data_setup.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/checkpointer.py#L1-L70",
+          "version": "repo-lines-v1:sha256:5891b7f408f0334b8b5d21db65afa362ba33d07f489e3bdcd56eda9b55c26c4f:eyJzZWxlY3RlZExpbmVDb3VudCI6NzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExMjY1NTdkZDI1NmMyOTkyZDVlMGE2ZjlmYTg5MThmMDE2YzZkODcyNGVjMTgwOGVhOWZjOTZhMzE4MzQ3MTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzODQyNjQ2YzhkMGI3NTI4YWM2NWQzNTU5NGUwMTFkMGVmNTM5NDc2ODQzY2JlNThiYTU2MTgzNDdiZGQ1YzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d7a118a2ccd24691ac04af010aaf3ec4",
+      "statement": "Models are configured per job by env var with defaults (CHAT_WITH_DATA_MODEL for agents, router/validator/reflection/title vars for one-shot calls on a fast model), and the model id determines the provider via init_chat_model.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/base.py#L1-L43",
+          "version": "repo-lines-v1:sha256:f29da0b8ddb57e12e1ad139968c3d6e27073319b109a695e9a99df19230c5959:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA5YjcxNWM4YmM1YzU1YTk0YWMzNTg0NzVhNzk4ZGQzNzM0M2ZjYmQ5MTdlNGViY2U3ZDdkNDA1NDMwYTVjZGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NjI5ZjA0ZGEyMTU0ODM5YjllMGQ2ZmM4MDQ0MjY4ZjlhNWUyOWExYjVhMDVlNGM4OTdhNmE3M2RhYWUzNjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/constants.py#L22-L51",
+          "version": "repo-lines-v1:sha256:4ec7b022516ebeb13f94280352572a314d3f6b8c80e53392a9acc2960e00f8b3:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3Yzg2NTEwZGVkOTQwMzQ1NzFjOTc4OTg1Njk3NGI0Y2I1ODQ5MjJkZTY0ZjdhZjY0ZTQzM2NjZjYzNmMwNGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyMDE4NGQyOGY4NzY3NTgzNGQ1ZTVkMDI1OGNhNWJjYTQzODQ4ZjQ4Nzk4YTQ2MGQzNmFmOGIwNTNmZWI3ZDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVmMTMzOGRmZDU1YzBjOTUxNjY1ZDYwYjBmNWQyNTViYTk2ZTE3ZTJhM2U2MWUwMjZjM2Y1ZDUwZDI5ZmZlZGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNiNTVmMzBkNDM5M2U1Y2JkY2JhY2JiYWIzMDM1NmM3MmNiZmZlNzIzYjNjOTM5NjQ5NDk5N2EwNTA2ODcyNGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ba1fcdbb28f541b79f413f4c53aa68f4",
+      "statement": "Langfuse tracing is off unless keys are set, never breaks a turn, produces one trace per question across pause/resume, uses a hand-rolled handler over the Langfuse v2 client with a Python 3.10 callback-dispatcher shim, and has stable span names that dashboards depend on; LANGFUSE_MASK_TOOL_RESULTS stubs tool outputs.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/chat/turn_runner.py#L106-L140",
+          "version": "repo-lines-v1:sha256:04540d52c1bfd69e247d8c2bea730c4142d2016e384ad1a6f5ed652bac5d3a15:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0NTMzMWYwNjc2OGRkYmMwNTgwNjU0ZGM3YmI4N2U4NmFmNjQyNzA4OTZkN2U4OGVmMWY4Y2EyNTgxN2ZkM2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNkODQ0ODkwNjUwNGZiMWE4ZjM5Zjk5MTk1NTE2MjE0MDUwZDE4ZjcxZTFiM2FmYzQxZmI3MTAzOWE3MmQzNGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUyODcxMTIxZjBlNWM4ZTQ5MjAyZGZmODE4ODMzNWQxZTdhNzY3MDBkNzBiYmZhY2IyN2I1MTk4OGEzZTE4ZDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY3YjJmOWE1MDI1OTdlYTE2NTE4ZThkOWQwNTMxNzhhZmEyZTVmZjUwMTlhMjdjMDVkY2NjMDQ5NGRiMjZmY2QifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/tracing.py#L1-L120",
+          "version": "repo-lines-v1:sha256:29aaf820bab78182b85850fa0ea41c17c38c363cce8ea45e009fcc09531e5b3d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkZjJjNjFiNWNlYTNmMTEyNzM2MGI5NmUyNDNjNWVhNGRiYTIzMTc4ZDRkM2UwM2QzMGE1M2E1ZGUzZjRjNWU2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJkMDhiZThkNzdjNGRlOTRjOWFhYjQ5ZTEzMGY0ZmI3NjdjZmNmZDgxMzg4Yjk2OGU1MGFjMTg5NTk0OGNiNDE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhZWZhZDk2ZGZjZDU4ZTEzOTYxYzc2YjVhMWRkYzgzMzgyNDkxNjE4YTNkMTNhMDA3MGM4Zjc2MjA4M2ZkYWVkIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_c96af7e8572d45028c54e08bf6215e12",
+      "statement": "Adding a tool means a new module in tools/ with @register_tool, an entry in the registry's _TOOL_MODULES, the owning agent's tuple (and approval tuple) in toolsets.py, and a label in TOOL_LABELS; get_tools raises KeyError for unknown names so typos fail at build.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/tools/registry.py#L1-L49",
+          "version": "repo-lines-v1:sha256:02ae75b42ba9834e5a652bd9f0ed0d39ef5f56d13d3e17fb0f3a9162b8359279:eyJzZWxlY3RlZExpbmVDb3VudCI6NDksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjMGE0Y2RhYTU4OGNmOTc5MjFlMzZjMDU2MmNiZDBmNTYxMTQ2NjdkYjFmMmJmNmRlYjVjNDA4YmNkYjFjYWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExYjQ3Nzc3YTQzODQ1ZmI0ZjU5MWViYWY3Y2Y3MTBmMmI4ZDc5MTdlMjY2ODExODE4OWVmMzYxOTUwOTZiMjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/toolsets.py#L1-L109",
+          "version": "repo-lines-v1:sha256:cb13073e11e3e16adc55f1440fb33067752163562541f05125460375e9447bcc:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI2YTlkMDU3OWRkMTk4NzdkMDEzYzVhNmI0MWU4YmFhYTkwNzA3OTUwODZiZThlMGMzNTAyMmU3ZjNmODgxNzdhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwNjMwZDg4MmQyZDYwNTA1NjBjNWM3MTdlNmYxNTMyNTEzZTE4MGM1NzEwMDQ4Y2Y5MjcyMzMxZDVjOGViMjg3IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_396d7bb37f3d46a5a43753f3f68bf32c",
+      "statement": "Evals replay golden JSONL questions through the real agent, with eval_routing and eval_sql_correct (both SQL results executed and compared) as gates and LLM-judge scores informational only.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/evals/README.md#L1-L120",
+          "version": "repo-lines-v1:sha256:61c1de8bfb1070e8c72f8bae72a969be079b959dd36cbec4ce8854f805a9f40c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI3ZGE0Mzg0ODcxMDlmYThmMTU2NWVlZWFmOTdlZTRmYjc1MTBmZWMzNzk2NGVmZGQ1ZmQ3ZTFkYmEwYTAyNTZhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI1NWQ1YzMzNmM2ZmU1Njk5OTNlMzhlZDQyZWEzYmYyYzNjODZjMzZiMGMyZmFhY2Q2NGFiMWI1YmQ3ZGQ2MjllIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI2NTM3ODc2ODdlMWQyNWU0NjEzOTAyNzk1NjgwZDdkYzBjMjg5MWY2MGE1ZDE5MWY0ZTUxYjk4YWU2MWEyODk3In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_f213fd9209334d4985ef7e5751a8fd29",
+      "statement": "Report summaries and dashboard-scoped chat were removed from core/ai (2026-08-18) and are not live; Chat with Data is currently the only product feature in the package.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/CLAUDE.md#L1-L14",
+          "version": "repo-lines-v1:sha256:341d999ef88cfb83275022ad2088bcac6b764a4a695c691812ee2a730627c542:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNkNTY2MGNkNTljNjEwM2U4MDc0MzNiMGFkMzI4NmZmNjk4M2IwYjUzY2EzMzllMzg2OTMzOWVjM2Q2ZWZkZjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJiMjZjNWZhNDE0ODNkZTViMmE3MzdiMWE4NmU1NmY4Yjk3NjgyMGQzZjhkZmI2Njk4MTE3OWM0YjRmYWU3ZjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU1OWYzMWVmZjZjMGI3ZWU2NDljMzk5MmFlNzdkY2E4YTk3Y2Y2NGFiY2U5Mzk5NjkyODljODI4MDkyN2IzODgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8d63723f23764b2e871bf77a1ac3268f",
+      "statement": "The webapp chat page reads /status and renders blocked states, keeps the open thread in the ?session= URL param, and uses useChatWithData over useBackendWebSocket (cookie-auth URL with orgslug, 3 reconnect attempts, no retry on auth close codes 4001/4003/4004); a pure reducer applyChatEvent applies each WS event to the trailing assistant bubble, and a reconnect-replayed approval card gets its own bubble.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/app/chat-with-data/page.tsx#L24-L155",
+          "version": "repo-lines-v1:sha256:42dc1b72f920cb2cb6eb48235fdcc7a2f4fb15bb29ed1daaf8d8586188af0e7c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI5ZGQ4MmE1YjFlMTE3MWNmNWVkYThhYzNlMzRiMTgyODNkMjgxNGUzZDRlNDgwN2NhMzcxNDNlZDMyYmYyNjBkIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MmEyY2IyNWExMjJiNDQyMjFhNjIzNGVjNjYwYTdiNWZiN2Y5YmRlN2IzYjllMmIzYzU1OWEwZDk2ZmFjNzM5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJjOWYzZDQ5ODk3YmQ4NWJkMjhiMTExNjg1Nzk5ZTdmNGM4ZDcyZWJmYjg4MzY4YjgyZWY3ZmVmNjE5YTVmY2FhIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI3NWU4OWFjODkxNjJiMzRmZDQ4NzI3ODk4YmMzMzlkNTQ4N2FiZDUwNDkwMmRmZjMxMzYzNjY0ZmZiNzQ2OGY3In0"
+        },
+        {
+          "resource": "repo://webapp/hooks/useBackendWebSocket.ts#L8-L60",
+          "version": "repo-lines-v1:sha256:0ab4d97170334676c3bbce90ff4af95b093f9280b27c90b457834889a923fe88:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiOGM3N2MwNzU4MmM4NDFiNTQ1MGY0ODdiM2U3YTg2NzFlNmZmODg0M2E0YjE3Y2U3N2Y0NWU4ODQxMmY4MDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhM2U0NmY5NDI3NmI2ZjZmNGVkMWYwMmFmNzhiZWY2YTJlZTFjNDM5ZGQ1NTg0Yjk3Mzk0ODMxMzIxNGQyYjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ4YTM5YWUwMmYzNzQ3NzUyMDlmOTJmNDNkNDQzYjcwNGQ0MDM0NDk3OWUxOGQ2ZWQzZmQyN2U0YzhiMTJlYWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjNzMxZjdhMDQyZDQwNTg2ZGNhMDZjMjRmZDZiM2IyOTNiNDNmZmVhNGM0YzgyMDMzYWFlYTViZjRkY2FjZjAifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/useChatWithData.ts#L68-L186",
+          "version": "repo-lines-v1:sha256:de6c6065afbee62c8121567b1a4d127aee2735a50cc83d294b96af65e9c45639:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJlYWYyMmNmMDczMjU5MmMyNDcxNDFjYmU2MWVmYTExMDEyNjEyZjVhMzEyMmI5YWY5YmJhZjUyZjU3MjRkMTk0IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwOTRmYzBjMTczZDFlYzNmYzUwMWQ3ZGZhOTI4NTUwMWM1MjdjZmI0NzEyNTgzZGEzY2MzNjE4MDU2NmI0YmUzIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlNjgyMjgyOTk3ZTJjZGMyNDM1MDNhZTY5N2ZmMTdjZjBjM2YyYTc1NWE5ZTFkYWQyMzM5MmRmZjg0ZTY4Mzc4In0"
+        },
+        {
+          "resource": "repo://webapp/lib/websocket.ts#L1-L44",
+          "version": "repo-lines-v1:sha256:485b6f3caa7b4b84e7ac4bfee7d04a045bde8e666cf487770f2efb9a65ec8140:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0N2RlZTQzNjczMjcwNDQxNGYyZWYyYWY4MTBmNzg1M2QzMGFiMTY5YWZmZDlmOGMwMmY3NjM5ZjJiOGU1MmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e5061004e08a498bb26fe911e4cb01f2",
+      "statement": "The approval card in the webapp holds PII ticks in component state and sends them in the resume_approval action; useChatWithData sends send_message with an optional model and resume_approval with pii_columns.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/components/chat-with-data/MessageBubble.tsx#L102-L132",
+          "version": "repo-lines-v1:sha256:7c36ab1ae33dabb8f52c3a64ee31c6421ecee75503a479613e64088e8e481d7d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhYjFiMGU3ZjJmNmNmNjU1ZWQ2MTQ3M2UzMzdjYjNhOTRhN2QwNTVkZGU0ZDljMDg2NTA2NmZhNmMyMmUwYWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5Y2RmNmViZTFmNzczMmY0NDMxYTBiZTU2ZTI4ZjI4YmQ4Y2IxZmE2NTNjOThlMjhlYjk0Y2EyMGQ0OTFmY2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkYTI1ZjQ0MzU1MzVmZTJkZWVlMDM4MmQ2MzE4ZDczYjc1NGEyODc3YmRmZjRiM2Y1MjMzMzQyNDE3ZjY1MjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkwMjIzYjFlNzU3YmMxYjNkZGVhOGNmMjI2OTFlYTdiY2MyYjZhMzNiMjMwODI2YTY3YjBjYTU1ZDVkM2VlMzEifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/useChatWithData.ts#L283-L313",
+          "version": "repo-lines-v1:sha256:1c59ff67dc6e3b2618ee64f9e1fc235c3c65bf2302ef3e425aa6a1b8867ce3d6:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU2YWM2ZTYxMmQ4YzAyZTRiODFmMWI4YjQyYTU2ZGNhYWYwNTFjMjJjYzIyODE3ZjZmMzFiNWRhYjYzMGZiYzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhlMzg1MDJjNTM4M2Q2NGU1ZWU5ZmNmMzcyZjVmZDg0MDA4NWU5ZDEwOGU0NGIyYTAwZmNkYTI1ZWFmYTg1YWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE0NjU1YTc4MjU4Yjk4NzAyOGJhODViZTZjMzdkNGM1ZGQyOWZkZTg1MWE2MGMwM2Q1NjM5NGE5OTA2ZTgwNDAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_cb66a689881446d1aa5658a3b58ed591",
+      "statement": "ai-llm-service is a separate FastAPI app with Celery workers on a single 'llm' queue (Redis broker/result backend); /api and /api/v1 routers require an Authorization header equal to the service's API_KEY, while Kaapi callback routes are outside that dependency and authenticate with an HMAC-SHA256 signature over timestamp and body (300s replay window) using a webhook secret.",
+      "evidence": [
+        {
+          "resource": "repo://ai-llm-service/config/celery_config.py#L1-L24",
+          "version": "repo-lines-v1:sha256:87e2b1420aa022189ef31038450825459ca28386f623db14ed0a688d4353295f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3MjdhZGZmNTI0ZTA2MTYwMjJlYWRkOGY0YWYyMWEwNzc4YjI5ZmM0Yzc3YmRmZWZkMWFmY2UyY2JmNWU0YjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxZjVjMDFmYmU0ZmZhZTllMzA1OWExMWU4YzY1MDIxOGUzZWQwODdhN2Y2MzI3MDgwMWQ5MGYwMjkxOTAyM2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://ai-llm-service/main.py#L70-L117",
+          "version": "repo-lines-v1:sha256:b9c6a739a93d913f435a2e47095dd0920b3b0f0731dc02a1f70623ec1ea860f1:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2Y2QxZWMzMDIyZDlmYzcxYzMwMmJhYWViOGM4ZTgxOWU5ZTBkMGM5ZmIyNmUyMmQwYjhiYWQwMGNkZGUzMDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlNjRlZDZhZjhkM2RlYzcwNzEyMjk1OTY1ZDJjN2I3NTMzNDU1MTEyNmU2ZmYzNmFjYzU4ZTJmMTdlMGVhMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5OGIwNjNkOWI0N2U2NTM3OTYyNTU3MmNjZTE5NzY2OWQ1NzY3ZTEyYzE4YmUwNzU2NTJiOGNkOTgxY2U4ZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM3MmI2ZDIyMjQxYzRlY2U1MzJiMGRjYjNlZTE3MWQyYzU0MDFjMTIwOTgzZDAyOWIyZjY1Njg3YThjOGRiZTcifQ"
+        },
+        {
+          "resource": "repo://ai-llm-service/src/apis/callbacks.py#L1-L82",
+          "version": "repo-lines-v1:sha256:05541c773e14d2762a0aabdf4602a08e5e0531ac46bfa9ac2a876d350851d6c8:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiZjUzMmRjZmZmYzZiNWQ4MjY5YTlmM2YwYmIyNDM3NmQ3ODJiZGMxMDM5NTBhNWIzODVjNWE2MGEzM2Q3OTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJjZDMzMTZmOTFkYzZkNTE2YTU2YmVlZjM1MDk2N2I0Yjg3ODVlN2VjMWJkYzFmNmZmYTI4YjVhY2Y0ZDRiNTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_daa439f81d1a464c9742c6505db06f66",
+      "statement": "ai-llm-service exposes a file-search workflow: upload a file into a Redis-backed session, enqueue a query task with an assistant prompt and queries (session locks after first query), poll GET /api/task/{task_id}, and delete the session via an enqueued cleanup task.",
+      "evidence": [
+        {
+          "resource": "repo://ai-llm-service/README.md#L100-L116",
+          "version": "repo-lines-v1:sha256:2a536a8e707791c40467999316a248944e947f107bd5909471d8e399e88b4965:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0NDQyOTU1ZmJmOTc0ZjI5ZmJhOTZmYTQyZTNlODQ3YzliOWY2ZDNiMTg1YWVmYzE5N2RlNWVjZjVmZDAzMzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI1ZmU2ZjRlMGE2MjA4MDQ4YjgxZjJiZTdhMjQyMDYxMjQyNmNlY2VmYWYwNDYyNjM5ZWNlYzA2ZGFjZTdhODkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUyYTc0ZTBiYTllZGU1OTU2OGI4Mzg2M2JkNjg3ZDg3MjQ3NDg0NTk2YzVlMTA3ZWY3NzU4NDVlNzE5M2E2YWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://ai-llm-service/src/apis/api.py#L24-L146",
+          "version": "repo-lines-v1:sha256:170570acdd2b59291e9af750198bd1e5080651863de8c58fa04c980588c84325:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmOTU5YWUwYTE1OWM1MGNiN2VhNTJjOTEyYzJmOGMwMmNjZWFkODllZjU1OWVmZmYxY2UxZTI3NWQ1MmViNGM2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmYTExYzA1NjdkMGE1ZjllOWIxMzVmNjVjZDI1MzcyZGZkNjI4Nzc1ZjdjMWVkMjUzZjhiYWQ0MmRkMmQ2NjY5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyYTYxMzY5NmZhZjY4YjlhM2Y5ZTAxNGNjNWNmMWU5NzBlYTk3ZGFmNmVjNWRhNThlYTk2NTdhMGM4MTFkNTMwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://ai-llm-service/src/file_search/session.py#L14-L58",
+          "version": "repo-lines-v1:sha256:34250e1679e268d00353ed4bee60184170aae048121c84710921899d44fe14ae:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI5ODAyMzFjMDEyZjBmZmVhNjE2YjkxMDJjYjQxZGQ1MmI0YjM1ZmI4NWMzNmQ4ODRmOTJlMGYyYjdmNWM2ZjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkMDEzYmI0NjcyOTJmYzBlZjUzYjhkMGI4MDZmMmU5NmMwN2NlZDEzN2EzNmFlNDNkMTMxZjk1ODI1MWNiODAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjMTliZWI4OWM4ZWU1MGIxNTIxNDQ3NGYxODRlMGFiZTVkNjVlZWQ0YWY3NmQ5MDlkNTk1ZDA5NWVkMGNlY2IifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5995e4c41f4b4761857a190f7f644745",
+      "statement": "ai-llm-service has two implementations: unversioned /api routes drive OpenAI's Assistants API directly, while /api/v1 routes orchestrate the Kaapi platform (create vector-store collection, wait for collection-ready webhook, fire each query sequentially chained by conversation_id and wait for each llm-answer webhook with 120s timeouts), with best-effort document cleanup on close.",
+      "evidence": [
+        {
+          "resource": "repo://ai-llm-service/src/apis/api_v1.py#L22-L123",
+          "version": "repo-lines-v1:sha256:2a5928caa12b8648887a0dda157e86f5e76ea1fd83daeb7c3a9256727a95bc92:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmOTU5YWUwYTE1OWM1MGNiN2VhNTJjOTEyYzJmOGMwMmNjZWFkODllZjU1OWVmZmYxY2UxZTI3NWQ1MmViNGM2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI5OTRmM2I4ODA4YWZhZDllM2I2NzRkNjM3ZGIzNWI5YmQ0ZWU0YTVjNDM5ZDRjNmQ0MWRhNzUzMTNiMDY1MmY0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyYTYxMzY5NmZhZjY4YjlhM2Y5ZTAxNGNjNWNmMWU5NzBlYTk3ZGFmNmVjNWRhNThlYTk2NTdhMGM4MTFkNTMwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://ai-llm-service/src/services/ai_platform_src.py#L11-L80",
+          "version": "repo-lines-v1:sha256:e346a61e68e43e059f009c400140b14f21548d5525a2ea56c682832b425343cd:eyJzZWxlY3RlZExpbmVDb3VudCI6NzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhZWVjMWJlMGM5YTc4MWJkMzNkYTk0NmY1OGFlN2NmYTk2YWY3NWRjNmViNTgyMDI4ZTM2ZDE4MjM0MzU4NTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjODYwNGNkOTU3YzE0ZTBmN2NkOWNjNTRjZDUwNWQ2NDc4MWYyMWQ2ZDQ3YmExYTcyNDNjOWRmZjQxMmQ1N2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg0NzFlYWVjZWQ1MjNiMmQ4OThhYzExMWRkZjljZDU3ZTAxZTM1ZGJjZTg4NjA1YzJlN2RmNzhiOTEyYWJiNzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNmOTBkZDI0NmM5ODFiYzI1NzBjZDZlZDkzYmQxMjUzMzU2M2VhY2QxNGFhZDQ1Mjk3MDdiZmE1YmU1NWZkYWMifQ"
+        },
+        {
+          "resource": "repo://ai-llm-service/src/utils/celery_tasks.py#L19-L226",
+          "version": "repo-lines-v1:sha256:eaea9a1b97c15596270262b80b051c303445fcf4549fd4f9b342976150b25830:eyJzZWxlY3RlZExpbmVDb3VudCI6MjA4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0ZDNhNWZkZjU3ZTczNmUyN2Q3OTgwMDg2OWYxY2Y0NzFkZWE5ZTUzZWFiYjgyNTg1NjIxZDcxODAzNDRhMDg3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMjdkMTk4YzliYTgzZDRkNzU4MGEwZDAxMDFlMTZlNjBlOTdmZjZlY2VhNTI0MWM5ODBjZDE1OTA4YjQzMzI5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyYTYxMzY5NmZhZjY4YjlhM2Y5ZTAxNGNjNWNmMWU5NzBlYTk3ZGFmNmVjNWRhNThlYTk2NTdhMGM4MTFkNTMwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_5a2529dd2f14402286dff8dbb8bfaa1e",
+      "statement": "core/llm_service.py is configured by LLM_SERVICE_API_URL, LLM_SERVICE_API_KEY and optional LLM_SERVICE_API_VER (empty selects /api/, set selects /api/<ver>/), sends the key in the Authorization header, and implements upload -> query-and-poll -> close-session, polling the unversioned /api/task/<id> every 5s and raising on Celery error states.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/llm_service.py#L13-L139",
+          "version": "repo-lines-v1:sha256:9cb058ed6b1c09ed150493701146ffb24ca549c6a96ef9a255a6a3edae767dd3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1YzE2MmRiNWQ3MmY3MTBkYTVlZTk4ZGRjNDNhYWVjMDUwZGUyOTBhZjM4YjJhNDczYzAyYjZkOWM0YzI3ZGZlIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJjYjA4ZmEwMmU5ODllZDJhOTMyMGZhZDJkNTcyM2FmNzViNzk5MDliNjUwOWZiNWMzZWUzOTg2NGNjMWQ4YjMyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlNzBkY2Q3MjBjNGI0Nzk0ZTJjY2FiM2ZjZmJkYzZmZWE4ODAwYzNhYmZkZTFmNWZkZWJjMzI2YjNkMGI4NmEwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_cd25c32432e142d0b36c6451b0a21618",
+      "statement": "Backend Celery tasks summarize_logs and summarize_warehouse_results use llm_service with AssistantPrompt types log_summarization and long_text_summarization, persist an LlmSession and report via SingleTaskProgress; a zero-row warehouse result is treated as a failure.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L762-L824",
+          "version": "repo-lines-v1:sha256:9c3a146880de47264a4e1753a515803175e99213ec172679b712936406fff743:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzMTc5NjBkNzhjYjZjZmYxNjQyY2M0ZjgzYzcyMzJjNjQzM2ExMjdmNGIxOTUyYThjYzRmZTk0ZWZkMzViN2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhhN2ZmMzE1ODc0YWIzOWFkYjU4NTBhMjBkNDdiOGVlYzFkY2RlMjZkMTY4NzIyMDRkMTVhZWI4MmQ0YmE5MzkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzNDQ5Y2Q3MTNiZjM3ZjE3MmE5ODMxNDY0YzkwMWI2NDhlNDk4MmQ3ZGUzYjdlOTVmMzM3NDNjYmU5MjFlYmUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L924-L1075",
+          "version": "repo-lines-v1:sha256:43f201104e0cd8371bc6c81b1fcb7044b5b1a9fa4f13bcc9b13fd440a67dd694:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0YjllNmFmNWM2NjgxZDliNzY3NWE1MzJjZTE3ZTI5NmJmOWUzN2M2NDRhODc3NmEwMzE0NjRlOWQ0YTk1NDhjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI5M2M0ZGY5YTJhNmM1MjdiNWM2OTlkMWQxYTE0NDExYTc0M2U4NmE5ODZjNzBiZDkwODkyNGQ2NGU3ZmNlNDBlIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiM2ZkZGQyYzBiNThkMWYxM2RlOWVhZmYxOWY3YmZjNTA3ZDQ2YjUxNTFkYzFhOTUxZWZjODQ2MTljZjRhNGNjIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI0YWQxNWJjZTIzNzVlYzIwODUyMTM1ODAyYjhjYjI3MGM2M2IwYzE5NzQzNjY1MTFkNTdjMzJhNTViYWZhMjdkIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/llm.py#L14-L89",
+          "version": "repo-lines-v1:sha256:6b66a3fe75bdfead611db1021ee3141de6402372b4e9f0d2045539a0a8ff25d4:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2ZTdmYzMxZTE2YmZiM2FmZjBmYjA3YWQ3ZjJjZDM2YmQ2NTE4ZWU3NjRlMTA5NjA2MmI0YjYzYTc5N2E4MWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRiMjIzZWY0ZWM1MzA5YjIwYzQ3OWZjYzEwMTNjMzQwYzJhZDdkODdkMDE2ZGM1YjZkMWRmOWYwODAwMmEwZGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgwMWQwYTg4ZDhlMGJjMmRkYTdkNWVmZmNhNzE5ZTE4ODhlMGY1MDIzNGY5YTlmYTQ1YTVlYjY1MWRjMzExOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

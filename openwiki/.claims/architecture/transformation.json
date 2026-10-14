@@ -1,0 +1,450 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:9f13a60dd97a62c7666006f0627977b41fada80c161f94330aa2563ada50e233",
+  "claims": [
+    {
+      "id": "claim_f9744bc453094dcbba5842acf7c49f41",
+      "statement": "Each org has one OrgDbt workspace record; new workspaces are created only through setup_managed_git_workspace, which creates a private GitHub repo dbt-<org.slug>-<ENVIRONMENT> under DALGO_GITHUB_ORG using DALGO_ORG_ADMIN_PAT, stores the PAT and an oauth git-pull URL Secret block, sets transform_type=GIT with is_repo_managed_by_system=True, scaffolds the dbt project, upserts the dbt-profile Secret block, syncs .gitignore, and commits and pushes the scaffold.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L59-L84",
+          "version": "repo-lines-v1:sha256:49b798d5360d786d150fb62032ca3bc0bdd0dc478447e1191f4327736fea0aaa:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3NzQ2ODkxN2RkN2FjMzJhYjI1YjBmOTIwMGQ2YTJlN2UzMWRmNDZmZjMxMTdiZmVjNDVkOGRiNmRjNWMwMTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3NzNkYTUyODllNmM1YWMyMGEzNWE3NzFhOWNlZWRlOTkxZGM1YjI5NmUyNDNjM2U2OTkxMWQyMDcwN2U3YjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFhZWNjOWIyMTBlMTdlMmZlMDFjOWRkMWVkYTZlZWFiMTQyOTY1NjdlMTlhZjdlYzBkNjg3NWM2MmMzMjQ3ZDIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/git_manager.py#L367-L427",
+          "version": "repo-lines-v1:sha256:bfcdcf2b0edd4bd2115c50d15c069a7b129d833e3d17a31b98afd04bce9ad489:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhYTYyOTZiZmNkMDJmMGU5ODJiOWUwODQ3MzUzM2VkZDczODczMzEwNTVlYWIwYjkyZGQxNmE0ZmI3YzA3YjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg5ZmMwMzcxN2M3MmFkZTI3NWIwNGMyNzAyOWU5MGIwNjg2ZWNmYjg1MTBiMjZjYTA3YzQxYTViZmEyZDMyOGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU5NGVmOGZjMWZkYzU4MGY0ZDYwMDQ1ZThkNWUwZmVkNjljMTM0OTE3ZTRmMDA0NWUwMGU0MTkyNWI0OGQwZTMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpdbt/dbt_service.py#L309-L430",
+          "version": "repo-lines-v1:sha256:b54c9d2308a8567de793287f8b12c3c7287402b2a5b94a63cd2ec9d248366b2a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJkN2YzOGRhNTIyNTdjMzNlYmM5NTVlZTA0MzA4YzI1ZjA5NjdkYTlhNWQyMjUxMmIxYmY1NTU4MmI1N2E0OTEzIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJhMGU4MDQ0Nzk1ZjRhMzZiZjAyNzQ1ODc4OGMxNTU1YTcyNjIwMjZlODQzNTYzZTQwNDAxOWQ1ZjkzZGI0NDEwIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI2NmRiYzdkZmRjN2FmOWY1ZjIyNzkxZjQzZmU1M2VlNDVlZTFhY2YzYTE0ZjBjNDQ4MGY4NmQ0ODg3MjNmYmVjIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJmZjA2YmQ0MDNlZmM2NWJkZWJiMTQwZjMxZDFlNjk3NWIyOTE1Y2FiMjUxZjNiNTE1NzMyODRlNjZjNDg5ODZlIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_78fdca4d70bd43d29ab08e14541c4c81",
+      "statement": "The dbt project scaffold is created by running dbt init with --skip-profile-setup, removing models/example, and copying packages.yml and the asset macros (generate_schema_name.sql, unpivot.sql) from core/dbt_automation/assets into the project.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/dbt_automation/assets/generate_schema_name.sql",
+          "version": "repo-file-v1:sha256:77aee632b721c71024209e3bda68ac820538327c10d4bb4d338e52c49adb5158"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpdbt/dbt_service.py#L57-L112",
+          "version": "repo-lines-v1:sha256:397b6c6f1397d46804659688e2c22b50b2524f5fcb166239fee0a2fa532b51da:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhkNzhmZjkzNWJkNmZjYmNjNzM1NjJhYzg4OTQ4MjU4MDk2MzM2NDEyZWRlOTkxZTBmODYxZWExMWM3MjFmOTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhYTU4NWI4YWU2MDlkYzI5NjFmZjcxZmVhZjdiNTVhMjg1ODg1YzdhNWIxZTUyNGFiY2E2OTdmNmVkMmY3YWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzZDE3MWRlNzU0MzFhMDIxYTBkOTRmYTc2ZmFiZjBkNzEzOWM4OThjMWEwYjQ0YjQzY2E2MDkwM2ZhMWI4NDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE2NmQ3Mjk4NDRlNDg4NDI2M2M3YjQyOTk5MDhlMzNlMjRjYTk0M2QzNmYyYmMzYjc2ZGI1YTMyZDllNzMwMTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3d17715063f845a8af73872d250958e9",
+      "statement": "TransformType has UI ('ui') and GIT ('github') values; the UI type is legacy and the management command migrate_ui_orgs_to_managed_git converts UI orgs to managed git, while ensure_git_pull_orgtasks backfills git-pull OrgTasks for git-enabled workspaces.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/management/commands/ensure_git_pull_orgtasks.py#L1-L60",
+          "version": "repo-lines-v1:sha256:f960eef7f84718b21a8d91e2a1584ae706107fdf73848267ffdca60d5862576e:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxMDM0ODFjNTdkMGYwZGMwZjc2Y2QyY2M4YjM2MDRjNGU4Mjk2ZGE0MTIyYWRkMTllODE3NDVkYzdlMzMxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAxM2QwM2IxNTZkMzEwNDJhNjJjMWE1YjBjMzMyYmJhYjZhYmNmZjQwNzZkYWJiMTk5MjcxZjk0MTBjM2IxYWMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/management/commands/migrate_ui_orgs_to_managed_git.py#L1-L90",
+          "version": "repo-lines-v1:sha256:5fea2ea0234d9e3ebe46f8c2c7b8fdc381288d50fa6ad7a6ee42e48bd88dd858:eyJzZWxlY3RlZExpbmVDb3VudCI6OTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlYjU5Nzc3ZDM4YTY4MTc0Y2MwNmZiM2IxZWZhMDBmNTlkOGFiMDQxNjZkMzYyZGRmNmZjNDgwYTkzMWQ2MGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAyNzI4ZGNlM2ZmNjdhZDcxZTE0YjNhMjFlY2MzNzEyZWFhMzQyZWRkODIwNjUzYzc4NWZmMjAxMzVjMjliNzgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/org.py#L46-L50",
+          "version": "repo-lines-v1:sha256:c439fd53c9020d09de84167c7899c6ea26824e0bf2d9452583e53a4f1b89e3a9:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTQ3MzJlNTc3ZjcwNjQ3OWM5ZjcxZmVkMzRkMmJhNjRkY2M5YTJlODg3MzFiOTJkMzllZGIyODJmZmJlZjk2ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZDlmMzY4Nzg4MDhhZjMxNzc4ODk2ZjUzM2RmOTQ2ZWU3YWMyOGY5ZjY0ZjdkMDk3NTk4YTM5Y2M5NzUwYTVmNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODgyZTAwNjVhZDQ2NjgxZjA1NzRlZTcwYWNiNjBmZDlkMjg0MDJmN2IwMmYxODM3M2FmNWJjZjhhNzJjMTQxNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjFjYjYxYzc0NDBlMzVlZWQzYmNkY2ZhYTNlZTcyNDFlNzA4ZWU1ZGQxNzZjNWY2ZGUyMmJmZmNkM2IwM2I2ZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_6a93cfec36c448aeadffa0b310f2e4c1",
+      "statement": "DbtProjectManager resolves workspace paths under CLIENTDBT_ROOT and runs dbt as a subprocess using the dbt binary next to the Django process's own Python (sys.executable), raising DbtCommandError on non-zero exit.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/orgdbt_manager.py#L21-L131",
+          "version": "repo-lines-v1:sha256:8c0e6dfe809ae5d0c47109dd45d8abc9388a741b6c45163507f1abeb673b6a3d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTExLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwNzc1YWExNzAxOTQ1ZjFiOTY0NjNiMDM3ZmYwNWRkZTNlMzZlNmExMjk2ZTk0YjAyOGY0NDg3YWNiMjU3MWZmIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI3NzJmOTY5NWM3NDY3Yzc0NzczYzljZTdmYzQyOWM1ZDBkMGU0ODdmM2M1MWQxNWQ2NjY4YTNkMjQwNzJiYjk1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJjZGRlMmM5MTZhMGZjNmUxMDRkZGE3MTE2ZjVjYWZiMTg1NzFlYTRhMGNmZWMzMGNiNWVkZWIzNmY0OTlmNjQzIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_5cb0c5e784274b0f92c759d111c6dd0a",
+      "statement": "switch_git_repository_v1 validates access to the new repo, copies a Dalgo-managed tree to an empty external repo or otherwise deletes the project directory and re-clones, always deletes all CanvasNode rows for the workspace, and sets is_repo_managed_by_system=False; a masked PAT reuses the stored PAT.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/dbt_api.py#L44-L102",
+          "version": "repo-lines-v1:sha256:7bc3436a25b14d0005b4c2e78b5657b0d827aacee8e89d511db37705492abd65:eyJzZWxlY3RlZExpbmVDb3VudCI6NTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5MDhlOTI0ODdmZTA0NDg1Zjk1MWFmNTRiNzI3ZTVlMzcxNWNiOTM3OTM5NjA2OWJhOGFkODQzY2I4NTJiOGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1NTRjOTAwODAxMmZjMmU1ZWFhNjRiMDBiYTQwZDdlY2Q1NTVmM2IxZjRhZDhlODA0ODczNDRhMDBhZmY0ZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJiZWI4ZDdkOGVmYzljZGZjNzJiZmYyY2ZiYmFjYjNhMTkyNDAxMzU3Y2NkMTZiNjIxZmM4ZDg3ZjQyNzcyMzQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpdbt/dbt_service.py#L1065-L1200",
+          "version": "repo-lines-v1:sha256:834cf8099f2e5605b791b56bccc18343b71f7b0fde672fd46c6f6a5cef173e5d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTM2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI3ODM3NmM1Yzk5ZWE2NTVlOTRiZjNhN2YyN2UyYWRmNzk4NDlkNDk2ZWIzNjJiZTViY2ExNDYxYmY0MGU4NmIyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODkzZjQwZTM3ODFlYjg5NmM4MmQwNDZhMDgwNjdhMTFlMzVjZGYyZjFkZmFmMjZmZWE5MGI4ZGI2Njc2NDEzIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4MWMxOWJlMjU0ZjIzMzU1MTdhYTgzNjRiYWE5N2QzOWY0YzdhYTg2MDFkMWE4OTMyZDZmMDM3ZmQ2NTAxMTc2IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_078a5d37c71b44ea97bba314789148fd",
+      "statement": "delete_dbt_project refuses with 422 while any CanvasNode exists for the workspace unless force_delete is set, and the DELETE /api/dbt/workspace/ endpoint delegates to OrgCleanupService.delete_transformation_layer, which refuses if any git/dbt OrgTask is used in an orchestrated pipeline and removes deployments, blocks, the managed repo, PAT, directory and OrgDbt row.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/dbt_api.py#L238-L259",
+          "version": "repo-lines-v1:sha256:852dc0402ade306afc781300032425246953be08aa5738dcd90a519e46678538:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0YTY5NGI3NjkzZTNjMjY2YTAyYmI3NzQ0ODAyNGJmMjZiYjA0N2IwMDc5NGZlYjIyYmMzNjI4YWJmNTRkZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMyZGI1NDdhMjJjZDIzOWFkYTY1ZjVlNjE4ZWQ4NjAzZmY0Y2I2M2I0Zjg0ODkzMDAyY2I5MTFjMjU5N2YyNmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ2MThhOGU1MzU1YjZlMjIyYjlkZmFkNzhhMGM0ZjQ5YzY2N2VmZDQxZDk5OWYwNmUxN2VkYTYwZjU0ZmFkNzkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk3NzJhNGJmMGEzYzZmZDcwZWZhYmZlYzc3YWE4Y2UzMGQyOTM5ZjI1MDQ5NjA5MmVmNDhiZDc0ZmZhZTQ1OTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L87-L157",
+          "version": "repo-lines-v1:sha256:e16df314ab848adc57ce728ea09fd7ad5ba5ab1ec16a8a2a3ce03f58c02393e6:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2NjI1NjJjZDg3NzA5OGRiMWE1ZTg2ZGYzMzFmZTJiMDA0NzMzZjNjMzc1MDdhNjJkOGIyMzJjOGY3YWI0N2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzMGQzNzMyYzQ5N2U2OWNiNDY1ZTE1YjNiMjk1ZDhmNDg0MDE0MWYwZDA2YjliNjc5ZjM1NGE1NDdjOTY3YWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM0ZGRmNzE2NzlmZjE2ZDUxNzE5MWJiNGUyYWMxZDg5OGZiNWZmYWY3ODgxOGEzYzNiMmY1NWE2OGVhMGVmNDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyNGI2NzkyY2MyYzIyOWNmNmZjODk1ZDM5OWI3YzQxNjY4YzlhYzM4MzI2MTc4N2MxMjdkOTZkMDAwMDBhM2YifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/services/org_cleanup_service.py#L65-L120",
+          "version": "repo-lines-v1:sha256:79b5482d9f5095abae8c3c1af55638dfa4249654a08ba45466536ccbf8505d36:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2YjBhMjA1NjM5NzYzZjk2YjNhYmJkOWIxOTYyZjEzMThkZDg2MDgyY2E2YjgxZjY2NzVjZTI1MTc3MmE4OTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJmMThkNzJkNDUyMTViZjkzNTRlNzk2OGZjZGQ0MmMxOGFlMzUxY2ViYmMyNGM0Nzc3YTNlYjFkNGUyOGU3ZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEyMDE0NzUyOTNhNzVhYmYyOTQwMmYwNDA0Y2I1YmQ2YTJiOTllN2E4YjI1YzcyZGUwNGZjYjcyNjhhZGMxY2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQyZjYxNGJjNTZiNTU2ZGFjYTJlMjEwNDdhZTJhMmYzMjU1NDUwZDJiMzc1NjY4MGZkOWEyN2ViMTQ5ZDZhYWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e226fc152d4340bab7364987c3f50802",
+      "statement": "Warehouse credentials are translated into a single-output dbt profile (target 'default', 4 threads, postgres or bigquery only); create_or_update_dbt_profile_secret_blk stores {wtype, default_schema, creds, extras} as JSON in the Prefect Secret block dbt-profile-<org.slug> and records it on OrgWarehouse.dbt_profile_secret_block (mirrored to OrgDbt), and write_dbt_profiles_yml writes a matching git-ignored profiles/profiles.yml for backend-run dbt.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/dbtfunctions.py#L52-L142",
+          "version": "repo-lines-v1:sha256:9606ff4d7f0980cf4f4d0e769783bbbe6dcd0695180a8aaf5d8286831dd49b19:eyJzZWxlY3RlZExpbmVDb3VudCI6OTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlZGM0MTBiZjQxYjM2ODQwZjJjY2VkYzZkZGNhNjUzZDM5OGNhNDgyNzcyZTc2ZTJjOTlkOGU0NzljMDcyMTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc0ZDFjYjBiZDM2ZWMxMTI4ZGIzMmZjMzFmYjU0NmE5N2ZiOGNkMDFkYjMxMjgzOWFmNmRiYmRiYjBhMzdkMjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpdbt/dbt_service.py#L38-L54",
+          "version": "repo-lines-v1:sha256:b37293062cdf11ce2f05eca0765207f0179a8db784f9bf988c87677aaeb15dbb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNkN2RhNWZiYzA5NzMyNTMxMjI5OGE5NTY3OWE5YTRjZDlmYjJiN2IxNTkxMzVhZTY4NjNhZTY3MGE3MmVmMDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NDE2ZTA5Zjc4YmEzMTZjMDMyNTY4MjEzYjg1NWVlNzU2ZTQxNTY1ZDkxOGYwOTUxOWM4MWZkNjIwZjQwNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRlNjU5OTNmYmY3OWNmNjVlYjNiM2MzMjlkYjk5ZjY2MmJhZDU3Y2YzYjZmODdjYzZlZDkyNTM5YzM2NDQyZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdkZjg1ZjM0MTYxZmEwNWU2YzM0NDkzMWUyZWEzZmNjYWZmYzZmMTZkY2ZjYTUxNzZjOWNkZDM0NWUyNzAyNjIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpdbt/dbthelpers.py#L20-L191",
+          "version": "repo-lines-v1:sha256:b38250421d31f46c9a1458d6024337047bc33257d980de78700e6800253a55d2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIxZjRhNmJkYmIxYWYyZjEwOGM0YjJjYzE5OTZhMWE1ZWVhZjM3NGI3YWVjNmE5ODU0ODNjMmMxNGIzN2Y0NzQyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJiNWY2YjIzNjBhZmM4OTFlNDU5YTkxMzllNGNjN2Y0NDU0YTdkYzE1ZGFmYTFmNjZlZjVmNTkxYTY0ZTg5ZWU1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJhNGY2YjE0ODkzOTc5YmU5M2RhZGNhYzgxMmY2NWY5YzdjZTc4YzhkNWQwMGViNzk5MDc1MGFjYzljMzc3NzZmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_57e5ad2d50d2457080b1b1f41ae1eabb",
+      "statement": "The canvas data model is CanvasNode (source, model or operation, with operation_config JSON for operation nodes, output_cols, and a dbtmodel FK for source/model nodes), CanvasEdge (unique per from_node/to_node, with seq ordering inputs), and a one-to-one CanvasLock per OrgDbt; CanvasNode.save clears operation_config on source and model nodes; the older OrgDbtOperation and DbtEdge models remain.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/canvas_models.py#L15-L107",
+          "version": "repo-lines-v1:sha256:b75a19560efada63919b5b0893b7525c5ecef23a9de74c0b2783850b1e0e32c7:eyJzZWxlY3RlZExpbmVDb3VudCI6OTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0NzdmM2E2YzVlZThlYTU5ZjA4N2I0NGJhMzUxNGQyMDllMzNiMjQzMTNmNWEzMTc0NWI2YTNlZWJhYjQ0NzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0MDlkODgwNjY5ZGIyNWJjOWRlYjI2MDczNzRkOTVkOTYwNGFhNTIzZmNiOTA4MzBmOTRiOTg2MWI0NDY5MzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRmZGJhNzg5NTE2OGRlNGRmYmVjNzk1YWU5M2FjNzBhZDc3MzU2YTM4NDY2YzQ3Mjg2ZWUyMDlmNGY2ZmVlYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/canvaslock.py#L8-L27",
+          "version": "repo-lines-v1:sha256:8cce60ce66885e3466d975b157174614f48c4b8cdb3b08fcb32ce158bc2966af:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNDZlNDk5ZDQ4NmQ1ODVkMDM2ZTkxNjU0ZDVlZDlhNDRkZWRmZTE4YmJhZDk2M2Q1MWVhMTQwYzdiYzdhOTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4ZTlhNjJlY2Q1MjY0OTI2NmFhOTY2MzU0MWE1YmI1MmU4ZjMxYTBiMzEwZjA4NzcwNzM4NjhlZjk5YTU0ZGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgwMWQwYTg4ZDhlMGJjMmRkYTdkNWVmZmNhNzE5ZTE4ODhlMGY1MDIzNGY5YTlmYTQ1YTVlYjY1MWRjMzExOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/dbt_workflow.py#L33-L81",
+          "version": "repo-lines-v1:sha256:efef6ace8475959821c9583c00cf50592629188dfbc43bc4af5047f8ac60a6b8:eyJzZWxlY3RlZExpbmVDb3VudCI6NDksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NDA4ZDM4OGEyYmMwY2MyNjFiMDIxYjM0ODdiMzllYWYwZDE3ZWU0MTU5ZmE3YWJmZGZmZTdlZGFkZmQzYWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhMWY0ZTJhNTZiNDcwZmUzNjI2OTY3MTNiNTI4ODNjNTFkODBkMDNiZGExMjE1MzZjZDAzNzU0NGY0NjBlM2IiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4MmUwMDY1YWQ0NjY4MWYwNTc0ZWU3MGFjYjYwZmQ5ZDI4NDAyZjdiMDJmMTgzNzNhZjViY2Y4YTcyYzE0MTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_57076c883f614b09bf66dff5d9a8cdef",
+      "statement": "Adding a source or model node is idempotent and for sources ensures a sources: definition exists in the dbt project YAML (creating models/sources/sources.yml entries with source name equal to the schema) before creating the CanvasNode.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L573-L660",
+          "version": "repo-lines-v1:sha256:32138c370d2f52dd5f7dc9d5f6ae224d8cc02081ae6f3cbe71bbcf8a0b40e3db:eyJzZWxlY3RlZExpbmVDb3VudCI6ODgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyOGVkNWU3MGY4ZTczYTQyOTJhOWY3NDE3M2FhYmFhZjVmOGQ1MTUyNjE0NmZmZWQ4YTI2M2ZkMmVlZjQwNWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjOTliZmU5Y2JjMGE1N2ZiYzYzODMzODkyOWQ2NDZkOWVmOGY0NWU1OGNlOTUyMDViNGIwNGJkZDA3MDdlMTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZiYWM4N2ZhOGVhYmNlYmEyYTY3NDk5YzVkZjg4ZmM3ZGUxZjg3MzQ0MTU4MGU1MzY4MWZjOWI2YThlYmRlYzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc3OTk2MTEyN2Y3OTEzMjY5MTZkMWI0MGM5NTJmZGM4Yjk0ZmQ4YzdjMGM4NmY3MjgxOGQzZDA4OWM5MzgyNjAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/dbtautomation_service.py#L809-L853",
+          "version": "repo-lines-v1:sha256:ac92a94465ae0bef1e0c61586a84f746caccc87a659257b148e9a5d864bf7e0a:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0MmM1MzMzMTRjNzBiNDA5Y2Y3NDU5Yzk3ZGZjZGZlNzhkZWUzNWQwNzJiYjYzMjZlM2ZiY2FhODM4NTU3MTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY1MjZiY2RlYjQwZjlhZmI5YmNkOTY5OGFmNWNmNDJhZTZhZDAzNGIwZTA1Y2ZlNGQ4OGJlY2YxMWQwZjliMGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA1OGFkMjIwYWIzMzE2YjY2M2Q4NzUwMTBmMzFmZTk3OGUzZDA1ZGZjY2U0Y2U5ZTU2ZDAzYTMyOGFhNDE2ZjkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_061d5b4328b84fb296f8e875f8051946",
+      "statement": "Creating or editing an operation node validates its config against a per-operation schema (op_config_mapping), treats join and unionall as multi-input operations whose extra inputs become additional CanvasEdges with seq, computes output columns by generating the SQL against the warehouse without running or saving it, and persists node and edges in one transaction.atomic block.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L663-L938",
+          "version": "repo-lines-v1:sha256:1538019cc42e8494067034194ea62876265c0970ee3c2cbf4055c7486262ae6b:eyJzZWxlY3RlZExpbmVDb3VudCI6Mjc2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyOGE3Mzc2Y2ZmMDMxNGEzYzU4ODFmZmQ1MjQ1NDQ0NDczNzAzNGU5OTA3M2UyOGIwNjM4ZjM2OWMxZDMyMWYwIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJlMWNlNjA1Nzk0YjlhNWQ3MWQyMGY2ODVjMTAwNjk0MWY0OWI2OTg3YWMxZjc5MjZiNjgzYzA4NzBjZTU5ZWY0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiNDdkOGE5OTBmOTMwNjk2YWIzMjhkYjRiMDcwMGZjM2EwNjQzY2Y5ZmYwMzZiMWQwMjczNmYyZTM0NGE1MzlmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI5NTRlNDBkYmM1MzI1Zjk5NTUxZTdiMjZmYTgzZjIxYTFjYzFlYTRlMTg1OTU5ZmYyOTdkMmIzMzc0MGZjMmM2In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/dbtautomation_service.py#L477-L486",
+          "version": "repo-lines-v1:sha256:6bd1ac9f904aa7b409479ca555c87a68d57e63bb0875df804db911241267d6c5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJjYmNjNjhjZDljNDI5M2IyOTM5ODM2YWYwYWI2NzhiYzJlYjIzNmRjYTUzNzAzNDA4MGYzZDhlNmNmNDkzN2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc2NTA1YjIyYTgwMDgzNTU3NjE1MzFmNjcyNjU0OTRmZGFiZGIyM2JkOTcxYTAzMDg0YWM4YzgxNmQ4YTMwMDQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkwYWE5MjJjOTU2MDgzOWI4NWU4MjllYWYzZDM4MWRlNzYxZTI3OGYxYTE5YWI3MDJiNjViZWMzYWE3NmE4NDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRhYWFjOTczYWU5ODVjMzZkYTBhMGRjMTU1ZDQ2NTFjNDYzYzkxOTcyMmViNjg1MDVjOTA5MjVkZDZmNzVlMDgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/schemas/dbt_workflow_schema.py#L288-L321",
+          "version": "repo-lines-v1:sha256:48b3cb28dd5c9be7c2d1fa7d61a6a09bdd6b7a22e40fb5ea00cf45c285d7ea0d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMTE0NDgzM2RhY2U5NjU5YjVmMTU4ZjI4M2MwNmU0YmY1MjEzZjJmNjY1YWI2NWVhMTc5ODVjYjM0NzI2Y2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhODc5M2FjNDNlOTMxYjFiYzMzNGVhZDk0ZTIxYTRmZGZiZWZiMmE4Y2ZlMGVmMjg1OWNkMjFiMDhkZTI4ZTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZmM2NhZDc4NGIyYTU4Y2U5YTQ1MmE3Y2IwOGJjNmI5Y2ViMTViMWVkYTk0Nzg4NWU4Y2YxYmRjZDk5ZWVmMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmZmQyMGNiNWQ4NzBhMTg5MzA3NjNjYmI4ZDcyYTYwMGFiODhjYmVkYjA5ODUwNWMxNzliYTVhM2E0ZjQ0OWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8f1519ab3a834f5d967602012a5ee188",
+      "statement": "Terminating a chain materializes it into a dbt model: tranverse_graph_and_return_operations_list walks upstream from the terminal operation node assigning cte aliases, merge_operations_v2 writes a single materialized='table' model SQL file made of chained CTEs under models/, and the API then creates or updates the OrgDbtModel (unique by name), a MODEL CanvasNode and the closing edge; a chain with more than one upstream operation node is an invalid graph state.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L941-L1050",
+          "version": "repo-lines-v1:sha256:781c880946e0697767dc5158440bfb0d9f1d4fadbf6317d01716357a675ef8b5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI2ZDc4Njg5NjYyNDc1NThmZTU3MzU1NWRmODQ5ZTFkNWE2MzNmZjMxMDMxNGUxMTUyOTQxMThlZDM2NDY2ZGQ0IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmZWE5OThkN2U1MjkyNjNhNmFjMjg0NTVlZjViYjJjYTgwYTVlMmViYTY3NzAyMmVjMWRhYjMwYTYxNDZiMmNjIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJjYTRhNGJjYjU5N2Q3ZDc2NGMyYTNiZmRmNDc5MzEwODQ2Mzk3ODY4NGI3YjRjNjI4MWVkYmI4NDU1N2ZjYzFhIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhZDc1ZmFkZjg4YjM0NDU1MGUwYTAyN2E1ODJjNzVkODg3ZTA3ZTQwMTUwYTgzMTU0YjEzYmFhYjRiMDNhNWU1In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/dbt_automation/operations/mergeoperations.py#L145-L251",
+          "version": "repo-lines-v1:sha256:4125ce9148ce7e54418129f4d3b9514fb818755e99fb14af816499aa2c608711:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwODFhNDJjOGE4MWIyMDg4ZDc1YWZmMTFmYzgzZGI1YmMwYTZiNWVjNzMzNWE4MTZlODFmNjA5ZDY0MTUzODM5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0Yzk3MGJjODk2MmY0MWYzZDAwOGViOTE5YzU1Mzg5OWRlZDdkODBmMWFlOWU1YjgzNjZhZWI3MzlhZGI4YjExIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyNTBkODE5NzhjM2IwZTg1MDE4Njc0MzAwYTU4N2QwNTBiZDFhYmI0MDU2NDA5YTliY2QwMzg1YWI2YmVhMTk0IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/dbt_automation/utils/dbtproject.py#L33-L60",
+          "version": "repo-lines-v1:sha256:be1a61c116cbfe558a4d6278452dd4e7a0587f87eb48195619316d3e1d8bd130:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJmMjdiZjgxYTI5MDQxZTg0MThlYzc4OTFjOTQ4MjhhZTU2NDE4N2I2MjI0NmQ1MzA5MWYzNjUwZmYxNDMzNTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxNTk2ZmM4YjU4N2JkNWZkMTY4Y2ViMTU2Y2NkNzg1MzE5MTYyYmE3ZjI2M2YyZGVhZWU1MmE1NTQwNjk0YTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlkYzlmN2EzOGE1ODZjMmM4MjVlZjJmNjJjZDY5YzJiMzI2YmY4YjVhNjliMWE2NTliN2M1NDE1MTVlMTJjOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNlYzk4NTU1NmExZjQ0MDNiNzc3MWRhZGRhMjM2MWI3NjAzMmViNzBiMWI2OTU2MjVmNDRkM2YwOGIwZWMyYWYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/dbtautomation_service.py#L982-L1099",
+          "version": "repo-lines-v1:sha256:4b21bd777ec090de5097bff629ed7c861cc009d56fa5ba84f40621187c33e4f2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyN2E0NjI3N2Q0MWVhYmYxYTg3NTdkMWVlYzlhNjJhMGI0OWY3YWIxNzFjOGI5NGZlY2E2MDJlN2QzOGUwOTA0IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJhNGYzYzdkMGE2MGYwMzM5Y2IyZWVmZjg1MDRiY2Q2NGU4MTc3YmViMDE2YjA0MzYxMjAzMDNkYmU3YzE3OGYyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJkZGI3MTBmYTQ4MzM5ZTA1NjJkNzY5OWY2ZjQ2ZDcyYTNhM2RkYWQ2ZjViOWMzMThmZjhlNjdiYzYyZmFiODAyIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_30d8b5c3b1d642de84aae3043c1ea4bb",
+      "statement": "Deleting a canvas node also removes the model's SQL file or source YAML entry from disk, while deleting an OrgDbtModel record is refused if any canvas node references it.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L1053-L1101",
+          "version": "repo-lines-v1:sha256:b958e6fe0a1c48c76ea00c3f409e58dfd09eaeed8c6626430f00117b97dddf00:eyJzZWxlY3RlZExpbmVDb3VudCI6NDksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0NDg3YzZkMmMxYjY2ODQyYmE0MzA2MzBiNjg5N2IyYjdjMTJhZWE5MjBkMDM2MTBjNjIxMjY5MDRkYzYxZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3OWFlNDUwNTEwNmY5Yzc2Yzc2NjFhNDM3MzllMDExOTJjMzg0YTk0ZmI1MjI2NjEyZGFlN2I4NjBmYjk5MmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgxNmY5MjhkMGU1Zjk3Njg2Nzk0MTVlMTY1ZThlNjBlNmJiZTIyODg3YjJhNzYwNzE3NjU3NTBiZWI5OWFiY2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc3MjAxNTczZWY0NGJiNzQzYzExZjY5NjA4ZGE0Yjk5Yjg4Yzg1YmIyMDgzYjQ3YTVhOTcxOTY4YTY3OWIyOTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L439-L490",
+          "version": "repo-lines-v1:sha256:c8f09267d42558c906491ca2e51a82234dab43ac90be7379932ac6bf5f8bd394:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0MDQ1MTBlMTU2M2U4OTg1ODljZGNjYTI2OGVhOTE1ZDdjNTdhMGNiMGQ0Yzg0NmI2NTNiNzZjODU0YzE0ZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhYTRjYjE3NTJlODQzYjE3YjRlODdlYmViMjJjNjk2OWNmNDhlNDczMGZmNjE3Yzk4ZGFjNWRiMDY1YzU1YTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1OGViOTFmOWIxYTk0Y2RmYTg4Yjg2ZmQwNWYzZjk1NDdlZjE1OTQ4NWM1NWRlNGRiZTMwN2U4YjViZjNiNDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU2ZmUyMmI5YjQyZjMwZTUwYTE3OGY4MGNiYjk0ZGRkOGFlNWNlY2Y4N2RmYjM2NTU3MGFiZmNiM2FlN2IwM2UifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f1106b2d6ade46bc97d0344a6d1ad840",
+      "statement": "The graph endpoint returns all CanvasNodes and CanvasEdges for the workspace and, for git-backed workspaces, marks model nodes unpublished (isPublished false) when their sql_path or a parent directory appears in git status.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L493-L569",
+          "version": "repo-lines-v1:sha256:274df322e7c354bf2a4396047bf6e93bde44e5c1b6d5cb0ab2eefca0496eb348:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg3ZWYyMTNmOWE0MjE0MWVjZGE4ODI0OWEyNDI3OWQzMWM0NmY3MGY0MjU4MWFlMDdkMjEyNDJkODkxYjY3MzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc5ZjhlODdlMjFlZjE0N2Q0OWIzZDFiZjc4YjgxYjY4MTllZmFjMjM2NmQ2OThhZDU2YjA2NTE3YmU2OTQ1NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY5MmNmMDIyODUyYWRiZThlYzY5ZWQ2YzYxZDc1MjM1NWY1NDFiNWNiNGM4Yjg5ZDQ2NTZhMDMzNzViYWU2ZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZiYWM4N2ZhOGVhYmNlYmEyYTY3NDk5YzVkZjg4ZmM3ZGUxZjg3MzQ0MTU4MGU1MzY4MWZjOWI2YThlYmRlYzAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/dbtautomation_service.py#L889-L954",
+          "version": "repo-lines-v1:sha256:152181c8ce2c7b93b5fd62b6884bbca136cd47a3df0e9e19c59d5009c751412c:eyJzZWxlY3RlZExpbmVDb3VudCI6NjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5OTMxYmQxMjgwYzU4NjQ5ZmVhZDVlYzAzN2Q2OTIyNGI5YTIzOTljZDUwNjdkZmE1ZTI5NTc0YjQ1MjRlYTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI1MGQ4MTk3OGMzYjBlODUwMTg2NzQzMDBhNTg3ZDA1MGJkMWFiYjQwNTY0MDlhOWJjZDAzODVhYjZiZWExOTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ1M2M5NGVkODhmZWNjZjIxODFlMjAxNjI3YzE3ZDQyY2NlZjBiY2JiYzkzMGU4NjRjZjYyZDJmOTIwODMwYWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fef8f344d2ba4a5f819e129cc4d58b85",
+      "statement": "sync_remote_dbtproject_to_canvas (only effective when transform_type is github) pulls from the remote, runs dbt deps and compile to produce manifest.json, and parse_dbt_manifest_to_canvas upserts OrgDbtModels and CanvasNodes for the user's own package's sources and models (excluding dependency packages), takes columns from the warehouse with manifest fallback, and builds edges from depends_on while avoiding direct edges that duplicate an existing operation chain.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L1154-L1190",
+          "version": "repo-lines-v1:sha256:64dd16b015b7907048ecb277be8224f4ad69d895d0d7e2bafae3b2251b2e126a:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3MWRiYWNhMWFiODYzZDQ0ZmQ0M2IzNDM0YmJiNzg3ZDI1OTQ2MWU4MjIzNDQzOTUwZTA2ZGY0NDBmZTU2NGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMTFjMDU2N2QwYTVmOWU5YjEzNWY2NWNkMjUzNzJkZmQ2Mjg3NzVmN2MxZWQyNTNmOGJhZDQyZGQyZDY2NjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzZDI2NzA1OTZhNzg0YTIyMGRmZTRjY2VjNjFkODc2NDNhNDliMTc4Mzc0ZDNiNzcxNGNiMjY2MzE1NGY5NzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVhNGE0ZDFjMjhhZDZjZDE2ZjdmMjNkNjRhZTEwZjAyNThkZTY4NDgzOWM5Y2YzYjIwNjQ4ODk0MGQzYzhhNTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpdbt/dbt_service.py#L506-L552",
+          "version": "repo-lines-v1:sha256:148e1d046337618c141ec07dbc11040fe5dd9e197b24b4f6f9c5f323871f03b6:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyOWMzYmE0NWNkY2NhNzAyMTk5NGQ4NjdhYjcxMWEyMTBkYjQ2YWFlN2U0MDZhYzY0ZGNjMzRjNTVmOTNjN2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1YmM0NzExZWNjYTA0NTBhZmM4MzI3NzlhODg2NzZhN2M2OTYwZmEzZGE1YWY0MTBlZTAyZDFlMDE1MTU5MWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ4ZDEyMDJmYTA2YWYyYzViMGU1OTM1NDBjNmU0ZjRhMjU5MGFkMTVhNTI5NTQ5MzY4NTZhNzhkMWE3MmE5MTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE2MDM5OTdhZDJmNzc1NzY4OTgyZWZlNTFmMjIxYWJiMDBiYWQ3ZjNlZmM1N2E1NjRhZWU0NjA2ZjQ1OGEwOTMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpdbt/dbt_service.py#L555-L895",
+          "version": "repo-lines-v1:sha256:98c26222d59c372b7377e4ed9129a772eaa7bb1b787dd49979b19f8fd79ecce9:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0ZTFkNWJlMDYzYzZhZTUxZWRkYjg3MmQxZDhlMmZiNTBjYmEzODY1ZDYyOTExYTUzOWJhOTNiYWM1MmQzOWJhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJjMDg1ZDY4NGY1ZWM4NWI3NDkzMTZkOWIyMWY4M2E0MjBlYmFlNTZlMjcxZjUzOTNmYjU5YTlkODU2OTQzOTU1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlMGIyMWJmODk1ZmFlMmQ3MzkyMGQ5MzE3OGNmZDU4NDFjZGY4Zjk1MjQ1MTZjOGE1NjU4NDM2YTRhYzQ4ZjNiIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzZmY3NmVhY2IyYjkxMWNmOTM1NWFiOWM4ZjdjYzQ4Zjg1ZTk3NGNjNmYwMzg0MGQ5NzNkYTk2MDZlYWRjNjJhIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_90dbcf0045374ac1b769457dd7f733ae",
+      "statement": "The canvas lock is a per-workspace advisory lock with a 2-minute TTL: acquiring returns 423 if another user holds a live lock, an expired lock is replaced, refresh returns 410 if expired and 403 for non-owners, and unlock is owner-only and idempotent.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L254-L357",
+          "version": "repo-lines-v1:sha256:f192237e7cf7ffac77f507f01b70855ced5c0aa6cf3a8211907c86d3273da095:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI2MjU5OTljMTU0ZjBjM2UzNDkzOTA3M2JmMTVkYWM4ZWI1OWNkOTdiNzViOWRiYzJlMjkyNDJlMTQzODc3NTQ3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIxOWNkNGRjMWM3ZjBkZDJmNThhYzRlNmRmZDJhYzkzOWEzNDJlMTEyYjk2MTMwYTFjN2VmYWY3ZTJjNDFlYTI4IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIzMjUxNDk5MzljM2JkZmM0MDI2OTJlNDhkMTUxNTI2MzAyZWM5ZjBiYWM1ODI1NmQ4Mzg0NDVjODY5ZTU2OTcxIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJjOTdhNmJmNTIzYzRlN2EwMDIyZTYzMTM0ODA4Y2ZjYWE0NGMzYTdhZWFjM2EwMzcxYjMyYWViNmRjN2RkOWUzIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/canvaslock.py#L8-L27",
+          "version": "repo-lines-v1:sha256:8cce60ce66885e3466d975b157174614f48c4b8cdb3b08fcb32ce158bc2966af:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNDZlNDk5ZDQ4NmQ1ODVkMDM2ZTkxNjU0ZDVlZDlhNDRkZWRmZTE4YmJhZDk2M2Q1MWVhMTQwYzdiYzdhOTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4ZTlhNjJlY2Q1MjY0OTI2NmFhOTY2MzU0MWE1YmI1MmU4ZjMxYTBiMzEwZjA4NzcwNzM4NjhlZjk5YTU0ZGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgwMWQwYTg4ZDhlMGJjMmRkYTdkNWVmZmNhNzE5ZTE4ODhlMGY1MDIzNGY5YTlmYTQ1YTVlYjY1MWRjMzExOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_90693c4d1daa4ebeb6cbdf8e52ad714a",
+      "statement": "Server-side lock enforcement is incomplete: validate_canvas_lock is called only by the delete-model endpoint, while node creation, operation create/edit, terminate and node delete endpoints carry TODO comments to apply canvas locking.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L360-L388",
+          "version": "repo-lines-v1:sha256:046aeca44c369fb3836b03a3f727f20d480809ff1feaeb87732d963aa3b3c424:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxYjg4YzY3NGRhNGQzNGNkODc3YmNjY2YzNzcwZjU2MzNjYmRhZWIyMmE2ZGEyM2I0Y2U4Yzc1Nzg3MjczYmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4NTk2ZDE1OTcwYzU0NGJlYmM4YzE2NzliYjNlNGM1ODk1YjE4ZDZmZDRhYzEwODY4N2M5NGRhMWVjNjcwNTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk1NmNkYTQxNjk1MDI5M2Q2M2M4OTQ1MDJhNmIwN2EwMDdlNjRkODliZDk5N2E3NjJlN2Y4ZjgwNGQwZDYzZmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA1OGFkMjIwYWIzMzE2YjY2M2Q4NzUwMTBmMzFmZTk3OGUzZDA1ZGZjY2U0Y2U5ZTU2ZDAzYTMyOGFhNDE2ZjkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L439-L460",
+          "version": "repo-lines-v1:sha256:1abb64e6e079521d01beed65a6c9f142054d5794b9f2f62789125cb98c814121:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0MDQ1MTBlMTU2M2U4OTg1ODljZGNjYTI2OGVhOTE1ZDdjNTdhMGNiMGQ0Yzg0NmI2NTNiNzZjODU0YzE0ZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1OGViOTFmOWIxYTk0Y2RmYTg4Yjg2ZmQwNWYzZjk1NDdlZjE1OTQ4NWM1NWRlNGRiZTMwN2U4YjViZjNiNDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI4MDI0ZjIyZmM4MWIzNGZjZDcyZDRjYWM0NDA0NjNkNzEzYzBjMmVjOWQ1YTdjZWQzMmFkOTc0ODI0YTZiMWQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L586-L596",
+          "version": "repo-lines-v1:sha256:6c02ac3b6ab861dee47bc7ddb1d29dbc841276cf9109ea56f056803a56bfc53f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0MTFkMzNmNWYwMzI2N2M1MGM1ZTEzNTQ4OTkyNmY2MzQ3MGE4MDcyZDRmODYyYmRmZTdlZGM4Y2FhYzUyZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkYmJlZDZjMmNjOTA4NjE0ZTM3ZjM3NWYzZDZmNWEyZjQxMDE5MmVlNGQ2ODhiMjBhMTY3M2U1OGE2MjMxMzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYzNjhhOGY1ZjQxMmNjYWY1NjFiYmFlY2NlNDkyNDVjNzdlNGQzNzNmYmZlZGE0NGE5ZDY1YTU5ZjU1MjQ1ODgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjliODBiYWYwMDM0ZmY4OWMwYjYyYmRlNDM1MzUxOTJkZmYxM2E5NjkxZTZlNzdlMjIzMGIyZDNlMGU4MzEwMzMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L684-L688",
+          "version": "repo-lines-v1:sha256:9a9a8b3a6611e60957b87c0e2ba30e7878045e066b3971b950b253cd1249937d:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDZjOTFjMWM5YTY2ZDZjODc5NjM0NTliMjUyNDJhNzdkMjY0MzM1YWYyYTRlYjk5MWE0ZGUyMzkxZGE4ZGU1MyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWRhNWM2NmUxN2IxNDUzOTc4MzRiOGM4NTRkYzQxOTNlMjEyNTE4MGE4OTk2YTE0YzMxODgzMzI2YjJlZmJjZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGQ0YmVhOTEwYjUzYzkzODIzZmIyMTNhMzg2NjdkNmRkNWM0MjVhNDhkODljYTBkNzU1ZGExMjJiNGI0MTQwMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTZjY2EzNWQ4NDcyMDYyYjJmNDJmN2VjZWI3OWQ2NTQ3OGEwM2U2MDhmNjQxZjNiYzRjZmI5MTIxMmE1ODExMSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_e22b72892c9040229ce66fd534ddf548",
+      "statement": "The web client acquires the canvas lock on mount, refreshes it every 30 seconds, pauses refreshing while the tab is hidden, releases it on unmount, path change, beforeunload and popstate (guarded by a hasLock ref so React Strict Mode cannot release another user's lock), and goes view-only when another user holds or takes the lock; transformStore.canInteractWithCanvas combines these flags.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/components/transform/ui-transform/canvas/layout/FlowEditor.tsx#L99-L105",
+          "version": "repo-lines-v1:sha256:9d12b64b9a27d99e5b9dc1c52188b25e250cffecf1448efe906d0dbc45e5bbef:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTM0N2VmNzNlMWM1YjE0Yjg5ZTY4ODQzNjA5MDdkMzQwZjBkZGE4NTJhMTk2ODMxMzFjN2YyNmI2YTk5Mzk0MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2EzZTQ2Zjk0Mjc2YjZmNmY0ZWQxZjAyYWY3OGJlZjZhMmVlMWM0MzlkZDU1ODRiOTczOTQ4MzEzMjE0ZDJiNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjBmYjlkYmY1NmI0ZDRjYWY2ZDM4ZjkyYTA1MjQ4ZTY3MTRjMTU1NDIyMmRhYTQ0MmFkYTg5NzVkZTRmNjE3YSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWY1NjkzOThlN2FjMmFkNTQ3NzEwZjVhOGE1MDU5ZjIwMmNkODQ2NTA1NzE2MWUxNWJhNzU3YjE3MGU4ZTQ1YyJ9"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/useCanvasLock.ts#L41-L257",
+          "version": "repo-lines-v1:sha256:4eeb969da3b03633ef0190d8bf5d3b6e9a2203f18e92e5ead1c61393b2bd2114:eyJzZWxlY3RlZExpbmVDb3VudCI6MjE3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyNjViMTRiYWQ3OGNhZTQ5NmQxZGFjNjBjYjRmNTM0YmQ5ZDFmODBhNDUxZGE1MzdkNGY0ZDQ5NjFkNWE1MjU2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI3ZWY4Nzc4MDkyZjY2N2JlNjAzNGQxMzFmZTM5OTk2ZGFiMDJhZDU2YjBlY2NiYmZiYzgzYjQwODYyYzE1Njc5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://webapp/stores/transformStore.ts#L235-L247",
+          "version": "repo-lines-v1:sha256:0c0edef51ab8e17e75735a97057c8a69407bb09e7a215ba8aedf1acfb57072b2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAyYjBiY2M0YWQwYTU1YTgwM2Q2YjEyZTkyMjJlMGNhZjYyZDg1Yzc0MjY1YmZjODM1MTM4MWE0ZGYyNDhlOTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5NzhlMjUwM2I4Y2YzN2EwNmY3ZDZmMGEzYTZiNmZlMzU2OTFmYmNhYjUwYjg3NzVjYWI2ZmFiYzcxYzU5MmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFlMDc0ZTViM2I1ZjVjMzRlZGYxMjE1ZGMyODNhNzU5ZGUzZmRiNDRjYmViZWM0OTg2ZDBmMmJkNTRhNjA3ZGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJlNTA2OTFlMjAxNDY4NTEzMjlmODkzMGZjMTg4OTkwMzMzMzJkNTZlZmY0NWZjZTQxYjBjNWZlOGY4NTA1ZjYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d82cb1b45cff4b80ac5a0cbf3e6eb9d6",
+      "statement": "GitManager wraps the git CLI via subprocess and GitHub's REST API, authenticates by embedding the PAT as an oauth2 URL at push, pull and clone time, and resets cloned remotes to the clean URL; publish_changes commits all changes as the requesting user and pushes only when transform_type is github, returning success false with committed/pushed flags on failure instead of an HTTP error.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/dbt_api.py#L105-L200",
+          "version": "repo-lines-v1:sha256:d236d133c86f06d2c88d8214e2dd2dd9f35e9750d63e3f5dd85bc7630499734c:eyJzZWxlY3RlZExpbmVDb3VudCI6OTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3MDNkZDc5MjU3MGQ3Y2Q0NTgzYTdlZWI4M2ZhNmQ1MzU2YTY1NTZjOGUwOTVlMzlkZGNlODgwNTljMzExNTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMTFjMDU2N2QwYTVmOWU5YjEzNWY2NWNkMjUzNzJkZmQ2Mjg3NzVmN2MxZWQyNTNmOGJhZDQyZGQyZDY2NjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZhNDk3N2JlNjcyMThhNzI5NTJiN2RhNGZmMDE1YjQ4ZTFkMTJmYmExZTI0NDY1NGJjMTVmZTNjMTQwM2VlYzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjljYWE1NzE2ODI5ODk2ZGVkYTk4ZTJlNjI4Y2E1MjdmYTI4OWM2OGRlNDI1MTBlZjc3NzUzN2Q4MGUzOWEzNjcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/git_manager.py#L37-L65",
+          "version": "repo-lines-v1:sha256:360986ef75517971134acd616977001eb8a159520ce052bb94cbfd011281510b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiMDE4NDdlNjIyNGJlNDJlNTM4OWQzZDI3ZGQzOWE2NDFlZGUxMzM3ZjliMWQ5NTU3ZWUxOWVmMjI2NTZhMTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlM2IzZTM5ZGZjYjEzYmU3ZWViMzUxNjQ1Y2Y4NTc2NGMzZTA5ZjA5ZDFkYWM1MzgzMDY1MjMxZjBiODAzNTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNkZGUyYzkxNmEwZmM2ZTEwNGRkYTcxMTZmNWNhZmIxODU3MWVhNGEwY2ZlYzMwY2I1ZWRlYjM2ZjQ5OWY2NDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgwYjM5YmI1ZTRmMTJiNmRiZmNhMTY1Mzc1MGUzYmU1MjJiMTc2YWI3NWY0NDc0ZjVkMTU0NWYxNDgzNzEzOWMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/git_manager.py#L429-L471",
+          "version": "repo-lines-v1:sha256:447a6a0cede931f89654c982fa1f12f14db5cc6c30427608ddd0160de661a770:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyMGI0NTNmNWUwYzkyZDVmNmMyNTFhNWVhMTk2MGQ3MmYzYmQwNzk1NmFlODU3ZGEyMGUzMWE4OGM1NTk2OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3Y2U2ZmQxYWFiYmI2ODU4ZjU0ZWRiZDY1OTUzZjM0ZjVmMThmMzQyMzA5ZmEwYTgxNmJlMWM4ZTgzYWNlNWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NDEwNjA3NDY4OTczZjY2MGVmNjFjMjJjYWEyMGU5YTAyNjk0MmQ1ZTFmNWIyNWFkNjA4MGZlN2M0NDY5NmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEwNWRmOTQzNzE4NTk3NDc1OTc2Yjg3NDUxNjRlOWI3NTM3YzMyN2E1ZTk4NDFlNTA4N2Q2ZGQ0MGVmNTk5NzAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/git_manager.py#L628-L716",
+          "version": "repo-lines-v1:sha256:10b99a17ef43692206fef3d1aabf325c9bfa97b09bae517cb1d8537e56612619:eyJzZWxlY3RlZExpbmVDb3VudCI6ODksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyYTBkNTdhNDlkOGQ4NTIwNjg4ZGI0MGVhNTEzOTIxMWI4NGM3MTgwNTkwNTBlYmEwMTUwMjRiYjc4ODgxMTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZmE3Yjk0MjZjYWUzMTM5ZDU2MGNjY2MwNWU5OGJjMzkwODQxZWE3MzIyZWMwODY0YzE2NzQwOTUzZTg0NjgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMxYzJkZTc2ZGY2MGMyM2I0MjE2ZmQ4NTFkZDFhZWJmOTAxNGY5NWY1NGM3Zjc1MmVjMjIxZDQxZGEzMmU4YTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlkODUzYTc5YmNmZmQ0YWI2ZDE5NGJiOWMxOTM5ZjdhNTY5ZDE5NDIwMWU1N2IxM2RhOWU3OGU1OTAxODA4OWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_528fbc30c1c74d23ab73d56f524be71d",
+      "statement": "The web client treats a missing PAT as blocking only for transform_type 'github', syncs the remote dbt project into the canvas on mount when a PAT exists, and otherwise opens the PAT modal; GET /api/dbt/dbt_workspace masks the PAT when the git-pull Secret block exists.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/dbt_api.py#L262-L282",
+          "version": "repo-lines-v1:sha256:e4993c5d68a891513a045508a9ddca4eedff210cf75674466f5623446e72d034:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIzZTk3MWRjMDQ1OWEyMTRhZTllOTcyYjFkNTIxZTViMjlmNTkxZjAzOWNmMWVmOTk1NmI1OWFlODdiMDgzNTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdhN2RhNTY5YzExZjI3ZDVmNTczNWMwY2Y0OTEyODUzZGQ2NzdkMjU2OGViM2UwMzA5Y2I1OTllMDU5MWJiMTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI1NTdiZWY0YTkyZjExYTc0YjVkNWRhNzE0N2IwOTAxMzc1ZDBkN2JkZjI3YmU0ZWQyYTA1ZDIzMDFjYThhNDAifQ"
+        },
+        {
+          "resource": "repo://webapp/components/transform/ui-transform/canvas/layout/FlowEditor.tsx#L107-L130",
+          "version": "repo-lines-v1:sha256:b9d18937dec547d7fdaceab72c0de437abc5420eeccc78b52b8429a4ca9d0144:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjMjcwOGZmMThjYjRiNDIyZDExODM0ZWYzNTkzNDBhOTY5MjViODdmNTAwMmVkZTg2ZTAxMDFjNTNmNDZlZmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUxM2E2MDZiMGZjNjEyYzAxOGJjMDUzMjUwMTIxMjQzMmQ3YWFjMDM5Yjc3Zjc2NzA3MmRmZTRjYzQyM2Y2YWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ5Y2QzM2E0OWNjY2FjYWQyN2VmMWI0MWMyMmQ2MmMyMjliY2I3NGM0N2MyNzc0OTJkYjgzNDVjZGRkYjhhMjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY3MDFjNTViMTBjMWRlODE3Zjg2MjE4OWQxYWZkMmI3ODc2ZTgyMTIxNTg4ZjhkMzEwYjdlNTdkM2Y2YjFlNjEifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/useGitIntegration.ts#L30-L99",
+          "version": "repo-lines-v1:sha256:002cddbf5b31a761451dceb24eaab384b42ad3907c45a731b1c23470dbfe9444:eyJzZWxlY3RlZExpbmVDb3VudCI6NzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIxMmNjMTM4MTMyOTRhNjc2MzUyOThjYTkwYTE2YWE1M2Y5OWFkZjk0NWJmNDU0MzAzYThiYmY2ZjA2YTYzNjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEzMmIzZDM2NGRmZDY4MjNjYzM2OTFmMThkMWFiY2U5NDQ3NWNjYTI5ZDc1YmRlNTMxOGExYmNiZDhjYjI1YzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_dcceabb6e70d4c6ea05e75d4888c1c2d",
+      "statement": "Canvas 'run workflow' executes through the Celery task run_dbt_commands, which takes TaskLocks on the workspace's dbt-clean, dbt-deps and dbt-run OrgTasks, writes profiles.yml, runs dbt clean, deps and run with the backend's dbt, streams output to TaskProgress, releases locks in finally and re-raises failures.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/dbt_api.py#L408-L436",
+          "version": "repo-lines-v1:sha256:d8454633b7a6bc2caad6746228fb18103592ff1664dc89ecfd40410111f0dbd3:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNzZlZjhlNTdkYWMxNDBmOTMzN2YyYmQ0NWNjM2Y5ZTVlMTM5OWQ5ZTQwOWYzMTliYjIxYTYxODBkZWFiN2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxNTQxMmRhMTE0MDcyZTU0NDg1ODdmMDJiNzJmZWY4OGJmOGFmNmI5NzYwNWE4ZGYzNmFjOTg0ZDYyMmJlOGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkwYmY4M2YwNzcwZjI2NGFjZDJlMWQ4ZTczN2IwNTA1YjQwNzk2NzEyOWQ3MzY1MWRlMTI0YzI3MWM0ZTUzODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L105-L309",
+          "version": "repo-lines-v1:sha256:40ca8ead8d1dd85bb6cb5aabbb756571350326146538b96ad51eb5569c806f83:eyJzZWxlY3RlZExpbmVDb3VudCI6MjA1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0YjllNmFmNWM2NjgxZDliNzY3NWE1MzJjZTE3ZTI5NmJmOWUzN2M2NDRhODc3NmEwMzE0NjRlOWQ0YTk1NDhjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5ZmViMDI1NDRlMjVkZTAzYzljM2Q2MDRhM2VjM2ViODQzYWFjZGVmYTg3NDlmN2EyZGQ1ZTI3ZjdlZjI4YTk2IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlZmEyMzUzODM3OGZhNGJiODAwZmE3MjBiOTgyMWFiNGEyNTk5NWNmODA0MjU4YTZiYmYwM2JiMWY3NjZjMmYxIn0"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/useWorkflowExecution.ts#L144-L182",
+          "version": "repo-lines-v1:sha256:8e3018ea01ecc02a1cbe364bcf1194af52a51212d7489ad8eab8cecdc3cd3c26:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTZiZGMyNjA0ZjhlMmYxNTJmNmNhNmQ5MTgzODY4YzUwMTA1OGZmZjU3YWM3NWNlOGM3Y2U1NzZhMTNmY2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2NmE2ZDMwMjdiYjFiNGQ3ZGFiMTRjMTA5YjRlMzRkNDJjZGU2Mzc2OWU2ZWEyNzhiYjI3OGM0MmY2OWYwN2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM3Mjc2ZTMyNzUyMjU2MTUyY2JhMTY0YzhkNzIzNmY0MGI0OTZkNzEyZjBmZTFmM2Q1MTc2MzI4ZWEwYjEzYzAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_25d3e7b602a94c07a012677b843d2f07",
+      "statement": "Manual DBT Transform tasks become Prefect deployments: create_default_transform_tasks creates system OrgTasks, and for dbt-run, dbt-seed and dbt-test create_prefect_deployment_for_dbtcore_task builds a chain of git-pull (or git-clone on EKS workpools), dbt-clean, dbt-deps and the primary task, renders each via pipeline_with_orgtasks into PrefectDbtTaskSetup payloads carrying the dbt-profile Secret block name, creates the deployment on the org's transform_task_queue and stores it as OrgDataFlowv1 with dataflow_type 'manual' plus ordered DataflowOrgTask rows.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/orgtask_api.py#L117-L193",
+          "version": "repo-lines-v1:sha256:8b5f84873340cbb746b9858ca98a5705ceab7c529f6cbec8269dd1b50eb53c0e:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc4ZGE1NmEwMzRjOTljYzVhNmRmMmE1YjQ3Y2NjMjJjNmQ4OGQ0YzVkZDdmZGYyNDZkMDRkMjg5MmJmM2FjMzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhYTRjYjE3NTJlODQzYjE3YjRlODdlYmViMjJjNjk2OWNmNDhlNDczMGZmNjE3Yzk4ZGFjNWRiMDY1YzU1YTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRjNjk0YzZkMWNiMWZkZmEwNjQ5ODFiZjYzMmI1YWFiZTMwYmNhMDM4MDg1YzJkMGY1NmRhOWEwYTI1YTdjYjgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/orgtaskfunctions.py#L62-L174",
+          "version": "repo-lines-v1:sha256:42de301680bc2a474809f4cedc134ff7131ece365f3b00ee90d194049a488af7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0YzI0NmVmNjJiOTg3ZWY1YjFmMDdjNDhkOTEwNTgyNmQzMTY2ZDEyNzc2YTdmOTQ2MGVlMDljYmJjOTk2NzExIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJhZGM1YmI2NjNiM2MyNTQ2MzkxYzU0NzI2MjA5Mjc0YWNlYzZkMmY4MjIzYWY1ZmYxMzc0MDAxNjgzNDE3NDk3IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJhYzYyMmRkNDYwYmNmYjAzMzMyYWVlMjBjYjlkMWMxN2RjYTMwMGRkNmRiNjVlMjE1Mjc5Y2U3MGRlY2Q0M2ZkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI1OTkyNDAyMGFiOWMxMjA2MGM5NDQ1YmZlMzJmZGM3YzYzYzE5ZTFjNGE4NGUwZjk3MjBlNjc4YzM5MzdjZGFlIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L154-L307",
+          "version": "repo-lines-v1:sha256:113149407516bc42eb9e2d9478c737a38c6306762d1ea5685e3dd0f6013d3b34:eyJzZWxlY3RlZExpbmVDb3VudCI6MTU0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1Y2UyMWU2YmRlOWI5MmZkYzBjYzQzYTE4YjM2ZGJhZDJkZTBjY2VjYWExM2M4ODJhMWE0YjAwOTU5OWQ4MDBkIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIzMGM0NWY3YzZmOTI3NDNmNDBiNWEzOWNlM2JlOGY0MWYwMzI5ZTdmZmUwNjBkM2UzYmQ0MDI4ZTBmNDNlMGRjIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4Y2M0YTdkMWNjNzk2YWJhM2U0NjcyMzMyN2Y1MTdlOWY4MTE5ODJkMjUwZjA3MDI5ODZlNGI1NzY0YWQ5NTg5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIyZTI2NzI4MTZkMThkZjE0M2Q3NDU4YjMwMThmYzJkYzA5YTE3ODg5YjkzNzQ4MmU2NTdlMmJiZmJjNjBmYjI4In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/constants.py#L35-L35",
+          "version": "repo-lines-v1:sha256:25cd7df694b6894ae093ff505c582fd6421cf2a077293f36554662960173596a:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjVjZDdkZjY5NGI2ODk0YWUwOTNmZjUwNWM1ODJmZDY0MjFjZjJhMDc3MjkzZjM2NTU0NjYyOTYwMTczNTk2YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjVjZDdkZjY5NGI2ODk0YWUwOTNmZjUwNWM1ODJmZDY0MjFjZjJhMDc3MjkzZjM2NTU0NjYyOTYwMTczNTk2YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjg0NGYyOTI5OWE1YzFlMDZiY2JmNWNhYmE2ODQwNmQwNWM1ZTkxY2M2MzU5NWMzYTY0NDQ3MjIzM2ExNmIwNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDk5Y2YzYzRhMjU0NDkyNDAyNmExOTUzYjdlM2Q5NDgyNjk4Yjk5YTZlNmNlMTg2YmU2Y2JlNGE3ODc2NTZhOSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_dbf5613d031c449c9a5aff40c3be7d56",
+      "statement": "Canvas nodes are never turned directly into Prefect tasks: they are written as dbt model SQL files in the repo, and Prefect deployments git-pull or git-clone from the remote before running dbt, so canvas models reach scheduled or manual Prefect runs only once published.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/dbt_api.py#L105-L200",
+          "version": "repo-lines-v1:sha256:d236d133c86f06d2c88d8214e2dd2dd9f35e9750d63e3f5dd85bc7630499734c:eyJzZWxlY3RlZExpbmVDb3VudCI6OTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3MDNkZDc5MjU3MGQ3Y2Q0NTgzYTdlZWI4M2ZhNmQ1MzU2YTY1NTZjOGUwOTVlMzlkZGNlODgwNTljMzExNTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMTFjMDU2N2QwYTVmOWU5YjEzNWY2NWNkMjUzNzJkZmQ2Mjg3NzVmN2MxZWQyNTNmOGJhZDQyZGQyZDY2NjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZhNDk3N2JlNjcyMThhNzI5NTJiN2RhNGZmMDE1YjQ4ZTFkMTJmYmExZTI0NDY1NGJjMTVmZTNjMTQwM2VlYzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjljYWE1NzE2ODI5ODk2ZGVkYTk4ZTJlNjI4Y2E1MjdmYTI4OWM2OGRlNDI1MTBlZjc3NzUzN2Q4MGUzOWEzNjcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/orgtaskfunctions.py#L105-L135",
+          "version": "repo-lines-v1:sha256:7f1aee4858dcb0a3c2d5ecff824c02a5a3513f4391622351c9fd7737d6aa5d38:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlZTE0OTZhNTQ4ODA4NzkzYWVlNWU0MGUxNjFjZjNmOGQxMjcwOTkzZDVjN2RhYzUzZTVkM2NjMjZiOTE2MjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmNjBlMTUyYWU0NWFkMGMzYzY1NzY4NDQ5NTNhMzI1ZjBlNzAxOTI4ZGRiNTIyZTg0MDA1NGE0NTA1ZDlhOGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNmZjlkYTU3MWU4YzQ1ZDEzYTJkYmRjZDhhMWMzNjg1MGZmOGZkNzJjOTkzN2RhYjlhNWZjZmU1YjNjNjkxMjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI4MjIwZjE4Nzk4MTM3OGNmYmE2YzZkZDljNjM5NDM0OGJhYzBmZDRjZWQ5OGU1OTgxNzE3MGY5NmU2N2MwYjcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L267-L300",
+          "version": "repo-lines-v1:sha256:c3db830ca0a815e3d4eedc2143612a100cb60cbad082dbcb9ab95ec346efb70f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlYWIxNTY2Y2JhYzk5ZWIyOTliZjRiNjg5ODE4NDVhMmJjZjgzY2EzZDg5NDI2MTJjMjlhY2FhNGM5MWM2YWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc4NDA5MzM5MjEyNTFhYzQzMDJmOTRlOTZhMTc4YmNhMTkwNWQwNDJhMGVkYjlkMDEzODViNzkzMmMzNGVjMjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg0NTgwNmMxYzk3NWQzYjQxZjg5MWI0YTI5NGJiYTEzN2EwMzZlY2YwOTAxZWFhYTBjMzIwZGNlODBiZGJmYWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUxY2NiMWRkMDgxODg0MTA0MmJlYTM1ZTYyZTJhYmJlMmY2NDIzNzU2NWQyZGMzMTk4YTZlZDg0MGI0MDgwYTkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_78105642e1d248b58b61142674e785cf",
+      "statement": "The dbt-core version pin and runner migration from DbtCoreOperation to PrefectDbtRunner are specified in harness/features/prefect-runner-migration/v1/plan.md, which has no tasks.md alongside it.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/prefect-runner-migration/v1/plan.md#L1-L22",
+          "version": "repo-lines-v1:sha256:75e5053bd26f9c28596cdc6bf590f6ad5dbc80f57069e8ae4c175a872e020bb7:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyMWRhNTc2MjdlOThiYjMyZmRlOGViMTU4NDBkODgwMzlkZWVhODg2MTYwNjNkN2VmNjI4NTgzMGE0ODMzNDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhMGJjYmRhNDA0Y2RhZjkwYThmOGYyYzM3OWRjNGQ3MzE2YzAzNTQzNmZhMDU1Yjc4YmNiZGM2N2Y5MDNmYTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE2MWQ4NDY5MTAwMGExYWI2ODU4NTA4OTUxZjgzNmRjNDUzMzQ0ZjlmMDdhOTRkZTE3YzljOWEyYTAzMTVjZWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7ac942f382c1414885d30a2d0ac5ce74",
+      "statement": "core/dbt_automation provides one SQL generator per canvas operation (a *_sql function returning select SQL and output columns, plus legacy file-writing functions), dispatched by OPERATIONS_DICT/OPERATIONS_DICT_SQL and a hand-written if/elif chain in merge_operations_sql_v2, so adding an operation requires touching the generator, the dispatch chain and the op_config_mapping schema.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/dbt_automation/operations/mergeoperations.py#L145-L212",
+          "version": "repo-lines-v1:sha256:7629098d642721c733776eb0abcff692673e32ce99f67fe06c5a730a24209aaf:eyJzZWxlY3RlZExpbmVDb3VudCI6NjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA4MWE0MmM4YTgxYjIwODhkNzVhZmYxMWZjODNkYjViYzBhNmI1ZWM3MzM1YTgxNmU4MWY2MDlkNjQxNTM4MzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyMjI1MWI3OTRhNjVkNDliZDQ5Njg2YTMyOWRjMzI1ZDcwYWQ0MTAwZDZhZjVlZTVlYzNjMDZhNDc2ZTMzZWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI1MGQ4MTk3OGMzYjBlODUwMTg2NzQzMDBhNTg3ZDA1MGJkMWFiYjQwNTY0MDlhOWJjZDAzODVhYjZiZWExOTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEzYmE4YzcyNWUzYTA4YTlmNjBjNGY1ZWYxMDVhMTRiOGQ2ZDY0NzM4YmE5YTdiMmI4MThkYzk1NWU2NjNjYjcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/dbt_automation/operations/wherefilter.py#L60-L80",
+          "version": "repo-lines-v1:sha256:11eaa2b39cad77f7c3b32302d1b953212cab04771542a339d993c835c1916652:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ3NjQ3NTliYTM2ODlhNzdlNDI4ZGUyODQ0NzY2NzI5NDBmYTJjYWE5M2E4MmRhNTQ4ZTYwY2Q1MDk0YjE0Y2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjliZGZjNGFiZDNlNTllYWU0OTNkMGFkZjgyNzlkMmQxODQ2MmRjYWU5ZWQzMmY0MzgwOWRkYWE3YjE2ZjU3NTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzNjI0NmYxM2FlNDkxNjUwNzk5YzUxMjZmM2Y0ZGQ3MjgyMWQyYTFiNzFkOWIyYjQ2ZGY2ZDE4MzQyNmYwZTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUzNjUxNjRiOTgwNDEyZWNhMTdlZmRiYmQ1YTZlNTQ5OGNiZDhhNmE1NzA5NTBhM2E5MmRhZjVjZTU3Y2E3N2MifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/dbtautomation_service.py#L305-L348",
+          "version": "repo-lines-v1:sha256:681cdf729a352689fb0a003f85ce20d7e538315871fb630a78201811fb254295:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5NTcwODhkZGRiZGMzMzM4ZTM3NGE4YTkwZDM4ZTAyNDQ5YzRiNzA2ZWUzODQyNTE3ZTllYjYzYmUxYTk2NWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBiODY3ZmRhNTc5MGVhNWY1N2M1YTM1ZmMwYWQ3ZDA1ZjgwODJhZmNmM2FkZDJjZjFlMGNiNzdhZDllMjQwZmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ5OTNmMmUyNDM0MzU0MjVhODRmYWQzNzNjY2FlN2Q1N2NmYWEyM2ZjZmMxNzU4MzBmZDg5NzM5Zjk2NzE3MzYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/schemas/dbt_workflow_schema.py#L288-L308",
+          "version": "repo-lines-v1:sha256:c6c45c8abba1e937756d5f78bf3fdf1c92d945a098b2ba149d248eaba240ed87:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMTE0NDgzM2RhY2U5NjU5YjVmMTU4ZjI4M2MwNmU0YmY1MjEzZjJmNjY1YWI2NWVhMTc5ODVjYjM0NzI2Y2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZmM2NhZDc4NGIyYTU4Y2U5YTQ1MmE3Y2IwOGJjNmI5Y2ViMTViMWVkYTk0Nzg4NWU4Y2YxYmRjZDk5ZWVmMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0MzNiMDlmNDZhMjlkNDZlNzk2YTkyNTEwMmU3NTY5MDM5M2Y0MmJlM2ZkZTA3ZjQ2ZjBjOTlmNjQyOTI1NWIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_60559a733fe742c7806c6c39b41551f7",
+      "statement": "sync_sources_for_warehouse_v2 is a Celery task that scans every warehouse schema and table, creates OrgDbtModel SOURCE records for tables not yet known, refreshes columns of known ones and reports progress via TaskProgress with a 10-minute expiry, without editing sources.yml.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/transform_api.py#L160-L202",
+          "version": "repo-lines-v1:sha256:90a697e9a7f72a6058f5802173153d0ec2345647b51d983c6bc02400b929da30:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2Mjc2M2NkZjJlNjc0ODRmYjg3ZjQ5Y2Q5MTI3NDNiMDMwYzc3OWNlNjJmZGFmNjMyNjE0MmNlNjc1MjU3M2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMxMWY3MDZiZmIwMjNjOTI0NjRmZmI2YzNmNTM4NmFkOWRlMTkxM2RlZTk3MGMzYzM1Yjc4NGFiMGE2OTI2ODkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY0MWUxOGNkM2VmNzVlNWVkMWI3NTcxNjg0MjMyNDBkZDZkYzViZjRiZWU4NGMzNGE4MmVhNTQ4YjMzZTA0NzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc4N2ViZDBkMWFlZWQ2NmVkNWYzNDJhYTg0NmVkOWMyZTM4NWJjYjlhZTlkNjBmOTc3YTJiMDYyYzliMmQ0MDkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/dbtautomation_service.py#L673-L794",
+          "version": "repo-lines-v1:sha256:ae26088ff9dc656a9f3450abe8735d370b14c5c2417bcfaef3f13286d3f34907:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0YjllNmFmNWM2NjgxZDliNzY3NWE1MzJjZTE3ZTI5NmJmOWUzN2M2NDRhODc3NmEwMzE0NjRlOWQ0YTk1NDhjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIzMGUyYTQ2NTAwOTVmYTk1ZDBlMmJiNDFiMmRiMjkwOTRkMzQwNGQyOGNlMTIzMzllYzg4YmI0YjVjNWJlOGY2IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJmOTdiNzU4MDY0YTZjZGVlNjcwZjc4NzkwODdjM2IxYmZmMTgwNzljNmU1ZThjMTM1ZTE4YzYyYWVjZGIzYmI0IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIyY2QzNjkwYWYwM2MzZDA5ZGVmZDA2ZmE4ZmQ4MTFjNDg4NGZhZWJiMDgwNjU5YTMxMDFhOGRjMWZjYjhhYzg0In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_17f1f718f0da4f60a0a691ca91c34538",
+      "statement": "The Transform page first sets up a missing workspace (setupTransformWorkspace, createTransformTasks, syncSources, cleaning up with deleteDbtRepo on failure) and then shows a UI Transform tab (canvas) and a DBT Transform tab (task list), persisting the last tab as a user preference.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/components/transform/Transform.tsx#L48-L133",
+          "version": "repo-lines-v1:sha256:5613a0ee484d5349a7b4a98ac7d0178e423cdb3e63c63da5998a8871633cbf6a:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5NjZmYmZhODg5OThkYTc0NjU2YzUwMTk0OTU2YzI1ZjA4NDk0NTc2NjBjMDA5ZmU2M2QxZTlmYTlkYzkzMWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRiZDBlZTdiNGQ3Zjc4MzViMjk2MWZmN2YwYjQ0MzA2YWVmYTcxNjQyNWQxYjU4NzA4NzY1ZTA3YzZlYWRjNTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYzY2JlMTE5NTlkNjNhNmExOTNiZjYyMjNmYTEzYTA5YzcwYjllMTQyZjI5MTk3NDc0OTExOWQ3OTRhMzViNzMifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/useTransform.ts#L37-L52",
+          "version": "repo-lines-v1:sha256:3e27b53cd5f5538ef34c223e817c2dbe8174671bcfac1d24062ffd683e328958:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjMmIxNTU3MjFlMzQwZGY4M2VhMmFiOGRhODY4ZmQ0OWQxYWU4YjdlZGZmMmRiMGVhY2M5ZjZjODc0MGJmYTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlNjEwODZlNzM4YTBjYzRiNWNlMmM4YmJmNmVmZjI4MTNhYWJiMTVlYjExMmIxMTVjOTI4ODY1MmY2M2JiMTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIyMTBhMzUxNGU4NGZjNDAzNzAwNDc1Y2Q4OTYyOWFjZjVhNzIwZmFkZjliMDRlYjYxOTFjMzExNWRkZTk4ZjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

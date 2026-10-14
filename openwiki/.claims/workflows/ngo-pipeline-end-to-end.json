@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:ebbe8c00c4ec8eda0f199789caf4786a8eb5497a4af56e8d1ededbb813b84e4e",
+  "claims": [
+    {
+      "id": "claim_ef628f8e54394d49a6c0a5797c4e1164",
+      "statement": "Warehouse creation (`airbytehelpers.create_warehouse`, called from `POST /api/organizations/warehouse/`) accepts only postgres or bigquery, creates the Airbyte destination first, then saves credentials to the secrets manager and the OrgWarehouse row, and finally upserts the dbt profile Prefect Secret block. The steps are not one transaction, so a later failure leaves an orphan Airbyte destination and the endpoint returns a generic 500.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/user_org_api.py#L881-L903",
+          "version": "repo-lines-v1:sha256:a5a0cbe64c0b372e8921f1b85b7d8b7fc4577098086d3ae7cfd3893c8ea04219:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQxNmQyMWVjNGI2NWFiMjE1MGRjNGMwNDI1MWJkYTYyYzA1MzgyYjkzY2QzOWNkODU2YmVjZDRhMzY2MTU4YWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3OGE2MWYyMTBmZjA1NDMxMmMyMTdlY2UzZTgyMDMzNDIxNDA1NDU0ZWIzMjgwNzhkMDQxNTdlMTdjMzhmZTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY5MmNmMDIyODUyYWRiZThlYzY5ZWQ2YzYxZDc1MjM1NWY1NDFiNWNiNGM4Yjg5ZDQ2NTZhMDMzNzViYWU2ZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMwNzEyMmJlNTBlYjJkNDFkMmQyMDZiMTI2ZWRhMzVjZThkZDRhMWY0YmEzNDE5ZDhlMmEzMDEyMDcxZjRkYjgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L893-L937",
+          "version": "repo-lines-v1:sha256:ae54d4b5c8c38960882218bd03da4dc21a4e29061bf55fe3af46132c35a25ddd:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJjYjU2ZmEyNGI5ZWQxN2YyMjIwZmMyYjg2OGNjNjQzNTY3YWNhYzViNzE4YzEwNDA5MmQzMmY2ZTQzZmNjZjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdjYmJiNzlmMTgzNzdmNDBkYjQ3MzFlMDI0M2I2N2EwOTY4NTJlMDg2YTIxZGYyZTAxYzA0YTA5MzE5MTdlNWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxYmIwZmJiMGQyNGRhZTBkZTRlOTAyM2YzODFhZjkyNTg5M2E0YjZhMmNhMTFmYjRlN2ExOWE4NjFiMDU2YTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ3MjkzMmNhZTFmZTFlNmI0MWIzY2FhOGM3Y2Y0MTNiMzQ2MWJkYWZhNjVkMDM3MTRjMTJhMGE2MmE3MTgzNzQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_28fe8de834d34961a17867f94c7a0e15",
+      "statement": "`create_connection` checks that the org has a warehouse with an Airbyte destination id, an AIRBYTESERVER Prefect block and the airbyte-sync and airbyte-clear Task rows before calling Airbyte. It then creates the Airbyte connection, and inside one DB transaction creates the sync and clear OrgTasks, their manual Prefect deployments, dataflow links and ConnectionMeta. Failure of the connection-block upsert is logged and ignored.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L258-L396",
+          "version": "repo-lines-v1:sha256:a6287f57d45301a88894271421e3091eebc39467c1630dbb26ca75e557b4d14d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTM5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI5NWIzN2YzNjljYmYwMGQ2ZmI2N2UxZDcwZTM3YmM5YjUxYzRjNTRhNDhlMzMzZjEzNDZmNWRiYzIxODdkMDhmIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwYmVhZjBkMTMwYzBkZGI1NTUzYzI5ZmQ0YzI1NDNjMzcwYTE5OTk3NTM2MGFkNmViNzdmYjAwNDYxNTRkN2I4IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4Y2M0YTdkMWNjNzk2YWJhM2U0NjcyMzMyN2Y1MTdlOWY4MTE5ODJkMjUwZjA3MDI5ODZlNGI1NzY0YWQ5NTg5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI4YzMyNWE4NzE2NDZmMTM1MzNhMTc4MDQzNTU5YzA4YzlkNTRjMDU0OWM2MzZkYTBhYjNmYzFlZDRjNmRhMDcwIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_18205a37c021476c8b3336429fd0d30f",
+      "statement": "If anything fails after the Airbyte connection is created, the handler compensates by deleting only the Airbyte connection and returns a retry message. The DB transaction rolls back but Prefect deployments already created are not deleted by that handler, so they can be orphaned.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L326-L379",
+          "version": "repo-lines-v1:sha256:43e588e30dcbd0191785f22273a0d88c2e0a29697e7ff845dd8dfdfb94a97d89:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkYTVjNjZlMTdiMTQ1Mzk3ODM0YjhjODU0ZGM0MTkzZTIxMjUxODBhODk5NmExNGMzMTg4MzMyNmIyZWZiY2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2MDllYmI0ZjljMzQyOWNlYTU5ZmY5ZTQ0YWUwNjE3NzRlYjZlOTU3YTMwNmI2NWRmNGJhMTRjNGUzMTc0ODciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU0YWM4NDc1ZDEyNzMyYzU2OTQzMmZkNWJiNDk1YmQyNzVhOTU0ZTgwN2ZiZmIyZTUzM2RhOGE4YzAxZTM1MzEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMxYjlkMmU2ZDc3OGUyMWY2YzYxNTcxYWJhMzYwODgxZjYzYzliMDA3NGYzOWIxNmJlOTBkOTJjZDUyMGIwMGUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_60796359b0a04af3bc4d1278a4b31b0a",
+      "statement": "`PipelineService.run_pipeline` loads the dataflow's OrgTasks in seq order and takes TaskLocks through `lock_tasks_for_dataflow`, which fails with HTTP 400 if any task is already locked. It then asks prefect-proxy for a flow run and inserts a PrefectFlowRun in Scheduled state. If that call fails the locks are deleted, otherwise the flow-run id is written onto the locks.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/orchestrate/pipeline_service.py#L521-L576",
+          "version": "repo-lines-v1:sha256:49ceb245c9f3ad3b71f1da9883ca72e655ff30cf60f6c09f78166fd42016f857:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlNjMzNTI4MTZkNDk0YWI2Mzk0OTZhNGZmNDlmNjlkNjg1ZTNkZDA3NjE0NDRmNmZkN2EwZWM4ZTY4NDg5ZmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlNDg0ODEzOTgzOTc2NTRlZDZiNmY1NDYxMGVlMzE5ZjMxOTU4NDk2MGMzMmQ3ODg3YmIxZGE1ZGQ1NTkyNzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlNTViZmQ2OTJhNDhiMDk2M2MzODI2NjYzNmFiODUwYTMwYWVjOGI1YmE0ZDVlYWRmZjliYzc5NTFmZWY1ZjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc4ODZiZjczNDRmYjI0NmRkMDJhODIxY2M3OWQ1ZDU2NTFlMWU5MGY1ZTYwZjVjODUyYjdlNDRkNjA1YjM5NDUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L368-L389",
+          "version": "repo-lines-v1:sha256:978acdcf08086462bc06aa2e6566deaa09ad861c486bc1a7ca452c98a484d08f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhYjllMDYyNzg0ZDk4ZGMyZGU4NjFlYjEyY2I2YTYwYmYwOTY1MGNjMjcyY2UyZDcwZDUwZmFjN2ZhNGUwN2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3OGEzODIzMWZhMDYzNzNlZWQ1MGZhOTM2MjE5MGZhZWExMTBjMmM2YzJmYjkxNmJkYThiNDMxY2E3MDkzNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3MDE0OWUwNjlhZDY3ZWNjZjQ3MzY0NmZmMWM3NTAwNTBkMzI5ZDExMDAxOGRjNTc2Njg3OGVhZmExZDYwN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEwYmY2ODY0ZDk2MDk3YWU1Yzg4MTBlYjExZWYyZDJkYTRkZjQxNmI2MGU0NWE3MmE2YTNiOTY2YTVkMzYzMDMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_69b003588fc04821bc06770cf5c9e5f8",
+      "statement": "`PipelineService.create_pipeline` builds a deployment config of tasks, org_slug and continue_on_sync_failure. Airbyte syncs come first, connections without a sync OrgTask are dropped, and a missing Airbyte server block raises a configuration error. UI-sent git, dbt-clean and dbt-deps tasks are ignored. When dbt tasks exist, the service prepends git-clone on an EKS workpool or git-pull otherwise, then dbt-clean and dbt-deps. The deployment is named pipeline-<slug>-<hash>, created via prefect-proxy with the scheduled-pipeline queue and optional cron, and mirrored into OrgDataFlowv1 (type orchestrate) and DataflowOrgTask.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/orchestrate/pipeline_service.py#L81-L273",
+          "version": "repo-lines-v1:sha256:b3b18eb6858af05374fd5b814896ecc8717ec7038bc617db78746caa6d9c7c1e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTkzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyYjFiZjNmMTJmMTYxYzM0YWQzY2RhZWUzYzAyYWFlY2Q5Y2NhODllYjA5OWJiOWQ5MzFmMDE5MGZmZWE4MGIyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJlNmIwNDQ5MTQ2OTcyMmU4MzYzYTk0ZTQwNDQ1MzhlMDEzYTJhMjE3ZTM2YjFlNTY4YmE2MGFjYjdiNGM4ZjJlIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJmZTNiZjlkM2Y0ODAxMGY2MzU3NTVkMjBhYTc2YmRkMDJkZDM5YmU1ZjgyMjQ5ZmVjN2FhYzRlYzg3Y2YyYmZkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJkNTk3OTM4ZWVhNGZiOTY2ZGRkMjM4MTYzZGY2ODg0YTFlYzQ3YzE2MmU3YTk4YTg5OGJjMDM2NTIwYmVhN2MzIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_e9f189ec565b4a34948b85452a89c9e3",
+      "statement": "`update_pipeline` rewrites the deployment parameters in Prefect first and only afterwards deletes and recreates the DataflowOrgTask mapping. The deployment parameters are the source of truth for what runs and the DataflowOrgTask rows only mirror them.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/orchestrate/pipeline_service.py#L276-L333",
+          "version": "repo-lines-v1:sha256:7eff1a1947af3ab50af25ff10aa32a4324e200ea25846299043bef6b48b7510e:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2NThkZWRhNWRmODg3NWIxZDdkM2Q5OWQ3OWQ2NGVkYTE1NDYxNzgwMDE2NTdjNzRkNmYxZTk2MGZlNWIyMWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc2MTBlN2Y5ODdiNDUyNGNhMjkzMDJkNjBhMzM3MjljYzgzY2IzNmE2YWQ2ZGRkOTU1N2JiYTZhOTNiYTZiOWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhhYWViNGRkNGZjYWIxYTY0OWU3MGQ0Zjg0NGFmMDk5ODM5YjIxYTkwMWNjOTA5MDQxZTRiNjFjYmU3MGNlZWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ1ZmI3MGM0MGIxNjE3ZmEwM2RkZGU0ODVkN2QwZDE1NzU5ZTRkMmIzNjczMDQ1M2Q3NTMzZTc4NTA0YjQ1YmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_442ee5806952499ab724915ec8763d62",
+      "statement": "On the worker, `deployment_schedule_flow_v5` sorts tasks by seq. By default it runs them sequentially and fails fast. With continue_on_sync_failure it runs all Airbyte syncs first, collects errors and raises before any transform step if a sync failed.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L877-L891",
+          "version": "repo-lines-v1:sha256:df280a46136e8b08e9de4bbc2ad7569268cab57a7599a69a65edbaa10dc5e678:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwOWFlZWM2N2MxMGMwMjI2ODkwYTVmNzMyZTlkZWU4OTFiMDg0Mzk4NjBmYmQ3NGVhMDVhOGY4Y2Y2ZWM0ZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlNTZkYTRmOWNjMGVmN2Y3YzM4OTRjYjk4ZWZlMzI3NjU0OTUwNGM4YzBjMDYyNWFkNjczNmZkOTcxNDdiNGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM5ZWZkOWUxNzJlNTE2NDhjYzY1N2RiZWEwNDYxM2ZiNzc5M2Q2ZjZjYmViOTIyZjE2YWVkYTZmZDRhMTlmNTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_dbcf16fee4ad4cd284653b579e9f0fb0",
+      "statement": "In the v5 dbt runner, a failing dbt-test step returns a COMPLETED state named DBT_TEST_FAILED instead of raising, so the flow run is not failed. Failures of other dbt steps are re-raised. prefect-proxy also recomputes the DBT_TEST_FAILED name when it reads a flow run.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L501-L532",
+          "version": "repo-lines-v1:sha256:20edc9f3eadc9c66eaf73164393cbab352d2af99e6825ab3557b7bbfba804906:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwZjYyYzgxYWVmZjZmOTA0Nzg1YTFiZGZjMzg0ODQ4MjVjYTdiZmJkOTc0MWYzNDc4YjcwM2UzNTliNmQ4YjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIyOWM1MjQ0MzRjMDA5YWFmMGQ3ZmU5ZTJmZmU3MjJiMTcwY2Y4ZWIxYzhjMTU3NWU0ZTNiZDUxZTkyNmM3MWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4YzhkMmRiYjBlYWQ4YmI4ZWQ3ZjlkZWM4ZmUxYzQ0NTgyMTAxYzFhMTEzZmJiNDMzYzFhZDExYmQzNGRhNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzN2VkNTI0YzMxMzA4ODg1ZTEzODI1MmI5M2Y1ZTVlNTU5ZTU0OGU5MDgzZDdkMWMwYmQ5Mjk4NTdmMjdiNTIifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/service.py#L537-L538",
+          "version": "repo-lines-v1:sha256:40feff3cafee0fa9237d088c143aa0f5db9e2ddac08109a899bdf0e4630a9f0d:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTE1MmUzMDdkY2JjNjc3YzEwMzU2NTlhMzM5OWM0YTZkNTgxNmI3ODRiMDVjYzAwMzkyOTQ0MjNkN2I1NjI5ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzVjNWRiYWJiMjQzMTE0MWFiNzQ4YWYwOTAzNDYyMzM2ZTYwYjQ4NDBhZmVjY2I1ODBiNGY1OTllMTliYjY1ZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDJmYzIyMmI3ZGQ5ZmYzNDFhM2M1NjNhYzIzZDQ0ODUxOGZhZWM0YmRmZGE3NGM4YzZjMDhmMmUyMzdmYWZmMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjk5Zjg0ZThmNzQyMDFiNjIwZTA0YTZlN2I1OWUyZGQwOGQyNzY4NmE0ZjIxNmFmZjBiMWZhZDE5OTYxZmM4NCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_d169166bdaaa4c37aa86a3a7deeb8619",
+      "statement": "The Prefect notification webhook `POST /webhooks/v1/notification/` is unauthenticated at the JWT layer and checks the X-Notification-Key header against PREFECT_NOTIFICATIONS_WEBHOOK_KEY with a plain comparison. It acknowledges messages that have no flow-run id and otherwise enqueues the Celery task handle_prefect_webhook and returns immediately. The sibling Airbyte job webhook uses AIRBYTE_NOTIFICATIONS_WEBHOOK_KEY and enqueues sync_single_airbyte_job_stats.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/webhook_api.py#L17-L79",
+          "version": "repo-lines-v1:sha256:0d7d9a107ab8bffa8f61cd07118c3f6d863c8ef57ea990e94fa64a9836ea5180:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2ZmUxMmQ0Y2NkNGZlZTVkNjllYjdlODcxMTVhODliN2M4NTgxMWU2N2MzM2FmYmM5N2JjNWI1ZDg3YTI5YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlNjRlZDZhZjhkM2RlYzcwNzEyMjk1OTY1ZDJjN2I3NTMzNDU1MTEyNmU2ZmYzNmFjYzU4ZTJmMTdlMGVhMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L1084-L1087",
+          "version": "repo-lines-v1:sha256:aedc618bd68b6ba58967f34170271a8ad6bcd6fe4e9326d28f3a68450f09f22d:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGI5ZTZhZjVjNjY4MWQ5Yjc2NzVhNTMyY2UxN2UyOTZiZjllMzdjNjQ0YTg3NzZhMDMxNDY0ZTlkNGE5NTQ4YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGY0MWU4OGUyYWYxMGU5ZTA5YzFkMjg5NGE2MDk1NTk1MjczYWE4Y2Y3Mzg5NGVmZWM5MmE0OGQyZDE0YjZjMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWVkMDY1NTQ0YmI5MWZmMWU2MmM2OGRjN2FmOWIxODI3MzZiNTdmNzAzNjU5YzhmNGM4MDY1ZDRlZjcwMTAwMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGU4MjIwZDlhZmJmNGJjODcyOTRhZmQzMjI3NjI3ZGM2ZmZjZjk1Zjg0NTIxNjQ3MWU4YWQyMWFmMDBhYmEwMSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_09b2581b7c954e55afb51232a9dacf61",
+      "statement": "`update_flow_run_for_deployment` deletes TaskLocks and upserts PrefectFlowRun on terminal states, locks the deployment's tasks as the system user on Pending (covering scheduled runs nobody clicked), and upserts the run on Running. On Failed or Crashed it optionally schedules one retry 5 minutes later when PREFECT_RETRY_CRASHED_FLOW_RUNS is enabled, and that retry suppresses the failure notification.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/webhooks/webhook_functions.py#L138-L210",
+          "version": "repo-lines-v1:sha256:10eeb92dab59457fda108ef3d0a599a98dc4bd2c77abf720342b27fccbe14a50:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxNWRlNDZkNTVlZGYwZTQyZWIzNTFjYzg0NzkxMDUxYjcyZDllMjgxYjg2YWE3MTQ4NGNlNGYxNzhmNzMwOWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwY2Y3ZWJiNDlmMWM1MzljODk0NDE3ODliNTc0Y2IwMGY5NDdlZDMwMDViN2M1NjkwYjc4MDI4ZGI4ZGUxMzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIxNzQ0ZDE5MjdkN2UwYmRiZGQ5NmNhZTg3YTdkYWFkZjFlOGRkMjRiN2RiOWJhOGFkMzQ1MTgxMGYxY2ZjMTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f1ed12ce58a548058ed9e17215e2998c",
+      "statement": "`do_handle_prefect_webhook` polls the flow run via prefect-proxy, catches and logs business-logic errors so they never surface to Prefect, notifies org managers (and platform admins if NOTIFY_PLATFORM_ADMINS_OF_ERRORS is set) of unretried failures, and in a finally block refreshes AirbyteJob history for the last 6 hours for any Airbyte connection in the run and queues log summarization for failed runs.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/webhooks/webhook_functions.py#L213-L240",
+          "version": "repo-lines-v1:sha256:0ae48f6a623303a68adad60ae4d4827fa8b93b9efbb023b70fcbfd302c68cb18:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdkNDIzZjljOGUyM2NkNWI1MmIyYTk4ZTliYjgxOTVjOTAxZTc4ZTJkYzEyZGU5ZjEzZTJjYTc4Y2FlZjUzOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyYTRhZTM2MzdhMmUzNWYwNmI4YzcxZjE3NTc5Y2UzMjA1YTQ3ZGY2N2QyMDY3MmE0NzRiYjQzOGM1NDRhMjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdlOWFlNDAyYTMxMDg4ZTMzOTgwODJlY2U2N2JlNTBhMDExNmE5MDI5NjFjZTU0MWUyZDAzMWVkNDY0NWFlNzkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNkY2EyZjEyOTEzYjM4YjVjMDVmZWJmMWI4YmIzOGM3NDA2NzdlYjQ0MDM2ODliNjMzYjhhNWI1YWQyYzcyZDcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/webhooks/webhook_functions.py#L327-L396",
+          "version": "repo-lines-v1:sha256:54c3c17541933b705ae72ac7fee68ccc56f8d255d2690cc2f1242e6dc77d0264:eyJzZWxlY3RlZExpbmVDb3VudCI6NzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMwMDc3ODk4Y2VmOWU0YWI1NzFhYWZjYWIxMWZmMDE5Mjc4ZjgwNDdlZGMxZmJlNWIzNzAyZDk4MGZmNmE5ODYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxODFlMDUzZDFkOTJhZDMzMGQyM2M5NGFmMmVmZjhkMzg5MGI2ZDI2Y2FlODI3YTRkYjM5OTIzODBlZjUwODkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE0MTMwNDY0OTRhNjk4ZDU2YmIyY2Q1MGE5ZmVjMGE5Yjg4ZGE0YTNiNTJjNjNjM2MxY2Y4NjBjNmNkZjVhYWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_50391e06af9a4f7b84bfa497d7097a72",
+      "statement": "Lock status shown for a pipeline is computed from the cached PrefectFlowRun row (scheduled or pending is queued, running is running, anything else complete), and a lock held by a different dataflow shows as locked. The webapp polls /api/prefect/v1/flows/ and /api/dashboard/v1 every 3 seconds while any returned pipeline has a lock.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L339-L365",
+          "version": "repo-lines-v1:sha256:4b144652b9d7a0b14059e39cfd54a1fbe08f713db864fb9ce5f3a514adb6004c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZjNjZhYWU5ZTRjMWM1ODg0ZjQ5YjE2ZmZlYmNiMjUzZDQ2MjhjOGQxOTg3Y2RlZTBjYWViNzNjNDBiNmY1MjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTYwMGE3M2QyZTAyZjM1MmI5MGZlZjFkOGQ2MzgxMWJhNGE4ZWUwYzFiZWFhN2FlNDY1OGYzNmFhMmUxOTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3MDE0OWUwNjlhZDY3ZWNjZjQ3MzY0NmZmMWM3NTAwNTBkMzI5ZDExMDAxOGRjNTc2Njg3OGVhZmExZDYwN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUxOWMxMzZiNGQwYWQxOTQ1YTFjNDliM2Y4MWIyZmMyYzJkMWExZTJjNzE3YTdjNjQ5YzFlNDljZjM5YTc4NDMifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/usePipelines.ts#L26-L42",
+          "version": "repo-lines-v1:sha256:9806eb8364d393b5461f85be855b9f162d1dcb1d22b03533196729ea4f1dbb35:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjODM5ZGVjNzM0MjY0NDZiMWY2YjBmYjAwNTRiNmY3MGRmYjZmMzJlMTg4NTRkNjBjYTY5OGYyMWM2ZWE2MDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFlNDgwOGQwYzIyNTMyYjc5YmNmMzIzYmZhMjk1YmE3YzA1ZjBjYmE4ZjUxOTdmZmUzYzRjZGM5YTc3ZDYzZTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA4Mjg0OThmMzQ3ZmZiMjFmODYzOWVkOThmZmJmMGE1ODI0MDVjOTVhZDdjYTNjMDY4MGVlNWIyY2ZiNGZlOTgifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/usePipelines.ts#L290-L301",
+          "version": "repo-lines-v1:sha256:8c32f670e781e20eeae1db230f7e3dd2febcb0340bc7e87bc4f0c8d5d156ff9c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmMzBhNTQzMWIwNWUyOTE5ZGEzNmUzOWE5N2RiMjRkMjAxYjg0ODdkZjljOGM4YTRiMWVjYTFkZWE4YzNjYTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM0MTY0NDUxM2QxMDc1NjUzMDQzMjQ4M2ZjYWQyMDkwM2Q1MTUxMWMxNDdmMGRhYzU2YTBlY2NlOWI0NzYwNTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkxNGY3NTdiNTA0MjI2OTkxOWY1YTMyNWQxMzNlYmU4YzBkMjMxODNhZGM3YTBjZDE0YmM3MTU1NDdhOGY0NjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_857cadeef54f4a7d8b097380f5ddbd6d",
+      "statement": "The /pipeline run-history page is fed by `GET /api/dashboard/v1`, which returns each orchestrate pipeline with up to 50 recent Prefect runs and its lock owner.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/dashboard_api.py#L15-L70",
+          "version": "repo-lines-v1:sha256:54bdc704db8e09aaf64149aa9d8b712b38fbba51740c6605e4d611aebab589e1:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMwZGJiYWJhOTJkNWEyNTM2OWI1M2Y0Yjc4MTNiYWNiYjBlYWI1NzhmNmNiMmViYzc4OWQwYzQ3NWQwNGQwOTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk2YTNkMDgzMTRhOTJmZTA3MjVmNjZiMTllYjY4NzExNDE4M2UzYmRhODhiMGVhYzNjNGEwZTdlODQ2NDhkOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ1Y2Q1ZWNiMmM3ZjVlMDRmZmIwMTQ4NTQ2Y2NkNjY0OWJiM2I4N2RiMmYxMTVjMWY4Nzg3YjBkMTMzNGEzMGIifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/usePipelines.ts#L290-L301",
+          "version": "repo-lines-v1:sha256:8c32f670e781e20eeae1db230f7e3dd2febcb0340bc7e87bc4f0c8d5d156ff9c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmMzBhNTQzMWIwNWUyOTE5ZGEzNmUzOWE5N2RiMjRkMjAxYjg0ODdkZjljOGM4YTRiMWVjYTFkZWE4YzNjYTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM0MTY0NDUxM2QxMDc1NjUzMDQzMjQ4M2ZjYWQyMDkwM2Q1MTUxMWMxNDdmMGRhYzU2YTBlY2NlOWI0NzYwNTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkxNGY3NTdiNTA0MjI2OTkxOWY1YTMyNWQxMzNlYmU4YzBkMjMxODNhZGM3YTBjZDE0YmM3MTU1NDdhOGY0NjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0b97538480334284921451d2a1031613",
+      "statement": "Chart data for saved charts and unsaved builder configs goes through `generate_chart_data_and_config`, which builds a query for the chart's schema and table, executes it through a WarehouseFactory-backed client on every request, and returns data plus an ECharts config. Maps and pivot tables use separate branches. A missing OrgWarehouse returns 404, ValueErrors map to 400 and other errors to 500.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/charts_api.py#L148-L220",
+          "version": "repo-lines-v1:sha256:e227b536703b7481599685b2143ba7a0bf252e47aee75e28d46c3e87d39a87b1:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1YmM4ZTFiMjM4Mzk4ZmZhOWMzMDljNGJmZGIwODNhMjJhMzczZTg4ZWQ3NGUxNGIyOWIxNjI2NTQ2MDM3NTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3ODAwMjU5ZjU3ODY4MjdkZTJlZjY0ZDBjNGYwN2QxNDhkMGNmODA3NmFkYWFhOGY2ZTM1OTY5ODg1ZjE5MTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzNDY2NzgxZjY0YmU5ZjIwZGY3YWY3NWJkMDAzOGM3Zjg0ZDc5YmZjNzdhMzMzZWQ4MTdhODI4MDYzZDM4ODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc5NzgzNDkyNDYyMGRjMTBmOTRkZTM4MmJkZmUzNDBlMDA1ODMxYTFiZTI0Y2EyYWM5ODAzNjcyYzkyY2ZhMGEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/charts_api.py#L444-L486",
+          "version": "repo-lines-v1:sha256:b37dd823e76de410f55d8b3755e3904411ef6b8cf0dcff9d5c60443215cb6d52:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3OTQ0ZjNhN2EzOTkxODVkZDZiNjBlZTY4YTE5OTMzYzkyNDI4MzY0MGJhZWQ5ZWZhM2EwYzkzMDA0MTYzYjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU0NjlhYTE0NDBmY2IzNWQyZjIxYTFlMjMyMWNjMTZlZTA1OTQ3OGEzZjdkYjVkODdiZmQwYjAyZGIxMjA2YTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA3NGEyZmJlOWU2NDZhYTBmMjBjYjM5MjgxMTg2ZTJmYjEzYWVjMDdjNWVmYzUwNzFhMThlOWY1YjY4MzQ3MjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFmNWI3Mjg2NDZiZWMyYzBlMmUxZWQxYmY5YjE1Nzg3YTk0YjYxODg4ZDAyZWExMDRjZmFkMGNkZTM5MTA2MzMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/charts_api.py#L994-L1054",
+          "version": "repo-lines-v1:sha256:2ce5c53ce6a3a08a17b20882f89407cc51249c0b8c3d07cf14c945b352c195de:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ0MmJhYWViMjkwOGM0NTY2NjNiMzI5NGRmMWJkZGE2ODA3ODRjMzBhZWNiYzRkZTE2M2QyYzUwYWVlNTAxMWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3ZTYwYzE0Y2Q4ODdjOTIyZmNkZTYyODhhZTQ5MDVhYmMyNDE4YjZkY2RkMjk2NDU4YmM3MWNmYzIyMWVjYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVkYWUyMTk0NTZhZjM0NmJhNjUyMDc4MzEzN2YyOGI0MGNlMDYwOGNmNjM4ZWVmNzRhYWE1OGE2YTY4ZTczZjYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8ab034c859114f51a381bd41ffc26c35",
+      "statement": "Chart data is not cached and is not triggered by pipeline completion: the charts core has no Redis usage, so dashboards reflect warehouse state at view time. The `has_schema_access` check is a stub that always returns True, so access is gated by org membership and the can_view_charts permission.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/charts_api.py#L117-L121",
+          "version": "repo-lines-v1:sha256:ab15ed89f3aae6fe9eda3de0d6ce2166cd2fe6ad9d04bf7762f49a7889114d00:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2VjNWJlY2I2NThiZWY2YmQwZDA0NzgwZGVkMTRiYzNjMjEwZWE4MmRmOWQwMGEzYWU5OGI1Y2EwNGRiZGI2MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzBlMmE0NjUwMDk1ZmE5NWQwZTJiYjQxYjJkYjI5MDk0ZDM0MDRkMjhjZTEyMzM5ZWM4OGJiNGI1YzViZThmNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzIyYTdmYTVjN2Y0NDQzNmE1ZTRkYjgxNDI5ZDQwZjhmZjQ0ZTMxMGQ3ODNjODc5NjFhODM0ZWI0MTU1NjcxZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjQwMDg0ODNjZTlkZWZlN2M5ZjQ4OTcwZGY0NDVkMjE0N2UyNTJkYzJiOTdlNTBlNGZlMjNkMGIzNTczZDI2YiJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/charts_api.py#L148-L220",
+          "version": "repo-lines-v1:sha256:e227b536703b7481599685b2143ba7a0bf252e47aee75e28d46c3e87d39a87b1:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1YmM4ZTFiMjM4Mzk4ZmZhOWMzMDljNGJmZGIwODNhMjJhMzczZTg4ZWQ3NGUxNGIyOWIxNjI2NTQ2MDM3NTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3ODAwMjU5ZjU3ODY4MjdkZTJlZjY0ZDBjNGYwN2QxNDhkMGNmODA3NmFkYWFhOGY2ZTM1OTY5ODg1ZjE5MTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzNDY2NzgxZjY0YmU5ZjIwZGY3YWY3NWJkMDAzOGM3Zjg0ZDc5YmZjNzdhMzMzZWQ4MTdhODI4MDYzZDM4ODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc5NzgzNDkyNDYyMGRjMTBmOTRkZTM4MmJkZmUzNDBlMDA1ODMxYTFiZTI0Y2EyYWM5ODAzNjcyYzkyY2ZhMGEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e12e750b8ce544b0b7fc62baf722dcff",
+      "statement": "Canvas models are files in the backend's working tree, while Prefect workers git-pull or clone the remote repo at run time, so a canvas model reaches scheduled Prefect runs only after it is published through git. The canvas run-workflow path runs dbt in Celery against the local tree.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/orchestrate/pipeline_service.py#L128-L163",
+          "version": "repo-lines-v1:sha256:b78e8bb71a7af23843c0c384ae4411e78f80501e953cf97b1f7350d924237b1f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwMGYzN2QzMmEyYzcyM2YzZmQ3MzhjZTI0OTk2ZDBkOWUwNTZkNzBkM2U3NjU1NTU2MjAxMDBjNGU1ODcwMWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM2ZTk2NWQ0MGE5MzRlNTY4ZTBlMGRkMjRlNzI0M2RlYmI2Y2E1ODdmODZkODA2OWRmYTczYTM2NzIxNTVlMmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwNzk2OWFkMzdhOTkwMzFhZDQ0NzY1N2YxNjE0YTQ3ZDc0NDZmMzlhZjRlZTJhZjMyZmNiZTgyNDU3MjIxZjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM3MTU5YzgxYWI0NDdkZTAxMDI2ZDgwYmY3NGYzZmI2ZTMwNjc4Y2RlODQ2NjNkMzk0YjU0NjhkZGZiOTEyOTIifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L501-L532",
+          "version": "repo-lines-v1:sha256:20edc9f3eadc9c66eaf73164393cbab352d2af99e6825ab3557b7bbfba804906:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwZjYyYzgxYWVmZjZmOTA0Nzg1YTFiZGZjMzg0ODQ4MjVjYTdiZmJkOTc0MWYzNDc4YjcwM2UzNTliNmQ4YjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIyOWM1MjQ0MzRjMDA5YWFmMGQ3ZmU5ZTJmZmU3MjJiMTcwY2Y4ZWIxYzhjMTU3NWU0ZTNiZDUxZTkyNmM3MWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4YzhkMmRiYjBlYWQ4YmI4ZWQ3ZjlkZWM4ZmUxYzQ0NTgyMTAxYzFhMTEzZmJiNDMzYzFhZDExYmQzNGRhNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzN2VkNTI0YzMxMzA4ODg1ZTEzODI1MmI5M2Y1ZTVlNTU5ZTU0OGU5MDgzZDdkMWMwYmQ5Mjk4NTdmMjdiNTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f41d053012ce4593b77e663680110675",
+      "statement": "The Ingest page's state is derived from the warehouse and sources queries, and only a successful response with no warehouse yields the no-warehouse state. A failed fetch is a separate error state, so transient Airbyte errors do not send an org with a warehouse back to warehouse setup.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/components/ingest/redesign/state.ts#L18-L37",
+          "version": "repo-lines-v1:sha256:0a5d2d6e828e8dc31d9871e6d8cdc5fb237b07855d86794e24b6491538b436c5:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyYTYwY2U4OGMzYjE5YTQ0Y2VjNDI2YzI1N2E5NjBhOGU2YzdhOGM5MGIxZmY3YmE4OWQwMDQzMjZkN2Q3MzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

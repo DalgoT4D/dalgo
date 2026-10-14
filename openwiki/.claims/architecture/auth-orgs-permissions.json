@@ -1,0 +1,306 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:440f990695931871e3d16fd404b046e457eb9c553e91a867ebac2f28dca1e8a8",
+  "claims": [
+    {
+      "id": "claim_6e8b414d29274ae0a037598e5a10eccf",
+      "statement": "CustomJwtAuthMiddleware is the default auth of the main NinjaAPI, so every route is authenticated unless it opts out with auth=None; it reads the access_token cookie first and falls back to bearer auth. An expired token yields HTTP 498 (the frontend refreshes), while malformed or bad-signature tokens yield 401.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/auth.py#L154-L172",
+          "version": "repo-lines-v1:sha256:f22370ebe630514f41e36a9716d6ac6f7ef58b3cad70840e9ca556ccc94cdf82:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAyZGUyOTMzMWIzMWRhNWFlOTJkOTEyYTJiMTdhZWZkMTRlNzE0ZDA2MGQwYzkwMjJmOTU5ZWU3MjRhNDdkN2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE4YmM4ZjQ1MDA0OGE0ZDczMDkyMTliN2EyMGM3ZWVkY2YwODRhNGE0ZmJlOWNjN2RhZWRkYzgyNmM3MTNiZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZhMjhmMzA0MGRmYmViNjhjYzk0NjA4NDdiODVkYjU5ZDNlMGFkNzA5Nzk5NzFhNzM0YzQ5NWEyMTBiOWViN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQzY2ZlNTQ4ZDdhYmY2MWMwMjE3MDQ3NzI5MTUwZGQ0YjE2NDE2MjkyODQyMmQzNzk5NDRlYTc3ZjRhOWUxZGIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/routes.py#L34-L40",
+          "version": "repo-lines-v1:sha256:da180e916342435101a24921fbaebf8fa78bdbfce5c158b88b1105812e29df4d:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2ZhYmZiYmY2YWI3NDVkM2FjOTI1YmMwMGVlYzU3Y2EwNzkxNWNkZWQ3ZjRhOWFhMWE4MTRiNzU1ZWM5OTdkYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmFmYmEwNTI3YzM5NTNjNGI2ZTBlNWI1NzM5YmE4MzYxMmY4MDUzYmNkYzk0NjY3MzAxOTNjZDFkNTkwYjQwOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDQ2NmU5YjFjZDQ3OTliNmExNTIxN2YyMjRiYWQxNDc1MGM1MzlhZTZlMTE3NzA0ZGQ0NmIyZmY5YmEzZjMzZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGM5MTk3NDdjMmM2OTI0MDA1NDQ5OWQ1ZDg3MmQxZmQ0OTE2ZTcxMTQ1Y2FjYjU5YjdkOWEzMDA1MDhjZjc2NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_d241522326594e8f9e60be715926196a",
+      "statement": "authenticate() rejects tokens whose jti is blacklisted in Redis (blacklisted_jti:<jti>, TTL equal to remaining lifetime, written at logout), then resolves the OrgUser for the token's user_id narrowed by the x-dalgo-org org slug header when present (else the user's first OrgUser); an OrgUser with no org gives 400 and no match gives 401.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/user_org_api.py#L239-L269",
+          "version": "repo-lines-v1:sha256:1548d996f7fa054f4142350efbec23b06bfccf7184b2e6086ca0192626118638:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwMmNlZjVkZmU0YzA5MWYxMDlkOGNkYmIzYWEyNDVlMjFjOThlMzMwNjhhZjk5ZGY0M2RkMjMxM2Q2NzExMGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyMDg1MzI5MTBjZmNlZmU1ODcwM2Q0MzQ0NWE5YzIwMmIxMjQ4NzcyZjE2ZWY1YTE2MzBlNjJmMjVkZjAyNzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5MWIzNTQ1YTA2ZjY0YzQ5ZWMwYmU3N2RkYjQ1ZDI0Mzc0ZmE4NTQwZDQ4NzMwZGE2ZDU4MmRmMmJiYjY0ZTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE4Y2ZiZDU3YWQ4MGE3N2E5YzE5NTk5MzI1NGY4ZTA1Njg1ODlmODMwZDE2Zjg2ZjE4MTU5NzFkMjI1Yzk2ZTEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/auth.py#L139-L260",
+          "version": "repo-lines-v1:sha256:74147a68c35afc5cb3ac4402f1ba57beb30db2dfecbc14fc496f98288714c8d3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyNjZiMTQzZDQxMjZmN2Y2Njk1NGM5NDBiNTUxNjIyYWFlYzBhZWU2ZjVhZGUwYWYyY2NmNjlhOTg3MzFjMmNhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJiOTk1NDE1ZmQyZjkyYmNmNGU3M2FiNDlmZGM2ZGY1ZTRjM2EyYzY2NjI4NzFjNzIzN2UyZTk1OWJjYmJlMzU3IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIxMzZjOWJlOTAwOGI0MmNiNmU2MTg2MGFkODA2Yjk4MjNiZGM4ZGJkYjUyZTg2ZjY4MjRkMDQ5MGFkZDdjMmQwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhNDc2YzQxY2RjZGI2NzZjM2RiYjVjMWM3YTM0NTQ5MDJiMGQzNmViYzYyZWI3ODk0NWJmY2QwNzQ3YTQ3OWVmIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_816e386a89eb43d9b9c01800e61008a2",
+      "statement": "Permissions are resolved from Redis: a per-user {orguser_id: role_id} map under the token's orguser_role_key claim and a {role_id: [permission slugs]} map under ROLE_PERMISSIONS_REDIS_KEY (default dalgo_permissions_key). Missing or corrupt entries are rebuilt from the RolePermission table, and the middleware sets request.user, orguser, permissions and token.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/auth.py#L126-L136",
+          "version": "repo-lines-v1:sha256:3bb9d3f37a2bcc7218fa64d88c3e045d4db52c5054511145427f88e95b5a96b0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUxZmZjZTZlNjI4NTU5OTdkYjJiMzMyNmU4ZGU3MDQ2NjFlNzc0MTAzNzY3OTRhZDkwYjgzNGI2OWU5Y2Q4YmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjNGUwZjhmZGY2YTA2YTg1Nzc4ZGE1NDA1NDZhNWQ3MTBkNjNlN2Y3YWM2NTc0ZTUwYzdhZTEyMDNiOTZhM2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE2MDVjNmFjN2JmYzk3NjEwZjBhN2YyNWFiYmMzNzM2MTY4OWUxYjNlYmJkZDU3MGRiMzU2MTE5YjQwYzllNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRiZWUwMGU2M2Y1NGUzNTUwZWJhYThiMDg2Y2QyMDFmZjhjM2YxNDVhZTFhMDdmNzg1MTE3ZWI2NGRmZjg1OTMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/auth.py#L194-L260",
+          "version": "repo-lines-v1:sha256:2858635c24d10fa1ec455eebe6aa08f1a3654085d59c074e653297977cbfe058:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY4ZjAxOGI5ZGFiY2NkMzgyZWRmY2NmNDMyNjQyN2NiYjY2MGY4ZTM4NThjMDQ4YzNlNWY5ZjA3YzhlNjQxZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5OTU0MTVmZDJmOTJiY2Y0ZTczYWI0OWZkYzZkZjVlNGMzYTJjNjY2Mjg3MWM3MjM3ZTJlOTU5YmNiYmUzNTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU5ZTAwZDhmZDkyMTEwMWEwZjFlMDQwNjJkZjExYzNiNjkzYTU0YTFkODAzMzBkNzljMTFkMDViMjRhN2IwMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE0NzZjNDFjZGNkYjY3NmMzZGJiNWMxYzdhMzQ1NDkwMmIwZDM2ZWJjNjJlYjc4OTQ1YmZjZDA3NDdhNDc5ZWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_65779ffa76064b64b6f51879762b8cbc",
+      "statement": "CustomTokenObtainSerializer.get_token rebuilds the user's orguser-to-role map in Redis on every login and refresh, seeds the role-permission map if absent, and adds the orguser_role_key claim; the v2 login and refresh endpoints deliver tokens as httpOnly cookies configured by COOKIE_* settings, and logout blacklists both tokens and deletes the cookies.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/user_org_api.py#L1277-L1358",
+          "version": "repo-lines-v1:sha256:5567ac6e296305bdc5387a9c8357dfd19e495b65e393b3ac28bffa2e80dad0a8:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIxNWYzYTFlYTJhYWMwOWQ2N2RkYWRmNzcxZmUyYTVhMWM4YTI1M2Y1MjFjMmRiYzM1ZThlMDRmZjMxNGRlODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyMDg1MzI5MTBjZmNlZmU1ODcwM2Q0MzQ0NWE5YzIwMmIxMjQ4NzcyZjE2ZWY1YTE2MzBlNjJmMjVkZjAyNzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkxMmM0Y2E5NDI5MmQwYTI2Y2YwZDg2YmUyNmFjMzJjNjc1MjA5OTY3N2MyYTcxNGFjODBjNzI1NmE5NDhlOTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM3YmQ5ZjRjMGQyNzRlN2VjZTkzMWI3OGI0NTE3MDljY2FlMjUyMGMwZWU2NjY1MmJmMTMzNGY4NmNmZDJiOGEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/auth.py#L263-L325",
+          "version": "repo-lines-v1:sha256:e61ab5da9c3d9f39d83b12fb1272cbf7a6e43aa5994a6e8f389f0ed427af84b3:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4MTIxYzUzZGI5NTA1NzQwMDIzMTQ0ZjM5ZjE2MDIyNTRjMWZlNzIxZDE4Y2NhMWFjMjA3ZGI1NjVmNDgyYTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhjMjVlM2FlYzFiMTNmOTBhMzhjYjJjY2NiZjlkZjgzYmM1ZmU2NjAyODE3OTJlYzczMDc0MjcwMjMwYzcyYjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFiZDdiZjdjMjA5NTBlNzUzZjkzODBkNGYzOWI1NzhiNzcyMGRhN2UwMmQwNjZhYWU3MzU0ODBkY2I5YTVlNjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/settings.py#L353-L355",
+          "version": "repo-lines-v1:sha256:fca19f40a7832da106c6794cc82888fe2bb6114b8153211c4855c69539b8cfc6:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTM4MTYyZjg3M2Q1YzAxMDE4NWJlYWE0NGZmM2NmNjY1NmI5ODRjNWEzNDhlNzc4YzAzM2NlNWY3ZDRhNTY5MyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2U1MTFkOGFhY2QzYzhmZWYzZmUzZmQ1MTgwYmJkNjY5ODlmYzRjYzhmYzUxOGQwY2VmNjE4ODBkM2UxZDQxOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGMwNzM5MDYzYTMwZDgyYmUwYWUwN2U3ZjA0YWU0MGYyNDUxZDk5MjVlNzcwYWMwYjQzNmI1ZjlkYTVjMmQwYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTljZmMwYzlhZTMyYmQ4MDhmMTE2MjBlZjhhNzQyNWE0YzM1YTg1MmEyZmY1YTk0ZmMxMmVlYWRmZjVmMzdlNiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_474ced5d3533412c9d576afffd8a36a4",
+      "statement": "Roles, permissions and role-permission grants are defined by seed fixtures 001_roles.json, 002_permissions.json and 003_role_permissions.json loaded via loaddata (post-deploy.sh runs migrate, loaddata, create-system-orguser, then clear_role_permissions). Because the role-permission map is cached in Redis, changes only take effect after the cache key is cleared.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/management/commands/clear_role_permissions.py#L10-L30",
+          "version": "repo-lines-v1:sha256:d09fc9783cf6f3e730eb41074befc1c21095ec90e98eea2aabd630b800e4ee4f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBmNGVkYWYwM2M0NWIzNjA0MjMzN2M2YmJkNDQ2MGFjNmY4NDkwMDExMDY1MDg5NzE1ZWM3ZTM1NGVhNDNjMzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkMTI0ZjlhYjU5ZGRhZTc1ZDAzNThhODM4MGIwODM0Yzg0ZjFhYWUyNWRiNDlhYjNjN2NjYWNkMmFmOTUyOTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYxNmJjNTZlMTYxNmQ1Y2EzOTA4NWY0ZTU1MTYzNGQ0ODg2ZDQ3YTQwZjgxZmIwZTMzMTkxZDI5ZjIzYTA1OGUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/management/commands/migrate_rbac_v2_roles.py#L1-L20",
+          "version": "repo-lines-v1:sha256:996f07f7d2f04385817fa024450583d12e583dd04e44727063ac7b3aa856882f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1OTM1NWFiNTk0NGNmNzk4ZGU0OWMzNWVmMjZlNjI3OTQwODlhOGIwM2MyYzI2NmFiYThjZDlmOWQ1ZWM3N2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUwNTk5OTcxODQ5ZGNjMDdmMzk5NzYyNzU5NDFhMDk4ZmFjYzdmNjQzYTFhNzgzN2Q1NjgxOTkwNWI2MmM3MTMifQ"
+        },
+        {
+          "resource": "repo://backend/scripts/post-deploy.sh#L9-L19",
+          "version": "repo-lines-v1:sha256:cde397f765f7ef2597928baa4940b3d2e0a8dd5c4d1a1e743ff97829dca89520:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMxZTRmZmUyNWRkYmNiZDgzOTA5ZjE1N2U2M2M5YTE3NzIzODVkZWFhMjY2OTYwMzBkNTMyNGE5ZjQzNTI5NDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY4ZmEyNmQzYWI0ZDU1NmZkNDg2MjYwYjc5N2Y2YjgxYWYzM2YzNDM5NWU1MzQ2NTQ3ZmQ5ZTNiMzhkNzA5MDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRjNjU2NDg3ZDUxMjkwOWExN2UyZjZhOGE5MmQ2N2JjMmQ1OTVkZjg1NThhN2E3MWM5NTFiNTgyZmNiYTc3MDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZkYmMyZTNlNmFkMTFhYzQ5ZDk5NzI3YzEzNTM5MmVlZDZiNzAwOTc1YmM2ZjkxZThiNjJmNWNhYjE0OGEyMDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2d2f634be3994ddbba9cc62c146351ba",
+      "statement": "has_permission requires request.permissions to be a superset of the listed slugs, supports both sync and async views, and its inner check catches its own 403 and re-raises it as HTTP 404 'unauthorized'; this quirk is still listed as open in the resource-sharing tasks.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/auth.py#L41-L75",
+          "version": "repo-lines-v1:sha256:317a6ad3c29501e185a3b775f99cfebf2efd56e9135f379b2e4ba116c8135364:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwOGUxZDNlYjA3ZWEwZDgyNGFmYzA4ZDdmMGNlNWUwYTBiOWUwNDM3MDU5OTI5ZjI1MmRiYjM5NzRjYmY1NmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1MDFiYzg4ZmNkMjgzNTU4NjBiZWI3ODYzM2I3ZjBjNzQyZTE1NDU4MDZjMmIzM2Y4MTg2MGZiZWJlYjY0YjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYzY2M5OTI3NDdiOTg0NjJlMmI3NWMyYjliOWZlYmYxNDU2NTU4ZjQ2NDc3YTkxZGJmZGZjMTA3YjA2YjA3OTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNjOTU5MGVlZmQzZDc0NDU0NGQ2ZjdjNWQ3OGNjZjcxNmZhOTQxMGU4NWQ1MThlMmJkMTQxNWZhNmY5N2RmNzIifQ"
+        },
+        {
+          "resource": "repo://harness/features/access-control/resource-sharing/v1/tasks.md#L389-L389",
+          "version": "repo-lines-v1:sha256:ce83ab8cad6d1027c68ce9b69ed58e2db4de7de1e39e25a89f8c21501d110c56:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2U4M2FiOGNhZDZkMTAyN2M2OGNlOWI2OWVkNThlMmRiNGRlN2RlMWUzOWUyNWE4OWY4YzIxNTAxZDExMGM1NiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2U4M2FiOGNhZDZkMTAyN2M2OGNlOWI2OWVkNThlMmRiNGRlN2RlMWUzOWUyNWE4OWY4YzIxNTAxZDExMGM1NiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTU4YzEzMWEwYTBhNTAzNmY4MzlmNDU1MzU0YzM2YTBhMzI3OTg3YWY1MjcyZTQ4YjQ3YmYxOGE2NDg4M2E5MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDcxMDU5ZGEyZDY5NDgzYTc2ZTgzYmNmNmViNmY0ZDk3YmFlMjRkMjQ2MmUyMjk1NWRjM2M2YjUxYjlkMTE2ZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4ac2fb07192f41fe82906dc953568945",
+      "statement": "Role.level is used for hierarchy guard rails: users cannot assign or invite a role above their own, nor update or delete a user with a higher role; deleting an OrgUser first reassigns their created dashboards, charts, metrics, KPIs, report snapshots and alerts to the acting admin.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/user_org_api.py#L812-L878",
+          "version": "repo-lines-v1:sha256:9d8acbed93289dc36ccf13c72babea77c54e048d3cb59dab3cda99fe3a5b30a9:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwYTllMGZlN2JhNDFkZTIyOTg2NDZmODJkNTlkNmM3OGRhMDRmNTk3MmQ2ZjljOTI1NTYwOThmM2E4MjJkODYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhYTRjYjE3NTJlODQzYjE3YjRlODdlYmViMjJjNjk2OWNmNDhlNDczMGZmNjE3Yzk4ZGFjNWRiMDY1YzU1YTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFjZTAxZmQ3NmJkNzM1YmI4NzFhMDlkN2I5YTFhZTk0ZTlkYzkzNzUwYTk5OGEwNzUzODE2YWRkMDA4MGRjOGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlkMGVjNzgzMzgxOGY4N2Y4Y2U5NmI0ZWEwYzk1NWZkM2JkZjEwMDBjNzM1NTExYjkyY2ZmOWNiYTI1OWE2MWYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/orguserfunctions.py#L188-L246",
+          "version": "repo-lines-v1:sha256:0400e9ff417cb090ebd4ad0f879210c2130d7d6f9cfb8b272c35d8b56c24d041:eyJzZWxlY3RlZExpbmVDb3VudCI6NTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZDQ3NzY1Mzk5ZjVhYWU1YzNlMGY4MzU0ZDExMDljYjg0OTQ4NDIzZWU2MmVkZjQ5YmFmNzMyMTJkYmJjZGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdhN2RhNTY5YzExZjI3ZDVmNTczNWMwY2Y0OTEyODUzZGQ2NzdkMjU2OGViM2UwMzA5Y2I1OTllMDU5MWJiMTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYxOWI5MTJlNzAxNzhlYTQzNTA0OTM3NTU5NjI3NTdjNmM4YTczZjNjMzJiM2NkYmUwODk0MjU4NGJkY2Q3MGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_78c024654ec34ca4b3a9acb29b5e0a5a",
+      "statement": "The access resolver in access_control.py grants edit to the creator or admin/super-admin, otherwise max-merges the user's direct and group ResourceShare grants; private resources then need a grant (else no_access) while non-private resources take the max of the grants and an org-wide floor chosen by role (analyst vs everyone else) from OrgPreferences. accessible_filter expresses the same rule as an ORM Q and get_user_access_map is the batch variant.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/access/access_control.py#L233-L251",
+          "version": "repo-lines-v1:sha256:c77046712194ac2e0e869c134ff50fea347b10b09ea01ed8e72045c3aea3762e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhYzRiOGI1YmQ3OTA4NTViYTUwNTkzOWRlMzY1ZTQyMTQ5MzJjMGVjY2FiZTc0NWVmMDg2MTQwNzY4OTMzY2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3MjIzMTA2ZmQ4NzQyYjcwZWEyMzNmOWRjMzU5ZjRiMDJiYmIwNjliNzI4M2VlZjc2MjQ5OTUxNmJkN2I5YzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/access/access_control.py#L36-L156",
+          "version": "repo-lines-v1:sha256:3aa24adca0eec64b1e51368dd3a5960da9e7c4481ccb91af0fb4953fb25de4a9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI3NTZlOTcxMzEwYzI4NmIzODJjZWM3NTVmN2ExYmVlMDhlZTIzZDM2ZDg1MzAxMGI1NTc3YTAzYTg5MWU1NjFmIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmM2EzNDFiMDA4OGIxZTVkNDJjNTc1ZDYyYTQyZjhjY2QwMjczMmJhOGVhZGRiNmMzZDc4YzZjYmY5MWRjZTk2IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwN2FkYTMzNjk1NTg1NmU3MTBmOTY3YjJiMzMzMWEyNDI2YTM2ZDY3MTM0MTQxMWMyOGZhNjc0NzQ4MmE2MmZmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIxNDUxMDQ5OGQzZGJlOWY2MTRmZmJiODE4MmY3MDk2MmVkM2VlYjliMzY1MGQzNzEyYTgxOWJiNGVlMTNmMWI1In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/access/ownership.py#L16-L32",
+          "version": "repo-lines-v1:sha256:2fef49270109c5558c5acfe0badb58c64ae5c9c2cd233367e9d74e2fff0f787c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1MjFjMjI5ODZkMzZmZjk3MWQ0NjU2NjI1ZTk1NTU2ZjVjYzFhNmUxYjIwMzRiNTk5Y2I5YmI2MjI2ZTRlY2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5NTgyYzY4NDVhYzgzOWQ2ZWVjYjcyYzAyNTcxMjAzNjJmNWRhNzg5ZjM0ZTQ4ZjI3NDRiOTI4ZjBlYTVmYmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQyMzIxYjc1ZTRjODU5Y2ZhNWU2ZDRkNTk0ZGZiN2QyYWQyYzFiODNmMzYwNmFlMDE3MTYzN2ZjYTg1ZWMwODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE4ODAwZDU5ZmUzMWEwNTA0NzUzNDhlNTkzMmViYTU4M2VjNTdmMjI5NjIyNDk3MzlhZDZiODQ2N2RmMDBmYzkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_aea546d3c2b145f0a7bb9c1d4629a924",
+      "statement": "has_access(rtype, required_level, get_resource_id) reads the resource id only from endpoint kwargs and maps outcomes to HTTP: missing or cross-org resource gives 404, no_access or insufficient level gives 403, and success sets request.access_level; it is stacked under has_permission.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/report_api.py#L123-L128",
+          "version": "repo-lines-v1:sha256:9cba1967b172e8ff5b22c67d36fa47141762000f1ab8cb18b83853d6e453b859:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGU4MzEzNTQ1ZDY2ZmU2ZDg0MjIwYzQyYTBlNjU4NTViOGUyMDkwNTZkNWRkZmI3MmNjNmY0NWIyZjkxYWE4NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDY1MjM3ZTExNjY1YTI0MGE3YjcwMTQ5NGMzYzRlMzQ4ZDAxNmNhZjgzMmFjMjZkZmEwNzA0MTI1MjIyMjllNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGNjNGE3ZDFjYzc5NmFiYTNlNDY3MjMzMjdmNTE3ZTlmODExOTgyZDI1MGYwNzAyOTg2ZTRiNTc2NGFkOTU4OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTllOTUxN2M3YzRkMTFjMWMzMDQwOTNhMGEwOWI4M2RlNTUyMTBiNTFiMDUzNWVlMzBhMzUxMDA0MTE3OWE4NyJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/auth.py#L86-L123",
+          "version": "repo-lines-v1:sha256:34f166db08e11a2736e400652839b01e4720d4660c9a4c430e54df79f1cac150:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4MmRmZTQ3YTQyNWYxNDE4MGUyZjVjYzgzOTZmNzJjODJiMzY0ODJiOWM5YzU0NjRiZWRlODgyNWVlYzE1ZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1MDFiYzg4ZmNkMjgzNTU4NjBiZWI3ODYzM2I3ZjBjNzQyZTE1NDU4MDZjMmIzM2Y4MTg2MGZiZWJlYjY0YjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM0NDZkZDE3YWFlZGZiN2Y4NTNhZDg4MzQ0ZjY1NGY4NzAxNDJiN2U4Y2NmNGViOWJjNzdkYjllZTlmZmQ1MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY3MTRlOGZkZWIwYTgwNjA5MmEwMDdjM2YyZjg2YTQyMTMyMmUxMGU2ZDYzM2RkYWI4N2FjODRiMzkxMmE0NTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_389f21ef35ad440ba2d11b760baf2fbe",
+      "statement": "ResourceShare uses a soft resource_type plus string resource_id pointer, a user/group principal or pending invitation, and a nullable self-FK parent for dashboard cascade rows; shareable resource types (dashboard, chart, report, KPI) are registered in a single RTYPES table, and get_resource is org-scoped so cross-org resources look missing.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/access/shareable_types.py#L24-L44",
+          "version": "repo-lines-v1:sha256:73d82f82d110a3c05d9709186bb320a978367dfc096c206e16477c6b4c52dddf:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4YmJhMjNlMTc0NDYwNzQxMTUyMGI0YTEzMDU2ZTUxOGI5YTkxZjc2YjhlMTk0NmUxMWJlZDVlMmYxMTZmYjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhMzg5Y2FiYWJlN2ZiYTg5ZDRhNTgxNTNkMzE1M2EzYTU4NGJiNWVkMjcxMTk4ZThhOGJiZjU0YWY5NjlmMTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI1MDgyZDY2YTY5ODcwMGE0OTA0YjJmYTMzNTljYTdiNDFkZmRlOTg5YTcwMGNiYjVlYTdlOWJhYTMxNzM5MjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/resource_share.py#L1-L126",
+          "version": "repo-lines-v1:sha256:114821c85f654ebad88fd538c2f4692e2b7badae5bb4a120e1249cfbab52e022:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1Y2JjOWFmMWVjY2FjOThhZjU4YmY5ZGFkYzhjOWE4MTM1ODA4NDBkNzA2NTM4Yjc4MjQyZjc3NDQ4NjExYjQyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIxZmM4Y2JhMzFhZWE5YmUzNGI1NDQzMTczNWFjODc5MmM5MzZhZTE2YjJlZDBkODllMGE1NWUwOTBhYTE4YWJjIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhYzFmNmYxNjE3N2NkYTU5Mzc3YTNiOTZkY2UwMGI4ZTE1NDQzMzRhN2JiN2Y3NDczOTczOWJmYjc3ZmEzZTlmIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_b276b78feb794cc4b8a0977abe17cd74",
+      "statement": "Sharing a dashboard materialises cascade child ResourceShare rows for every chart and KPI in its tabs via sync_dashboard_cascade; the owner gets an automatic Edit self-share that cascades only at View, cascade rows cannot be edited directly, and a direct grant at or below the inherited level is rejected.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/access/resource_share.py#L355-L405",
+          "version": "repo-lines-v1:sha256:5bb1f56137ed827fdafb635c104a565ff153fe90dc683ef27fab62a00368a044:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM4MjBmZWIzN2JlOGM4YjE0NmFkYzM1MDRhMDZhNDQ3NmQyMWU0ZDBhMTFhMzliNWE4N2RmYTNlZmE4YzY0MTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MDMyZTk2NGQwOTMyMzUxZTVkMTg1MjY5MjgxYjE3MWEzYTA5YjA4YjI4NmU2NjFlYTQ3MDMyM2M4MmViNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMzNGMzM2Q0N2YyOWJhMmJhOTNmM2QzZmI3NTUwZWI1ZjAwOTY3NDQwN2VjM2ZjYWY2NTIzMTUyMGZhNGQyNzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmMGM5ZjQxM2FkMTk4N2ExZDUyMzUxYzI4ODg5MDYwMDMxMjlhZGQ0MThlYmEyN2YwNGIzMGI5NTM5OWM3YzQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/access/resource_share.py#L473-L493",
+          "version": "repo-lines-v1:sha256:0be2d3f260c13cde8e46455d6dbb9005c87fba31b57f1b1fc8b65f65d6cf749f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3NjM3NTE5MmZjNmI2ZmIzM2Q1MzkwNzYxZTJjZDYwMTM2ZTM4OGJlN2JhZWJiYzgyMmFjM2IyODUzYWVmZTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxNDUyMzJhYmFhMmM2MzU5MDUzNTI2Nzc5ZGYxMDcyODZjMmQyMTA0MjJmMDcwMWZkZTYwZjY5YzA4NmQ2YWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzYzVlNTljNGZiNGY3NjNkMTllMGQ5YWJjNDcxMDA2NGU3YzNjMzQxMGFkMzAyOTdhYWFkY2QxNzk4ZTZjYWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUxYWVjZWI0NzIyNWY4NmIwMmYzZjk1MTUxZWJiMWM3ODFjMWNmOWEwZTk0ZWQ0M2RlYjM1ZTAzODk3MjNiZTgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/access/resource_share.py#L61-L147",
+          "version": "repo-lines-v1:sha256:536beb8720703ec9c2f30b268f37f719e632cb09b828c227f8ef8a8a55531463:eyJzZWxlY3RlZExpbmVDb3VudCI6ODcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgwY2E0NGY3MDU0NWZlZjkyYjZhMzI2MDg0OGQ2MzM0MGI3YmQxN2ZkM2E5YjEwNTlmNDU5MjM1MDMxNmFjOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBiYTM2MTNiNzgxN2U1YmIyMzI2YzQ4YjIxNWEwOGI1OTg0MDAyOGUwZGI2NTQ4ODFmMGQwMjFjOTY4YmNmMTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEwMjQ1NzcyZWYyMzQ1Y2I1YTRmOTVkMDY2MThhN2Y5ZWQ1M2Q2N2FlZTNjNWU0YmVjNmRjYjJjZjU0OTBmZTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_741ec9fcc42a4f58b2b90ef2e5751d11",
+      "statement": "access_api.py, mounted at /api/access/, exposes grants CRUD, general-access mode (internal/private/public with parent-dashboard visibility and org allow_public_sharing checks), ownership transfer and candidate listing, and access requests with approve/decline; Edit-holders as well as owners and admins may manage sharing, business-rule errors map to 400, and notification failures never fail the call.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/access_api.py#L185-L276",
+          "version": "repo-lines-v1:sha256:e272dee30aba201b80e73c32c2d42432f77ccdc67713c4d122ab5fd501ac33a2:eyJzZWxlY3RlZExpbmVDb3VudCI6OTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIxNjUzNzA3Y2RlNjI5ZmY5ZTVjYjBiOWViMjkyNjdlODlkOTVjNGMwNTg5MjE0NGNmZWZmZjZlNmZhNmQ5NmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2MTE5ZWMyZjQ5MDJhY2M0ZDIyMjUyYWJlZGI2YjVjMDkzMWQ4YWRiOTIwYWJhZjhhMjU4OTQxYmNlYjFiYzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2MzA4ODU2MGI1MGVlYTM4Zjk0NjM4MWMxNTU4NmVkOWY0OGQ5OTkxYTI5MDk1YjdiYmZjOWU5NGY4MzAzMzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNhYzM5ZDU1YjFjNDA5YWVlN2MzMThhZThmZWU0ZjEyOWVlODM1OWViMjczNjU3NWJlYmI4MDcxN2E1Mzk2OWQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/access_api.py#L296-L452",
+          "version": "repo-lines-v1:sha256:ab31c8ec14cc6dbad6e2c7b0b6afed6e0a7d50a35e891e5aebd483f4ba292f36:eyJzZWxlY3RlZExpbmVDb3VudCI6MTU3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJlMjJlMzZlYzE3ZjRkNTA5ODhiN2FjNGYyNjk1ODhmNmI3NGI1YWFhZTE4N2ZlZWIyYWU3MTAwNjgzMWNmOWYyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwMDgzYTg4ZDQ2YjFhN2U3YzY0ZWU5ZTk0ZjJhOGUxMDNiMGEzOWE4Mzk0MmE2NDA3ZGRjMjEwNTU1NzQzNzNlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI3Mzc0MDdhMjZjYjU0ZTM1NmExMzJlNDg4NDk3NzFiMTA3N2QxZDExYTNlZDQwNWJlNGM4MzFmMjkwMmM5YTAzIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/access_api.py#L470-L575",
+          "version": "repo-lines-v1:sha256:9976fbef7c138a5099b2fb1f1c66346790f33fd513fce04c525c1f27a8e1e5cd:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJjOTQwOWE4Y2JkNjFmNDlmZTc0NDFmOTc0OWJmNDE4OTk5YTE1N2YwNTAzM2E2YzFlODFlYzhiZTMwM2E3OTZhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJlZGQ0MDRlNDQ3ZjBkMmRiMzA3ZTU2MzJkODk4MjE5MmRiNjVmYTk0NmEzMWY0MmY4YTJjYzJlOTY2ZDFiZDE1IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4Y2M0YTdkMWNjNzk2YWJhM2U0NjcyMzMyN2Y1MTdlOWY4MTE5ODJkMjUwZjA3MDI5ODZlNGI1NzY0YWQ5NTg5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/routes.py#L124-L124",
+          "version": "repo-lines-v1:sha256:1c95032c3a8eab53129927f587a02a139c920df963756cec7a8caf8434cdf1cd:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWM5NTAzMmMzYThlYWI1MzEyOTkyN2Y1ODdhMDJhMTM5YzkyMGRmOTYzNzU2Y2VjN2E4Y2FmODQzNGNkZjFjZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWM5NTAzMmMzYThlYWI1MzEyOTkyN2Y1ODdhMDJhMTM5YzkyMGRmOTYzNzU2Y2VjN2E4Y2FmODQzNGNkZjFjZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWUzMGI3NDAxMzUxMjQ0N2ViMjJjZGFiOGRhNTcxZjIyOWRiNDIwNzU0MTRiZGU5NzA1ZmQ1ZjdmM2E5MjJlYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2ZiZTUyNTA3YzcwODcyYzQ2MTE3Y2M4NjgxYjI3NzU2YmM5NzBkN2JlNGM2YmJiMTNlYjJjNWU4M2Y0ZjhjNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4c9879d6d89140828c235aa5dadfe2f5",
+      "statement": "transfer_ownership requires the caller to be owner or admin and the recipient to be in the same org with effective Edit (unless an admin takeover strips the previous owner's direct shares); otherwise the previous owner is guaranteed an Edit share, and dashboard cascades are re-synced.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/access/ownership.py#L35-L116",
+          "version": "repo-lines-v1:sha256:a4f8acc47a441d03b78be605807aa0ada2b25e1c65f2292f8c2df0fca8cd6a01:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlMTQ3MjZlNjZiMDQxZjEwNjI1OWU1MTIzMWQwMjk5MjQ4Mjk2MTU5MmM1YTk1ZDI0ZjA1Yjc3ZTZkNmNjMGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyYjVhN2Q5OTYxZWU4NzA0ZWUxNTE1Mzg5M2NjZTU5ZDllZGQxYzYyNTI2Y2FlODNhOGUxYzY3YmUyMDUwZGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjllZjY2YzI0OWEwYmU1ODYzMDI0Y2M1ZjQwNzkxZTUwMmJkM2YyMjcyZWE1ZTg1MGZkY2Y3MjA2ODljNGI0NDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9a40857860844d02b98bcaa228affc8b",
+      "statement": "Accepting an invitation promotes pending group memberships and pending invitation-backed ResourceShares to the new OrgUser as direct user grants and then re-syncs dashboard cascades; sharing with a brand-new email creates an Invitation through invite_user_v1.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/access/resource_share.py#L508-L560",
+          "version": "repo-lines-v1:sha256:693ff675500dc36aef3c34c38e73e75827a955a7ed495e688e9e501989340131:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc5NDkyNDQ1YmM4YmJiZTNkNjMwNDhjZmEwOTExYjYyZmQ3ZmNjNjY5NmFlNmQ1MDg5YjI5MGU5NTJkY2JlMTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkZmE3ZjQwZTY1NWIyM2ViZGI5YzZjNWEwMTIzOWEyODA0MzBiMDBhZDRmOTMyNjA2NTYwYzg2YmIwZDRlYjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcxZTNmOGQ3NDEyNjY5NDNjOGVkN2RmYmU4MmFkZTAyNThhYjA4ZGFiMjAyZGMxODhlY2RkZjRlOTk5OGY5ZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJkMTMxMDM1MDcwZmJkZDY4ZmM4MGJlYTk3YzZlMjdkMzliNDJjNGRhNDdmNDdiN2QxZmZkZjY5M2VhZjM0YzYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/orguserfunctions.py#L347-L403",
+          "version": "repo-lines-v1:sha256:c6d2dc767c2c3190d21ffcd93c32d1a206d272a684c910daa42273c64fc4cb11:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlYWFhNDcyZWMyMGJjYzMyMWY0ODZhZTUwMDYxZGMyMzg4NzllNTE2NmUwNTU0OWFiMTU5ZDhlMDMzODkwY2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI4NjQ4OGRmMTZlN2U1Mzc2ZGIzMTFhZGM1YTdiZWFmYzdmYmFlNGViN2JhNDYxNTMyMWFkMjdkZWViMmIzYjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU3OWUzNzllYTMyNTAzZjExODQyZDFjMGEzMTAyZGZjMGE1ZWVhOWIwNGFjZjhkNGVhNjI4MjAwZjM5M2U5YTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA5YjU0YWQ1ZDg5OGIxZDQyOTVkMDM3YmY3ZmFhNjM2NDU5ZGExZjhjMDhlMDcxMTcwZTkyYzM0NDEwNjlmYWIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_18188466c5d7475aa5c7b4faf3a8757f",
+      "statement": "create_audit_log writes an AuditLog row on a daemon background thread and never raises, so auditing cannot break the caller; the model keeps orguser_email so history survives user deletion, and auth events such as login, logout, role change and org-user deletion are audited by user_org_api.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/user_org_api.py#L81-L99",
+          "version": "repo-lines-v1:sha256:ea3a54c750753d3859489cccbe763fdfb744013a3b50d5575ff673e3b5370553:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxZGJmNzRhZGJhNWE0MDE2NjQzZDZkY2EwYTBmMTY4NzNiZDk0OWRhZGJhOTA4NDkzZjlmMDExZjZkYjA4MTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU3MGVlM2ExNmY4MDFiODNlNzhhOGMwNjJlYzUxMzdjYmZiMWQwMjYxMTlhYzViZWI2NDVjMjI5MmUxMGRlOWQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/audit_log_service.py#L41-L130",
+          "version": "repo-lines-v1:sha256:374351de1ed8136da6dab14eeac2594f9bb6149f0f804647b6afc7a359f1b4a6:eyJzZWxlY3RlZExpbmVDb3VudCI6OTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRmZjJjODU5MjM4Y2NmYmJkOTI0NzUzMTU0MDhlMDI0YzNiZDVhN2NhNzE0Mzg5MWQwZGQ4MTg3Y2ZiODg4MGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzNTdlOTczYTkzOWE0M2I3N2UwMGNjMmQzOTMxY2Q5ODRiMTNiM2IyY2M4NTEyYTUwMjNiZTg4Y2RhYTViMWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk4ZmM0MGU1OTBhNzFiYzc5ZTU5ZTg0ODFlNGQ3ZTY1YWUxOWE0YjkyNThlYzEzYzA5ZTdkNzlkNDU5YjYzMjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/audit_log.py#L54-L110",
+          "version": "repo-lines-v1:sha256:2edacf868934552f1d102aea353e224c4431059eb4b78d60073cb51abe365713:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiM2YzNmEwNzcxYWUxYTNlNzI2MGM4ZGM1YmQ0MmNiODc5YThkZWYyMjZiODRiMTA4NDBiZDVmNzgwZjVhMTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJiYzM4ZjUyOGY3ZDJhYTlmZTZlOTQ3ZjAxZmZlYmI2NzlkYWM2MzhiODY3NTkxZjRmZWM2MjVjNGNkMTQwNzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhZjQ4NzQ3ZmFhNjI3MmQ4YTEzZjNjNzg4MDk5YmQ5ZDI3MTZjYjA1OGM2OGJkODAyZmRhNDYyMDM5NGU2MDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6b3fccefb6ba42ad8a8be9840fadf41c",
+      "statement": "The webapp's apiFetch sends cookies on every request, adds x-dalgo-org from localStorage selectedOrg, and on a 498 performs a single shared refresh via /api/v2/token/refresh and retries; a failed refresh or any 401 clears state and redirects to /login except on public share pages, and thrown errors carry .status.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/lib/api.ts#L11-L126",
+          "version": "repo-lines-v1:sha256:8b2c2c2f1ef395ee178cb3e9c353350dc82cb56b72e257b769a398f3751a2b42:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzNjJlMzkzZGVkODIyMzVjNzM1ODdmNjE0ZDkyYWEzNGRmNjA5ZWNhN2NmYzRiNTQ0NDZkYTY0NTQzYzc2MjQzIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODkzZjQwZTM3ODFlYjg5NmM4MmQwNDZhMDgwNjdhMTFlMzVjZGYyZjFkZmFmMjZmZWE5MGI4ZGI2Njc2NDEzIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI0ZWQ2ZGY2MTY3Yzk0NzZjZjA0Mjc4MWMxZmVlMTc1ZjM0ZjI0YmJmY2FlYzkzOWY0YjNhMGRlOWY2YWVmNzFmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwMDIzYWJiMjY5OGQxNTU2OGE4ODA4YTFjMTExM2MyYWRhNzU1NmMyOGY3ZjQ4ODRlMjA3Y2I3MDM1NDc5NWUxIn0"
+        },
+        {
+          "resource": "repo://webapp/lib/api.ts#L190-L193",
+          "version": "repo-lines-v1:sha256:968b57a844502fd0a3d4eeec05493a89981f4b37811efd2a3e41afd4a31e4822:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjNlZjZlYjM3Y2NlY2M1ZjBjMWZiZTAxNmUzNTM4ZWU3NzY5OGNiZmFlY2NhMjBjZGE2NGNkZGMxMzg5OTk2MyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDg5M2Y0MGUzNzgxZWI4OTZjODJkMDQ2YTA4MDY3YTExZTM1Y2RmMmYxZGZhZjI2ZmVhOTBiOGRiNjY3NjQxMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDEzNDFkMGM1ODgyZTkxYTY2YzYwY2I4NjAyMGIyNDdmMGFmYzMzNmNkZjc2YzBhZTE4YmNkMjBhYzhmZTFkNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTRiMTQ1NWY4Mzc5ZTg4NmFhMjVmZTk1MzFhNmNlZjg5ZjlhZTFmNzg3ZjllNWEyZDBjMzlmMmU5NDBmZWViNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_8796a6a84a804bc78894096083044cf2",
+      "statement": "The webapp derives authentication and RBAC from GET /api/currentuserv2: AuthGuard fetches it and selects the stored or first org, authStore.getCurrentOrgUser picks the OrgUser for the selected slug, and useRbac/RoleGuard/PermissionGuard gate UI by role slug and permission slugs mirrored by hand from the seed files (UX only; backend enforces).",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/user_org_api.py#L102-L185",
+          "version": "repo-lines-v1:sha256:1c6102854c00cd6fc5629ae8d2c010f2c82be3a04e15faeba3b55102b1321bde:eyJzZWxlY3RlZExpbmVDb3VudCI6ODQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzODA5ZTdhMTJmNjZlN2JkM2JhYTc0NjQ1ZDMzM2NmNWZjNzJkZmFkYTBlMDRjMzE5NWQyNTBhMTc2MjlkNGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMTliNDBmNzBjNDM2MmE0MmJmMDIwMDdjNGIxNjI3YjE3OTEwMjE2NmMwNzA2ZTAyM2E1ODIzNjQ5NmZhYjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkMTFmZmFmNjliOWZhZjIwMWJmZWIwMThiZTU2NTg0NTJiMDcwNWViMTE4MWI3ZjI1NWRhMGQ0ZDlhNzk5ZTEifQ"
+        },
+        {
+          "resource": "repo://webapp/components/auth-guard.tsx#L25-L83",
+          "version": "repo-lines-v1:sha256:e06f6d33c30dbef4d0faecd35806cb2836e1d0716479329eee8be9d373fd24a6:eyJzZWxlY3RlZExpbmVDb3VudCI6NTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg5Zjc1OWUwNWRjNzA3ZGI5NDNhMDlkZDUyMDdmMWRiZWY2ZGQ2OTFlMzQ2ZTZlYjJjMmE3OGRiNjQ3YTQ3ZDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFmOWRiYzdmMmYyNGI1Mjg0MzU3Zjk4NjMwNmZlZjA0MTdjYzZmODFhODNhMDJiZjgxNTBmNzExMmY4ODNiMDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVkNDNmNWQ0Zjk3MjQxMTFkYTVhM2FjYzQxOWY1YjMyNTYyNmE1NTE5ZjZlMTU2ZjE3MTI2NThhMzEwOGIwZTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUxZjk1M2Q2NGUzMWM0NTRhMWYwYTQyYTFhZjQxMTYzZTVhYjZhYWVjZDgxOTA3MThkODg1NGZmZGY5ZTgxZWUifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/rbac.tsx#L157-L239",
+          "version": "repo-lines-v1:sha256:c39f67e9b8be40b732d0f65f84a5d1e70d298023b043a7fb03d489e965a576d6:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUxZjdkMWJkMTlkODliNjBiM2Y4ZmU0YTMxZmZmYWU1Yjg1YzhkZjFlZjFlYjU4MjY1ZmE2NDUyNDVjYTQ5OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg1NTY5ZGQ1ZGYyZmViYTVmMTE3OTI0NTVlMmFiMmJiMTg2MDFiZDQ4NWU3ODcwNTgyMWVkYWZjYTY5NzNlZWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/rbac.tsx#L7-L30",
+          "version": "repo-lines-v1:sha256:65f945b57d7668a947c8e1bf3aad61c91ceceebd2cf89ffbf7c5b109576f4e23:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzNjFiMDZlN2U3YjJiYzMwZDdjYTgyYTMxNzk1Y2I5NTkxMzYxMjQzZjQ1ZjJlNDg3M2I5ZTg4ZjMzYWQ5ODUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgxOTQ2YmI1ZTJiNGYzNzQ5MjVlM2RkMTRkYjhiMTgzZDc5NDAyMGYwMmQzN2I5YjFkYjJjYjk0ZGI0NTFiMGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE5ZDBkNzJjMDZhNGJhMTEyYTU4NmVlMjFjYTU1NTMwNjU0ZjY1M2U2NzMzNWE1MzM4MWZmMTRlYWMxYThhNjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIzNzliMGY5MmU0YmY2MTA0YjM3MTdmM2I1MzA4NWE4YTE2ODhlMWExZDE1ZDRiYmI5YzM1MDlkZjk5ODFlODIifQ"
+        },
+        {
+          "resource": "repo://webapp/stores/authStore.ts#L148-L151",
+          "version": "repo-lines-v1:sha256:d3f2d37db6f77b62ef182bab49c3bbe5da7a524f376a81104ee627a393877aae:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODVjYzNlYjgwODllYTFhNjA1MjhkYTFlMWQ1NGJiMmFjYzdlYzRjOTA1OTA3YTcxYWZjMGQ1YTA0YWQ0YjJlMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWYwY2RiOTcyYTdiZmI3ZWQyNDZmOWZmNjcyMzg1ZTU1ZjQ5NjhmYzExMDQzZGM1YjY4NGQ1MWRmYTMxZGJjYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTcxZmE5MmM1MmZjMDhjZTBkMzIzZWE2Yjg4OThjNzIxYmE3ODg4NDllYmJjODYyOWNhMTczZWJiZTQxNmI3MyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWI3OGU3ZTg2NjU2MzJlYzQzZGY3Njg2OThiMzk1OTNkM2ZiMThhOTAxOTJkOGVmYzY3Zjc3NTUyODY5NTZjNiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_7943c1f1b0274f90bbf2e6dc2c2807c5",
+      "statement": "Per harness tasks, role-collapse is built (all milestones and pre-merge checks done, only worktree removal open), resource-sharing v1 is largely built but partly incomplete (several unit-test items and group-endpoint gaps remain open), and dataset-access and rls-access are scope stubs not yet planned.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/access-control/dataset-access/README.md#L1-L5",
+          "version": "repo-lines-v1:sha256:8ec7064c7d7cc55838effa76525df9c023100aaf614461091f392401eebd85ea:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2MyMjY0MWJkOTcyMTJmYzgxYTllYTg0MDBiZjNlZDMxYjZjZTUyNDkxYzc3YjYyMjJhNmIwMGM1YTdlM2ViNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDk3MWY2YTcxODYxZTI1NzdmMTAxZDlmYjljMDgwODFhODAzZGZhOTgyZWU3ZjhmNDk3YzI3OWEyYzMzZGMxNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjM4YTRlN2Y4OTdiZDJmZjVmMTE3MDQ5NmNmMTdiODFjMDMxNTQwZGQwYmMwMGRhZGNjYzMwNWRhZWQ2Zjc5NSJ9"
+        },
+        {
+          "resource": "repo://harness/features/access-control/resource-sharing/v1/tasks.md#L370-L392",
+          "version": "repo-lines-v1:sha256:7e6609fd43dd669fcd64e2b5e020c8da5dd97941cef6e5141fc7c8ab49604289:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzMDM5NTQ1NWZjMTE0OWMwNjIxZTQ1M2VjMDEyNjdkYThlOGE5OWM4YTNhY2ZmODIwYzg5Y2Q3ZGVlZjY0OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1ZGY2ZWVkZjhmMDgzOGMxOTA3NGExNWE4NzcyZDY2ZTliMWE3M2FkN2YyNmJkZDNjYzM1ZjZlZWI4M2NmOTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE5Y2I0MGM4NmZiNGU2ODdlM2E5Yzg4MDFlZWRmZTNlYWM3YWU2M2Q4ZjUxNDIyMDNmOWNiYmU1MDZjMWQ3NDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEifQ"
+        },
+        {
+          "resource": "repo://harness/features/access-control/rls-access/README.md#L1-L5",
+          "version": "repo-lines-v1:sha256:01f1d0c2d9d94ff5d6319f63e8df39cedabd4581f27453fc7d7f17e1176e96cb:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmIzYWYzMmFjOTJhN2FlODM0Zjc2Mzg3YTJmYjY3NDE2OTExMjNhNjhkY2UzMDQwZThlMzY1NjU3YzAwNmFkYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDk3MWY2YTcxODYxZTI1NzdmMTAxZDlmYjljMDgwODFhODAzZGZhOTgyZWU3ZjhmNDk3YzI3OWEyYzMzZGMxNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmQzZjc0YzcwNjQ5MTAyN2UzZDg3NGViZjM0Yjk0NWNiMGFhY2ZlMzg5NDhmZTNjYzA2ZThhZTllNWVmYWYxYyJ9"
+        },
+        {
+          "resource": "repo://harness/features/access-control/role-collapse/tasks.md#L14-L71",
+          "version": "repo-lines-v1:sha256:fc079a6e2fb669af6af20a6c4f56c691c9f14536660b5552ee24368b03bf6c30:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3YzAzYTg3YjNhNTdiMjA2NGQzMzk5ZWI3MzZkNjdkNmI3MWE0ZmJlZTI4MjY0MTM4NjgwZGY1MTMwYjM1MmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlOGIwOTE0MjIxNmZlODhlMTA1NzFhZDY0ZTgyODJkMDU4ZDk4ZGMwMmE1NWNhMTdhM2MyZGY1ZTZjNjRiZjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

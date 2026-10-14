@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:7fae4b0f162b5796e90deebd075e8590a8380882cc53535e4e80d11acc04cdd0",
+  "claims": [
+    {
+      "id": "claim_e696ef6c0495419fa34c68f0bd5525a8",
+      "statement": "The backend's documented dependency direction is API → core → models, one way. API modules (ddpui/api/*_api.py) handle HTTP, permissions, validation and exception-to-HTTP mapping. Core services own business logic and transactions. Models define tables only, and feature exceptions carry no HTTP codes.",
+      "evidence": [
+        {
+          "resource": "repo://backend/.claude/CLAUDE.md#L5-L42",
+          "version": "repo-lines-v1:sha256:6f99bb344d26d41d050a418ffedec4d84998a46c8fadfe46926e4be4e861d231:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkZDFlMDZlYWZjNDJjOTQ5Yzc1NDJiOTc2NjAzZjU3NWM5MDQ0MjZhNWJmZDNkZmUyMTRhNDExNDVkNjU5NTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhNmEzMzMxYjBhNjE3ZGI4MWZlMTZjNDRmOTIyNWNiMWQ5NDYxM2JmNTU1YWJiNTMzZmE0ZWNjOWU0MDBlZDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkxNzE4YmQ0ODYwYWIwYmNlNDAxMDdiYTA2NjlkOTVmYjE3MDQ5YTU2YmMwMjYyMDY3MjFiMTI1NWVlNzU2MGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFkZGE4NWFmYWQ3ODJiMzI0MTE3Y2ZiYWE2YTEwZjk2YTAzOWJhZTM2YTcxOGE4MGE4NTc4Y2RhMTViMzljZWMifQ"
+        },
+        {
+          "resource": "repo://backend/.claude/skills/api-endpoint/SKILL.md#L57-L76",
+          "version": "repo-lines-v1:sha256:2ad324044f1058fc582d0f68c6d67d09552a2d637a60ad2ff146378cf839cb8c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUyNGIwODdjNGMwNDIyZmE4NDQ1MTQ2ODA4OWE4YWM3M2MwZmIxYWM0Y2E4NzhmZTJlNDM1MDlmNDg2YWJiNjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4ZDI3YzkxYTkyMTUyZjJjYTliZDhkMjlmOTcyZjlhZTAwN2E5N2UxZjY2NzIyZWM0ZWZiMjczYjg2M2M5MDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFhNDRjOGQxZjdmZDY2MmM4ZjFiYWQ3ZDdjNzJjYjk0ZDRiNDhjNTRmZDJhM2ZjNjE2ZWQ4MjQ2Y2M5ODg0YTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY0N2YzN2U0YzUzMmRlNDVlZTZmYzExYTAzNGM2NWI2N2JlZjczYjhhMjI2OWU4ZGUyZTQ5ZWE3Y2FmNjAyN2QifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_01b49c38b3e84dcbaf72f76ffb12f7a3",
+      "statement": "Business logic lives in more than one place. Newer code uses core/{module}/ packages (for example core/kpi, core/orchestrate). Legacy flat core/*functions.py modules and a separate ddpui/services/ package (chart_service, dashboard_service, superset_service and others) also hold service logic. The service-delegation skill names both core/<entity>/ and services/ as owning-service locations.",
+      "evidence": [
+        {
+          "resource": "repo://backend/.claude/skills/service-delegation/SKILL.md#L24-L28",
+          "version": "repo-lines-v1:sha256:a6df9c0f5df64964c7ffc06d3243e69f6cc24a9b1dbc6cb9e72d681114836061:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTg0ZmZlOTllNzYzNWI5ZjI1OTllYzEzNDI1ZTVhZTVmMjk4MzM3MWFhNzMxNGEwYzE5NTI2NzliODliYzExOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmExMWJkZTY0ZDY1MDhhZGE4NjAxYWE0YmI2MjMyY2JjOTI4ZmYzYThiMzNiYTYxZDJkZDg2MTZjMzgxMGYyMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiN2E3NjEwODFkZjk5OTBlNDQyZDM0M2Y0MGE0MjRjODM1YmMyNTU2ZjY0NzQ3NTcyYTQzOTIwODE2ZjBiN2VkNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMWEzNGQ3OThjYWU3Nzk5MzBkYzhhYzNkNjc0NDZjMTgwMWQ1Yzc4NDNiMjFlMzA4ZDMyMmUwZjM4NTg0MDI0ZiJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/kpi/kpi_service.py",
+          "version": "repo-file-v1:sha256:05fb8688c53d499a99330a40d3b11cac96432dc5e5f9f4ccbfb8a91843996b09"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/orgfunctions.py",
+          "version": "repo-file-v1:sha256:1d637d29ce640a83d12d88794bc74c90714257beb19018123a802b4ca6782b34"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py",
+          "version": "repo-file-v1:sha256:0a7836d68bf2942ae2fa2a4e014bd02b32cad238f2c05b1450a661e8fb7b473f"
+        },
+        {
+          "resource": "repo://backend/ddpui/services/chart_service.py",
+          "version": "repo-file-v1:sha256:d72b5411b832a4a73b180d32487797a73a0c505c4cd2ac64f358540d48bba68e"
+        }
+      ]
+    },
+    {
+      "id": "claim_4684d90012d945789bc056c155734703",
+      "statement": "routes.py builds the main NinjaAPI (src_api) with CustomJwtAuthMiddleware as the default auth, so every mounted router is authenticated unless an endpoint sets auth=None. It imports each module's router, tags it for the OpenAPI docs, and mounts it with add_router under prefixes such as /api/airbyte/, /api/prefect/ (pipeline_router), /api/prefect/tasks/, /api/kpis/, /webhooks/ and /api/ (user_org_router). A second unauthenticated NinjaAPI, public_api, serves the public and trial routers.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/routes.py#L100-L134",
+          "version": "repo-lines-v1:sha256:4c207aaef47e3a5d9323d59b45cdaceafd0a0542bd30106257ceaa0a521649c2:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3MTZhOTk4ZmI4ODU2YTBmNjAyOGFlM2M5YzJiYmU3YjRiNDYwZWQ4ZWJlOGJlYjE2YjU4YjQ3N2FjMDVlMzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlMDNkYzc1ZjRlM2ZhOTEzMWM4ZTgwNGEzM2I1NzZiZmY3OTNhZTMxZTk1OWQyZGY4N2U2N2YyOGQzYzU2MDciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM2MWMwOTQ1NTZlNjc5NDg2YTg1YjBhZTFlN2JkMGEyMmUyMDcwYWI0NzUzZjg3YjZiYjMzNmMzMWI2MGEwZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/routes.py#L34-L40",
+          "version": "repo-lines-v1:sha256:da180e916342435101a24921fbaebf8fa78bdbfce5c158b88b1105812e29df4d:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2ZhYmZiYmY2YWI3NDVkM2FjOTI1YmMwMGVlYzU3Y2EwNzkxNWNkZWQ3ZjRhOWFhMWE4MTRiNzU1ZWM5OTdkYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmFmYmEwNTI3YzM5NTNjNGI2ZTBlNWI1NzM5YmE4MzYxMmY4MDUzYmNkYzk0NjY3MzAxOTNjZDFkNTkwYjQwOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDQ2NmU5YjFjZDQ3OTliNmExNTIxN2YyMjRiYWQxNDc1MGM1MzlhZTZlMTE3NzA0ZGQ0NmIyZmY5YmEzZjMzZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGM5MTk3NDdjMmM2OTI0MDA1NDQ5OWQ1ZDg3MmQxZmQ0OTE2ZTcxMTQ1Y2FjYjU5YjdkOWEzMDA1MDhjZjc2NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_033e687d558c4bb29736aa286084caad",
+      "statement": "urls.py mounts src_api.urls and public_api.urls at the empty path, alongside admin, healthcheck, prometheus and dbt docs routes. WebSocket consumers (data insights, Airbyte checks, chat-with-data) are declared in ws_urlpatterns in the same file.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/urls.py#L24-L44",
+          "version": "repo-lines-v1:sha256:6e1f64c3980a49fbc6420ba2440366a72f584672e94bcf19c7745e754f7dbde5:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3Y2EyZGYwZjVjOTU0Yzg4YTk5NDAyMDYzZjY5OTVjYTcxMGQ1OWQzYWM1N2VjYTM3ZmJiYTZhM2YzMTI5NmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NDE2ZTA5Zjc4YmEzMTZjMDMyNTY4MjEzYjg1NWVlNzU2ZTQxNTY1ZDkxOGYwOTUxOWM4MWZkNjIwZjQwNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3YmNiZTEwZDk5MjA0ZTFkY2EzNWVhNGMzYTU2NTIyNDk1NDA4ZGFkNDBmMWM0OGRiMjk3N2I5YjFmMDYxMjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_da9da96b00874ad5b57c1c10d6682932",
+      "statement": "CustomJwtAuthMiddleware authenticates each request. It reads the access_token cookie or Bearer token. Expired tokens return 498 and other invalid tokens return 401. It rejects JTIs blacklisted in Redis. It loads the OrgUser (optionally narrowed by the x-dalgo-org header), resolves role permission slugs from Redis (rebuilding from RolePermission on a cache miss), and sets request.orguser, request.permissions and request.token.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/auth.py#L154-L260",
+          "version": "repo-lines-v1:sha256:3ec2a909a0fedb66552475c03b9f7e3bc1afe7e0ec5b399569928196f23b2639:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwMmRlMjkzMzFiMzFkYTVhZTkyZDkxMmEyYjE3YWVmZDE0ZTcxNGQwNjBkMGM5MDIyZjk1OWVlNzI0YTQ3ZDdjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJiOTk1NDE1ZmQyZjkyYmNmNGU3M2FiNDlmZGM2ZGY1ZTRjM2EyYzY2NjI4NzFjNzIzN2UyZTk1OWJjYmJlMzU3IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI2YTI4ZjMwNDBkZmJlYjY4Y2M5NDYwODQ3Yjg1ZGI1OWQzZTBhZDcwOTc5OTcxYTczNGM0OTVhMjEwYjllYjdkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhNDc2YzQxY2RjZGI2NzZjM2RiYjVjMWM3YTM0NTQ5MDJiMGQzNmViYzYyZWI3ODk0NWJmY2QwNzQ3YTQ3OWVmIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_83a7a0e7a9994375bb9acc38fdc50334",
+      "statement": "has_permission requires request.permissions to be a superset of the listed slugs. Its bare except converts any denial, including the inner 403, into HttpError(404, 'unauthorized'). The decorator preserves async views via an async wrapper so Ninja awaits them, which a regression test covers.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/auth.py#L41-L75",
+          "version": "repo-lines-v1:sha256:317a6ad3c29501e185a3b775f99cfebf2efd56e9135f379b2e4ba116c8135364:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwOGUxZDNlYjA3ZWEwZDgyNGFmYzA4ZDdmMGNlNWUwYTBiOWUwNDM3MDU5OTI5ZjI1MmRiYjM5NzRjYmY1NmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1MDFiYzg4ZmNkMjgzNTU4NjBiZWI3ODYzM2I3ZjBjNzQyZTE1NDU4MDZjMmIzM2Y4MTg2MGZiZWJlYjY0YjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYzY2M5OTI3NDdiOTg0NjJlMmI3NWMyYjliOWZlYmYxNDU2NTU4ZjQ2NDc3YTkxZGJmZGZjMTA3YjA2YjA3OTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNjOTU5MGVlZmQzZDc0NDU0NGQ2ZjdjNWQ3OGNjZjcxNmZhOTQxMGU4NWQ1MThlMmJkMTQxNWZhNmY5N2RmNzIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/api_tests/test_has_permission_async.py#L1-L44",
+          "version": "repo-lines-v1:sha256:49ebf23ba4d2c4c757637a009afefc75136e0ee28785d95ccb1772cf697434a2:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1YzUyZmNmZmE5NjI0OTdkNmFlMGE2YWI1YzFiMGVlZjUwMGFiYWUxYWYxYjc1MjgzZjRjNDkyNmUzOTI0ZDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlY2QxMDViNjNlYzgwMWIwNGYwNzQwMWU4OGQyYmUyZDA1Y2JkMzQzNGZiZDgxNjE2YjFkY2VhMzZhMWUxNTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZmY2YwYWZhY2MxNWFiMjBlM2ViOWRiNzk0MWRjM2M3NGVkOWQxMjc5YzE1NWJlM2VlN2M1ZjA3NDdjMGIyNWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5782c4f6045640c48a851458df91773f",
+      "statement": "has_access is a resource-level gate stacked under has_permission. It resolves the caller's access level on a resource through access_control. A missing or cross-org resource returns 404, no access or insufficient level returns 403, and the granted level is stored on request.access_level.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/kpi_api.py#L113-L125",
+          "version": "repo-lines-v1:sha256:f4809bf84d3e1eccdc4fd7e0e0755ed9eca4cbcdec2e085a15b0795a39c5643d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyODY2MDI4YTM5YjM3NmY0NjlhY2UwNTE3NzFkZDdiYTViMWYyNzhiNGU3NmNhZjI2MWQzZWNjY2QyNjQ1MTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzNjg0YmIzYzg3MWU3YTBiNzdmNjBkYzhjY2NlYjAzODI2OWEyYzU1Y2JlOGRlZWFlNzAxZGU3MzU2YmIzNzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmNWNhN2Y0MzdmMjA5NWU3NGExNTEwNzFkOTBmZDk2OTViMzVkMzcwZTAzMTUwNDU1NWM0MzllMzZiZmJiNGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFmYzY4OGE0YmUyY2RmYjI3MWEwMGE4MDE1MTcwOTBjMzEzZjExMWU3MmE2MTUxMGFkZWFiZTI3MWU0NGM4MDYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/auth.py#L86-L123",
+          "version": "repo-lines-v1:sha256:34f166db08e11a2736e400652839b01e4720d4660c9a4c430e54df79f1cac150:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4MmRmZTQ3YTQyNWYxNDE4MGUyZjVjYzgzOTZmNzJjODJiMzY0ODJiOWM5YzU0NjRiZWRlODgyNWVlYzE1ZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1MDFiYzg4ZmNkMjgzNTU4NjBiZWI3ODYzM2I3ZjBjNzQyZTE1NDU4MDZjMmIzM2Y4MTg2MGZiZWJlYjY0YjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM0NDZkZDE3YWFlZGZiN2Y4NTNhZDg4MzQ0ZjY1NGY4NzAxNDJiN2U4Y2NmNGViOWJjNzdkYjllZTlmZmQ1MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY3MTRlOGZkZWIwYTgwNjA5MmEwMDdjM2YyZjg2YTQyMTMyMmUxMGU2ZDYzM2RkYWI4N2FjODRiMzkxMmE0NTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a75c0ca3b3f74b87a79581de12192006",
+      "statement": "Endpoints that run before a user context exists opt out of JWT auth with auth=None (login, token refresh, password reset, invite accept, the Airbyte OAuth callback). The Prefect and Airbyte webhooks authenticate by comparing an X-Notification-Key header to an environment variable, then queue Celery tasks.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/user_org_api.py#L201-L202",
+          "version": "repo-lines-v1:sha256:a6dde24a9772b51ccdb54bbd707acbe55755454e35115c7f52816459cad5d2fe:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjZkMzg2MDcxNjUzMTcyMDJmOTcyYmViOTE0YjI0ZjRiYzczYmIyMzBhYzU1YTY1MWI1YWQxOGFjZDIyZDk4ZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjNjYmFkMmM3Zjc5YjA3Y2RkYmUzNTliNDVlYmFkMmYwMmU1MTVhOWJkZWM1ODYxYzJkNTY5ODE2MzE5ZjQzMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjkxYjM1NDVhMDZmNjRjNDllYzBiZTc3ZGRiNDVkMjQzNzRmYTg1NDBkNDg3MzBkYTZkNTgyZGYyYmJiNjRlNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiY2JhZmNjNDQwODdjZDAyMmM5NjA0NTY1MjJkNDdlODlhZjAzMjdkN2U1MDFkMzM3YzU0ZDc5YTdkOTQxZDQ1MiJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/webhook_api.py#L17-L79",
+          "version": "repo-lines-v1:sha256:0d7d9a107ab8bffa8f61cd07118c3f6d863c8ef57ea990e94fa64a9836ea5180:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2ZmUxMmQ0Y2NkNGZlZTVkNjllYjdlODcxMTVhODliN2M4NTgxMWU2N2MzM2FmYmM5N2JjNWI1ZDg3YTI5YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlNjRlZDZhZjhkM2RlYzcwNzEyMjk1OTY1ZDJjN2I3NTMzNDU1MTEyNmU2ZmYzNmFjYzU4ZTJmMTdlMGVhMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fd1979a106a0445e9ace86528aea92b5",
+      "statement": "api_response(success, data, message) returns a plain dict envelope. message and data are omitted when None, and data is model_dumped if it is a schema instance. ApiResponse[T] is the matching generic schema for OpenAPI response typing.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/response_wrapper.py#L8-L42",
+          "version": "repo-lines-v1:sha256:e241a914a21e032a3020fc901b127fe22bc88bffb55d2965078eff1092de73b6:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3NjBhOGUwMjhiMTQ0ZTgxNTZjMTFmZTQ4OTg0N2IxMzViZTE3NGJjMDMzODAwOWFiZGI5ODBhZGM2N2FiNDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyMDg1MzI5MTBjZmNlZmU1ODcwM2Q0MzQ0NWE5YzIwMmIxMjQ4NzcyZjE2ZWY1YTE2MzBlNjJmMjVkZjAyNzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNhYzM5ODI5NGI0NzYzNmRhYzlmNTM1M2FiYTBmNzIyMGI5NzYxMDJiMmVkNzZlN2U5ZjRmZTBlMmJiMzFjZGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_495fb4a74afb4eb19bae9b393904f02b",
+      "statement": "api_response is not applied universally. Only alert_api, chat_with_data_api, kpi_api, metric_api, report_api and user_org_api reference it. Other routers, including pipeline_api and the webhooks, return service results, response schemas or plain dicts directly, so the envelope rule is a target for new endpoints rather than a property of the whole API.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/kpi_api.py#L97-L125",
+          "version": "repo-lines-v1:sha256:34d149f3df666aaaeb7a5dcc4cbd4cf70ec684e027a0af9c50dbe839b535ce94:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0MzAyYWY5OGJiNTEwNjNjYjRkYmQ5NDEyMDU2NTcxM2EzNmQyNTUxYWVhZjU2NmFhYzA4YjMxMzdhOTllMjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzNjg0YmIzYzg3MWU3YTBiNzdmNjBkYzhjY2NlYjAzODI2OWEyYzU1Y2JlOGRlZWFlNzAxZGU3MzU2YmIzNzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2NzZjNzA5ODE5Y2YzNzZlMmYzNmY0Y2NkODYwNDE3N2M5NDgwYmMzMGJlZDA4NTVhY2I5ZmU5YmZhNjAyMzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFmYzY4OGE0YmUyY2RmYjI3MWEwMGE4MDE1MTcwOTBjMzEzZjExMWU3MmE2MTUxMGFkZWFiZTI3MWU0NGM4MDYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/pipeline_api.py#L67-L101",
+          "version": "repo-lines-v1:sha256:16dcdd8a4cd62410fbb93a3ebc972a8e0f33522f563fc350ae1ebfcf23aca697:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2MTBhZTA0MjYyZmU4YTcwYmU4MjAxNGY3MjA3NDQ2NzgxNmQ1MzE2ODdjNzZiNTg2ZGEyODIyODVlYjAwYjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyNDMxMjU3NmYyNDc5NDI1ZjhkNTM3MDRlMGE0NmRkNGZkNWQ0NDhlZmM0N2M0Nzk2MDQ0YTQ1YmRkOTIxZDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM2ZGRjOGUwZGNkMTc0ZDRkMDZmNWViMmExMjkyODg1NDdlNDU4NzlhYjQ4OTBhYWFlMTNmZjlhYjU4OGQzNDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY5NDBkODU4YjVmZWI1YzFhOTFlZjJkODkwMWFkODczOTYzM2VlMTY4MWNlYTRhYmMyNGQ2MDM5YmYxNWEyNjUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/webhook_api.py#L17-L52",
+          "version": "repo-lines-v1:sha256:eebb0d646eff3c24fbbf7fdb0e731801f0e1d8dd415dc5c940a35f537435686c:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2ZmUxMmQ0Y2NkNGZlZTVkNjllYjdlODcxMTVhODliN2M4NTgxMWU2N2MzM2FmYmM5N2JjNWI1ZDg3YTI5YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlNjRlZDZhZjhkM2RlYzcwNzEyMjk1OTY1ZDJjN2I3NTMzNDU1MTEyNmU2ZmYzNmFjYzU4ZTJmMTdlMGVhMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVlYzhlNDNmNjgxMzQ2OWIxNmJiMWQ0YmI5ODVhNzJlNzdmZWVhOTcwOTE2ZjQyNDQyYTU5YjMzN2JjMTcxN2EifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_df188b6d733d41e0b8075de5f14e0308",
+      "statement": "src_api registers global exception handlers. Ninja request ValidationError returns 422 with detail, Pydantic ValidationError returns 500, and any other Exception returns 500 with str(exc). Core code raises domain exceptions that the API layer maps to HttpError (for example the Pipeline*Error classes map to 400, 422, 404 and 500 in pipeline_api).",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/pipeline_api.py#L77-L101",
+          "version": "repo-lines-v1:sha256:7eaba1ff92fd96c8ef76e84cb42ccc3adbddf5ba396a3d39394051a01824b86a:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkYTVjNjZlMTdiMTQ1Mzk3ODM0YjhjODU0ZGM0MTkzZTIxMjUxODBhODk5NmExNGMzMTg4MzMyNmIyZWZiY2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyNDMxMjU3NmYyNDc5NDI1ZjhkNTM3MDRlMGE0NmRkNGZkNWQ0NDhlZmM0N2M0Nzk2MDQ0YTQ1YmRkOTIxZDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkxNTM1MTE0ODY2MmU0NDNjYzRlNmMxZWFjYjI0NjQ0MTY0MGM5MTRkODU1M2ZjYzMxNzU0M2Q1ODQ2ZGYyMDYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY5NDBkODU4YjVmZWI1YzFhOTFlZjJkODkwMWFkODczOTYzM2VlMTY4MWNlYTRhYmMyNGQ2MDM5YmYxNWEyNjUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/orchestrate/pipeline_service.py#L44-L74",
+          "version": "repo-lines-v1:sha256:185fcc76db63854ef2914849c0e4e98e74a56d575f81ffb4a12636e2a6009423:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkMTc0NjkyNWU5YTU3MGMzZjI0ZWI5MTY4YWUzODZjNTc4ODJmYjg1MTJjMjYxYzMxZmI4ZjhkZmJlNGQ3OGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OWVkYjU5NWQxNTZhNTBiMjA0NmI2YTdlOWM1NzEwZGMxNzVlNzZjZmU5YWY3MTFlYTcyNDJlNGRlNmY1NTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFhOWNlOTBkOTdiODY5YzIyMjVmZGVjY2FhMjQ0NTA1NzM5YTFhNDdkOTQ1NDA4NmExMjY3NzE0Y2FmZmM0NmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE0NzFhMmMzYjgxOTgxYWY5OWFmNzcwNmQxODU5MjhkZGYxZTEzYTM2N2Q2MDJhZTE3ZjM5NDg2ZDc3ZGFjOGMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/routes.py#L43-L70",
+          "version": "repo-lines-v1:sha256:7a8f00796a2816dfeb3b5f9a10b410df8a3334c9aa5de236bd5914b633cbc41f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3NThlNzk3YjdiNDBmNDk4N2MxZmNhMjY1MjRlMDQwMjFiNTY1Njg5MTg2NjZlNzM0OTRmOTliYTQ5ZjFjMWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEyNzIwNDRjMzVlZGE4MmM4YWNkN2NkY2JkNjE5ODAxNDMxN2Q0OWE1NDhiYTY5NDU0NDdkMzE0NjdkOWY4NjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5OGIwNjNkOWI0N2U2NTM3OTYyNTU3MmNjZTE5NzY2OWQ1NzY3ZTEyYzE4YmUwNzU2NTJiOGNkOTgxY2U4ZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUxYmE1NGEzOTU5MWY2MWE3NWEzMmE2YWRiZjA0NjcyYTRiMDE5MmQwMjVjMDljYWFmZGFkMDAyNDE2ZTlkYWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b77dded85243431cbecdf343797189ae",
+      "statement": "CustomLogger is a thin subclass of DalgoLogger. It emits structured JSON, sends records up to WARNING to stdout and ERROR and above to stderr, and disables propagation. A rotating file handler is added only when ENABLE_FILE_LOGGING=True. Org slug and user id are auto-detected by scanning up to 10 stack frames for local variables named orguser, org or user. There is no request-id middleware, so request_id appears only if a caller passes it in extra.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/settings.py#L117-L131",
+          "version": "repo-lines-v1:sha256:aedf1b7c9b6101332cdae414d6e2cb5bc0731719a84ceb5eead043145b749165:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc4MGUyODBhMDhkNGVjZmI2OTJhMzc1NmVmNjkzZWJlNzY2NjhlNjk2MmE5YmM2OTFjYzVmMzc3MDRhMjU4Y2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NDE2ZTA5Zjc4YmEzMTZjMDMyNTY4MjEzYjg1NWVlNzU2ZTQxNTY1ZDkxOGYwOTUxOWM4MWZkNjIwZjQwNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3ZjVkMjE4OGMwNmQ1MjFiMmU5YzI4YTM2NzZkYTgwY2M1NGZkMjJhZDRjYTA3ODY0MWJiZjM5ZWVhMWU5NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ2MGY0YWVhZTY0OGNiOGZkMDdhYzU4ZDM5MzY2NjdjNDdmNmUxOWI5MTIzNDJmYzAzY2YxOWE4Yzc3ZjM1YzkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/custom_logger.py#L1-L9",
+          "version": "repo-lines-v1:sha256:397a4dd72762b603be836cc9fdbe1d786f7174c8635d136679d52db6304772e4:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzAzMDc3ZWZjODU2NTdmZjE2MjdkYTFiMzE1NjU4MDk3ZmI5Mjc3YjMwMDQyYzhlMTRiNTI1NzA1N2FhOTY1MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTJhYjdiZmNhMGY3YWE1ZTQ3NTQwNWQwYmZiNmRhMTBkNGEwOWMzODY5YmI5YTY2NWNlNjM5MDM3YzIzNmE2MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/unified_logger.py#L148-L233",
+          "version": "repo-lines-v1:sha256:fe5980f5507729013426271927eff81d2bba8b69902f26d07b8e2378d44d799f:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNmOTljZDkwNTFkYmU3ZTc1YzE4NzU2OGIwNzhlMDQ1NjA4YjE2ZGEzYzU4MDNkYzYxYjFjNTFlYmE1NDk4MjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBjMWU0YzUwMjRkZWZiNDJjMWY0MTU0ZDg3Y2JmNTljNWZmNWQ3NjQ2NWY4NWI5MGYwMWIxM2Q3ZGY2OTQyYzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk1Yzk4NzA4M2M1OWZmOTdhZTE3NjM0NjA5ZWJmYTIxMjNiOWVmMDMzZmE0OGQzM2MzOGU3MmVjNmJmODkyMWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRiNzI1MTk3MzI4NTk1NjNjMDRhZTQ5MWJiYTg4ZjUzMGQ2MjkzYmY4NjkxNmY2Yjc2M2Q5NDZhZjRjMDdiMTIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/unified_logger.py#L23-L146",
+          "version": "repo-lines-v1:sha256:1f501041864e861be62f280661c3399ca536081c44b7f111b2f0555a78e1cf71:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJjZmEwZWZiMDliZTY3ZWJjYmM5OWE4YjNkZGMwNzc5MzBjYzcyZWIyZDU3NjAwMGFlNDJhNTJjNWE2ODhjYzNhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIxNzQwODJjMWJkOGNjZTE0ZWIxNTA2OTA0N2UyMmM0YTg3ODBmMGY0MWExOGNiNTMzNjE1ZmJhNWIxMDFiNmNkIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI3M2QyNTQ5M2Y4NDI0YTNkZDYwMDdjYzBkYTYyMTAxYTI3OWJjNzBiNDFkN2Y0OWMyYTQwMjg3ODE5NGRlN2QyIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJiNmFjOWM3NjcwYWI2MGQ5OTNiZmNlM2Y1ODI0ZDJiYWU2ZDcwZjc0ZWE5MzJjNDQzYTk2ZWVmY2I3OWYxMWEyIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_b2279fae59cc4ae89bc334d3b71a1c44",
+      "statement": "Multi-tenancy is enforced in services by filtering every query on the org derived from request.orguser.org, never a client-supplied org id. PipelineService, for example, queries OrgDataFlowv1 and OrgTask with org=org. The framework does not enforce this, so a missing filter would leak data across tenants.",
+      "evidence": [
+        {
+          "resource": "repo://backend/.claude/CLAUDE.md#L32-L37",
+          "version": "repo-lines-v1:sha256:1632fc625a3cb1b6dc535ba3c95a31210792657aafeeac623526f3c9b0bb839b:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjNhMjY0ODNkNDY4ZGIyZDU0OWU2YjkwODM3NWFlZDU1Y2M3ZjllZTY5ZDZlMmEzN2Q0ZDExY2VlOTEyMDNiNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjVmZDU0ZWIxMjAzZWY1NWM1YzRjZjQyZTQzNTE2NzQwYjAwYTAzNjYyNmQxNDRjZTZhZWZjNWFmMzA2MTM1YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmUxYTE4MDJhNmI3MGMyNzVmNDk1OThkYjg4NDA0Y2FjZDY0NDJmNmVmM2Q3MmUxNWJhOTkxZWM4ZTgxMjlmZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTAxN2Y1ZjEyY2UxZjAxYmRiNmQyNDNjMDdlMTYxZTNhNjQ3ZDQ0YzkxYWUzODZlYWZhYWM5OGVjYzk4Y2IyMCJ9"
+        },
+        {
+          "resource": "repo://backend/.claude/skills/api-endpoint/SKILL.md#L76-L76",
+          "version": "repo-lines-v1:sha256:18d27c91a92152f2ca9bd8d29f972f9ae007a97e1f66722ec4efb273b863c902:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMThkMjdjOTFhOTIxNTJmMmNhOWJkOGQyOWY5NzJmOWFlMDA3YTk3ZTFmNjY3MjJlYzRlZmIyNzNiODYzYzkwMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMThkMjdjOTFhOTIxNTJmMmNhOWJkOGQyOWY5NzJmOWFlMDA3YTk3ZTFmNjY3MjJlYzRlZmIyNzNiODYzYzkwMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2M5NzQ0OGZkNTY4MzM2YmExYmRiOWM3M2JhNDk3NDY2NTQ0OTUyNzg0NTBhZmM3YmJlZThmYTdkOWFkMjczOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjQ3ZjM3ZTRjNTMyZGU0NWVlNmZjMTFhMDM0YzY1YjY3YmVmNzNiOGEyMjY5ZThkZTJlNDllYTdjYWY2MDI3ZCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/orchestrate/pipeline_service.py#L109-L111",
+          "version": "repo-lines-v1:sha256:29eb9ac5ed51cc9a25e99bfdc374011a2a05263c589d33d4a8a51c11ad5fdc9b:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDE1NTU5ZjYwNmJkYzkxYjRkYmFlOWEzYmI3MmUyYTFjZmU3M2RjMTE1YTE1MDI1NmQ0YmE5NjE4MzQ5MzQ4NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZDM5NDkyN2U0ZDE5YmQwNDJhNGEwZGVhYzdlNjhmNWM4YzhmNmQzNjQ1YTFjNDkyNzdjYzNlMzY4OWRhMTY0NSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWMxYjM2NjRlYzJhZmEzODY0YTYzMzM0ZGZlMjAzY2MyNGFkM2E3OGE4ZTJiZWUxOTY5Zjg1ZjMzMThjZDI2NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDU2NTg3OWFmOGJhN2UzNWNmMGFiOTk5YWVlNTdjNGMxNTI1NGFlMzY5MzM0ODIzZjZhODk1ZjlkYjA4MTcxOCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/orchestrate/pipeline_service.py#L281-L281",
+          "version": "repo-lines-v1:sha256:be76c87c2333c1af432fb7e9305c47d1a9d3cc37b1914ec083061eeadbb7df93:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmU3NmM4N2MyMzMzYzFhZjQzMmZiN2U5MzA1YzQ3ZDFhOWQzY2MzN2IxOTE0ZWMwODMwNjFlZWFkYmI3ZGY5MyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmU3NmM4N2MyMzMzYzFhZjQzMmZiN2U5MzA1YzQ3ZDFhOWQzY2MzN2IxOTE0ZWMwODMwNjFlZWFkYmI3ZGY5MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWM2N2M0NWVhOTNlMDE1MTg3N2Q0Y2ZlZTUyMGNhZjE5YTU5ODVmMTdhN2RhMjdiZGUxN2Y5ZjkwZGQwY2VkOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjM4ZTEzMzdlOTI2ZTZmMTc5Y2VhNjYzNjU2NjkzMGY1NmYyMTc4MDNmNDM1MGFkZGU2NjE3NjhmOTAxN2JhOSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_85d6240846044a89a94e35f09c8b9879",
+      "statement": "The documented non-negotiable invariants are: API → core → models, org-filtered queries, @has_permission on every endpoint, api_response returns, extra=\"forbid\" schemas validating before dbt/Airbyte/Prefect calls, top-of-file imports only, no to_json/to_dict on models, empty core feature __init__.py, service signatures of payload schema plus org/orguser, and exception chaining with from err.",
+      "evidence": [
+        {
+          "resource": "repo://backend/.claude/CLAUDE.md#L30-L42",
+          "version": "repo-lines-v1:sha256:fc53b2f7ca5ef65ac436a11c1e35a323cc2b8773ef114c9c09edcd4f29469e1b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0NjdiNmNjY2U0MWJmMDFhOGM0OGRiOWJhMzk3MTE5ZTU0OTQ4NDAyNzAzYjQzNGMzNGRkNWJhYTdhNDY1ZGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhNmEzMzMxYjBhNjE3ZGI4MWZlMTZjNDRmOTIyNWNiMWQ5NDYxM2JmNTU1YWJiNTMzZmE0ZWNjOWU0MDBlZDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQyZjExMGJkNjM2MzY5Y2YyYzk2OTNhNTNlNTZlNWMzNjU4YmU0YzkzNWUzMzdjYTU5NjAyNmYwM2VmODkyMzEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFkZGE4NWFmYWQ3ODJiMzI0MTE3Y2ZiYWE2YTEwZjk2YTAzOWJhZTM2YTcxOGE4MGE4NTc4Y2RhMTViMzljZWMifQ"
+        },
+        {
+          "resource": "repo://backend/.claude/skills/api-endpoint/REFERENCE.md#L324-L348",
+          "version": "repo-lines-v1:sha256:85f18793cd7df944304e0148d4608e1e4f5d6a5db5e7ccfe904d8ea16b196adf:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiMGQxNDk0OTcwZmFiYmIxMThmMWQ1Y2FkN2Y1ZTE4MDRkZTU5NGRkZGE5OWIwMTI0MjEzMWQyYTZjNmQ2MjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4MDkxOGFjNjQzMDcwNDAzMDA0MzI3OGFiYjE2NzAwMWM2ODM0M2ZjNWEzYWRmN2Y4MmI2MTY5NTI5Yjg0YWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ5YTJjOWJmMDU0NzJmOTRhODdkYzk1Yjk0NDZhYzIwYzM2OWJkODFjOGM4Mzc0ZmFhNTYzOGYyYTg0NDJlODMifQ"
+        },
+        {
+          "resource": "repo://backend/.claude/skills/coding-standards/SKILL.md#L8-L72",
+          "version": "repo-lines-v1:sha256:b5ea39c591a785dde6a5437798a2c0118113bb204a76d1a018bf2797bfa27b88:eyJzZWxlY3RlZExpbmVDb3VudCI6NjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRmZGMwZjcwMjQ1NjJlMGY5M2QxODc3ZGY0NjUyNTBkMTE3ZjM1ZTg4ZTliOTRmZDU2NWIxNTU3Yzk4ODU4YTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0NzRhYWU0MjVkMzhlMmRmNTg2NjUzNWE5MDQxZTNlNTkzMzA3YTA0YmQ1MGU5OTY2NmQyZGYwMWI2NDAwMzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM3MDU4NzQwY2VlYmIyYTY2ZDM5MmQzYWY2YWQ3NjgyZDQ3MjAyYTU0NWMxOGVhYTQzZGE5OWJmNjIxYjQ3ZWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9a9b8d2a461d46b9ab509dac92e9c035",
+      "statement": "Parts of the code base deviate from the written invariants. pipeline_api imports OrgTask and ConnectionMeta and queries them in the API layer, and calls prefect_service and airbyte_service directly. Several models still define to_json. extra=\"forbid\" is used on only a few schemas (KPIExtraConfig and the OAuth state, token and ref schemas), and ddpprefect/schema.py does not set it.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/pipeline_api.py#L7-L64",
+          "version": "repo-lines-v1:sha256:b1fa059a5a4c624beac22c17c31ccf7a467f10abbcd9b29a6baf1e06850a097f:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmZTNlZTU3NGJlMjBmZmE4MzBmZDVhOTJhMTZmYzY4OTNlYzRiMDZhMGMwYjMxM2JhNTA5ZWI1NmViM2IyYzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwOThmY2UyNDQzMDE4Y2RkZTJjNDA1MjZiNzE4YTc1OGUwNTYzZmU3ZTdlMjY2MTEzZDgwNzQxNDhjOWE4YmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFmZDUyMDA4NTVlZDhiYjM3MTk3ZjY1MDViMzk5ZTVhZGQ5NDMyOTJhYWRhZDM4OTg5MGVlMjVjMGI3ZGM4ZWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMyM2ZlZWI5NDAwOTY2M2YyYmNkOTIwNzA4NDBkMzNiNzVjYWMyMGEzYTIwNWE4MmQ0MGU4M2YwNzNmYjVlZGEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/oauth/google_oauth_service.py#L43-L88",
+          "version": "repo-lines-v1:sha256:a56c8a234315ed79376463307dbbf025c2ce262acaa8c5209fa0ba2ed734314d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwNTA2N2M3MTA2OTk1MGE5MGNmYjZhMzE3N2ZjNTY5ZDE1NDFkZTE1YjRhNDIxZmJmZTg0OTM3MTFlMjc0OTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI1MDEzYWFjN2M2ODRjM2RjNDZmM2ZkZTIzNmE1NTY2M2M1Mjk5MDE2NTllMWIxNzEyODAzYWU0YzFiOTY5ZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdkNzQwNGYyMjk4NWEzZjk2NmJjZDU5MmJjNWUwN2FiNTY2ODQwNzY0MzNhMTdlODhhNGI3YTgzMmU1Njc1ZTgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/tasks.py#L75-L75",
+          "version": "repo-lines-v1:sha256:72135519832bbed11b5bc4814ccc9d68f834881c3ac0fcee15ffa61598665521:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzIxMzU1MTk4MzJiYmVkMTFiNWJjNDgxNGNjYzlkNjhmODM0ODgxYzNhYzBmY2VlMTVmZmE2MTU5ODY2NTUyMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzIxMzU1MTk4MzJiYmVkMTFiNWJjNDgxNGNjYzlkNjhmODM0ODgxYzNhYzBmY2VlMTVmZmE2MTU5ODY2NTUyMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmJjNWU0ZTY3NWM5MTE0ZTVjZDA4ZmYwMzJlNjBiNGVhODk1MjBiYzA4NWIwZDQ1NDI2ZmY3NTEzMTI4MTc3NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzhhZGYxNzBjY2Y1OTg5NzdhZDU3MDg5ZDFhZDYzODA1MDUyMmRmN2IwN2MwZWMyZGZkMjk3ZDUxNmY0NDg2ZCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/schemas/kpi_schema.py#L15-L25",
+          "version": "repo-lines-v1:sha256:9f77a15c32a47bfce4fb9107699c85732a58808c670dbb045750afed6356e827:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwYTc2MDQxODQwNzg0ZmViMTdkN2NkZmRiOTFhN2JmNjA2MGQzOWU1MmE4MjIxY2QzNWEzMWQ4OGUxOWI2MTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIyMTJmODFiYWUzNzM5ZTg1ZTVjNzFkZTI1MTZiNTZhYWEwMmVlMzg1NmFlMzU5ZDNkZDI0OTdkNWRkNGNjOWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM4MTg1NDM4ODlmMzAzMmUxMzRmZjlmMTc2Nzk3NGU4NDgyOGMxYzI3NDM3MzM3M2MzMTg0ZjgzZjEwMzQzODkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_06f077d771784429bd91fad8eaf7a5f6",
+      "statement": "models/__init__.py imports some models purely so they are always registered with the Django app registry, because processes that skipped feature code otherwise did not know their tables existed and the test-database TRUNCATE flush failed on their foreign keys. MapLayer is deliberately not imported, since it has no migration and importing it breaks test-database creation.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/__init__.py#L20-L37",
+          "version": "repo-lines-v1:sha256:95af0c35e1f2ee0fdb61d97436fd10e0749e619782636da576b140069e6790e1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1NmUyNzg0OTI5ZWI0ZjJlNTI1Y2IyZjFiZDAzYzI0NTM2YjNjNDlmZDNhNGM4NDFlNDA5ODcwNWQ2M2M2Y2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZmYWE0YTNiNjJmYzc0NDg0MzQ1YjNlYzlkYmE3ZWM5NDA2ZWM1NmUxZWJhODFlNWRlNzZjMTBlZDAzZDEzY2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

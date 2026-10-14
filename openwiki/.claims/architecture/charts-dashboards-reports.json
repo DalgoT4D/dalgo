@@ -1,0 +1,452 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:4e95c930c17cc2cbd9de90b6fcef0b9c3e310e4c39635a250ee918405f4f1dc4",
+  "claims": [
+    {
+      "id": "claim_d400127d05bb4cc5867c38783931ff47",
+      "statement": "generate_chart_data_and_config in charts_api.py is the single funnel for chart data: map charts branch to generate_map_data_and_config, pivot_table short-circuits to get_pivot_table_data and table charts return rows, both with an empty echarts_config, and bar/pie/line/number run the query, transform the data and dispatch to the matching EChartsConfigGenerator.generate_*_config method.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/charts_api.py#L148-L220",
+          "version": "repo-lines-v1:sha256:e227b536703b7481599685b2143ba7a0bf252e47aee75e28d46c3e87d39a87b1:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1YmM4ZTFiMjM4Mzk4ZmZhOWMzMDljNGJmZGIwODNhMjJhMzczZTg4ZWQ3NGUxNGIyOWIxNjI2NTQ2MDM3NTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3ODAwMjU5ZjU3ODY4MjdkZTJlZjY0ZDBjNGYwN2QxNDhkMGNmODA3NmFkYWFhOGY2ZTM1OTY5ODg1ZjE5MTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzNDY2NzgxZjY0YmU5ZjIwZGY3YWY3NWJkMDAzOGM3Zjg0ZDc5YmZjNzdhMzMzZWQ4MTdhODI4MDYzZDM4ODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc5NzgzNDkyNDYyMGRjMTBmOTRkZTM4MmJkZmUzNDBlMDA1ODMxYTFiZTI0Y2EyYWM5ODAzNjcyYzkyY2ZhMGEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/charts/echarts_config_generator.py#L8-L30",
+          "version": "repo-lines-v1:sha256:08b74add348e6150dfc58ae1d8f8a193ff31ba601ab41570f3a91b359e4b82d4:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRmYjgwMGJiNzg0MTlkNTM0ZDM0ZGYwMDA0OWNlMzY4NTk4MzZjOTY3YzEyMWMyMDQ5OTY1MzNiNDExYzNjZmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJmMjY4MDNkMzdjNDM4NDA2MGI3ZjczYTVhZjEyYTEwNmUwNWQ3OWJiNmMxM2MyMjliOTRiMjVkYWI2YmIzZGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQxOTYxMjllNzRkNmNjYWU5ZDczYjIzYjE3MTAwZDI1MjgzMmUwMGNkMGIyN2MzZGE2MTNmNTVlMjVlODA3ZDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM2MmIyNjZmMGY5NjIyMDIxZThjMGUzZTExNDAxNDEyM2Y5M2UzNWQyYTY1ODMxNmNiZjA4NmNiODlmODdkNzAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ccaeec0ba99a4cd88d60d4ddb822818c",
+      "statement": "charts_service.build_chart_data_payload converts a stored chart or frozen report config (extra_config) into a ChartDataPayload shared by dashboards, reports and public endpoints, and resolves saved_metric_id references to inline metric definitions from the Metric model, skipping ids that no longer exist.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/charts/charts_service.py#L175-L271",
+          "version": "repo-lines-v1:sha256:c46a2ab5c757be098120806ffe8afad80e97c7f2dcdbd6df7fa00af97421ed7a:eyJzZWxlY3RlZExpbmVDb3VudCI6OTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUxN2ZiMWYzNjNlOTA1ZWM1Y2Y3OTc3NTQyYmU0OTE1ZjMxOWZiYjY4MjFhY2VlZjMzZGNmMzIyZjg2MzQxZDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhMDg1MWFjNWEwNGQ5MDdlNjRjOTA4ZTUyMDQxMDI4YmI4M2ZkMGZlYWE3Y2ZlNTdjYjBjZmM4NjQxNDA2NTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZiOTk5ODZiMzRjYzY4YmUxYWVkY2ZhZTY2Y2Q4MjZjZmMwMjc4YjJhYWVlYjlmMDZhODQyOWY5MWU4OTJkZmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZiN2FlMGFmYTBiODFmZmNlYTM4YTZjY2ExYWMxMzIwNTQzNGYzODEzNDc1M2EyM2ExYmJkNjQyMmUwNDRmYmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_319962a42a704cc58d61ffb553a61433",
+      "statement": "build_chart_query applies dashboard filters first, then chart-level filters from extra_config.filters, then sorting; apply_chart_filters ORs multiple equals values on one column, ANDs multiple not_equals, and expands a date-only value against a timestamp column into a full-day range.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/charts/charts_service.py#L689-L701",
+          "version": "repo-lines-v1:sha256:8d36afe7e5dd1c6869df845fe6f92e151eaffad7ac36c23b06b4b655ab51a73e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwYmM3ZjhkNDg1NGVlMGZlZWI5NTc2NzEzYjM3NGZlNTQ1YWY2OWEzNmE2NGYxN2U3YzBiNGY2OTZkYzJkZDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0NzZhYTAxODVmYTU5MjgwOTk5ZDc4ZTc2ZmZiM2VlYmQ1NzM3MWZiZTBkMjdiYjcyYzZmMGQ3YjdjZWIyZWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQwZjhlZGMwYTk1Y2JjNmU2YTdmODVkZjY5OTA3Yjc4NjQ0ZTdiNDczMDI5ZmJlMDNlODEwYzkyMDFhZjhiZTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxNjVhYmM4MmFmNzU0YTM5ZDdkNjk5ZGRkYzFjODY2MmU5MDk5ZDg2ZWY2YTRiMDc2ZjQ1MTM3ZWQzNDdkZmQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/charts/charts_service.py#L807-L929",
+          "version": "repo-lines-v1:sha256:20e4a857bdf3109375f17f1cddee331913d693b3e9537de8140eabc273e6c62b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0YmEyZTE2ZjE2MmJkZDk5YTU2ZWNjN2NlZGJlMzFmZTdjNTQ3NWU3ZWUxOTU3ZjFjYjcxZDgzYjNlMmIyNDdhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwNDc2YWEwMTg1ZmE1OTI4MDk5OWQ3OGU3NmZmYjNlZWJkNTczNzFmYmUwZDI3YmI3MmM2ZjBkN2I3Y2ViMmViIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiNzdlNmZiMTMwYTBlZjFlMDM2ZWEyZTc4MTRiYWUwM2UzY2YzNjY5Mzc2MDMyODc3ZDk1ZWQxMTRlZGYzZmFiIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhZTkzZDEwZmQ1MTg0ZTVhMzVhZDhlNDUyYTMwNjBjZmZmYmFlZmRiODMxMmM0NjJkZjVmNzM4NWY3MTJhMzYzIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_3395713b45d94b778b606cecfbd1f728",
+      "statement": "Map charts are built by reusing the bar-chart query path with the geographic column as dimension (build_map_query), then transform_data_for_map joins results to GeoJSON features by lower-cased trimmed region name against properties.name, counting matched regions only when the value is above zero; generate_map_config adds non-standard mapData and mapName keys for the frontend to register with ECharts.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/charts/echarts_config_generator.py#L374-L453",
+          "version": "repo-lines-v1:sha256:acbd9eaf457d77c709ae00907b07d482dc93fbaa6b785d62498520d32199450e:eyJzZWxlY3RlZExpbmVDb3VudCI6ODAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0YWZjYTlkOTgwZmQ4ZjRjODc0Mzk0ZTJjZGEwNjBjNTVlYjVkYTA2NDNlZmQzYjVjNGViOTljYTc0OGY1Y2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkYzMxMjE4ZGEwOTllOWQ1NjBlYzU4MzdiMGU4MTQwMzVkMGY3OWUyZDNjYjAxZDk3OGJlMGZjNmRiYWVhYjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMxZTBjY2FlYjAzZDU1MGI1OWUwOWZiNTJhM2NmNjg4OThhYmEzZmJmNjA3OTBkZDcwMGVlMjNiNGVlNTBlY2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQyMTk4OGY2ZWQ2ZmUzMWJkZTdmMzdlOGY0NmFiODgyMzAyMWRiNTkyOWVlZjI3NDY0MGM5OTAzNzg4ZWNjYWMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/charts/maps_service.py#L157-L282",
+          "version": "repo-lines-v1:sha256:f1846ec28518d68ba33360f3209e94d5fc68457c768e5ce4440cef7d6a34cce7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIxNDk3NjBhODgxM2YyMzA5ODE1ZWFmNTExNmJiYTZmODBlYThlNjU2NDg4NjJmZGE3OGQ3YWM1NDg5NWUxZjc3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODkzZjQwZTM3ODFlYjg5NmM4MmQwNDZhMDgwNjdhMTFlMzVjZGYyZjFkZmFmMjZmZWE5MGI4ZGI2Njc2NDEzIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI0ODZkMDM3MDIyMTAyNWNjZjMzODgyNmNjZTVmNGE4NTNhZDc4ZmM1ZTBhMjNlMDQ3OWE4YzBiNDVmNmMzYzU4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlZWNhZjlmMTE0ZjI2NGYwMDkwNjhhZWYzMTEwNTY2MjJkOTI5MmIxYjFkNWFhNTgxOWUwOGU0ZWUxOWY4NmY3In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/charts/maps_service.py#L86-L120",
+          "version": "repo-lines-v1:sha256:0200cd59b821648d90bcddb515d88664a6884950e835705ebaf96d0f377ab660:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU0MGI1MDJhZWY3NGY3OWFiNTVjZWE5YWZmNDM2OTJmOWViOGNlYThlNDE3NTdhY2MzMDA3Y2JjYmY2MzM5ODYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgxMzY4ZmFiZDYyOTlkYTk1YmRhYWZmOGRmYTViMzgzMDQ3MzNhNDViOGMxNWI0NTllYjA1ZDk4ODk4NTAwNWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlhODJlYmU5ZWQ0MDdjM2E2YmE0YjAwMzQyOTJiYWE1MmMxMWNlNWFlMjg2MTA3NDAyZGU0NzkyZWVlY2FjZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIyYTZjZTk0NjA2ZDllYWE4NzIzZTVlM2RmNDVkMzUwNTRjYjA1M2UyNTkzOTA3NDZjZGVmNmRmZTE5ZTY2MTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_aefb166b90f7418f96a38bd69d608280",
+      "statement": "The authenticated map-data endpoint rejects non-default GeoJSONs owned by another org with 403, and map region/GeoJSON listing supports drill-down via region, child-region and per-region GeoJSON endpoints.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/charts_api.py#L769-L790",
+          "version": "repo-lines-v1:sha256:8761a5dbd2d82d48040ff8e71552b5de93739a0a9b3b7a9f300ae49c850ebc70:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1MTQ0ZDViNzMxMDIxNWQ2NmQ2YWQxYzhhZDIzYWQ0MThkYmMzMGI1YWVjY2Q3ZmU3NzVhNGY2OTlhZmVmNDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhZWQzMDUxZTM3ZDM5NzljMGY5ZDEwNWNhZmE4MTBhMTMxMmYxOTI5MWY2M2RiMDFhY2RhM2Y2ZWI3NWM0YTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlmYjY1MmRlYWRhY2FkYjZiM2YyNjU2ZGQwNmNhMWYwMjAzZGQzMjhlYzA3MzllYTU5OWQ3N2UyMzNmYzAzNjMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/charts/maps_service.py#L44-L67",
+          "version": "repo-lines-v1:sha256:06008a36ad315d30d792f75b32fb30f364bb3341d75be1e15c7f8de80a2d9228:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM1MGFiMzA2YmRiY2RmNmUyOGJjMjhjOWMxODJkMTYyMjBlZDZiOGMxYjk1N2MwNWU5MzBmMzkzODgxOGExNTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkZDI0NDU4MmI2ZmIwM2QyM2I4NDE1YWJlY2QzNDZiMGM5ZjQ2NmI2Zjc1MmIwNjgxODljZTdlOWEyZGMzNTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlhODJlYmU5ZWQ0MDdjM2E2YmE0YjAwMzQyOTJiYWE1MmMxMWNlNWFlMjg2MTA3NDAyZGU0NzkyZWVlY2FjZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJmNjE3MjExMTljNDRlM2Q1M2U1NmVjMjE5ZDc1NzI1NWEwODE1NDIzN2NhY2UzZDBkMjJlMGY4YjFiMzJhODgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_03ae2b0a060b41df82307918ea0dfbdc",
+      "statement": "Pivot tables use a single ROLLUP query whose flat rows are rotated by rotate_to_pivot into self-describing cells tagged with row_kind and col_kind, plus a canonical server-sorted column axis; the frontend derives the grid layout and the API returns an empty echarts_config.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/charts_api.py#L158-L163",
+          "version": "repo-lines-v1:sha256:e591ad4fd2f422bdfb542187f45a9190b921c64f761a530c17cdcb9ce6abe22a:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTRjMzNhODU3NjFiNzg0ODMxYjY4YzBhM2E4MDcyMGVkNDYwZjYxNmUyY2NjOWJhMWVlYTBhMmY4Njc3YTZlNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjgzZDMxMmRiM2IyMTg5MmQxZGJjYTUzNDk0MjgxZjRjMjZmZjAyOGE0ZTQ4OTFhY2Q3MDUyYjdlZjAxNTVlNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNGQ4NjhlZTI3Y2ZlNTkzNTliZTUwMmE0NmI0ZGM5MmQ0MTE5ZmYzOGZjZDU5ZjhiN2EwODdiOTMyOTcwYWFiNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDgxMjJhYmJkNThjNTY5YWFjZWI0ODAyYmZhNWFhN2Y2NDkzNjUyZTZjMGU1OWI3NGI0MGZmMGU2MDU3ZTVmNiJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/charts/pivot_service.py#L21-L59",
+          "version": "repo-lines-v1:sha256:3a850929b56e3d478e2465729ac6c420c7d3bca1c9982ad9d82de3c9f15ad477:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU2NTc3MDZlMjA1NDNlM2Y3NjExZjdmNTdlM2VmNWEyNWJmMzVlNGZiYWM5MjEzMjgwNGE1NjgwOGI2ODBiYTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYwYTY1NzAzMmVmZjRjOGEyMDYyOTM2MGQ0Y2FiOWNhNzViZDNjN2ViYjY1MmU1OWYyMjY3MTc3M2ZjN2U0MTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/charts/pivot_transform.py#L1-L46",
+          "version": "repo-lines-v1:sha256:01592d3b9f65f11bd9a01049bf829f895732b2b1bcc16477c92bf506ceb47bc9:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM2ZWE1YWE2ZWI1ZjBjMGExZmZkZTJlYWMyM2FmYzc0ZjQzMmQ5YmYwZmIzY2MyZjkwYjRhOTkxNDZjMDI4YWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8760faade95b49b59242a472973d883e",
+      "statement": "useCascadingFilters.ts is unrelated to dashboard dependent filters: it narrows selectable child regions for multi-layer drill-down map charts in the chart builder, client-side, based on the chart's own filters.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/hooks/useCascadingFilters.ts#L26-L100",
+          "version": "repo-lines-v1:sha256:b7f4f123bc81d945ae6483e6da74638c82fb17cd7ffe15520c954b9f04c1ee83:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlMDU4NTQyMDcxMjA4YzVhY2JhN2E3ZjBiNWUxYWU3NTdmZWFjNTMzNmM0NTNmMjY2ZWZkNDMyZGNiNzIwMjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJmNDhmODUwMzMyNWQ3MzJkNmZjNDdkNTY1ZmQ1MGZhODQ3NTc4MTgzMWQ1NzBiMjg5YjY5ZDQyZTRjOGUxOTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjYTFkNmZlZjgxMDFjYmZlYzM0YTFkOWJkZDgyMjdmNTlkMTk4NjU1ODRiYmRiMzQyMWJhYWI0NjQ3Y2Q4Y2IifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c3cd2ccd82f949ee865d716e9643a866",
+      "statement": "Chart endpoints are gated by role permissions via has_permission and by per-chart resource access via has_access for get, update, delete and dashboards listing; deletes also remove ResourceShare and AccessRequest rows and write audit logs.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/charts_api.py#L1114-L1222",
+          "version": "repo-lines-v1:sha256:963eec266561cc98ba1a21e572544ac6b07bee8f85d36037419882a6b2922d07:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyZGQ2NTk3YjYwZWU5MTAwMzMwYjNiNzU0N2IyNzNhODljOGVlMmI5NWRlZGY5ZTBmODc3ZmZhNDMxMGYzZDE4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIxOWNkNGRjMWM3ZjBkZDJmNThhYzRlNmRmZDJhYzkzOWEzNDJlMTEyYjk2MTMwYTFjN2VmYWY3ZTJjNDFlYTI4IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4Y2M0YTdkMWNjNzk2YWJhM2U0NjcyMzMyN2Y1MTdlOWY4MTE5ODJkMjUwZjA3MDI5ODZlNGI1NzY0YWQ5NTg5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJiNGI5ZjZkYjM4NWY3YTQxNDgzMWJiNjQ3ODgxMmUyZGZhN2JhZDZiOWEwNmIzYWYwZjhmZGJkNmVlZjQ1Mzg0In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/charts_api.py#L963-L968",
+          "version": "repo-lines-v1:sha256:9ca86fa3118d713066816c8846bc69f604aa6e83e2e0c1f54cc0795a9d627bb0:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTgzNDdhMmJmMzZkZTMwNjRmNmM0YjRlYmFiOTFiODAxYjA4N2E5NjUyMTJjZDhjYTg2MmY2Y2Y5NDdmZTY0ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTAwZjkyM2I4MDkyMDg4YmI1ZWY1MTFkMmU4MmE4ZGNlZTQwOWYxMjlmYmM3NTc4MDQ3M2Q3NWRlYmE3Yzc1YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzMwMzI1Zjk4MGI0YWJlMGE1YmZkZWIyZDNlYjkzNDg3NmQzYTA0MzMyNTY0NDQ3MmMxMzZjY2EwMmI5YTgwYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODMzY2QwYWYzNWEwYTFhYjkwYTM5ODNiOTliNjM2ZjA4ZmIyYmYwODA4Yzg1Mzg4OTgzNTYwNjJjZTI3YmJjMyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_8d64759c5a524f1e8be2d6b3407d9138",
+      "statement": "Dashboard editing uses a cooperative DashboardLock with a 2-minute expiry: lock_dashboard and refresh extend it, update_dashboard rejects saves from non-holders while an unexpired lock exists (HTTP 423), saves by the holder auto-refresh the lock, and a save with no lock held is allowed.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/dashboard_native_api.py#L187-L217",
+          "version": "repo-lines-v1:sha256:4ded1afa46d966b82656118b0ca67ffdcac7872dc6b1ec8a9cdf215e0b7f50a7:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc2NjQwN2ZjOWZmYzMwZGY5MjljN2YyYjM5MTRhYWFmYThkOWQ1ZTliODM1NzkxM2VjMmQ5MzNmNjY2YWM1NDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEwOWExNGEzZGFlMjFlZDQ4ZTg1OTVhN2U3MzQ3OWJlNjZkMGFmNzBkNzQzNzgwZTVlNmY3NGU3ODhlNTJlMDEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/services/dashboard_service.py#L446-L536",
+          "version": "repo-lines-v1:sha256:4bad511a9423a7d0e04448a2aee1d84293eaea2f0cfc17f583b833661887f135:eyJzZWxlY3RlZExpbmVDb3VudCI6OTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyZDU1NmJkN2U3NjVkOGZkOTM3N2E5YTBiMmQxODc4OGZkNzllMGVkMTJlNjhiMmI5Yzk3ODNlM2FjM2VhMjIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU4ZTVhNTcxNjZmNWIxMjQ3NzMyZjJkZDA0MjQ2MTRjZDQ2ZmNmMDkyYjIxMDhhY2FiN2M5NWYyYzEwZjMzZjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU0YjVlNjFkZGVmMmZhN2EwZDNlNWNkOTJjNDE1Y2MyYTNhZmZmNWRhNDkxNzE2Nzc0MGQ1OTJjMzUzYTMyMWIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/services/dashboard_service.py#L589-L709",
+          "version": "repo-lines-v1:sha256:a1d0d5f4f29ea5fff74880af6a26dbc4c7cede03c9e5dcc25f300690d468988a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0MWFiY2QwY2M2OTEzZDRmNTFlYjIxZTRmNWFmYzJlOTBmODZkMzZhNDUwYmI0MmNiMDVjNmYzZTBkNzA2ZjhjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI5YTY5ZDZkZmNkOTgzNDBlZDQxZGRlZGRiZGE0ODA1MjgyN2M1MWZkOWY0NDliZWZlMWU5OTYwYjYwOWZlZjE5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJkMzI2MTYxNzM2MGU4NzI4MmJmNzc2NDQ1MzVlZWY5MWE2OGZjMGFhOGQzOTZiNWI2YTNhODA0N2MyMTRlY2I4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI0NWUyY2IyNTAyMzE5MDM0NGE5MGJiNDk3ZjQwZGUxNDk1OWIzY2I1NjQ3OGMyNzc0NGYyZDRhYThjOTQ2YjExIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_67e4a870281543a1bf054e0b9927a7d0",
+      "statement": "Dashboard components reference charts and KPIs by id inside the tabs JSON and Dashboard.component_ids is the shared walker over those references, so editing a chart affects every dashboard embedding it; duplicating a dashboard copies filters including dependent_group_id and remaps filter ids in the tabs in one transaction.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/dashboard_native_api.py#L260-L329",
+          "version": "repo-lines-v1:sha256:71d6f2e58fac36979a57a3df49c6e4db3074aadfe675af9d9947886852418414:eyJzZWxlY3RlZExpbmVDb3VudCI6NzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZmZDcxZTI2NjNkYzY4M2RlYWU1NTIyOTRiZjM5ZDc0MmVlNjZhZTY4NDNjZjIzMGNmODE5YjQ5ZmU3MjEzM2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk1NmNkYTQxNjk1MDI5M2Q2M2M4OTQ1MDJhNmIwN2EwMDdlNjRkODliZDk5N2E3NjJlN2Y4ZjgwNGQwZDYzZmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0YjY4NmI1MjlkNTE4OTcxOTZlY2E4OTNmYzdhNTJmN2VmY2YwYzA0ZjlmZjVjNDY3NDg0MzQ2MDE4ZjVjODIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/dashboard.py#L130-L142",
+          "version": "repo-lines-v1:sha256:2f9e20b8c064acbfd4cee8eaf08051d719537a2ccda6ff6b41ddcdc409361617:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4Yzg3ZjRhN2YxMmZiZGU4YzY2ZDNmM2RmMzMyYzgwYTQyZGM5MTM4MTM4MTQ2M2U2ZWFjMmU4MDc3ZmY1YTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkxOGJkMDBiZDhiMTQ1OTI0NGI5OGQ2NGIyYThmNjAwNmU0MTdiZWYyY2I2NzQxMmQyYWEzODBlZTJjNjMxMmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc3MzU2OGJiNTlkMzk4YjliNGUxOTY5ZjdkNDM2NmU0NjAwNzliMjRmNTFjMzVmODUwYmViYWI4Y2Q3MzQyZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ4NWM5YjJlYzY0Y2I5NTRhOWVjN2I4ZDc4ZDdlMmM3NDBjMGU1MjUwODM5OWY5ZjhkNjQyMzAwZWEzM2I3ZWEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_40ad8f4b7fdd48a4bbd242a823ee3276",
+      "statement": "DashboardService.resolve_dashboard_filters_for_chart is the shared implementation for turning {filter_id: value} maps into resolved chart filters for live dashboards, report snapshots (frozen filter defs) and public views; a filter applies to a chart only when its column exists in the chart's table (or schema/table matches when no warehouse client is given), so application is by column name across tables.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/reports/report_service.py#L343-L366",
+          "version": "repo-lines-v1:sha256:add2045d5d66188f3783dfe0ef7f738b39a9bb0f97fb5faf0b00471a54ee98d7:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkZmFlYWUwNDdmOTM4YmVlNTA2OWYyZjRhMjk4Yzg3NTZkODBmNDc3YzIwNjFkZjIzNTZiMzk4MDFhOTIxZmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg1Y2Q2MTJkMzlmMzNjYzQ0ZTRmMDY1ODk1MzMyMDA3NDAxN2E3ZjgwMDhhYmYyNTk0MDQ1ZTkwMzYyODRhNDUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/services/dashboard_service.py#L198-L271",
+          "version": "repo-lines-v1:sha256:7cdd88c860b0c4d2a8b8bf77aa7a5b09f43716806f4cc8e3b3c54675f62e10f7:eyJzZWxlY3RlZExpbmVDb3VudCI6NzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM1ZWI1YWE4YTEwYTM5YThiNmUxYTI0MzRhNGUyZGNhYjE2NzYxYzAwMWI5M2Q5MDAzZmY2ZWY5ZjNmNjJmMDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlkNjc2MzMzNTNjYmMyYzYxMTcwYWU2ZDM1YzgwOTZmYmUyMGExYWZhZGQ1ZWE1Nzg1ZGU4Nzg5ODQ3NThkYjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE4YjhkMmMxYjA2MGQ4MzRiMDdjYmNiYWRmNzYxZDhiY2IwNzcwODJjNTYyZjVkMmNlMmYwYjk2ZmVjNmRjMGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_83054fd3d0224e07a6f1a0ec83d5f0c6",
+      "statement": "A dashboard's single dependent filter group is stored as a nullable DashboardFilter.dependent_group_id (always 1) and exposed as dependent_group_filter_ids; set_dependent_group validates that all ids belong to the dashboard, are categorical value filters and share one schema/table, and dissolves the group when fewer than two ids are given.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/dashboard_native_api.py#L515-L535",
+          "version": "repo-lines-v1:sha256:6da12defcbbcc940881cb559fba2cee76f07004347a39388c9ba3b38a3fe1679:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwZTM3ZThlY2E1NTkwYzE1ZGY0OTFiOTVhZmRhNzRkMWQ0MDFiMTM3YmFmN2Y1MmY2MThhNThhZDNlNzgxMzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2OGI2YTBlNDJkNzk2MzMzMGM0MDIxYWQ3MDU4Y2IwODZjYzEyMGU5NmFjNDZiZDBkODIzYmZjMjFkZWE5OTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk1NmNkYTQxNjk1MDI5M2Q2M2M4OTQ1MDJhNmIwN2EwMDdlNjRkODliZDk5N2E3NjJlN2Y4ZjgwNGQwZDYzZmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA0YWMzZWYyMjJhYzEyYjQzNGNkMTJjMzIyN2I1Y2JmZjI1MzgxMjg1ZmI1ZGQyOWJkMTk4ZDU5OWZkYjJjMWMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/dashboard.py#L144-L167",
+          "version": "repo-lines-v1:sha256:7dbcce0efa2e783015f53855bb5d6c0b97aea8248d19a784fb495a0d6b8cf96b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2MjhiMmIxNzcxYTYwY2RhOTY4NmU3NmU3MDhiN2UzOGUzMGUyYzA5MGNjZTBkNDYyYjcyZGRjMjcyNTIxYTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2YjA0NDkxNDY5NzIyZTgzNjNhOTRlNDA0NDUzOGUwMTNhMmEyMTdlMzZiMWU1NjhiYTYwYWNiN2I0YzhmMmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2ODJlYmUxOTFmYThjMWNhZGYxZTM4NDdlNjA2N2U1MDhkMzZhYTM0OTNhZjZlNGRkYzdjNzYxOThlYmJjNjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRjODkzMjEzOTc3ZjgyZjQ5MzZkMzNmOTBlMWQxOGFiY2FmY2YzMjYxZmJlNGIwODJhZDk2MDVmZDdiYzBkNDUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/dashboard.py#L197-L198",
+          "version": "repo-lines-v1:sha256:3ab033022112ff7afc088563858eeeb9836f3f29187f75c221705aa1b635f98e:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjMwY2VmZGM2Y2EwMDI0MjE1ZjdkZTA0YzFlZWFlM2YyODE2MDdiZTFkMjlmYzc0NWM1ZjRhZWUwYWNmYzkzZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjJkMzMxMmUxMTY5YWU5NTEyODQzNTRlMTYxNTdlM2Q4ZmFmNTlkZmNhZjQ5NDc0ZmQ0ZTdlYjhmMmRlZTY4YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiN2JiYjAxMGY2NTVkZDI4YTVkYTg3N2I3NDdjZmI2ODljMTRjYzhmZDkzNmM3ZTVmMWIzMGFmYWViZmVhOWY5ZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjUwNGVjMjM0YTFiMTk4MzU5ODgzNzRlMDQyNzczOWUxZmQ1MmY5NmJiY2I3NDkzMGVlMzZmOThlMjQ3NGNlOCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/services/dashboard_service.py#L883-L925",
+          "version": "repo-lines-v1:sha256:f0159b0ad979ed49f0339d95f985aab60f70262eba82f377007266fed2cb2ff7:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1OTYxNWJiMTc3YjMyYjkxNWY0ZjIyODQyNmUxMGFjODkzYWFiNzMyNWEwMmU2ODllYWJkMjdmMTI0MzA2MWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEyOTJlN2E1OTIyNzFmZTU4MmJjOTIzMTQ2MTViM2EyZGQ4Zjk3OTk5NTIyNjE3YTIzMWNhZmI0NGNiZTg0NGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRiNDliYzFkZTE5MjdlNzNmYzMyMDE5ZjJhMWQ1NDBhOGNjOGJlZDk3MTMyY2I0MzgyMzEyYjk5Mzg5MDc0MjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5660d4407dba43a7ab06b610a78b62a5",
+      "statement": "Dependent-group invariants are maintained on filter changes: update_filter (under row locks) removes a member that stops being categorical or leaves the group's table and dissolves the group below two members, and delete_filter removes the member and dissolves the group when fewer than two remain.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/services/dashboard_service.py#L774-L881",
+          "version": "repo-lines-v1:sha256:4285c4f4b73dd65fe275a11b0e26ac6cd6025e4ef85872ad5b51be9c8d7fee58:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0MWFiY2QwY2M2OTEzZDRmNTFlYjIxZTRmNWFmYzJlOTBmODZkMzZhNDUwYmI0MmNiMDVjNmYzZTBkNzA2ZjhjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJkMTA0MjRiZGUzYWQ5MWZmOGRhZWE4MWE0YWE1MDRiMmZlOWQzNzkyM2Y1OTM3OTE1MmQ1NDNkN2I0ZGVhZjcxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJkYWIzM2E1Nzg4ZGY3MWNkNDZkOTliOWUwOTZkY2RlY2FmNDUzZjY0M2EwMzk5M2QyNTZiOGQwMGMwYmNkNGNiIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI3ODRmZTY1OTFkMjVkM2FhZmU5MjIyZGFiMjQxZWEwMmY1ZmNmNWUwNzg2YjEyYzYwMzU4OGE5ZjYzMWRkNDc1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_37b2f23df1534306b184a8dc43d83d81",
+      "statement": "Dependent-filter narrowing is client-driven: getGroupNarrowingInfo builds in-constraints from every other member with a value, which are sent as the constraints query param to the filter preview endpoints (authenticated and both public variants); the backend validates shape with parse_narrowing_constraints (400 on bad input), applies them via apply_chart_filters, and falls back to the unnarrowed option list if the narrowed query fails.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/filter_api.py#L257-L301",
+          "version": "repo-lines-v1:sha256:343894aceeeb1982ace39d689e91febdb48679974fbcb77038c091cfd93aa2ab:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiY2M4YzI4NGY1N2FkZmNkYjZkMDljYzg3OWMwMWI3Nzk5ZWNiNjY1Nzk3MGE2Y2NlNDk0NTBiZjMzNWMwZmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3MDNjMDE0Yjk2ZWRmZGI3MmIxYmZkOTFlMDQ5ZmRiM2MyM2Q1NDlkNzc3MGE4ZDIxNzk4YjVmODkzMDBjYmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYwNzljYTkwOGQ5MGVhNzJlZGJlNWY2NTUxOTRhYWQxOGEwZTI4YTYxOTliMWU5MzcwYzdmNTM5OWY2ODk4YzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg3NjFkMDA4ZGEwZDRjZGY5YmM5ZDJiYTYyMDU3MDA0NTExYWVkNDE3MjMyOTBkYjQ1NWVkNzYyOTY2NGNjMDAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/filter_api.py#L55-L94",
+          "version": "repo-lines-v1:sha256:d6e704983d6a8564db37d0a3bd26018f3dd7a98b79b7a2febcbcdd313954eb70:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExNDI1MjUxZDg5ODk0MmRmYzg0MzA0YjI0NjAyMTNlYTljZDEwZDhjNjEyMWQ4ZTQyYmQzNTgzMWM2NjQ1ODIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlMDIyOTA0MjEyMjMwNTI0MDc4MTlkNjc5Nzg5Y2YyZDE0OWJjYTI1Mjg5Mjk1ZWI5Nzk1ZjIxMTExNmYyNzEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjViYmQxNWNmZjBjZWMxNDFmODZlOGE5ODRiYWEzYzU3OTA1N2EyNjg4M2NmMzczMjY2MDMzNWU2ZDcwMzg0NDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE2NWZlZjdlYTk1OGRhN2M0YWQ4MTdjODZiOTE2M2FmMmRkOGJhNGEwNDNjMGRjYTE3YWVjNzg5MDhmNzk1OGYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/services/dashboard_service.py#L1302-L1337",
+          "version": "repo-lines-v1:sha256:dbf265e180f8826975772aa431d2083c0e7a3ef409e6effe507ada91cc439dbc:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc5NWQ1OTBlYjdjOTY2MmMyOWYzNzgyMTI0MzRhN2Y1MDFmZjI2Mjk1YjkxY2IxZTRlZTMyY2EwMjYwNzMzZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3YzA4MWY0NzcyM2EwYjIwYmNkODkwMmE3MTg3OTIyM2VlYTMxZWZhZTY2MDE4NDlhMTI4NzQ4OWIzYmRjOTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5NDUyNTM4YzNiMmY3YzNkMzMzNWI0MjUwZWQ1MGMzZDBiZjQ0ZmFmMGZmYjAzNTBmMGMzNDQzMDQ5MzMwNmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM4MWEzZDY2YWM0Mjc4NWIxYWExZTZlYjE4ODhlODcyNjc4MzEyM2Y0MmIwYmE4Mjk2MThhOTNlZGYzMDA2NDAifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/dashboard-filter-utils.ts#L262-L295",
+          "version": "repo-lines-v1:sha256:5aa1d8823d3a66eba3508e324cdbbee1ae83215f151e89fae107173a014947b1:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA2NzkxOGJkYjE3YmQzYzMzNDM0MDMwMzg2YTM5Yjk1ZWEzMTViNzRkZjRmMDFkMjI4MWVkNjFiZTE4YmZjYzkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc2MGNjODliYWEwZjJhMjJlNmMxNzkxYjI1NWIxMDQ0YTg5ZmMxMmRkMDMzYTRkOWJkZWEyODE2NTBmMDY1MGEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_dceae7dee0574d588edd28addcdf8d29",
+      "statement": "Report snapshots freeze dependent_group_filter_ids in frozen_dashboard so narrowing works in private and public report views.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/reports/report_service.py#L61-L77",
+          "version": "repo-lines-v1:sha256:27f8a8b4b913822eec6ba739bf0d209d510ef19b4c4b8ade165b193dddfed0a4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2YjA0NDkxNDY5NzIyZTgzNjNhOTRlNDA0NDUzOGUwMTNhMmEyMTdlMzZiMWU1NjhiYTYwYWNiN2I0YzhmMmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmYzcxMmFiYjg1MjNlMGEyMGYyMmFhOTMwYWM2Y2NkZDgzOTQ2NDRmZDY2NjYyNjJkZTUyMjk4MTY0NWQ3MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNiMTc2YzgwZjk1MTVhMTk2M2YyZTUwMWYxNDY4MDU5YmVjNjRmZGU1ZWEzYTkyYTg4ZGM2MjEyNDVmNzcxMDEifQ"
+        },
+        {
+          "resource": "repo://harness/features/dependent-filters/v2/plan.md#L171-L178",
+          "version": "repo-lines-v1:sha256:b9ee65990bd5102b5e98d5df331fcd11223097f878c542d0ef72dfceda2c4c76:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDczNWJjMTRmMGNlZmY2MjNmN2M3N2EzN2E2YzI5ZmYyZTY5YzVlYjAwZTFjYmYyZTM3OTU5YzI3OWMyNDE2NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzljZGFkY2U0NmZkZGNhMGJkODY1NzU0YzBmNzZjZDBjZWU3YTcxZWZhNDBhOWRiYThmM2M5NjM4YzcwOGE0NCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmI2MTYzNDEzYmJmOTM2NDJkNTVmOWU2MGRkMTZmOWFjZTNlMjdlYjUwMGVlMTZiODYzZWE5MGI0NzQxYWYzZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTU5YjgwYmIwZWU1OWRjMzE0M2QyOTNjMWE2MjIwNDJiZTA5YWVhNTRkYWUxMzA0M2E2ZWI2YzZlYWZjNmE1MSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_6f92028130e7422792676fbab33d6c6c",
+      "statement": "Visibility is changed via the general-access endpoint with modes private, internal and public (public only for resources with is_public); it requires owner, admin or direct share, blocks downgrading below a parent dashboard's visibility, refuses public mode with 403 when the org's allow_public_sharing is off, creates a token with secrets.token_urlsafe(48) on first public enable, and keeps the token dormant when public sharing is turned off.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/access_api.py#L283-L400",
+          "version": "repo-lines-v1:sha256:39fbe6c556e2715ea62a3160b2c39789c1d7a42bc34b2aecf81406837db1d5ff:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI5MWFkNTQ4NGRkODU3ZGNkMGRhYWI1MGUzODYwZDhiODJjNGRmNDIzYTM3NGZiOGZkMmY1NzQ3OWEwZDk1ZTFjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI3MjA4NTMyOTEwY2ZjZWZlNTg3MDNkNDM0NDVhOWMyMDJiMTI0ODc3MmYxNmVmNWExNjMwZTYyZjI1ZGYwMjc0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJmMGQyMTg5OGZiYWNjOTkyM2IyZDY4ZGYwN2JlNGY2YjI1ZjE4MDc1MjVjOWY5ZTEzOGQ5NDQwYWJhMTkzMzlhIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJjYWMzOWQ1NWIxYzQwOWFlZTdjMzE4YWU4ZmVlNGYxMjllZTgzNTllYjI3MzY1NzViZWJiODA3MTdhNTM5NjlkIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_c00f9453ceb5401c93390287dd84582d",
+      "statement": "The public API is a separate NinjaAPI object mounted at /api/v1/public/ with no authentication, whereas the authenticated API uses CustomJwtAuthMiddleware as its default auth.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/routes.py#L126-L134",
+          "version": "repo-lines-v1:sha256:5559e51ee15c8d4a6c4f1ed046c5010353ef05b830457b9e6896e4f05aab7775:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODE4YzIxZTZiYjQwNTZjOTk4NTdlMDA5OGU5MjRkMDUxOTkxMDY2OTU0ZDQ3ZjRhZDdmYjc4ODkzOWY4ZjU3YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNWUwM2RjNzVmNGUzZmE5MTMxYzhlODA0YTMzYjU3NmJmZjc5M2FlMzFlOTU5ZDJkZjg3ZTY3ZjI4ZDNjNTYwNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTZkOTRiNWNlN2FlNDI2YzNlMDljMDcyZmJmM2RhYjkwNjFiMTdkYTk2ZDc0ODFiZmQyYjViYzQ4MzZhMTZiYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/routes.py#L38-L40",
+          "version": "repo-lines-v1:sha256:7a1e5afb86f467a76da560a3bd296185aa2a2b6f471ecb86e206c40e07063b67:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmJjYjgzOTNhOWRlZTQzYzcyZTMzYTU0MDVhYzc4ZjRmY2VmYzBiMTFiZjliZmI3NzgzY2VjODE5NTVmMWM1NCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmFmYmEwNTI3YzM5NTNjNGI2ZTBlNWI1NzM5YmE4MzYxMmY4MDUzYmNkYzk0NjY3MzAxOTNjZDFkNTkwYjQwOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWQ5Y2U1NTk0OWY0OTM2YTIwNzY2OGVmMzI2OTA2MTdlY2ViZWQ4NGZkMDNkNjVhZDAyMzZlMDYxODVlNWQ2OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGM5MTk3NDdjMmM2OTI0MDA1NDQ5OWQ1ZDg3MmQxZmQ0OTE2ZTcxMTQ1Y2FjYjU5YjdkOWEzMDA1MDhjZjc2NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_24a681ed04ce46569c4aecb870516bd0",
+      "statement": "Public dashboard access is gated by _resolve_public_dashboard, which requires a matching public_share_token, is_public=True and the org's allow_public_sharing enabled (an org with no preferences row counts as enabled); failures return 404 with an {error, is_valid:false} body, and successful views increment access counters.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/public_api.py#L106-L181",
+          "version": "repo-lines-v1:sha256:711f63eafe7695e2ea8bd1efa6a5fc8a3d8e8fd983570dd0f7bc998c949a97b3:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAyNWYzZTA0YzVkYjExNzAyY2MxNGY5NTY3NjcwMTM3NjEyMjVjN2QwYWJjY2NmYmVlMzE4Y2E5MDhiODY5OTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI5YWFmZDlmMjViOGQwOGU5ODI0ZjliOWEyNmE4ZjYyM2FiM2M5ZTg4YmE1ZTkzYTNiYWJlMDkzOTFjNzUyYzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY2Yzk5YzZhMzkzMjZkZDc4NDRiMDA4ZjMyNTg4MGM0NDNmZTQ0OTlhODBmNmQ0NjgyOWJlZTUwOGYyMDU5YjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjYjJjOThkZjBhN2M2ZGZjNTUxZDM1ZjMwMmQwOWNlNjU4YTIxN2MwNTVjYmE1ZTA4MzkxMmZiOWZjYWJhODAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ab580d1c0a2d434fb768f67add03dc2f",
+      "statement": "Public report endpoints serve chart, table, total-row and map data from snapshot.frozen_chart_configs with the snapshot's period lock injected and filters resolved against the frozen filter list, and public map overlay endpoints overwrite schema, table, geographic column, value column and metrics from the saved or frozen chart config rather than the request body.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/public_api.py#L1189-L1275",
+          "version": "repo-lines-v1:sha256:54810f49509b7b500c73c7374c01d4a441902c74203528658a95bdb9a9c73cb7:eyJzZWxlY3RlZExpbmVDb3VudCI6ODcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwMWNiZTk2NDEwYWQ3YzgyMDgxODNmNTBkNjg4NDdkYmMyYTBlMGMwZjkyN2QzNDlhNmRjOTAzNzI2ZTI3ZjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlZDk1NmExMjMxYTk1OTQwNjRhZmU0YWU5ZjkxZDU0NzA4ZjM0MzM3YzFmMWY1MzFlM2IwMGY0MTEwMDFkN2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFkNmVmYmQ3YjVhNjBlOTJmMzM0NTQ3ZDI5MGEwMzc5MWE1ZjUxZDZiMWMzNmY2MDMyM2ZlNDMxOTgwODdlZDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjYjJjOThkZjBhN2M2ZGZjNTUxZDM1ZjMwMmQwOWNlNjU4YTIxN2MwNTVjYmE1ZTA4MzkxMmZiOWZjYWJhODAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/public_api.py#L1376-L1454",
+          "version": "repo-lines-v1:sha256:f0478e72f46f874dea09f4a0453afa6d1fb55eacd2acb2715a76baf080e7ebc5:eyJzZWxlY3RlZExpbmVDb3VudCI6NzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwMzIyNGM4N2QwYTUyOWZkOTQ2ZDlmYzA4YzMyMjI2ZWMzYTI3ZGM0MmU2NWI4YTA1MTQwZjQwYzcyNWZjNGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwNzY1NDVhOTczYTQyYWZjNzdlZTBmZDFiMGUzNjk0MGQ2NWY2ZDk2NWU4Y2MxYWY2ODZhZDk3OTc1MmRlMWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE1YzFiZDI3ZWIzMzMzMTdlM2EwZjU5MThhZGFlZGM0MWYxNzQxMWNiNzU3YWRlMzliYWIyYzJjYWUxMWJlNjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjYjJjOThkZjBhN2M2ZGZjNTUxZDM1ZjMwMmQwOWNlNjU4YTIxN2MwNTVjYmE1ZTA4MzkxMmZiOWZjYWJhODAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/public_api.py#L685-L762",
+          "version": "repo-lines-v1:sha256:1f70299a6ccef5e763779866a14c77be6dc2d927ba022d3557d342840bf813c1:eyJzZWxlY3RlZExpbmVDb3VudCI6NzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkY2VlMzAxYzkyYzg5OGZlNmJiMTFhMWM4N2FjMmJjMjgwZGJlNTE1ODZiYTkxNTcwNTUyNTQ3NTEwOTkzYzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwNzY1NDVhOTczYTQyYWZjNzdlZTBmZDFiMGUzNjk0MGQ2NWY2ZDk2NWU4Y2MxYWY2ODZhZDk3OTc1MmRlMWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc1OWZmYTQyMTY3ZDRmNzhhMGFhYWU5NWU3NTUxNzBmNTk1Yjg3ZjYwZTYyZDg3YWIyOTAwYzY5ZmEzZWRiMjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmZDQ4ZTU4NTJhYzBhMDczOTMzZGIxMTY0N2ZhOTc1OGJlNDFmNjZiOTdlMTlkY2Y1ZDYyY2E3NGZhNzEwYzIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ff72852102e94a0a9737503c0c8b330e",
+      "statement": "Public dashboard chart endpoints look charts up by id within the dashboard's org without verifying the chart is placed on the dashboard, while the public KPI endpoint checks the KPI is a component of the dashboard; the data-preview endpoint accepts a ChartDataPayload body and the filter-preview endpoints take schema, table and column from the query string.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/public_api.py#L1052-L1107",
+          "version": "repo-lines-v1:sha256:0164cf4ec4586aba818cb0c8df5f6770917776df4e266640a66ea5b510d43fe7:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjNGM3Yjc3ODNiODA4NDJjYzMxNWMwYTkzNTNlNGE2NTgxMGNmNWViOWVkYzNmYWI2ZDM4MDk5MjU2MTFhMDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4MjI5Y2RiMzE2YTFjNDViZDA5YzEzY2RkMDZlM2M1MjZiYjlmMGExMjhiNzQ1Y2Y0MWVkYTNlYTZlYzU4NGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE1YzFiZDI3ZWIzMzMzMTdlM2EwZjU5MThhZGFlZGM0MWYxNzQxMWNiNzU3YWRlMzliYWIyYzJjYWUxMWJlNjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzN2VkNTI0YzMxMzA4ODg1ZTEzODI1MmI5M2Y1ZTVlNTU5ZTU0OGU5MDgzZDdkMWMwYmQ5Mjk4NTdmMjdiNTIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/public_api.py#L184-L230",
+          "version": "repo-lines-v1:sha256:e05741ec492425db4dc1acb25223a6f7a984f6ae962187fc435930de9cd187fa:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjNGM3Yjc3ODNiODA4NDJjYzMxNWMwYTkzNTNlNGE2NTgxMGNmNWViOWVkYzNmYWI2ZDM4MDk5MjU2MTFhMDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUyZWMwNTdiMTUyYmQ4MDY3MjIwMTk5MzE1NmU2ZmRkOTE3NmU2YWYzZDViZGZjNGY2NzhlMWRhMzg4NDg4YWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdkN2U4OTM3YTBmZTk4MTc3M2ZjMTFhOGEyMWQ4MzQ2OTc2YTc3ZWVhNGY1OTA1ZTM1YWY3NmYyMjE2YWU3ZmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjYjJjOThkZjBhN2M2ZGZjNTUxZDM1ZjMwMmQwOWNlNjU4YTIxN2MwNTVjYmE1ZTA4MzkxMmZiOWZjYWJhODAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/public_api.py#L416-L453",
+          "version": "repo-lines-v1:sha256:600fdff82119f432d5b7af14830b71ac713c1fe62ccfd76a4f8aba6bb6465a87:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjNGM3Yjc3ODNiODA4NDJjYzMxNWMwYTkzNTNlNGE2NTgxMGNmNWViOWVkYzNmYWI2ZDM4MDk5MjU2MTFhMDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhhNGU1ZjczZmZjOGRkMWYxNzc5ZjgzMWVjMWE0ODExZWFkZWJiMTJkOTRhMjA2MWNmOTRjMmExZGY4MzBmNDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjliYjYzNzhjZGZlZjU0ZTdmZDdjNmU3YmQwNTgxYjk2YmE5YjRhZjdkMjkzODAyMWEzYmI1MDQ5YWVkNmNiZGYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/public_api.py#L521-L609",
+          "version": "repo-lines-v1:sha256:e925ebdda80bf6d60dc64cdf31d5092b3d487d003d27965ade915125082f2d70:eyJzZWxlY3RlZExpbmVDb3VudCI6ODksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwMzIyNGM4N2QwYTUyOWZkOTQ2ZDlmYzA4YzMyMjI2ZWMzYTI3ZGM0MmU2NWI4YTA1MTQwZjQwYzcyNWZjNGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1ODA2Y2U5YmZjZDJmNWM3NzBkZmJiZGFlMWE4ODhlYThiY2NkODljZTdhZWIwZTFiMmI4MTRmNjVmOTg3NjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA4YTk2ODViY2I3ZTUxN2E1OTMwMjM1OGVlMzBkMjJmNmNjYmFhOTcxMjFiNTQ0MDg1OGIyZDZjZTdhNGEwMTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjYjJjOThkZjBhN2M2ZGZjNTUxZDM1ZjMwMmQwOWNlNjU4YTIxN2MwNTVjYmE1ZTA4MzkxMmZiOWZjYWJhODAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_079d9f5059ea45aca1e8c9905947c02d",
+      "statement": "On the frontend, DashboardNativeView is reused for internal, public-token and report modes, and chart, filter-preview and KPI code switch between authenticated URLs and /api/v1/public/dashboards or /reports URLs based on publicToken and report-mode props, using cookie-less public API helpers.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/app/public/dashboard/%5Btoken%5D/page.tsx#L1-L31",
+          "version": "repo-lines-v1:sha256:e0c2851a353398b8b03b7c1d7eff98a25d3d3b38c1ff7fdaf544ada21cee5286:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiYzkwMGUxODkwM2U4ZWIyOGM2MmU4NzBiZDU0ZjAyOTVjZWQ1ZDk3ZDAyMzJhYmQwNWE1MDA5OTkyYzE0NGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/components/dashboard/chart-element-view.tsx#L254-L272",
+          "version": "repo-lines-v1:sha256:618e4c6607cf3c51b3503ff75ebaa2a4cf5aa0edb49ac9ef8df64323912e7edd:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJjYjk0M2I5ZmM0Njg5ZWM1OTExNTc0ZjZkZDQwYTgxOTQ0YWRlY2VmMjMwYzkyMDk3Y2JlZjliYzMyMDk5Y2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiNjA1NmJiZDczMDAzNDU4YjNmZjhlNDdhOWVmNjU5OTYxOWZmZTg2Zjc4M2E1ZmI0YjM5MzMwNzI4N2M5MGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE2MjFlMWQ5MzEzYmVmY2RiNjk5OWIzZjk4OGZmMjEzOGUyMTViY2ViM2RmNTkwYjgwZjA3ZjRhYzMyNjdmMTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM5NmQ1OGYwMTRkNjNlMjg1ZTA3NmQ2NzVmNTkxZWE1M2I4Y2MzMWUyNGUyNzE0YmZiMjk4N2E1OWNjOGZmYTUifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/api.ts#L243-L260",
+          "version": "repo-lines-v1:sha256:cc75ec146c2b17f717ddc61c609c06c21596cf1c7b7e7c518afc39eb05b9fe9c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiZTUyMTA4ZGVhZDA1YThjMjFmNzc2MmFjNzQwMDkyOThhMDI5MGMzNmQwZWZhZDFjZmMxN2Y2YjZlYTcxZGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiMjAwYTM0MWM5ODU2MmI0Nzg3NDAzOGY0ZGUwMjBhMDk2YjlkMjcyY2I3MDFhN2NhYWM0ZTQwZTM4ZWQ3M2IiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5NmM1ZTFiYzI1MGMxYzlkNWE5M2RjMDUyYWI5NWM0YjI1NmMxNmVlOGViNjVmNjQzMDUwMTAyNTA2ZGFlOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI0OTFlNTE5YmNhYTA2YmZkYzI1NGZlOWQ3NDE4NDQxMGUzYTRkZTk3YTNmZDdkZmNhODRkN2QzYzMzNWU3NzcifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/dashboard-filter-utils.ts#L309-L335",
+          "version": "repo-lines-v1:sha256:839a4fc06564f18d5b65597b37cc73fd480b50d7f697d8133c93f6bbdcf2ac8e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRiYjgxYmE0MzJmNGJiN2M3ZTRiOTJiMDYyNGQ5YTI4MGE2MWUwZjQ5ZTA3YzliZjQxZTU2MWU5YzZhODA1M2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhM2U0NmY5NDI3NmI2ZjZmNGVkMWYwMmFmNzhiZWY2YTJlZTFjNDM5ZGQ1NTg0Yjk3Mzk0ODMxMzIxNGQyYjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxMGFmNDc4MjUxMWNlNWU5ODQ2NDEzMTQ5NGIzNDA2Y2JhODRkZTRhNThlODk2ZTgxYzhhNzA4ZDcwNjUyZDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFkMjAzYzg1NDJmZjQ2MDlmYmRkNzMzNjI4MTFjZWE1NjAxNjI0MDFlOTBjNzE3Zjg1MDk0OGI5OGIzNWZlN2MifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_88b1acc78e1849fbb1b3799c1d0a2235",
+      "statement": "ReportSnapshot stores frozen configuration, not frozen data: it has no foreign key to Dashboard or Chart, keeps frozen_dashboard and frozen_chart_configs plus date_column and optional period bounds, and chart data is queried live against the warehouse each time with the period applied.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/reports/report_service.py#L61-L179",
+          "version": "repo-lines-v1:sha256:e5d12a8a50797f6eda443baea496d71540d98cbc40d7ff6aa02304cbd9802723:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0MWFiY2QwY2M2OTEzZDRmNTFlYjIxZTRmNWFmYzJlOTBmODZkMzZhNDUwYmI0MmNiMDVjNmYzZTBkNzA2ZjhjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMzE3MDdjM2NhNzgyMmZmMmQyYzU1MzJlNmE1OTFkNzU3YmQ3ZmEzODhkODU1N2YwNTBjOWYzNTMxMzlhMWVmIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5ZmM3MTJhYmI4NTIzZTBhMjBmMjJhYTkzMGFjNmNjZGQ4Mzk0NjQ0ZmQ2NjY2MjYyZGU1MjI5ODE2NDVkNzMyIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI0ODU2MmIwYTQzZGFhYjRiNjg1NjkzZDkxZjc2Nzg1ZTFmMjUxM2RiMjMxNjc3OWYyYTI2ZTFiMjE1MDY1N2JjIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/report.py#L8-L64",
+          "version": "repo-lines-v1:sha256:5ce521384487692fd742a7009093077967272b112dbf8138f2910df25bbbe279:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk3NjRmYWVlYWMxNzZmNzM1NWQyY2E0OWI0MWEyMzhkNzlkMjYwMDdiMWRhOTI1NzI1ZGU0YWMyNmJmMjU2NzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlMTczZWMxZjQ0ZGM3OWEwMGMyOGNjOTg3MjFkNGVmMGRlOThlNzY0NzUwNjZjY2E0ZDViZjMyN2M1MzgwYjIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgwMWQwYTg4ZDhlMGJjMmRkYTdkNWVmZmNhNzE5ZTE4ODhlMGY1MDIzNGY5YTlmYTQ1YTVlYjY1MWRjMzExOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJiOTNkOTY3ODBhYzQ3Mjk1Yjk2Y2Q1YjExY2I3NzhmNjM3YzRiNGMyYmYzNzI5NTAzYWJiZjg5Y2E2OTY0NDMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_56ef2202c0d14da4a80b8e658d3febe1",
+      "statement": "create_snapshot validates that period_start is not after period_end, that the dashboard belongs to the caller's org, and that a supplied date_column matches a dashboard datetime filter or is a datetime column in the warehouse, then freezes the dashboard, charts and KPIs through Pydantic models before saving and audit-logging.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/reports/report_service.py#L612-L736",
+          "version": "repo-lines-v1:sha256:4b3cf76f4f815c796be34bc6cb68ff0ae4eb631d261bb6d90d8dee34a38ff9f6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0MWFiY2QwY2M2OTEzZDRmNTFlYjIxZTRmNWFmYzJlOTBmODZkMzZhNDUwYmI0MmNiMDVjNmYzZTBkNzA2ZjhjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI3ZGNjZmY1NjRlMTdjNDVlMzRiYjNhNzU2NzY4MzAwMWQwMDMxMmUyZDhhYzI2M2EzZjBhNDg2ZmZkY2ZiNTkwIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4YjU0Y2I3NjNjNjdmNWQ0MmVlN2Y5ZTM2NWU0N2VjNGZiYzQ5NmZjNDc0MGZiNDhkMGY4MzNkNDgwZTYxMGFhIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIxNjRhY2Q5N2ZhZGZhYWU2Mjg2NDhiYTQzMzY4Yjc4YThhOTM0YTUyZWYzZGM5NDMyZDFjY2M1ZjQ0NTk4YmZhIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_73d915b0e741408f8723e652739e671c",
+      "statement": "At view time the report period is injected into deep copies of the frozen config: chart-level date filters are added to charts on the anchor table or on tables having the date column (end bound made inclusive), the matching frozen datetime filter is marked locked with default dates or a display-only negative-id filter is injected, so persisted configs are never mutated.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/reports/report_service.py#L185-L341",
+          "version": "repo-lines-v1:sha256:1e0fe7f65d019e3b4b794617b780f3a0d40438295a9df36b39239f806ce6eeae:eyJzZWxlY3RlZExpbmVDb3VudCI6MTU3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0MWFiY2QwY2M2OTEzZDRmNTFlYjIxZTRmNWFmYzJlOTBmODZkMzZhNDUwYmI0MmNiMDVjNmYzZTBkNzA2ZjhjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmMjk0YTUzMGI5MmY4OGZlYWE5MzI0NGZjZWI2YjdiNGY2M2Y2NWQzODU4MjVlZjYyYzlkODBkYTA0ZjFjNTU2IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlODI0M2RkMDg5NWJhOGE4ZTY5N2QwZWE2OGI5NDA3NmU4ODA2ZjUwZDhkNWMyY2I2YTA5OTJmYmFiN2FiMzA4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJjN2IyZWQ3OGU0ZDU0MjIyODU2OTRhNzNiYjQwZTRlYjMwYmI4NDc0MjZhM2M1Nzc5MmZkYjc0ZjUxMWZjMmFlIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/reports/report_service.py#L781-L854",
+          "version": "repo-lines-v1:sha256:18e38c0b49dbbb014a2fba49bc80105f1acf73164bb446cd0cc9ece1b677a50a:eyJzZWxlY3RlZExpbmVDb3VudCI6NzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2YjA0NDkxNDY5NzIyZTgzNjNhOTRlNDA0NDUzOGUwMTNhMmEyMTdlMzZiMWU1NjhiYTYwYWNiN2I0YzhmMmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU4YjdjNDRkMTlkOTk5Zjk4OTFmNWUyMWY2MmQwODkxZmM0ZTBmY2JmM2JmNzY1NWMwMGUzMTliNjExMjcxNzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZjNzA5MjNkNmQzNjNiMjJlYTE3ODNmOGE5YjE1YWQ5MDY0YTI4NDY0MWU0YjYxOGM4MmNlM2I4NTE2Y2M3NGYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_277269d204fc4bcbacd8303cd54d15f3",
+      "statement": "PDF export drives headless Chromium via Playwright to the public report page with print=true and optional dashboard_filters, injecting an X-Render-Secret header into every request; _get_public_report_snapshot accepts that secret (hmac.compare_digest against settings.RENDER_SECRET) to bypass both is_public and the org's allow_public_sharing toggle, ensure_share_token creates a token without making the report public, and generation raises ValueError if RENDER_SECRET is unset.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/public_api.py#L1115-L1142",
+          "version": "repo-lines-v1:sha256:9d5094f090d49a525285116d338a0e639529d15136dc740d96a988e1451e4de6:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY4ZTA2NDNkOWQ3ODI5MmJiYjFiNDVmMjg3NTBjNjIwOWJiYjMwZTY5NDg5NTc4MzY0MWNhNWI3YjliODRhZGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVhOWIyYWI3NzM2ZjI5Y2FiNTdkYjZiMWUzMWVlNmJhMmUxYmNhMmQ0NzlmYjEwODE0NTdlZDE1MWUyNDgxZTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjYjJjOThkZjBhN2M2ZGZjNTUxZDM1ZjMwMmQwOWNlNjU4YTIxN2MwNTVjYmE1ZTA4MzkxMmZiOWZjYWJhODAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/report_api.py#L404-L443",
+          "version": "repo-lines-v1:sha256:72f131c70eb9e385c52774180e6b151b484e3d04fd0d9ecdd99792da34f78a83:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5MzJjNWU5YzlhZDVjNzc4MmQzOGE1NjQxYjVkYWYwNDg3ODcyZmEyNjc0ZmY2MmJiMDhmNjk4YjViNWUyYmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA4ZThkOGE1YjNmOGIyYWZkMjI1YjZmM2FlMjMwYWIzNzk4NDU0NjZkYWZkM2I4YjE0ZWU4ZjU3MjYwMmM2OWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlOTU5YzAxNjI1OTY2OTlmNGYyNTZjMjVmYjBkYmM1N2MwZTE1ZGU2YzFiYWMxMjQ2ZTllMTg0Zjg3NmViNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBmN2E2OTUxOTlmOTY1YmNiNTg4ODE5NTIyOTMzOGI4ODY3NGMwNTYwYWU5MmU2YzNmNmYxNDM1NDE3NzRhYmUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/reports/pdf_export_service.py#L29-L120",
+          "version": "repo-lines-v1:sha256:de5d0be9533d748bc1b1f4681eac3cecb0e782c4e5dd5484302e9bc8b63c0c32:eyJzZWxlY3RlZExpbmVDb3VudCI6OTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwYWM3Y2Q3MzY0OTNiODZiYWZkZjk5YjA4ZTBiMDJhZjBmMTMxOWJlMDc3MDhmODkzYjY4MGYyNmU2ZGE1MDQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwOTQ3YzI3MTE3Y2I4ZGVhZmVhYWRjN2FiOWI1MjdjNmY5MjBiNmRhYjRkMDBiYmQwZjRjYzY0ZDdmZjVkZTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkYmYxYzZjYWE3YTk0NDA1OGYwZjE0ODY5MmE4ZWNkYTM0OTQ4Y2QwOTkzNDQxYWFmYzBiNTRkYjcxMmVkOWUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/reports/report_service.py#L1030-L1043",
+          "version": "repo-lines-v1:sha256:61eacfdfd4c2cb6221e05203dd70ab772d7252c9a32ba34cfcb53c418bde19ce:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlOGMzNmU5YmRlZTk0NjAzODlkMmQ0NDVmYTViMDg2OWVjMTg5ZmYyNzIzNmE0MTQ3OTZlOGYxZThiMDJhYTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdhYjEwMmRmMDU2YjQ0MTI2ZTMyZGUyNzhmYjBkMDE3NDlhMDJkNTk2MjA5OTM5MjY4ODQ0ZmI3ZThhYTQyYmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ef904db7ce894ea2a5420efc0a02d300",
+      "statement": "Email sharing of a report queues the Celery task send_report_email_task, which generates one PDF for all recipients, includes the public URL only if the report is public, fans out through notify_report_shared, swallows exceptions and sends an urgent notification to the sender for recipients who could not be reached; the task has no retry logic.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/report_api.py#L474-L504",
+          "version": "repo-lines-v1:sha256:e3cb748f5f50ebe059f7eaad2d64ac4e3718031f6151a9b8cd81c29836fe8aae:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAyOWYxZGFkNTUwYTliMzE2NTQwZjUzOTAxMTlhNGEyNTNjYjhkNGNhMDg3ZTY5MjRkZDFhNWYxNTc3MzUxZTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxMWI0MGNlMmI0NTZhODI4MzE5YzE3OTVjNWMxNTU0ZDUyZjkxNzY5ZTAwODg5ZDk3MmRmMTE0NmEyMmNiYjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNmNDA1ZTllNTI1ZTg2YWNmYzk4ZmQ0ZDQzN2EwZWMyM2M1NjZjZTU5YjIzYmJjMDdiNDhmMmMwYzY5Y2VjZWYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/report_tasks.py#L19-L117",
+          "version": "repo-lines-v1:sha256:7051a3d470387316155416cfb09c8a83bd7084aa2f04ed9383bcef9f54ad6998:eyJzZWxlY3RlZExpbmVDb3VudCI6OTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRiOWU2YWY1YzY2ODFkOWI3Njc1YTUzMmNlMTdlMjk2YmY5ZTM3YzY0NGE4Nzc2YTAzMTQ2NGU5ZDRhOTU0OGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MDMyZTk2NGQwOTMyMzUxZTVkMTg1MjY5MjgxYjE3MWEzYTA5YjA4YjI4NmU2NjFlYTQ3MDMyM2M4MmViNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ4YzM4OWQ4ZmQ3ZjAwMzY5MDgzYWZjMDYwZGI1YWZiMGU2MzM1YzNjMzg5OTFjZjBjMGQ0Njc0ZDBlODZiODEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4547bb8ac4264e2b98779faadd588e5a",
+      "statement": "Report comments anchor to a snapshot with target types summary, chart and kpi; chart and kpi targets must exist in frozen_chart_configs, mentions are restricted to emails of users in the same org and dispatched via notify_mentioned, and deleting a comment hard-deletes when no one else commented in the thread and soft-deletes otherwise, allowed for the author or any user with EDIT access to the report.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/reports/comment_service.py#L95-L217",
+          "version": "repo-lines-v1:sha256:eef92aed0d9b636ca358dc08de70a3fd320453e6d2ee0991081737cd9c2db980:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI3ZjA5YTk3NjYzZmYyMGUxYTY3ZWQwNDYwN2IyYjU2N2ZjZGM2ZTFmOWQ5OWYwYzI5Mzc5ZDc5ZDI2Y2FmMTA4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJhZDRjMTQ0ZmY3N2YwOGY3Y2NkM2M2MzM0ZTZiMGM1MmIzZjVjMjRmNDk1ZjMxMDA2Zjk5YzQ2ZDI1N2VkMmQ0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI2NGIxZDcwZTllYWUyNDQzMTVlODU5MmM5ZTU1YTk3NWM2ZWJmZTgyZDg4ZjA2MmY1YWI2NmNlOGRmMjUxYTQzIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJjNzQwMDkzMjQ0ZTUyOWUzNzE1MjNjOWRhOGFjZTY2ZWE5ODUwMWNmNTg5Y2E2MjdkNjcxMDQxOTE3NGUwNzFmIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/reports/mention_service.py#L19-L91",
+          "version": "repo-lines-v1:sha256:ec446c7743c35bd7c0859c6f9fbdb049b2e8f352ae96ec2aa1e246db80999244:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU1NTg2ZjlkNjEzMmYwODVkNDNiZTdkOTQ1MGQ2ZDMyYTQxMDI5NjhjOWVjMWFlYjNhNzk2ZGQzZjI3MjI3NmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImViMWZhNDY0M2Q2YjcwOWY2MGExMjhlMTgyMDA1NWQ4MmFlMjZjOGZiYjMzNzg5M2RmOWNiODdiNTJmMjgzM2MifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_bfd2690e19514b4caca5678bf0a5e44b",
+      "statement": "Report scheduling is not implemented: the harness only has report-scheduling v1 plan.md and research.md (no tasks.md), the backend has no ReportSchedule model or scheduled-report Celery task, and the plan describes an hourly Celery Beat design that reuses ReportService and PdfExportService with retries and failure notifications.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/report_tasks.py#L19-L35",
+          "version": "repo-lines-v1:sha256:886d0a6266c993b6e60f4eb0de4727b910f24fae2d642ee5318e5973a3ec12dd:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRiOWU2YWY1YzY2ODFkOWI3Njc1YTUzMmNlMTdlMjk2YmY5ZTM3YzY0NGE4Nzc2YTAzMTQ2NGU5ZDRhOTU0OGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYyY2U4Zjc5MWJlZTMyNTMzMzFjYjljOGM5ZTQzOTA0M2U5ODRiNDE5N2RmZmZlMDcyMjJhM2E4NTJmMjNkNDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ4YzM4OWQ4ZmQ3ZjAwMzY5MDgzYWZjMDYwZGI1YWZiMGU2MzM1YzNjMzg5OTFjZjBjMGQ0Njc0ZDBlODZiODEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM4MDk3NjljNGQwY2E5ZmQ1OTExNTYyNjY2MTFjMTM3NWFhMzdkNTY4NDNmNzM4MTAzODg5MDJkMjc0MDZjNDUifQ"
+        },
+        {
+          "resource": "repo://harness/features/report-scheduling/v1/plan.md#L1-L128",
+          "version": "repo-lines-v1:sha256:fbe9707d49e16c3645ba8fca7930135282fc7887b31848012bee15f9a3d02acf:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0OTJkMjVjYTE2MTk4M2QzYmI2M2Y0N2JkNDgzOGFlNTliMjNlNjQyYjQ0NmM2ZjUwZjU4MDNlNmY1YjdjNGVkIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmNTJkNzExMTAzZDUwYTQzNzgzMGM2ZmJjZDA0ZmI0YmFiNDlhMGY4MmY2ZDI2ZDFjNzkxYzZlODQ4OGRkMDkwIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIyMzQzYmIyMDEyNDkzMDM3MjVmNmYxMTY1ZmEzZDkxOTkwMDNhNThlZDhjN2JhNjRiZGI4NzkwOWZhYmI4YzAzIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_58259784c23b4b08b2891b474ff52eb4",
+      "statement": "Superset is an adjacent integration for orgs with a viz_url: superset_api exposes dashboard listing, embed info and guest tokens using credentials from the secrets manager, and SupersetService caches access, CSRF and guest tokens in Redis with short TTLs and retries on 401.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/superset_api.py#L161-L342",
+          "version": "repo-lines-v1:sha256:1f70ec6e2792be829596cb2d3d31c659d4c25ef91fb7a26802148419c7560dce:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJhMDFjZTc2YzJmYzBiMzkzZTMwMzA4NGY4NGQyOTI1ZTczMjViYzE1YjBiNWFlZDA2YzJmMzY5NWY0ZmRlMDBiIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0ODkzZjQwZTM3ODFlYjg5NmM4MmQwNDZhMDgwNjdhMTFlMzVjZGYyZjFkZmFmMjZmZWE5MGI4ZGI2Njc2NDEzIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5NTZjZGE0MTY5NTAyOTNkNjNjODk0NTAyYTZiMDdhMDA3ZTY0ZDg5YmQ5OTdhNzYyZTdmOGY4MDRkMGQ2M2ZkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI5ZDFiZGEwYmEwMGM4YTZmYmFhMmFmOGQ3NThiMjdkN2NkMTEyYjFlNTNlZTRkM2E2YWViY2VjNGE1YTM5YTIzIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/dashboard.py#L10-L19",
+          "version": "repo-lines-v1:sha256:a8d2d8a2eea6c886557d555969fd1070e5353689eba20c21822c2fd9dc96fec4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwOWYwMDllNmZkYWVjMmViMjQwMmU3NDM1Y2Y2MzljZTM3NzUwMzQ3NjJkZDc0NTkwMTU0MDEwNjk3ZWFmNDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjZjViNmYwYmQzZWRlMTgzYmZhZGRiNDNmODBmOGQ5MmFlNzE0ODNhY2JlZmUyNzEyOTY1NDYxN2E4NzY3N2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgwMWQwYTg4ZDhlMGJjMmRkYTdkNWVmZmNhNzE5ZTE4ODhlMGY1MDIzNGY5YTlmYTQ1YTVlYjY1MWRjMzExOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFiZmIwZDQ1YzRhMjkzZTg0Njk3NzUwMmEyNThmNGVjOThjZjBmNTQ3OWNlOTM2ZGUyMmNhYmY4N2VkNTBiNzQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/services/superset_service.py#L16-L70",
+          "version": "repo-lines-v1:sha256:2941a8c6e36cbe66d18c3adbb29b0e6fd59650b71b787adf37ee54944662b7dd:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjliYTJiZDU1MDMyN2E0ZjZlYzRiYTM4NTdlYmE3ZDgxNDZlODMyMmYyNDc3YjE1MTI2NmZiOTUyZDA2ODM3ZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1MGIwZGRhODJlOTk3NGY4MDNjOGIyOTQ3MDA0MmExNmEzN2VkYzAzZjE0YzlkZjcxOTg5MDkxNWNlZjkzNTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiMTcyMzFmOWE3YzI4YmEzYmJkZmU2MzY4MTI1MGUwZDViOTk0YjAwYTY5NWI5NDg2MWQxYzc5NzEzZTYxOWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ0ODQxMDk0YTQyYjAzYTI2YmQ0MmFjZDFmMzcwN2YyY2RkNWMxOTRkMDIyYzFkZDY4ZWI5NGJmN2NkNWQ4YzIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:02b26e4a533026f1c4cef6a154f8c8d395727c37239c9a6c62eea5c58097d470",
+  "claims": [
+    {
+      "id": "claim_470dcde7dec8460c96c21e2a1f88436a",
+      "statement": "Jest runs under next/jest with jsdom and uses an explicit testMatch allow-list of __tests__ folders under components, app, hooks, lib and root __tests__/lib; e2e/ is ignored, so tests in other root __tests__ subfolders (e.g. __tests__/app) are not run.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/jest.config.ts#L11-L42",
+          "version": "repo-lines-v1:sha256:3eb6dc2fa5647394df50f26c855c91c61b07c86afa75abab153e2ef4591bf0f0:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4NDc2ODFlYTk2M2JlM2RjOTVkMTI3Zjk3Y2NhMDhiZGRjNDJkYzNkMTc2OTJlYmM5MGM4ODkyZWYyYzM5ZTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMwMjA1NjNkMmZiMzYzNmNmNjkxYTkyYmE5NGU1NjRlMzgzZmIxNThiMjY0NDAzYzU1ZmVlZTdjZjI1YmFmMzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE2OWM1MjFlZjQzZjBjOTc5NDg5ODA0OTVhZjMwNDgwMGUxZDA0OWFjYmFiNmU5N2FmZTQxZDQzMzg1N2Q3YjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYwOWVlMTI5NmYyNGI4MTdiZWZmMTU0OGQxZjVjMTQxNzNhMzdhNzNhNjc5MDIyNzZlNWYxMzY2ZWIxNjJlNWEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ca331f1040104824bdb2e9363383af6b",
+      "statement": "jest.setup.ts globally mocks @/lib/api (apiGet/apiPost/apiPut/apiPatch/apiDelete as jest.fn) and stubs jsdom-missing browser APIs, and sets NEXT_PUBLIC_DOCS_BASE_URL since .env never reaches CI.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/jest.setup.ts#L1-L71",
+          "version": "repo-lines-v1:sha256:d345c07a1646f1f06d7bf6cdad8ba2007a9c3bd73f364556e90bee03ee7c4384:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE0NmQ2Njg1MWFmMmMwNTZlODA1ZmRkNTc0YmY1ZWMzYWRiMTE4MWM0M2M1ZTQxZjBhMWM1OTJlMzM4YWZlNjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a28e52d76f0a40278c6bd683bfcf4787",
+      "statement": "test-utils provide typed API mock refs and SWR wrappers: TestWrapper isolates tests with a fresh cache, no dedupe and no polling, while PollingTestWrapper leaves refreshInterval unset for fake-timer polling tests.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/test-utils/api.ts#L8-L19",
+          "version": "repo-lines-v1:sha256:a84426ecb0364bae7254f86c9d9c889aca91c7dd42b28de2f5f9e7fb2d4d6a5c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdhZjlhZjQyMGUzNzY2ZTdmYzc3NjJmZTU5NjQ2ZThmNTkyMzkwNGMwOTYwYTBkMWRhMWU0MGU1NzIxNmRlMWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhMWQxYTYzMzkwMjI5Yzc5ODM0N2U4M2EwNDA1NDQxYzk0MDAwMzUyODRhZDE2OGMxYmY2Y2RmMWQ3MGEzNzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ2MDRmN2E3MzY2YWRmZWQ5ODYwYmRhY2YzYWZjOTBjYTBjZjYwMmQxMDhhYWI3ZGMyNWFkZjA2OWJkMjBiNTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/test-utils/render.tsx#L18-L45",
+          "version": "repo-lines-v1:sha256:7dfe306d6d180ac64d75ed9a6f4557dae6ec228e1433b8542245d923e51d84ee:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFhMWZmZGI0OTFhMGM0MmQxMjJiZDA5NmY4YjU0MmViOWZhZWM2MGY2NzdlNjJlNTA5MTZiZDgwYmExZTZjYzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5OTY3ZWMxZWQzODM2ZjhlYjE3YWZmMTcyYjViZmVmN2RlNjA0ODVhNDM5YzZjYTExYzU5MWUxNzU1NzM5YWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ0YTY5Y2JkMTlkYWYwZTY0MmIxMjFhYTc2NGFlYjMxYWNhY2MzODFmMzA1OWYzOWI4N2FjMjU4MDQxODQyNWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c948240f5f5e4fbc96a19a0dd35e31a7",
+      "statement": "Testing rules: never change assertions just to pass tests; tests live in colocated __tests__ folders with *-mock-data.ts factories; permissions are mocked via useRbac spreading jest.requireActual('@/lib/rbac'), not by mocking useAuthStore.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/.claude/rules/testing.md#L11-L34",
+          "version": "repo-lines-v1:sha256:6e9208bd14b582fd1c6b849082c89b598ad5cc97ad7a5d0681730c6464bbbc16:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3MDE1YzY3YTg0MDA0NDA0ZTE4MmUxOGY4OThjZmY0NzUxOTM2Zjg1NjMyZWU5NmUxMjE2NGVmZTk0NmRhMzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk3ZGQ5MjhlNDc2OGE2Nzc4MzJiNDIxZTUwMzQ0MThlYWE5Njc3NmE0NGUzMTEzNTZkZDRlY2Y0M2NiZGM3ODgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE4YzhhZjdiYWUwYTBiM2E1ZTIzNzQ0MDRiMDQ2NzhiZmM4NDAyZDcwM2JkY2VmYzJkNTU2N2UzYzY4YjRkODQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdkZGMxOGFmYjIxMWEzNzI2MGQxNWJkY2Y2OTIyZmEwNGY5ZWQ1Zjc2NjM0ZTYyOTMzYjYxOWVlNTY5YWMwMTAifQ"
+        },
+        {
+          "resource": "repo://webapp/components/pipeline/orchestrate/__tests__/pipeline.integration.test.tsx#L67-L79",
+          "version": "repo-lines-v1:sha256:e37e5117176e427e81fbea3fca31a4c79ed7b16e6f947a91765a6a748b4e9259:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlYWI1MGM4YWUzMWYzM2E1M2NkMmE0YWU5YjlkM2ZlMjcxZmExYjBmZmUzYmMwY2Y4MzdmYjJhY2NlNDRkMzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZhZjg2NTZkMjBiNWZlODNlNGNlNzcwNWI5Njc3M2IyOWU4OTI5OTAzNjg5MzI3ODgzOGQ3YTQ3ZWFmZGYwNmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ3ZGYyMTk4ZTQ3MTY2YWU3NGQzNDZkYzQ1NzdkNzYyZmU1MjhkNWFiOTI2ZTY4OGViZjg4N2Q1ZDAyZmIzYTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_78c5cff5773740b4b0b3e19f8affb747",
+      "statement": "Playwright config uses ./e2e, baseURL from E2E_BASE_URL (default http://localhost:3001), starts npm run dev only when E2E_BASE_URL is unset, runs chromium/firefox/webkit, and applies CI-specific forbidOnly, 2 retries and 1 worker.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/playwright.config.ts#L14-L61",
+          "version": "repo-lines-v1:sha256:20f06dbe73876f4d37e30dbf2d85dfb6fe66fd24350d17002eeed502a16283e5:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIyY2VjYjE0NGE0NmY1ZGNmMTJhNjE2OWZjZWVkNzY5NWU4Mjk0YjA5MGRlNzZmMzY2MWNkZDAyNDkzMDAxNDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwY2U0MDVmZWY4OWQ4YjQwNjI4OTE2MmE1OWM0YmI2OTdlZTA4OWE2NGEyYWYyMjcyNzliNzMxZDUwMTUzMjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1a770b9ba273470e850699736a6c0dad",
+      "statement": "Authenticated e2e needs E2E_ADMIN_EMAIL and E2E_ADMIN_PASSWORD: login.spec.ts skips the successful-login test when missing, while helpers/auth.ts requireCredentials throws and login() signs in via UI and waits for /impact.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/e2e/helpers/auth.ts#L1-L22",
+          "version": "repo-lines-v1:sha256:5b71f2c0a9e546274d9c980f4e6c55591d237e83cfbfd1b6ed81e8fd11bdf44e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2MDM1ZDVjZThjZTE1Y2Q0YTljMDNhOTdiNjRhZTMzY2NhYTMxZjM0OWJmZTQwYzE1M2M0ZWVkZTAyMjdiOGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/e2e/login.spec.ts#L3-L5",
+          "version": "repo-lines-v1:sha256:5ee7d68d4c3b69b15b5e673f5a41f8b8bfe81bad91061615aa71f5181a8a5549:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWUwOWFlODlkMzEzN2IwZGYyNTJmZGZhN2ZiNzFiYzcwNmY1ZTYwYjZjYjc2YzcxNDQwZmI3MDZmZDg4YmZmNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmEzOTk5MGYxOTYxOGI4YzZhMTcxNjYyMjZlOGE5YmEzNmVjYmUwZmIyNzg2NzAzNDg3YTZjODE0YzM3YzMzMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjIsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGZlZGY0ZmU3NzdjODAwZjM3M2VlZGEzZGE3NGFjODUwOTI5YTM4NDYxYTNiYTFjZjBiN2MyY2YzZDc3OTc4ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTcwMDJhY2FkMWIwMWZhMDk5ZTc0YWVkNzZhY2NkNzc1YzkzMmY5NThiYzQ0OGVlNjhkYzQzMTRmNzIwZGRhYSJ9"
+        },
+        {
+          "resource": "repo://webapp/e2e/login.spec.ts#L63-L78",
+          "version": "repo-lines-v1:sha256:b5fcbb9bd889cf9c7dd1ea26d42a5e0a189fc7756aaf18bdf906bc4440dc80bc:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMyOGU0MTRhOTJiY2QyODgyNTkyYmJjMzNkNzhkNTljNzdiNzMyM2Y4Mzk1NDkxNTQxZmFmYzEwMzU4M2EwYmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhM2U0NmY5NDI3NmI2ZjZmNGVkMWYwMmFmNzhiZWY2YTJlZTFjNDM5ZGQ1NTg0Yjk3Mzk0ODMxMzIxNGQyYjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk2ZjQwYTU0MDg1YjA3ZTdhNzQ0MWI4ZDk4YmVlNTM3ZTIzYjQ4MjAyNTQ1YzQ5NzI5YWQwY2IzNWE0MjQxZGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM4NTlhZDUzZTdmN2E1ODY0ODU1NDMxN2VmNjNmOGE0MzRlODI0MDdjMWNkOTIwOTcwMTViMjliZTQyMGM1YmEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6d2bcff547514966a3ee289006936f09",
+      "statement": "Webapp CI runs on main pushes/PRs touching webapp or Dockerfile.webapp: npm ci, Prettier check, lint, Jest with coverage, Codecov upload, and on PRs a verify-only Docker build; Playwright is not run in CI.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/webapp.yml#L1-L62",
+          "version": "repo-lines-v1:sha256:3bd8a85979e36445e4d0ecf4f9c48d7d80694e27a464b6da3a57046e0293a7f1:eyJzZWxlY3RlZExpbmVDb3VudCI6NjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjliMGM3YWUwNGY1ZjAyNjhkOTNkMmQ2ZTFjODcyZmU2ODNhZTEzYWY5MmM1NTg4YTdjODFlNzdkNTdmYTc0MzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0NTVjZDIyYzBmYmU2ZDAwY2Q1MjBkNDJiZDc4MmNhN2YxYmNmYTI1NjQ2OGNkMzU3M2IxNTkxNzFmZTM1ZWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/package.json#L8-L20",
+          "version": "repo-lines-v1:sha256:01a5c61fb07376da77ca6792d7a7584e0a1cd383dfe602cf08e04dab3b3b050b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM0ODMzZDU5NDljMDNhNDBjYTk1MjQ5MTYxMGE2NjU5NjQ0YjNhYTQ2NjM2MmY3OTkwMjBkYmYxOTgxNTQ3ZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVhMmQ3N2M4MDNiNmI4ZWM0OGZhYzhjNGFkMDIxODc3NTlhNTQ2OTkwZGMzNmE0ODgzODU5YjE0ZjNmOTYwZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE5NDdjZDQ0OTI2ZmQ0MWIzNTYzZjFlMzQ5N2ZhOGQ0NmI1Y2U2ZjQ4ZGI2Njc4ZGIyZjkyODQ5YzBmZmQ3M2YifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_44c0b5616ded44cd83c7258a8f1f8c35",
+      "statement": "feature-route-coverage.test.ts walks app/settings on disk and fails if any settings page route lacks an analytics feature mapping from featureForPathname.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/lib/__tests__/feature-route-coverage.test.ts#L14-L31",
+          "version": "repo-lines-v1:sha256:ac513acf64897ab33c7c631b7877d998a4120b5717d692d5e05485c364eee185:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjZWM0NGY3YWUwZjQ1YTNmMDFkNGUzNTIyOWFkMDY4MmMzYTlkYmRlY2Y4ZDkxZWQ2OTgwMGRhOWJiZDI2NTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhM2U0NmY5NDI3NmI2ZjZmNGVkMWYwMmFmNzhiZWY2YTJlZTFjNDM5ZGQ1NTg0Yjk3Mzk0ODMxMzIxNGQyYjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg1ZmNmZjRkYmQ3MmQzMjAwODJmYmNlZjZhNzNmZGJkZmQyNzM0ZmU2NmQ0YjRjYTgxNWIyMjEyMzE0NzJkNWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQzMjI4YmVhOTRmNGUwMDgyYzk1OGEzODNiOTM5M2RjYzA0ZjZlODlhMjUyNGEyNmE2MzNlZDdkMjE2YTYyNTMifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

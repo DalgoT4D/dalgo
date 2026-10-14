@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:d71ed5889caf901fd3a3fda215953b8dff42bf45744755ddafafa9363158326f",
+  "claims": [
+    {
+      "id": "claim_f66f157acb6a456283983c0dae457a79",
+      "statement": "Backend pytest is configured in backend/pyproject.toml with pythonpath '.', DJANGO_SETTINGS_MODULE ddpui.settings and testpaths ddpui/tests, using pytest, pytest-cov and pytest-django.",
+      "evidence": [
+        {
+          "resource": "repo://backend/pyproject.toml#L202-L205",
+          "version": "repo-lines-v1:sha256:e31f30bdb26de78792a3414501adbae2929cff980da09f30e8de32605dcfa24b:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2YxMjc4NWZjNjcxZjI4NzY1ODdhOGI3YjkxYmZkOWVlZTgzMGFhZGNhOGQ3NWM0ZjJmYWMxMmJmOTkxNjE5YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzA0NGFlNGQ4NmFkNWVjNzg4NmFkOTBjZWNjNzQzOGEyNTRkZTM3MjYwYzQwNzQxMzNjMTZjYThjNjllYWRlYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmRlNzczMzM4NDM5OTYyZDkxMDljZWM4OTRhMWU0MDNjZDljMTgzN2E1NzdhMjA5OWE0OWRmODY5ZmFhNzk3OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGI0N2MzMDcwMGUwODc5YjY2MDhmYTU3MTE2N2Y2Zjk2MjEyOGFkMzhlMDg5MWI3YjQxNTkyYTZmNGUxNTIwZCJ9"
+        },
+        {
+          "resource": "repo://backend/pyproject.toml#L287-L292",
+          "version": "repo-lines-v1:sha256:16911f684e089e32243918e65bf039f9c1b382bab4aff1331f944d2284f01325:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODY3NmU2NDE0NjVhNjU1MWU5ZTljZmZkN2ZhYTFlNmE0MmY5YjcyNDgwOTgxM2M5MDNkN2VkY2I1MmYzMDA2ZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjk0MTZlMDlmNzhiYTMxNmMwMzI1NjgyMTNiODU1ZWU3NTZlNDE1NjVkOTE4ZjA5NTE5YzgxZmQ2MjBmNDA2MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmVlYWU2MDkzNWU3YTI2MzcyN2MxZjNkYjMxZGM4MzgxZjE4ZTlmY2Q3MDZiNGI2NWMxY2Y1ZjQ4MmI1ZjU3ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODU3NmE5MmY3OGY4NDY2YzI3Zjk1YTAzMzU5OWYzN2ZkY2MyNWRkZWNmZGQ2YTAxNTBkZjFiODM3YjlmOGYxNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_1763b06d2c0c4fe591bf8c620cc3464e",
+      "statement": "ddpui/tests/conftest.py defines an autouse fixture applied to every test that monkeypatches ddpui.utils.awsses._get_ses_client to return a MagicMock, so tests cannot send real SES email even when real credentials are in .env; DDPUI_TEST_SES_PROBE optionally logs test node ids that reach the SES client.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/tests/conftest.py#L1-L35",
+          "version": "repo-lines-v1:sha256:b8e76088c15601e7b2cfc0c78c4a7681d571cf1dcfca7098142cbd3a5812b9b2:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIxODk5MDMwM2YzNWJlMDgwMzlhYTBmN2Y0ZmU1MGE0YzE2NzZkYWZlMzk5YWZiOGUxMjZhNzY3OTU1ZjZkYWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJmMDkzZDA5N2U4YTRkNTMyNTM0NjMwNTQ1OWJmY2FlYmZiODVlZTliMjc1ZjA1OWU0ZGY3ODFjYjMxODMwMGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0e2fe7e8b221438c926d4864b9cb1236",
+      "statement": "The shared test fixtures (seed_db, org_with_workspace, org_without_workspace, authuser, orguser, nonadminorguser, orguserwithoutorg) and the mock_request helper are defined in ddpui/tests/api_tests/test_user_org_api.py rather than a conftest, and many other test modules import them from there.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/tests/api_tests/test_user_org_api.py#L90-L179",
+          "version": "repo-lines-v1:sha256:491aba9807de6e8e8a498b5cf79af25edac6c23f527839240b710deb7ce9c48a:eyJzZWxlY3RlZExpbmVDb3VudCI6OTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzMDM2NWQxNGM3ZGFiM2Q2NWIyMGVlYjNhZmU3ZTVkNGUzMGU4Zjc5OGU3OWFkMDZlNTk0MjI4Nzc0YTc0ODYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyODUxZGQ1NWQwZjM4ZWNiM2JiZGVjZDQwYzNlMDRiNGVhMjRhMjNlZDA3OGU4MzM1ZDlhMjQ2MGI1MDUyMjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlMDhmYTJiODRhNTc4MDVlMDNiMjI3ZjIzMmY5NjVkMTY3ZDkzNTJlZTRmM2U4ZjEyZTIwNjVjNTZiMGZjYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU5Y2YzNzNiYzdkOGE2MTczYzRkNzFjZDMxMTY0YzUzMTlkMTY5YTM1ZWM4ZDNhNGEyODJkYjNkM2Q2NzQ0NmQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/core/test_celery_tasks.py#L17-L24",
+          "version": "repo-lines-v1:sha256:a2d5cb5ac331ddbb7c13074c023ba62e41d86d9fc948fd7d1fee92db12786f59:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTRmZDY2YmU4ZTlkOWM0MTQ1NWRmODEwYWVkNzAxZjM2YjU3YWE3MjYyYWFkOTE3YWQ3MmJiYTViOGM3ZmYyMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmFmYmEwNTI3YzM5NTNjNGI2ZTBlNWI1NzM5YmE4MzYxMmY4MDUzYmNkYzk0NjY3MzAxOTNjZDFkNTkwYjQwOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTMxZjI1MjYzMzJmNmNjZWY3NGY0ZmVmODVhMzZmN2UxZDI1OTI4MTVlMzVmNmY4MDQ0ZDgyOGM3MTA2N2JjNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2RkZjU0ZDNmMDZmYzIzYjFkZGJkMDZmYzdiZTc1ZWY4YjRhNDFiNjRlMDlkZDdlYmM1MjVlYzRjZmI4YTEwMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b74fae6ee4a24d24b860bb23cde83288",
+      "statement": "seed_db is a session-scoped fixture that unblocks the DB and runs loaddata for 001_roles.json, 002_permissions.json and 003_role_permissions.json, which are located through FIXTURE_DIRS = ['seed'] in settings; orguser has the account-manager role and nonadminorguser the guest role, both attached to an org without an Airbyte workspace.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/settings.py#L320-L322",
+          "version": "repo-lines-v1:sha256:d7554facd450744e80fcbd7357f26db3345b6c10bd7f236afef3e349646764d1:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTc2MzVjYjljYmE5Zjk2OWJkMjkxNTMzOWE5OGVhNTdlNGU5M2I0ZjEwM2FjMDc5MThlNjUwNDg5NzgyMTM3YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjk0MTZlMDlmNzhiYTMxNmMwMzI1NjgyMTNiODU1ZWU3NTZlNDE1NjVkOTE4ZjA5NTE5YzgxZmQ2MjBmNDA2MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWU4NDJiOTU2MWE3NWVmZmEzYWRjNTkxZTAxYjM1ZWU2MjljMmI0YmYwNTVhOWE3OWEwOWNmNGUwMWI0NTYxYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTJlYTU4ZGM1MjhiN2M5YTgzYTg4ZmUxNGU3NjI1MTc4NGEyM2E2MTQ2Zjc1OWU0N2Y3MGY2NTIyOGJjZDliZiJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/api_tests/test_user_org_api.py#L90-L153",
+          "version": "repo-lines-v1:sha256:eb051b0e040c4cc425c00b170d9cf705b9bb7ab906f00b9d901951ef5eafea81:eyJzZWxlY3RlZExpbmVDb3VudCI6NjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzMDM2NWQxNGM3ZGFiM2Q2NWIyMGVlYjNhZmU3ZTVkNGUzMGU4Zjc5OGU3OWFkMDZlNTk0MjI4Nzc0YTc0ODYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiN2Y4OTJmZTJjNjBlNDY3YWM4ODdhNmVmYzQ2YWNkMzFjYTQwNTM4ODA3M2Q3NjM5M2IxYzRlOTk5NzA4MzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlMDhmYTJiODRhNTc4MDVlMDNiMjI3ZjIzMmY5NjVkMTY3ZDkzNTJlZTRmM2U4ZjEyZTIwNjVjNTZiMGZjYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgxYzE0MjZiZWE3ZmFiYTA1YTEyYzFlMWM4NjBkYTY3YzYxNzM4ZmZjY2NjYTRmNjc2ZTRiOTI2ZGVhNjZlMDIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_016cc2252d9c4543b748ebe22b674f94",
+      "statement": "mock_request(orguser) builds a Mock request with .orguser and .permissions populated from the RolePermission slugs of the orguser's new_role, imitating what the JWT middleware sets, so API tests call Ninja view functions directly instead of using a TestClient and need seed_db for permission lookups.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/auth.py#L41-L75",
+          "version": "repo-lines-v1:sha256:317a6ad3c29501e185a3b775f99cfebf2efd56e9135f379b2e4ba116c8135364:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwOGUxZDNlYjA3ZWEwZDgyNGFmYzA4ZDdmMGNlNWUwYTBiOWUwNDM3MDU5OTI5ZjI1MmRiYjM5NzRjYmY1NmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc1MDFiYzg4ZmNkMjgzNTU4NjBiZWI3ODYzM2I3ZjBjNzQyZTE1NDU4MDZjMmIzM2Y4MTg2MGZiZWJlYjY0YjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYzY2M5OTI3NDdiOTg0NjJlMmI3NWMyYjliOWZlYmYxNDU2NTU4ZjQ2NDc3YTkxZGJmZGZjMTA3YjA2YjA3OTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNjOTU5MGVlZmQzZDc0NDU0NGQ2ZjdjNWQ3OGNjZjcxNmZhOTQxMGU4NWQ1MThlMmJkMTQxNWZhNmY5N2RmNzIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/api_tests/test_user_org_api.py#L169-L179",
+          "version": "repo-lines-v1:sha256:ebd2f69e6809da90dad865a6404a0573814c6b5d4eedfcdb59e33ff37fa59d4c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzZDQ4ZmM2MTk4NDdmMWM0NmZmMWM4ODRlYmRlNTFiMDA3NzUzZGM3N2MwOWY4MWZjNjZiMzU2ZmJjZjAwZmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyODUxZGQ1NWQwZjM4ZWNiM2JiZGVjZDQwYzNlMDRiNGVhMjRhMjNlZDA3OGU4MzM1ZDlhMjQ2MGI1MDUyMjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE0ZjQ1MGMxNDAyMDllY2RlMDI0N2EyNmZhN2JkY2NmOGE1ODY4YzhiOTRhZWQ1NWMxMjg4Y2IwODdhOTJjNzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU5Y2YzNzNiYzdkOGE2MTczYzRkNzFjZDMxMTY0YzUzMTlkMTY5YTM1ZWM4ZDNhNGEyODJkYjNkM2Q2NzQ0NmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6d2a4c0097e14058bf5ab1c56e8b1730",
+      "statement": "has_permission turns its internal 403 denial into HttpError(404, 'unauthorized') because of a bare except, so a role lacking the required permission surfaces as 404 from the decorator; existing tests acknowledge this quirk and accept either 403 or 404.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/auth.py#L41-L54",
+          "version": "repo-lines-v1:sha256:13df4b2ba9a1eb34b08ea2cda537da1e954bace6780becf9ab08d7a780460c20:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwOGUxZDNlYjA3ZWEwZDgyNGFmYzA4ZDdmMGNlNWUwYTBiOWUwNDM3MDU5OTI5ZjI1MmRiYjM5NzRjYmY1NmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4YWQ0YjNlMjIzZTkwOWVlZmQzZDc2YmU3NzcxM2IxZWJhNzg3ZDU1Yjc4YTk3ODI5OGI3NjA4ZWE4NzZjOGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYzY2M5OTI3NDdiOTg0NjJlMmI3NWMyYjliOWZlYmYxNDU2NTU4ZjQ2NDc3YTkxZGJmZGZjMTA3YjA2YjA3OTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhNTQ2OWRhNzZjNTNkOTg2YWE5YmQ1ZGJjOTZlYzU4YTdhZGU3MjI5N2FmOGMxMzk4OWViYTU2YjNkMWYxN2UifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/api_tests/test_access_api.py#L2587-L2595",
+          "version": "repo-lines-v1:sha256:fdfaf77a7c77954bb984d3b76785820ad84fcced2939a768acc498daf218c82d:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzI5MDBlMjg0ZTdhZjFlYjM5MGZkY2M4NmY2OTZjNzNkZDg4Zjg0NzE0Mjk0NGMyZjZhNjFhMWFmODVlNmEzNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWJiZGFlMWJiZWVmMzIyODIwMTM5ODc2NmZjMTI2ODI0MWZlOTcxNWYxMTMxZDM5Nzg5YWYxNWViMGI3ZGZkNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjAzYmZlYzNmYmY4MDFhODMwMmZkNWE0MDZhNDZkMmNjYzI2MzA3YWZiOTUyMTJlMmQ1OTQyYTA2MTI3MmJhNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODkzYmNhNzRiNTA1MGVkMGM2MjM1MDIyMDExZmQ2YmNjMWQyMGY2OWM5MzNlNjIyYWIzNTZmZDFhNTliYThjOSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_df34135fde1d432280e884cc0b3988b8",
+      "statement": "has_permission wraps coroutine endpoints with an async wrapper so Ninja still awaits them, and test_has_permission_async.py is the regression test using asyncio.run and a SimpleNamespace request.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/auth.py#L56-L73",
+          "version": "repo-lines-v1:sha256:150995c2c4155de9e7e4a18dbafea9515e673ceb7fbb1e8a47b73b09f300e869:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyYzVjY2UyMjg4Mjk3NGMxODk0NjI0ZDZlNDllMDAzOTNkNmIzYTU0YTg4ZDdmMTY1MTkxZmVkMDM3NDJhMTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRiMTNiODg5ZGE3ZjI2OTljZDg0NTU5MjEyMzk0NTQ2MjQxOGIzY2EyZmI3MDE4MjdmNWRhZmM3ZThjM2RhMDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkxYWVkNGNlNzEwNDFmOTgxZDE5ZTM4YjdmYjg1NWViMTNjNjk4MGI3ZDM2ZjEwMDc1MWU3NWFiOTRiYjc0MGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFlN2JkYmE5YTFhMTg4MGUxOGI5MWYwMTYwNWE5NDZkYmMwODA2MjczMzJjYzUwZjQzMTVkM2U4NTMyYjc1MDYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/api_tests/test_has_permission_async.py#L1-L53",
+          "version": "repo-lines-v1:sha256:5b8e62713f773c515a5576b79f9e767086a573c2f81eceb3c44a4e66297e93c3:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1YzUyZmNmZmE5NjI0OTdkNmFlMGE2YWI1YzFiMGVlZjUwMGFiYWUxYWYxYjc1MjgzZjRjNDkyNmUzOTI0ZDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA5ZDNiZGYyYjM5YmYzMzU3ZDI5NzEzNzczZjg1M2Y5Y2I5MGJmOGQzZDdkNjdlOTQ0ZGMzMWQ3MWIyYTUzNWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fe2af974e9044d42a377bb86f7c0f3f8",
+      "statement": "The testing convention is to patch external services (Airbyte, Prefect, WarehouseFactory, Redis, SES, Celery .delay, git, filesystem) at the name lookup site used by the code under test: the source module for module-attribute calls, the caller's namespace for directly imported names, and the class for classmethods.",
+      "evidence": [
+        {
+          "resource": "repo://backend/.claude/skills/testing/mocking.md#L1-L60",
+          "version": "repo-lines-v1:sha256:cabf1a605a2f4ec7afcbdd2b1d8a6b0f234c5f4c17c4373992dba524a51ac025:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhhOWY4NzYzY2E4YjA2OGVhYjc3NTBiNDExMDI1ZDE0NGFhODIwNjFhMTY4ZmMyMmE5NjcwMWY5NjJmNmNjYzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc3ZjJiZGIwMDY2NzczOTkyN2IzMjc1Y2NiYzA5ZmJlNzBkOWYxYmZlYTk4YjU4MWUxMmZhN2QyZGNlY2M0MGQifQ"
+        },
+        {
+          "resource": "repo://backend/.claude/skills/testing/mocking.md#L153-L307",
+          "version": "repo-lines-v1:sha256:1a7c21a342e3db6f63183ee66e7c835a9267f7baeeca6a7af940eb2df8a1eb5e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTU1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0M2E2YzEyMTBkNGZjMzkwOGFjOTQ0MGJlMTE4M2Y4NjBjZTQzZTM1NzJhMTM1MGFlMGY2ZmFhNGVkNGIwYjY1IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0N2MwNmM1NjFkNWMzMjczNDM2ODUyNjhhNDZiMzM5MWYzOTk4ZWVlODkwZDJiZTUxZjBkMjFjYzRhNTNhZTZkIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwMDFmMmVjMTc1OTNjMTA1NGViNDYzNjdkODQ1M2VmMjRhMTczY2U5NmI3MTE3ZDkxZjlhNjhkNDRmZWY4YjAxIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIwMDFmMmVjMTc1OTNjMTA1NGViNDYzNjdkODQ1M2VmMjRhMTczY2U5NmI3MTE3ZDkxZjlhNjhkNDRmZWY4YjAxIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_202895e5e07b4f1dad449763518358d4",
+      "statement": "Backend CI runs on a postgres:15 service and Redis, applies migrations, runs black via pre-commit, then runs 'coverage run -m pytest --ignore=ddpui/tests/integration_tests' with dummy Airbyte/Prefect env vars, uploads to Codecov with flag backend, and fails the build below 55% coverage.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/backend.yml#L20-L108",
+          "version": "repo-lines-v1:sha256:c2e866bc69947201b75ec794bfb88a7aeb38ccf3a50cfaa1d5f56869eff4b5da:eyJzZWxlY3RlZExpbmVDb3VudCI6ODksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5ZDgwMTU0ZWQ0MmZjNWM3NzliMTMzMTU3OGI1OGI4OWM4MDFlYWNlNzRmMjRjZDQ4ZWI0YTIzNTc5NDBhOTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEyYWM5ZGMzN2FlZWE3ZDJlZDYyODIxNjUxODZlOWRkNGNmYjFlYmM5ZjI5MzExZjQwMzU5MWZjYTU3Njc0YWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc2ZjdkZTE0YTM3YjFmMTMxY2MzN2UyMjBlYTE3NmYyMTM5NWQ0MDZiMTJjNjI0MDFmY2YxZTA0NGUyMWQyMmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_64a176c707b04360bfb4779b9622843f",
+      "statement": "Coverage measures the ddpui package but omits tests, migrations, management commands, models, schemas, celeryworkers, settings/urls/routes and parts of dbt_automation; codecov.yml disables aggregate project status, enables patch status, and tracks per-service flags (backend, prefect-proxy, webapp, ai-llm-service) with carryforward.",
+      "evidence": [
+        {
+          "resource": "repo://backend/pyproject.toml#L306-L330",
+          "version": "repo-lines-v1:sha256:47b38eac6f561d2754f33760d1e2ce591a7e35c323959254947f6c8cb37cf0d9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRmZjg3ODg3NzNlMzFjN2E5MzkzNmM5ZWFlMWViMTUzMTE2N2M4OTU3N2ZmMzNiN2Y2NWNkOGVjMDhhMmM4MGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NDE2ZTA5Zjc4YmEzMTZjMDMyNTY4MjEzYjg1NWVlNzU2ZTQxNTY1ZDkxOGYwOTUxOWM4MWZkNjIwZjQwNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmMGMwYzExMTdkZDk3ZTlkMzYyYWNkZTNjYjhlZThlZDQ2ZDBlZjgwNzY0YmExYTBhNTQ3NmUwOGNlNjE5NGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI4NGI4NmI2MjEyOGI2YmJkNGE1MmQ0ZDM4NjYzYTZmNzk3NWMwMDNmN2FmZTU3NzEwMDQ3NTlmNTllYWJmZDQifQ"
+        },
+        {
+          "resource": "repo://codecov.yml#L1-L29",
+          "version": "repo-lines-v1:sha256:9c974787ac005e08efbe917ffd5c7dbde0629104c1b40f4c65b2cbead130c51e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImViZDdhNWQ1NjAyMWEwN2MyOWM4Njg5ZjMxMDk3ODFkOWNhMWU4ZWUzYmMzODY4NTA1YWM2NGExNGViODQ0NWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1OTlmODgzNjQ0NWIxOTRjZjhmMmZmMTliZjk1MTgxNjk3MjMyOGZlMmZjMDAwZTc4Y2ZiZDA0MjkxMzE1MDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_714b9ff5d2954cd9aadb10188bd4b737",
+      "statement": "Tests live under ddpui/tests in api_tests, core (by feature), services, helper, models, schema_tests, unit, utils, websockets, common/fixtures and integration_tests; integration_tests hit real Airbyte/Prefect/warehouses, are excluded from CI and partly skipped.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/backend.yml#L96-L98",
+          "version": "repo-lines-v1:sha256:d3658e833e6e2d96c25aac73934eec032ffe01bfb2bce80a946ccf94b256ce35:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWNlOGI4MmUzODA1YTNhMTgwMDNmMmZlNDVkNGY1ZGJiNDdhZmRlOGMyZGRmNTU5Y2VkMmI0ZmRjNGY0MDYzOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTBlMDVjNzlmOTA3MTE2MTJkZTE3NjU5NTk1ZmNmYjcwYWFjYTIwYjcyMGJiMzNjYWFmZWY1NzMyZGE3NWYyZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTFiYmI2NjE0ZGQ3N2FhNzMxMzA2MmI5NGFkZmQ0MjUwZWZiNjY4MTllODEzM2I4MDM2YTMyMzNiMWNhYjAxOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTVkNDVkMWYyYjFiZjNkNmNjOGE4YTg3ZWU0ZGRjNDk1ODg1OWZlZGI0NjAzMGJiYWI3NzJiODkzZDQ1MTlkYiJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/integration_tests/test_airbyte_integration.py#L1-L20",
+          "version": "repo-lines-v1:sha256:ccbb776f335f6f15b3ff743fa13c78380ca19d84e57b6efbf8c2c9e5046fb317:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3MjdhZGZmNTI0ZTA2MTYwMjJlYWRkOGY0YWYyMWEwNzc4YjI5ZmM0Yzc3YmRmZWZkMWFmY2UyY2JmNWU0YjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI1NjljYjA5MjgwZWUwNzgxOTQ1ZTQ4ZDQwNDFiZDJkZmFhZTY5MWFkMmVhYmY1ZDNjYmEwODQ2YzcyMTZjYWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIyNDVhZWU4Y2YxNzcyZDM4MzZlYTc3NjAwODEzNThlMjQ0ZjM5OTFiOTg3ZTU2ZmIwY2ZkNWVkZDE5NDVkYzYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ce181b6eb7a641a7b6c8a6c303953d6b",
+      "statement": "The project workflow is to write and run backend tests one at a time with uv run pytest <file>::<test> -v, then run the class/file, rather than batch-writing tests, and to keep uv run black clean.",
+      "evidence": [
+        {
+          "resource": "repo://backend/.claude/skills/testing/SKILL.md#L1-L97",
+          "version": "repo-lines-v1:sha256:debb6403bf0a595c02dadcccfa1bd73c688d93a210f62672ff2eeca7dd78c727:eyJzZWxlY3RlZExpbmVDb3VudCI6OTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY1MmQ3MTExMDNkNTBhNDM3ODMwYzZmYmNkMDRmYjRiYWI0OWEwZjgyZjZkMjZkMWM3OTFjNmU4NDg4ZGQwOTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3MjQwMTcxYzJlYmNlOTU5Y2Y5N2VmMDI4ZGIzMWJjNWYzNzcxYTMyYWY0MDc1ZWZkMGE0ZWM1NzIyN2MwZjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/.pre-commit-config.yaml#L1-L20",
+          "version": "repo-lines-v1:sha256:57c7d35152bd158ff4302bdf60e515dd661e90038042f7e269df315526ff43bb:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhMTEwZGI1YTkzNTdjZGExZDc4MjE2Y2RjMGJmOGIyNTVlMzM4Y2JjMWYzMjdlMGRmMDhjZmM3NzM5MWRkZWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1MDQxMDYyZjAwNTI0OGI5ODg5Y2EzNTIxNTliODVkMGZiZjFjNzQwNDI0YjkxYmIwZDhkN2YzNTUzNTBkZjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

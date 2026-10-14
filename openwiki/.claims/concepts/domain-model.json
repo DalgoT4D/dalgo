@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:87451badecb5885550399b216059a4a237748edba36fc4ce681815cccb46cdfe",
+  "claims": [
+    {
+      "id": "claim_a7659b8f7a214da19dd46024667c6732",
+      "statement": "Almost every product model carries an `org` ForeignKey to Org with on_delete=CASCADE (OrgUser, OrgWarehouse, OrgPrefectBlockv1, OrgDataFlowv1, OrgTask, SyncStats, Chart, Dashboard, Metric, KPI, Alert, ReportSnapshot, ResourceShare, etc.), with one-to-one satellites (OrgPlans, OrgPreferences, OrgSupersets, OrgWren). Exceptions: OrgDbt has no org field (Org.dbt points at it with SET_NULL), Task and Role/Permission are global, Notification reaches the org only via OrgUser, OrgFeatureFlag.org is nullable for global flags, and OrgUser.org is nullable.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/notifications.py#L1-L25",
+          "version": "repo-lines-v1:sha256:5606696917f76cbdd279eeb3c098b8a536ff70a685775213d586d38dfab7ee5d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhMThmMDNkZGQxNjMxY2ExNTRhYWY2MDgzN2E2NTk2ZTgzZmExNjNhMmU0NzUxODJlMDExMGJmYWRkOWIyYTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc5ZGVlNjFjMTNlMzE1NDJhN2U3ZmNhZGJmMWM4NTM3YjI3ZjQ4MWU5NjY3YWVmZDVkN2QwOTgxODRiYjE1MmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/org.py#L133-L160",
+          "version": "repo-lines-v1:sha256:d811bd2cd4f4e87e4ab30d29678726209598563e7b5c6712eb1b84cdcc126916:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZTAwZjZiZWJkZmYwZTQxYjFlMjY0YTAyMmE1MTE1NTM2Y2Q2OTcwYjE1YjY4NjFhM2I4MDY3NWM5MTIyMzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMxYWM4YWZiNTc4NjBhNjA0ZGM3NTczZTdiY2IzMjIzYmVjNDhiNTljMTkyMTc0N2MyZDU3MzA4MGY3Y2EwZTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBlOTU0ZjA1MWQzMWIzMTBhZDJkMzRjNjQ4NWQwNWRiNjk2ZDNhZjJiMzFhZmYzMzgyMTI2ZTM3NzMxYzhjZGMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/org.py#L257-L387",
+          "version": "repo-lines-v1:sha256:924be90f0e95f5d638affb46792974bc105b75c92a2b4ecc9105a63fb9cbae78:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI5YTM4MTQwNzI0MGNmZDA0ZWNlMmIzODVlZWEwODZlYmM4ZDczN2FhZTc1ZjE1ZDM1Mjk5NTIzMDk0MzQ0NmJlIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJiOTk3YTliOWE3M2UxOGMxZDFmNTg5OGIxYWQ4NzA3NWI1MDRhOGU2MDg5OWRkOWNjOGQwYTdlMmVjYmNiZGE0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiMDQ3NWRiNWU1ODY4NWE4YzBkMjE4NjU2NWIyYzkyZGFkNzFhN2UwYmE0Y2QyNzBjZmNkMWY3NmQ5ZDdhZTU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/org_plans.py#L19-L40",
+          "version": "repo-lines-v1:sha256:d5cf013ce168fe3336372e14b087b7fd40f21d7fb4becdd59fa58fe5cc3a9f04:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMwZjE5NTgzNzkwNDFkNGI3ZmI2Y2E5ODdhMTUyZTcwMzM4YTQyMmJiNTgzYzFmYjdhZDEyN2Y0ZGMzZGMyYTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2ZGU5ZTliMDMwNDc3N2U1MjNkOTcwODcxMmU4NWE3ZWZlYWM2NGY5YTVmMjZmMTYyNGNmZWRkNjQ4YmY4YTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4MmUwMDY1YWQ0NjY4MWYwNTc0ZWU3MGFjYjYwZmQ5ZDI4NDAyZjdiMDJmMTgzNzNhZjViY2Y4YTcyYzE0MTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM2YzMwNWVkNTBmNTlkNTQzOTI3Mjk1MzNkN2RlYjIyZjI2YmYzZjJjYmRlZWFiOGU4MWY2MDU1MjM4ZmNjMTEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/org_user.py#L70-L95",
+          "version": "repo-lines-v1:sha256:2956991fd47f7ee0c1e189d6e9aeeb17b646c80e0375863c5bcd1bf625886ef3:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4NDI5ODJkOGE1ZGZhNjMzODg1ODQ3OWRiNjhhZDJmMTY4NTJjOTExZjg3MjYzOTFhYTJiYjg2MWVlNjk3MmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwNmZiMmYyMGFhZjYwOTZiMGViMTczYzhiNTVjMjVmNzNiMjc0Y2JmYmNhMDQ2NjZkN2NkYmRiM2RhZDMzNzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk3YzhkMmU3ZTExNGY0MDNkMGUwMTE0ZjEwNzdlMDNkMjVhNmNmMzBhYzZhMmE4YzY2MTdlYjBmZjA5NmE5Y2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVlMDc4NWY1YmM3ODg2M2FjM2ZjMDQ3MWFlZjVhNTFiMzhhMWYzMzcyNTE5ZTljMGZiZjVkMzAzYTE4ZWQyOWQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/report.py#L81-L81",
+          "version": "repo-lines-v1:sha256:6c99199a261a3a6df5a5ea0a73118b89e714ac188d2cbe6933b72866174b814a:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmM5OTE5OWEyNjFhM2E2ZGY1YTVlYTBhNzMxMThiODllNzE0YWMxODhkMmNiZTY5MzNiNzI4NjYxNzRiODE0YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmM5OTE5OWEyNjFhM2E2ZGY1YTVlYTBhNzMxMThiODllNzE0YWMxODhkMmNiZTY5MzNiNzI4NjYxNzRiODE0YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZThkNjJhNDgyNTk4ZWQ5NWMxOWI2YmM3OGRlYTAxZjk5ZDE4NjU0MTk4Y2ViOGQ0YjEyMmE1NjlmNDEzZTFkOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDM2MTM0MTBkNDVmN2ZhZGZjOTJmYjVjYTM2NjliMDgwM2Y0Mjk3ZWE3MDI3OTc5Y2ExMjcxNTI5ZWE4OGNiZCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/tasks.py#L60-L102",
+          "version": "repo-lines-v1:sha256:160af81244bb1dda861ed62a93632b2d68bf767c6f76232f7507840611b4420f:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1MmVmOGU5MDk0MWY1ZmQzNzhmZDA0OWI4YzhhYTU0MjM0OGZkYzg4MDdmODlhNTQ0YmM2ZjMwOTc5OTgwMGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0MDhmOTcyYzFjYTBiZDM2MWE0NmFhZjY4YmU0ZDYyMzQ1NzIzYTZlOWY4OGEyMzI5YjhkMGFkMTI0MWYyODgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4MmUwMDY1YWQ0NjY4MWYwNTc0ZWU3MGFjYjYwZmQ5ZDI4NDAyZjdiMDJmMTgzNzNhZjViY2Y4YTcyYzE0MTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM3MjRiMDkzZmE3MDQzYTA4NTk4NGJkZDgzMWM4NTZhZmZiYmM3ZTI4MWE1YmIwYjYwMzBkMGQ2NDcyMGEzMjIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0e31fc0da62544dcb0f41e7445ddfb93",
+      "statement": "Tenant scoping is a per-query convention rather than an ORM or tenant-aware manager mechanism: the OrgUser is resolved from the JWT and x-dalgo-org header (Org.slug), and services and endpoints repeat org=orguser.org in their filters. Public share routes have no OrgUser and instead derive the org from the shared dashboard or snapshot (org=dashboard.org or org=snapshot.org) when loading charts and the warehouse.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/public_api.py#L210-L280",
+          "version": "repo-lines-v1:sha256:4026496a0cc4c99c896b1a3ecb2160943b024f45a29cd8dce3741162cb92ee7e:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkNTRjZGY2ZDVjNzVmNGFkODU5MzgwMThmOTFlNDYyMTEyY2E4YmJjMjZiODk3YmNkNDgyYzVlOTU1Zjc5NjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRlYmJkZTMzNDFmMDY0Y2MzY2EyMTIyMmE5OTg1ZDg3M2I2NzNjYjUwZWQwMjQxZGNmODkzY2M3OGM1NDU5M2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBjNzJmMDc2MzZlMWI2ZjYxYmRhMmJkNTFlZGQ2MjE0Y2JhYTM3NTliM2VjNmZhZDczZTMzZjgyNzk2MzIxNDMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/public_api.py#L485-L490",
+          "version": "repo-lines-v1:sha256:106d7277c69ac80e6b02b527ce344392361a189a09a43497d69cc714a45fee7a:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTkwOWE1M2E2MThkMDI4ZTFkMzAwMGMwYTdhYmNlZWNiZTVmYjM3ZjRlNTExZWZlNDY2NDNmYWQ2ZTY2ODcyZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQ1NGNkZjZkNWM3NWY0YWQ4NTkzODAxOGY5MWU0NjIxMTJjYThiYmMyNmI4OTdiY2Q0ODJjNWU5NTVmNzk2MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGFhNWRmMjIzNjQzYTQ5M2ZhZmY2Yjk3NGVjNmUyN2MxYzAxNmFlMTI2OTQyZGEyYjk4NzVjZmI3YzFkMWU3NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzgxZDgzZWFiY2RmNTA2OGE1MzE1ZmFkMzFkYTIyYjI4ODdjNmFhYTUxNGM3ZTRhZTJhZjk5Y2I5M2E2NzY3OSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/auth.py#L195-L215",
+          "version": "repo-lines-v1:sha256:0f7a0ca4a0ec04b47c48449b0f5de7175b5eb16e5bb48fc6c5b5e93f65eb1ffd:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlhNjk4NjkxNDkzMjM0MTMyOGI0YmM0Yzk4YTY0YzZhY2RmMjgyNzgyZmZlMDlhMWE5ODUxMGIyMTVkYmRhYzkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJkYmQ4YjYxMTdlZWRmZGZhN2VkNWQyMmE0OWI3ZjUyMTFjYTI3ZGY0M2NhYWNmNTM5YmYxOGE0ZDg3NTE5YjEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/access/shareable_types.py#L38-L44",
+          "version": "repo-lines-v1:sha256:881bc564694d71d7ff0812abe47b3d59afe495e84d65167d41afb85c2635c598:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGQzMmU3NmI0YmYyYWRmZTVjZGFkN2U0MWU0YTZlZmU4ZWI1M2MwMDRlYmQwYWE3NDNlZTFmYzk2OGQxYTRmZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGEzODljYWJhYmU3ZmJhODlkNGE1ODE1M2QzMTUzYTNhNTg0YmI1ZWQyNzExOThlOGE4YmJmNTRhZjk2OWYxNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGI5MGNkOGMwZDlhMWE1MjMwOTI2ZTBhYTc1OTVmYmIxZDVkMDc5ZGEyMGQ4ZTk5NTc4NmI1ODIzMzA2YjRjNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/services/dashboard_service.py#L940-L965",
+          "version": "repo-lines-v1:sha256:c64ce63c050b318b478bee45d04a149e8f6542ce40574414369fa9accabe9a50:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyY2U3ODA0OTU2MDcwZjY5ODYwYmNlMjczODQxMDQ4OWNjMjM4ZTQ3Mzc0ZWExZmMyMWRlYWZhYzhmZmJkMTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2NGI3NzhmMzA2NzEwMGRkMDQxMmM3Y2FiODRjNGI1YjM1NDNmY2VjZmE1NmUwZGNkZWQwMDBmNzUxZjExNjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE3ODU1OWUwY2MyZmE2YmU4Y2I2ZWY3NWVhYzk3MTM0ZjAzMzQyNTEyOTA4ZDkzM2VkYjBiYmE1ZmRlZDFjOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU1YjJiMTk1NjBiMjgyM2U1MTE0ZDc3OGQxZDI5NzgwNmVhODUwNDUzZDUyZTA1ZGVlMDMyODQzNjA2MzBmZjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_22a5d52f4b8647ff985d0a83e8bf3b63",
+      "statement": "OrgWarehouse.org is a unique foreign key so an org has at most one warehouse, while Org.slug is not database-unique even though the x-dalgo-org header relies on it, so clone-created slugs must be made unique by code.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/trial/clone_service.py#L112-L122",
+          "version": "repo-lines-v1:sha256:46a91a4ede0216187977d7519a9141a0569ffd8fe3ca0bbae452b151201625b6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlNzk1MTc0YWVhNjlhMTlkNDA2NGMyOTBhZjI3NWYyMWMzN2RjYjVjNzgxMDFhMmE3MGVhZjQ5ZjE2MjJhOGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmYTkyOTkwMDgwY2I3MTc2MTBmMmRkOWYyOTVmOWI3OTE3NjM1NzQ3NDhiY2ZkODRmZTY5OGIyYWM1ODBiYTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3NGI3MDkxNmQ5YzI1N2Y5Mzk1MmY3ZTgyZWE4Zjg1YTM2NWU1NWMyNmY4NTk4MjAyYjcwNmU1YTk5MjMxMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRiMzQ3YzNkYWQ3MzE0NjkxZWQ0MmI2YmQ3YmM5ZWQwZmM1YWU0NGY0YTdhNDdlNjAwYWMxYWUyN2YwNDg3ZjEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/org.py#L133-L140",
+          "version": "repo-lines-v1:sha256:c4ef97875ebfa72f8c602f08be22cf912679cd994f49a108abb8467cf2ac76b0:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTNlMDBmNmJlYmRmZjBlNDFiMWUyNjRhMDIyYTUxMTU1MzZjZDY5NzBiMTViNjg2MWEzYjgwNjc1YzkxMjIzNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzBjMWYxODhmMTQyZWQ3YTgyNDY4MGIyMDcxNzJjNTUxOWJjNjE0YTQ4ZmRhN2NmMTY3ZWRiOGRkZjc5OTU2YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzFhYzhhZmI1Nzg2MGE2MDRkYzc1NzNlN2JjYjMyMjNiZWM0OGI1OWMxOTIxNzQ3YzJkNTczMDgwZjdjYTBlOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzc0ODUxMDFmYmRiZDU2ZjFhMjQyMGQ1NTQ3YmNjMmY0Mzc5MzRhODZlMWU2NWNiNWU4ZDljZjY1NmU0NGNmZSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/org.py#L257-L286",
+          "version": "repo-lines-v1:sha256:71e7ac242ddfd04db04a540dca2cbc699c471a8b603e94b26688cdcaa92d520a:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhMzgxNDA3MjQwY2ZkMDRlY2UyYjM4NWVlYTA4NmViYzhkNzM3YWFlNzVmMTVkMzUyOTk1MjMwOTQzNDQ2YmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIwNDc1ZGI1ZTU4Njg1YThjMGQyMTg2NTY1YjJjOTJkYWQ3MWE3ZTBiYTRjZDI3MGNmY2QxZjc2ZDlkN2FlNTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdkODY0YTllZmE4NWEzYTQ1MmFhN2I1YmMwMTY0NmNhZTM4NTQ3Nzc1NDE4MzBhMzlhNGEzNDFjYjg3ZGM4NzYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_64edff7669f040b7ad0c50603bda1d14",
+      "statement": "A pipeline is not a single table: it is an OrgDataFlowv1 (Prefect deployment id, cron, dataflow_type orchestrate or manual) plus ordered DataflowOrgTask rows (with seq) linking it to OrgTask instances of the global Task catalogue. OrgTask carries the Airbyte connection_id as a string, an optional dbt FK, parameters and post_sync_transform, and TaskLock is one-to-one with OrgTask to prevent concurrent runs.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/org.py#L308-L335",
+          "version": "repo-lines-v1:sha256:444da9d6f628ed031e099f2779d5fbd2bd557017e7e1cf8725c5f52879e2cf9e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxMDA5N2VlZTQ3ZDZmMmIzMjFlNjBjMTdmY2YwMjNlNmI4ZGU0Y2JhOTgyY2IyNmFmNjgxZmI5NzA3NDgzMDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkNjUwMDMwMTg1ZDhjZjhhZTU0OGViN2VkYTc2ODBkMjYzZTM0YTU2ZGY0MmQzNWQyNmUzZTJmZGE3ZmQxYmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFiYjJkZDhmMDViZThiOTgxNGJmYzBhMjg5ZjFhZWYzNTIyYjY5OGNhZTZhY2NmNzkzMWRiYWVjYzYzOWRiMTgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/tasks.py#L60-L158",
+          "version": "repo-lines-v1:sha256:8c801f9896d7f7616f58aadae383320fe05523fd4f639e4036d8e009b70a0c26:eyJzZWxlY3RlZExpbmVDb3VudCI6OTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1MmVmOGU5MDk0MWY1ZmQzNzhmZDA0OWI4YzhhYTU0MjM0OGZkYzg4MDdmODlhNTQ0YmM2ZjMwOTc5OTgwMGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwOGVlYmNkYTI1MDcwYjExN2VlYjc0ZDVjMDkwMmY4NWUyYWZjODRmYTRmZmI2OWVjMzVkZmY0N2E1YzUwMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4MmUwMDY1YWQ0NjY4MWYwNTc0ZWU3MGFjYjYwZmQ5ZDI4NDAyZjdiMDJmMTgzNzNhZjViY2Y4YTcyYzE0MTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5a3569474b20420aa45ec76cfa819ae8",
+      "statement": "Airbyte connections have no Django table: they are 36-character connection_id strings stored on OrgTask, SyncStats, OrgSchemaChange and ConnectionMeta, so Airbyte is the source of truth and these links are not FK-enforced.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/airbyte.py#L7-L22",
+          "version": "repo-lines-v1:sha256:304b3dfdb9e382d9fe0f2885512d3adffe49d772b3e8cdecd3cbf834c81e90d8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyMjJkMTA4ZDQwNDY5MzA2NDMxZDdlNjE5M2Y1ZjIwZTAxYjgxNTM3YzEwM2QwZDZkMTJiNWQwNzcyMmVhNmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFmYWMxMjgwOWJkNWQ5ZTU3Zjk1YjdiOThjMjQ3NGYxYzVjNDllMDgwZDAwMmRiZjlhMzQ1Y2RjMjRjNDgxYjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4NmFmYWYwMDQzZTJhNTU0NzcwM2Y1NTE4MGMyZmU4NGNiZGQxY2EwYjBkZTE2ZjY2ZTliNzA3NGZlZTA2NjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjczYjM5ZDU3NmU3ZDNkMWVkZmRiMzcwOGUyNDU5YjdiMGMxOGE3YmM3MzRhNmU0OTg4YjNlZDA3YjJmOGUxYWYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/org.py#L337-L353",
+          "version": "repo-lines-v1:sha256:b1d6fb35e7ae264d21962dea26e77f18199149cf475fec4c9a3279cd94ef4a48:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxOWQwNDk5MTBhZDhjMWRjY2I0Y2ZmNDliYTUyZTQ1YTQwNzVmNWE4ZmM3YTQ2OWI3OTIwYWI3OTQ3YWQ0ODciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwOGVlYmNkYTI1MDcwYjExN2VlYjc0ZDVjMDkwMmY4NWUyYWZjODRmYTRmZmI2OWVjMzVkZmY0N2E1YzUwMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIwYWU2OTVlOWEzYzEyYzRiZTU4MDYwMGVhN2Y4ZjhhMjE3ZjllODcxYTA3NThkMmNkNTdlOGNjNzY0NDdhMjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY1NTJkNjVjYzhhNGNlODk2ZTM0ZDU5ZmRjYTMwMWY1ZTc4YjE5NzJhMDAzMjQ5YmY5OTcyNzI3NjZjNzk2MDQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/tasks.py#L85-L99",
+          "version": "repo-lines-v1:sha256:3b31c87983617885937b0d15a2ef6d703267b9ffea5d6c4dcdf9694659ddb429:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0NWYxNWQzZTE4YzhmYTI2ZTg1MmI3NWNkZTE5NGEzYTM1NjFlZGQwY2FlZGIzMDFlNzc5MDYxZjZiOTlmYzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwOGVlYmNkYTI1MDcwYjExN2VlYjc0ZDVjMDkwMmY4NWUyYWZjODRmYTRmZmI2OWVjMzVkZmY0N2E1YzUwMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBmOGNmNmU2MjBjMDg2ZDAzMTIyYzIxNThkMTY2ODZkMmIzYzBkZGE3YjY1ZDdkMjc4YjVkNWFlOGE2MDMxMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyZWYzYmNmN2M4MGJiMGUzZjE4ZmExNDhjMDBjY2MyNTdhZmM2MDA1OTRkNjA5NDhhYWM4MWQ2ZGMxOTE3NjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2755876201884da78d236b86d1c9cdfe",
+      "statement": "Cross-entity analytics links are soft: Dashboard stores a tabs JSON whose components reference chart and KPI ids (walked by Dashboard.component_ids), Chart keeps its data binding as schema_name, table_name and extra_config JSON, and ResourceShare points at resources with resource_type plus a string resource_id rather than an FK. The database therefore does not enforce or cascade these references.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/dashboard.py#L49-L143",
+          "version": "repo-lines-v1:sha256:8cfcb43510eb963cfe76e07640d421ef948c810e1316d406e51410c53381ffc2:eyJzZWxlY3RlZExpbmVDb3VudCI6OTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjNjRlY2Y2ZWRjNmFkODZiMzkwYjhlMmMxNDA3NzdmNmI1MzVlMDQ2YjI1MDJhNzI5YzljYTVkZjRjOWVkNWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4MmUwMDY1YWQ0NjY4MWYwNTc0ZWU3MGFjYjYwZmQ5ZDI4NDAyZjdiMDJmMTgzNzNhZjViY2Y4YTcyYzE0MTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwM2VjZDMyMGJiODVhYjY0MzE1MTkwMWJjZTMxMDVmNTljMjY1NGMwOWIzNGZkN2I1NWJlYjU3MDc1ZjAwZTQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/resource_share.py#L1-L6",
+          "version": "repo-lines-v1:sha256:c92fed4cfa717daae9f7d0e7b01a84ed32d2ad36b0e3b1342bb34ae5b6aa87fb:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWNiYzlhZjFlY2NhYzk4YWY1OGJmOWRhZGM4YzlhODEzNTgwODQwZDcwNjUzOGI3ODI0MmY3NzQ0ODYxMWI0MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTM5NzU4MzAxOTRmZjQyYjgyNzEwNDVkOGY1ZjdjYjkwMWRmNmIyYjA1ZTBlMjU2MzZiNTBiYWZkMDUyODhkNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTk3NmUxYjZhMDA2ZDljNGEwZGU5YzRlMzYyNzM2NjMyNjA3NWFjM2U2MGU5YWE4Mzg3ZTBlNzI0YTJmZDczZSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/resource_share.py#L60-L72",
+          "version": "repo-lines-v1:sha256:eb868e2813a0708ad8cf10ad2a3145c6fe4e8349d9e857cb684fafb0920e454a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjOTkxOTlhMjYxYTNhNmRmNWE1ZWEwYTczMTE4Yjg5ZTcxNGFjMTg4ZDJjYmU2OTMzYjcyODY2MTc0YjgxNGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyYmFjNjdhYzJhZDU3NGMzMzYzOWZlYTIxMTlkNTJjNjZlYzc1MDA1ZmM4MmI2MGEyYmNkMmMxYzhmNGMzYmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjViY2IxNDJhYzdmNzQ4NTRlYzY5ZTgzNjNmOTJkOTQ1NmFiOTM4ODdjM2ViODU2NTU3MWU1ZDRlYmM1ZWMwNzMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/visualization.py#L38-L79",
+          "version": "repo-lines-v1:sha256:824f74d772a6aaad7536457af85f47280ebb1d3efb0053337af842b07dc9bc2c:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMzMWNiN2IzZjM4NDE1MmZmNjJkNWU2YzAzMDFkYmM1YmI0ZmYzZDE2NDBlY2YwMDQ0OTg5MjExZDVkMDZlODUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiNmYzYjBmYmE4ZmNiZDQwNjBkYzYxMzRjN2I4MDYyMzM5NzdmYzY0MGVmMDQzNzE5OWI2MGJiMjE4YTAxNzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzZDE3MWRlNzU0MzFhMDIxYTBkOTRmYTc2ZmFiZjBkNzEzOWM4OThjMWEwYjQ0YjQzY2E2MDkwM2ZhMWI4NDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8abad34715954b66a6742345b7a942b2",
+      "statement": "ReportSnapshot has no FK to Dashboard or Chart; it stores frozen_dashboard and frozen_chart_configs JSON plus period_start, period_end and date_column, so deleting the source dashboard or charts does not affect snapshots. It has its own unique public_share_token separate from Dashboard's.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/dashboard.py#L87-L104",
+          "version": "repo-lines-v1:sha256:bb9d56e12ce84e8010e07cb47640e60bc134526659a59a4bc503e3678725be1e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhiZjdhNmQ4YjM4MmUxODE3YzlmMWVlYWU4ZTdkNjUyYWYxMjAzOWQ2YWJhOWJjOGZmYWNmMDJjOWJlMjk5ZGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlMTczZWMxZjQ0ZGM3OWEwMGMyOGNjOTg3MjFkNGVmMGRlOThlNzY0NzUwNjZjY2E0ZDViZjMyN2M1MzgwYjIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgxZmQ4NzY0NzU2MTkwMDE3NTYxZGMzZmM5NTJlOGI1MThmMjNkMzljMGY0NGM1MzBlODYyMGU1MTc0ZGE1YTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjllMDY3ZjkyYzdjY2VmN2FiMDE2NTUzOTNkNmVjMGRhNTIyN2Y2ZjQ2OTEwYmMxZWNlYzE3MzJkYjZjMmI3ZDEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/report.py#L8-L90",
+          "version": "repo-lines-v1:sha256:96fb412991aa203eed7ef7f2f87ab82cef9cecbe1038c4d8eab2c93531ef638d:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk3NjRmYWVlYWMxNzZmNzM1NWQyY2E0OWI0MWEyMzhkNzlkMjYwMDdiMWRhOTI1NzI1ZGU0YWMyNmJmMjU2NzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNkY2RmNzI3Mzk0YmI3OTBlNTBlNzZlMzdhOGVlYzIwMzkyZjY4MzQ3YWM3NjA3ZmZhOTYxYTY0MDE1MzQ3NzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgwMWQwYTg4ZDhlMGJjMmRkYTdkNWVmZmNhNzE5ZTE4ODhlMGY1MDIzNGY5YTlmYTQ1YTVlYjY1MWRjMzExOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwMTU2ZmM0ZTkxYzI4MmFhMGZiOGFhYTkwNTVjY2E0YWFkYWE5ZDdlNWIzODUxY2M0MTU5YmM2ZTk3OTQ5OGYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_08b534f0bbc1493c87c983c9728cd675",
+      "statement": "Deletion semantics for metrics and alerts: KPI.metric is on_delete=PROTECT so a Metric with KPIs cannot be deleted, while Alert.metric and Alert.kpi are CASCADE (and AlertLog cascades from Alert), so deleting a Metric or KPI silently removes its alerts and logs. Metric names are unique per org and alert names are unique per org.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/alert.py#L117-L130",
+          "version": "repo-lines-v1:sha256:759641ab2dcd66e4fba942eca44a47395a404670161d6eff16b04815a94a5549:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0ZTkxNjRiNGQ2ZDA4ZDRhZDYxZGIyYzVhOTI4OWJlNGQ1ZTBmNzg4MjRjNTkzMGU4YTI2YmFlYWQzNWVlOGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg5MTdkOTVmZTExNGM1OGRhNTM5YzYwMTUzMjQwODQ0MDM0YjVhMGViMGU1NjNjZjY0NGY0ZmU1YzA3NGE3YTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUzZTI5OWI3OTQwMWQyMzAyNjE5ODk5Mjg4MzEzZjQ0NjI0NWQ4ODIzZTcxYmVhZjEzNjFlOTFhYmNkYjhjZDEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/alert.py#L22-L112",
+          "version": "repo-lines-v1:sha256:0fccdc6a3d17627b3436140c02048ef0e32540654b6dfbdef795a873c486574f:eyJzZWxlY3RlZExpbmVDb3VudCI6OTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiYjA2YzlkMDlmM2E5MTliNzliMDU2ZmI4MTdlMzllMTcyYTEyNDk2YjA0NzU4NDZiODdiMmEzMmM4MGRlZGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY3ZTlmMmZmMjlhMjJmNzYzNzRjNGZhMTZhNWNhMTkyYTc2ZWEwMWZmYmYxODFhY2E4YmY4NGU1N2EyZWI3NTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRjYTU4NjQ0ZjlhYjYxYTYzMmRlZjE0YWVjMTJkMGUxNmRjZDcxMzc0ZThlYjZkZjM5NTBmZGEyZWRmZGRmMWUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/metric.py#L38-L88",
+          "version": "repo-lines-v1:sha256:a18977a71a64bec76235f85098467dc77b6f1bdd15c7a81398b25aff50d33777:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMxNDJhNjllNTBiMGY1YjM1NDk4YjZmZjgzNGRkMTAzMDQxNzg5Nzk5NGY3YjJiY2ZlYTNhNjg0YjAwMzJhZjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0ZTg3YmVmOTk1OGNkODIzMmY2ZjE3MTdlMmVlMDNjMzA2MDg3M2ZkODg3NzMzYjZjZDliN2UyYWZhMGI4ZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQzZDE3MWRlNzU0MzFhMDIxYTBkOTRmYTc2ZmFiZjBkNzEzOWM4OThjMWEwYjQ0YjQzY2E2MDkwM2ZhMWI4NDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgxZmZlYzQ5MzNkMzE3YTI3MDA0YzAxMjc1YTlmNGY5NmU4ODYzZTJhYjMxNzMzNWNlODg1MzczMTRlMzQzMWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6c2a9e32243e47519a1fd8d86c392c54",
+      "statement": "Dashboard has a partial unique constraint (unique_org_default_dashboard) allowing at most one is_org_default dashboard per org, a DashboardFilter child table with cascade, and a one-to-one expiring DashboardLock for edit locking.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/dashboard.py#L106-L110",
+          "version": "repo-lines-v1:sha256:3a2f574d882cab5499aac52980147072fd23a1845b663b21be381acd5550a8df:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc2NTE5YzNlNmMwOGZjZDhlZjFjMDk1MmE3ZTlhMjdlOWQ2ZTU4ZWVkYWNlMWU5ZDcyMGNiYjgwMmNhZTk1YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzBjMWYxODhmMTQyZWQ3YTgyNDY4MGIyMDcxNzJjNTUxOWJjNjE0YTQ4ZmRhN2NmMTY3ZWRiOGRkZjc5OTU2YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzY5MzA0MTU0ZGQxOGFkYjZkMzBjY2MyMWRiOTg3MzAxMTg1ODkwMzVjZTljOTI1ZmNjYmVjMjI3NGJiNTUzOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmI5M2Q5Njc4MGFjNDcyOTViOTZjZDViMTFjYjc3OGY2MzdjNGI0YzJiZjM3Mjk1MDNhYmJmODljYTY5NjQ0MyJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/dashboard.py#L169-L178",
+          "version": "repo-lines-v1:sha256:cf0c1207c136e9e4fdcd2dad284396aa2c150bc49e604b5ad82bef0dc1ffcf01:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlNzQ4MDY0YTBkOWQyMWFkMTE3ZjE3YzFiMWY4NWQxN2I4ZWM1ZjU3MzJjOGQ2MzA3NjkyYWMwYTA2YjY1NjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhYWU4YTBjYTc2Zjk4ZjdiN2RjNzk4NDk1MWQ2M2U1N2RiM2M2NDU1NzljYTUxYmFkNmE1MzlkNjE0ZWRiYmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ3YWJkYTc4OTVjZGM4NzRlZDI2MmI5YTQwYzJlY2Y5OTM3MjIyNDA3ZTcwZGUxZTE4OWM2ZjcwOGI2YzAwMTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA5ZmQyZmMxYWJjYzVlNjI3ZDI2NGRmN2Y1Y2M1ZWQxM2JjYTAxNGQ0ZDcwZDBkMjMxMTE5ZThmM2VkZWUyMDMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/dashboard.py#L181-L258",
+          "version": "repo-lines-v1:sha256:a7c2c39ac9b9019ca6aa61378c5f20acb33225f6a07315da0daa3634edbc71c7:eyJzZWxlY3RlZExpbmVDb3VudCI6NzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZhNTViYjcyNzdkNzRmZDkwNjJkNzBmNGQwYzU3ZjdmNzE3MGM4MjQyMTQwNDI0OThkOGU3NGY2YmNlNzlhNjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1MjM1MTRlOTU3MjE4ZjQ5MzFlYjBiNDUzZjk4N2I4NmEwNTQ3MDczYmNkNTQ5NTI0YzJiNzhhOWQyMDRhNmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5ZDZkYmI0NmY3ODcyNmI2OGE5NWMwYTNkMjJiYzgxYWFhZDQ3M2FhMDNmYjZmNzk0ZDk5OGQzZTEwMzRkMjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f3cbc6938de84368af13e560a1237a39",
+      "statement": "Deleting an OrgUser (delete_orguser_v1) runs in a transaction that first reassigns created_by on the org's Dashboard, Chart, Metric, KPI, ReportSnapshot and Alert rows to the acting admin and deletes the invitations the user issued; it refuses self-deletion and deleting a higher-level role. A new owned model must be added to that tuple to avoid orphaning.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/orguserfunctions.py#L188-L219",
+          "version": "repo-lines-v1:sha256:f18372ce0dd1e31c20eacf86e966e92c235e9ed918ac5871066b572db4bc0393:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZDQ3NzY1Mzk5ZjVhYWU1YzNlMGY4MzU0ZDExMDljYjg0OTQ4NDIzZWU2MmVkZjQ5YmFmNzMyMTJkYmJjZGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3ZGNlYmVjMGNiNTU0OTRiNGRlZDk4NWQ0OTg0OGEzNGQ5MjJmYzQ0NTc5Y2VmMDVjOTYzYzc4MGE5NGE4ZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdhN2RhNTY5YzExZjI3ZDVmNTczNWMwY2Y0OTEyODUzZGQ2NzdkMjU2OGViM2UwMzA5Y2I1OTllMDU5MWJiMTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIxNTIwMTlmMjZlMDkxNjIzNGFmMDA4MGVmN2U2OTYzOWJmZGI4MjQyMDQ2MjI4OWZhNzUxNWY3MmZmMTk3ZmMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5461e1bec091477fad8de3999bbe9dcc",
+      "statement": "Org deletion is orchestrated by OrgCleanupService.delete_org (dry_run defaults to True) because external state must be removed first: Prefect deployments and blocks, the transformation layer (raising OrgCleanupServiceError if a dbt or git OrgTask is still used by an orchestrate pipeline), warehouse, Airbyte workspace, org users (UserPreferences deleted first; the Django User only if no other membership), the on-disk org directory, then OrgPlans, OrgPreferences and LlmSession rows whose DB constraints do not cascade, then KPIs before Metrics because of PROTECT, and finally the Org.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/services/org_cleanup_service.py#L368-L399",
+          "version": "repo-lines-v1:sha256:1416d3cc25eaf957a56db714eba17e374c87207c863e56a92b2aa99994c4d100:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNmYWY0ZjgzNmQyY2QwMWRmMTRlMjNmMjFjZWE0NTUxZjY2OWQ0ZDE4ZjdiNmQwMzM4NjU3NDhiNWMzMTVmYTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwMDEwNWUwYTY4NTIxYzNkMzMyNjE1MzkwZTg1OWUzOWNmMjQxMjc0YTdkNzgxZDE5NmEzYWRhMDdiMTBmZDciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMyNzJiZDBmNjY0NmFhZTEzZGFhY2M1NTU3ZWUzYTQ2ZDEwZDQyOGUxNmQyYWQ0MGE2YTU1ZDRkZDU1NTU1NDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY1YjdjM2M0NGRjOWJiZjcyYmVkM2IyNTJiZGZlY2EyZjE0OTM1ZTFkOTI5ZTJkNGY0YmYxYWQ0NDgzZDdjYmYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/services/org_cleanup_service.py#L39-L120",
+          "version": "repo-lines-v1:sha256:0692380e5aedf50ecfff48994335d6dad1c43419410d37e7347ab22115907b97:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3NWYxZjQ0MmQwODZmNzZlZmNiOGM5ZDNkMjhmMDQ4NTU4MGUxMWNkNTNmMTMyYzEyMzljZjhiZGI2YzVlZTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJmMThkNzJkNDUyMTViZjkzNTRlNzk2OGZjZGQ0MmMxOGFlMzUxY2ViYmMyNGM0Nzc3YTNlYjFkNGUyOGU3ZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg1NDEyNzMwOWZkZTJiZWUxOWQzODY1MWRkOWU5ZmJiZmQzM2E5MGM2Yjc1ODk4NjY4MzM3N2U1YmNjNzUyOWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQyZjYxNGJjNTZiNTU2ZGFjYTJlMjEwNDdhZTJhMmYzMjU1NDUwZDJiMzc1NjY4MGZkOWEyN2ViMTQ5ZDZhYWMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/services/org_cleanup_service.py#L467-L545",
+          "version": "repo-lines-v1:sha256:fac96b5d28163b9f217e253ff74fbeb988e231474789825fa9aae77e6064abd0:eyJzZWxlY3RlZExpbmVDb3VudCI6NzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZmMxNTU1NDM4ODI1OWMxNTZkYmEzYTVkMDkyZmU2MjllMTFiZmIzNTkzNmZkNjk3YTQxYzFjNmQwZmQwY2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwMGNjZTIyODM1N2QxNjM2MDRhMzllYTM0MTFhNjYzNGJiMmI0MmZjNTFkYWM2YmMyMDQ1ZmQyMGRjOGFjZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2OTNlZGEzYjhhZDJkYjM3NmZhYWM5MzJhMjc0MjMzNTY3MTM0YjUzZDJlMzZlMGU5NGYxZDg1NDlhYjE0MzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUxYjFhODk4ZTRmYTcxNjlhNjc0MGMzY2U4YWIyYmJmNTc2Y2FjODM5MTU4YmFmM2UxNzIxMWI3NWRjMzRlYTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_773b7de7db10462ab867980852b144c7",
+      "statement": "models/__init__.py imports many models purely so they are always registered with the app registry (otherwise Django's test-database TRUNCATE fails on their FKs), and deliberately omits MapLayer because it has no migration and registering it would break test-database creation.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/__init__.py#L20-L37",
+          "version": "repo-lines-v1:sha256:95af0c35e1f2ee0fdb61d97436fd10e0749e619782636da576b140069e6790e1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1NmUyNzg0OTI5ZWI0ZjJlNTI1Y2IyZjFiZDAzYzI0NTM2YjNjNDlmZDNhNGM4NDFlNDA5ODcwNWQ2M2M2Y2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZmYWE0YTNiNjJmYzc0NDg0MzQ1YjNlYzlkYmE3ZWM5NDA2ZWM1NmUxZWJhODFlNWRlNzZjMTBlZDAzZDEzY2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d3954017578e45a0a8b938f953f31afd",
+      "statement": "Org.queue_config holds per-org Prefect queue and workpool settings for four task classes, with defaults derived from PREFECT_WORKER_POOL_NAME and PREFECT_EKS_WORKER_POOL_NAME and support for a legacy flat string format; OrgPlans is one-to-one with Org and Org.plan_window() is the single definition of a trial's validity window rather than Org.created_at.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/org.py#L161-L254",
+          "version": "repo-lines-v1:sha256:cfa0720fb2f1b20a2a4f15a9e8fb2a1ca50d4116d2c5e2a2d54453316888006f:eyJzZWxlY3RlZExpbmVDb3VudCI6OTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyOWI4Yzc4NDBhZmE2NDczZjRhODc2MGQxZjdhMTIwNTY1ODRjYzYyMzI5MzkzNWI1ZGNjZTUzOTVhZTcxMjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI4YzA4N2ZmNTMzYmNhMmE3ZTM5NTQxYzVkNzI4YWMxNTEyZWQxMDVlYWQ2ZWNiMzE5MWY2OTUyNDUzMTRmMDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZhY2UwZWNjZTU4NTVlMDEyY2UxZWE4MGI5MGQwMWQ0ODZlMzlhNDI4YmIyYjFkYmExMTMzZWE0MTM1ZmQxY2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNmZjk3ODhlYjBjZDRlNWY4MjIxODQ1NjJmMTZkZTE3NzQ0Nzg5MzAyNGZkOTkxNDUzNTEwN2JlMjMzM2QwZDgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/org.py#L53-L79",
+          "version": "repo-lines-v1:sha256:9fa59ed2c005dc41201d39ea53ee689207b35a855963449a40e7a98528c4a7b4:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVkNWJhODZlOTlkNjllYmQ5OTkxOGQxMTcyZmRmYzM2YjBmODMxMjRiZWNlNDRjZGQ4NjExYmM0OGUyN2M5NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5MGQ5MDQ4ZTYzYjYzOWRiMDMxMTdkMTIzMjUxY2RkNmI2ODU3ZjY2Mzk5YTk5MjdiZWZjMjJmMWEzNjBkZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEwODVmODE3NmUyZjFlNWE0OGYxMzFjMzhlNDg4ZTBlYzAwYzcwOGZlY2RmZDlkNGNlNmEwYzFkM2Y0YmZlMzgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/org_plans.py#L19-L40",
+          "version": "repo-lines-v1:sha256:d5cf013ce168fe3336372e14b087b7fd40f21d7fb4becdd59fa58fe5cc3a9f04:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMwZjE5NTgzNzkwNDFkNGI3ZmI2Y2E5ODdhMTUyZTcwMzM4YTQyMmJiNTgzYzFmYjdhZDEyN2Y0ZGMzZGMyYTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2ZGU5ZTliMDMwNDc3N2U1MjNkOTcwODcxMmU4NWE3ZWZlYWM2NGY5YTVmMjZmMTYyNGNmZWRkNjQ4YmY4YTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4MmUwMDY1YWQ0NjY4MWYwNTc0ZWU3MGFjYjYwZmQ5ZDI4NDAyZjdiMDJmMTgzNzNhZjViY2Y4YTcyYzE0MTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM2YzMwNWVkNTBmNTlkNTQzOTI3Mjk1MzNkN2RlYjIyZjI2YmYzZjJjYmRlZWFiOGU4MWY2MDU1MjM4ZmNjMTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_33abda8275b04eb29d1736c0456b2a3d",
+      "statement": "The product map harness/domain-map.md is partly out of step with the code: Dashboard now stores a tabs JSON (each tab with layout_config and components) rather than top-level layout_config and components, and Source/Pipeline/Transform are not single models (connection_id strings, OrgDataFlowv1 plus DataflowOrgTask, and OrgDbt plus OrgTask plus dbt model/canvas models).",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/canvas_models.py#L1-L56",
+          "version": "repo-lines-v1:sha256:0243528e09d863bf1443f07f36e7d74b1c2232deb9d10a407c90954d9ec83cf2:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3ZTFlNzViN2JkZjJmNmYxNzBhZWU1ZDgxMTYzNjhjNTYzMzRmOGFlZTFhNjI3ZGYwODc0ZjYxYmQ0YzE0ZDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzZTkyZmQ0NzE5MzRiZjY2NTliOGFiNmRlNDIxZGU0Njk5YzdiZGRjYjExNTQ1MjllYjE3YmE3MmRjYzBhNWIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/dashboard.py#L68-L72",
+          "version": "repo-lines-v1:sha256:53b261075d62308a246189db809aea44db0ba69fa5ba00e8c57bfe2333a655c9:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTIxODA2MTYwZDVjNmUzZjUzNTk5OTcxYjQ4MDQ0YTU2YjBmMzgzMmRhMjYzZWVlODc2YjI3ZDliYmFjMWRjZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDRlODU4ZTA4YjQ1NDliMzU0MDk1MGM4YjVkYjViZWQ4ZDY2NDlmYTNjMjc1MmIwYWRmNWI0ZjY3N2MxZDAwOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTQ4Njk5NzBmYzUyZTg1ZjY4NGY1YTUyZThhMTJjYTdmYWUzM2ZjZTUxNzk5NzM2ZjFiMzkxNjIxMDc0NmQ1OCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/tasks.py#L128-L137",
+          "version": "repo-lines-v1:sha256:16307caf8c091977bf5ff1684b607d4adcccbe0911531e569fe215711bc3bee3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4YjYzMjE3MmNmMjRjOTJlMzhhNjljY2Y2NjI4ZTJmMjg5ZWQwNGVhZDczOGI1ZGMwOWE5NTg0NGE1MmNhNDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwOGVlYmNkYTI1MDcwYjExN2VlYjc0ZDVjMDkwMmY4NWUyYWZjODRmYTRmZmI2OWVjMzVkZmY0N2E1YzUwMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE2OTBiZDM2MjMzYTU5MDNiNGY4OWEyMjk1ZmEzZDk5OWRlYTNjNzFjNjkyMzdjZGNhOTJhZDY3MTk0NjcxZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQyMDIyMjdlNjc1OWRlNTBlMDJmZjkwN2M4ZTcyOTI3NzViZDhiNDhhM2EwYjQ2MGEzNTg4OTkyN2RmZGQxOTgifQ"
+        },
+        {
+          "resource": "repo://harness/domain-map.md#L185-L202",
+          "version": "repo-lines-v1:sha256:b352b6257f87f2159adc25af12955fb26d983b66cd2b43ded740ecf5c72772c7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyNmFiNmZhNzZmZTk2ZjVmNTIzNjQwZjhkOWFkYTk0MmFkZTJmYjExOWVkMTNkYmIzOGRlMzY2NzFiYTA2YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBjY2M3ODQ1OWUxNWFmZDY3Yzc2NjcwM2UyMDZmZjQzYWNkYmEwMGFlM2M0ODUxNDM5NGNmODk1YmNmMWI4YjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI1OGMxNzA3Mjc2MzRmZDgyNTJmZWY4YWM4Y2VjZTM2NTg3NzhlNGIyZDFlYWZhZjM3ZTNhN2RjOWExM2NlNWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyMWMwZTcwZTQwZDYyMDA4NmEyZDRkYjRhMWZlYWMwOTJkYmNmNjUzNWUzNTI2MTlmNWFjNWUwNjIwMzQ0OTcifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

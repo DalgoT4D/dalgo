@@ -1,0 +1,308 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:cae968b258fccaa0f624f3cbd67f9323c079982ecc506303fab1654bd3839044",
+  "claims": [
+    {
+      "id": "claim_deade8788ffa4ab788242deba4454a85",
+      "statement": "Alerts are evaluated on a per-alert UTC cron schedule: a 60-second beat tick runs dispatch_due_alerts, which enqueues evaluate_alert for each active alert whose most recent cron tick is later than last_evaluated_at (falling back to created_at); both tasks are routed to a dedicated 'alerts' Celery queue.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celery.py#L38-L47",
+          "version": "repo-lines-v1:sha256:39958b0379fcf1688b03818db6bc5ace4aec954cc492de6bb8eefbf1ed225d56:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3Yzk3NjZiMThmM2ZlNzI4ZjQ2ODg5MGVkZjIyNzMzYTAwM2QwMzBiN2MxZThlMjhmYTcxYmM2MWZmNjhkYmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk1MDAzOWVjNmEyZmEzMTA5OTQwMTMxZmNjYzgzOGEyYWM0MDYzNzFiMGJkZjJjNDZjOTMwZWZiMjEyMTYyZWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyZmVkNGQwYWE1N2I2ZTIyOTFkMjhhYzcyNDA3ZjcwNmJhNThiMmFhNDYwYTliZTY1N2E4YzBkZTdlMTAzZGIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/alert_tasks.py#L38-L55",
+          "version": "repo-lines-v1:sha256:b1af60dc1f4b605f548210a6100fead4fb9e563b64acbd40feadc3ba20602af5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVkMGY2YzJlODBiNWJhN2Q4NDU1MjQ4ZjJjOGQ1NzAyYTY1ODUyMWRkYmM2YzM0YWZjOGEwOWEzNzlmOGRhZTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3MjkxNDAwOWNmYmE1ZDJiNDJkNzRmMzRkYTczYmE4ZjNjODVmZjFlOGQxZmUyZjBiMzUxZmE2Y2M3ZWRmY2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1ZDQzOTBlYjQ3MGM0M2ViYTIxMTdjZjEyNjVmYmM0YTFkYzcyZDYzMGE3OWUwMTExNGU0YTNmYzJhNzNmZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI3NmIxYjU3NzU3ZTJlN2E0MjU1OTZiZWVlMjZiM2FhYWJlODMyNGM1OTE3NTAzMzkwNmY1ZGM3M2M1OGQ0ZTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L1292-L1294",
+          "version": "repo-lines-v1:sha256:0a41027b68b6f5f9cd316dc92f0797261a3b9a8ad83c594643cfc8c4ebfaf162:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzk1N2VlZmE1NmZkMDcwMTM3MjJmNTEwMzdlZjNjMGUyYTJjMjFkNGFhOTE0YzlkNDdlMDQxYmE3ZjRlNGMwZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQ1NDk0YzIzMGZmZDUyMmE2YzM5NDkxMGM0MTk4YWU5ZjE5MzA2NWFiMGRmNTdjMWRlNzc2ZGU4ZDBhNDRiMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTZiOGZkNzg4NDdiNWJmYzgyZWQ2NTk5MWMyNmNkM2VkZTE3Zjc5MGNkZTY5Y2FmNTM2MjQ3NGJhYjQ3YzQ4ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDY2OWMyYzZiYzZhODFjNzYxMDdmZTYwMWJkMTRhN2FmM2U5ZjY0ZWY2NGZmYmY5ZTUwZjljZTBlMWVhMjc1OSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/alerts/scheduling.py#L41-L55",
+          "version": "repo-lines-v1:sha256:62384ee1f0da024e8644411386bd67190b1dc5572159b643f107fc86c5568f55:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRkYTFiZDcyNDRhNWI2NjE0YjIyMTcxNmQ1YzI5NzdmNTVmMTZkYWMwMTI1OWYyNTk4YzlhNzcwZTA0MGIzMTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiNWMyYWUwY2E1ZGNlZmJhNjQ3OWZkMzAyZDQyZjIwZDJkZDY1NDBlNGU4ZjdlZWYyN2Y2YzkzZTdhZDYyYWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM2MGNmMGM0ZjA2OTlhZTQ5OWE5MGNjODQ2ZmEzZDAyYjk0NzEzZDNkNmNiOWYwZWRhNzk1YWRjNjYzOGViZmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZjMzk1OTJiMjc1ZDUzZjQ2YzY5NDI5NmRmMTlhMWNhOGNmOWVkNzY0MDU5MmYxYTg0ZGM1ZTBhYTk5OGQyODQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b9e02695971f49988310b5ab59b2f43b",
+      "statement": "evaluate_alert makes evaluation idempotent per scheduled tick via a conditional UPDATE of last_evaluated_at (only when null or older than the previous cron fire); the claim happens before the warehouse query, so a crash after the claim loses that tick's evaluation, and the task has max_retries=0.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/alert_tasks.py#L58-L94",
+          "version": "repo-lines-v1:sha256:58ec9a75aee6b5bc0dc06413ceda2982981038c249c8c628bca1ddc4a41432d7:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlZGEwMDg4OWRlN2RjM2Y3ZGExM2Q4NDJmNWQzYjYxZjVlOTQ4OGY0YmQzNzY0NzRhYjg5NjlhYjA5NTM3YzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwZTJhNDY1MDA5NWZhOTVkMGUyYmI0MWIyZGIyOTA5NGQzNDA0ZDI4Y2UxMjMzOWVjODhiYjRiNWM1YmU4ZjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJjOTUzNzkxZDZiNzUwMzRmYjlkYmUyYjdmMDE2NWU5MmI0ZDEzNjUzOTdlNTA0MzRhYTFmYzFjYzkyOTIwODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImViNTdhZTgzZDQxYTYxODJjOWVlMGM5NDRiM2YxZDM5YzI0MWE3OTdjNjQ5MDU4ZTZjMmY3NzAyYWVkMjNkMjIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/core/alerts/test_alert_tasks.py#L132-L146",
+          "version": "repo-lines-v1:sha256:27bd7be9470b31c20fe47cedf0f665249568bf018599d9ef91e89e0a4c695d10:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIzM2IzYWY5MDU4Y2Y3YjAyYjcxNGY0ZjIyNTUyMmQwMjhjYmZiY2U2YWFkZTVhNmJmYzdmMjhhYzIxOTc3YzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFmNWE1N2IwN2FhNDI4ZjU1ODA5MWM0YzI5YmM4ZjNjMGJlNTQzMjVmYzRmNmU0YzgwMzA0ZWFiZDJjZWRjNWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjljMjkzNmM3ZWJmZWQ3MDg5NzdhZWE5ZWExYjUyYWFjYTE0NTFmM2E5N2IyODZhNzEwN2VjNTVhZjM2OWFhYWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0040eb2e89a34b58a8256e0adce405e5",
+      "statement": "_run_evaluation always writes one immutable AlertLog row per evaluation (fired or not), including value, frozen alert_snapshot (with rag_status and an error key on failure), executed SQL, rendered message and deliveries; a missing warehouse or query exception yields fired=False with the error recorded instead of crashing, and delivery only runs when fired.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/alert_tasks.py#L97-L162",
+          "version": "repo-lines-v1:sha256:989c632776d8a1e84e4727167a493bcc1ec03aa3ce8976f528be5d6057677c14:eyJzZWxlY3RlZExpbmVDb3VudCI6NjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE5MmZkN2UyMjEyM2VmMTI2YjUwNDBmYjJhNzE1NGIzNTIyNDJiNDhmMjJjYWVkNmIzODBmM2E0NzMwZjJlZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRlNzU3NWMzYjc3NzZjZjJmOWMyYmZiY2E0NGYyMTQ4MTNhNzgyN2VhYTljMzg0NTRjNzAzYjY4OWE3NDQzODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE3ZGY1OGU1MTRjMTc5MDk4ZTc1OTQ4NzAzY2M5NDRmNjIzNTI1NDY4N2NkMDY5Zjc4MzYwY2QwODk0NGVlZGEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/alert.py#L117-L172",
+          "version": "repo-lines-v1:sha256:98e19d867279f77e054bdbf4be823929287a231ed214c2390b4d5b1dfacd09a6:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0ZTkxNjRiNGQ2ZDA4ZDRhZDYxZGIyYzVhOTI4OWJlNGQ1ZTBmNzg4MjRjNTkzMGU4YTI2YmFlYWQzNWVlOGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4ZmY4YTYxNWI2ZWM5YWYyNDQxMDJhNzM5NWRlOGEwNzA2YmY3NDhhNWZhMDMzNjFjNzcyZjk0NzQwZjQ0OGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg5MTdkOTVmZTExNGM1OGRhNTM5YzYwMTUzMjQwODQ0MDM0YjVhMGViMGU1NjNjZjY0NGY0ZmU1YzA3NGE3YTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6d297ff64f13488c9637a864aba1ec38",
+      "statement": "Alert value computation reuses the Metric and KPI services: metric_threshold calls MetricService.compute_metric_value_with_sql, kpi_rag calls KPIService.compute_latest_value (most recent time-grain period with RAG status, falling back to a whole-dataset aggregate when the KPI has no time column/grain), and standalone builds an AggQueryBuilder query from standalone_config with eq/neq/gt/lt/gte/lte filters.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/alerts/alert_query.py#L47-L119",
+          "version": "repo-lines-v1:sha256:b8b8c7b2d13912564141ab772fb9e287f188a5505ce4638bd2ed3ab49ee683c0:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzM2QzOGI2ZDc1YWU3MGZhZTRjZmUyNjE5MGFlZjViYzdkNWNhNjAzN2QzYzJlYzQ3YzRmYjhjZGJmYWQwYmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVmNDM0MDMxY2MyMjkyZmNkOTdjNmJhM2VmNDkxYTc0NTQxZGZjNzEwMzU3ZGZkYmU2YmViZTZhOTE1ZGRiNzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZTZmODgyNmZhOWYzZDMxNWNmYzM5ZWUyM2VjODIxNDQxNzk0NzlhY2VhNWQxZjhlZWI3NGZmMGI4Mzk3ZTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdjNmMwMzliMmI0Nzg4ZTliNzNmNDk0NGNiYjdkNzExMWU4MTE5ODI5MTRjZmQ2NDBiNTBhYzViNGU2MTc3MjEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/kpi/kpi_service.py#L506-L576",
+          "version": "repo-lines-v1:sha256:02e7ecf48ffd6eb1e9ae65b7ae661654cf0bfde250469ffb458b1c112e92a977:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyOTIxNTVjNmE0OTMyNmQ1ZDZjOWQ2MDFhMTM1YTYwMjcxNTkyMzI3ZmNjOTRlZDNiZTZiNDI4ZWI5NmY1ZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVjOTQyM2E1MDkwODM5NWZjYTAyZTBhOTQ0NjEwN2VkOTE4NmZhMmEyMzJjMDY5MWI1ZDNiNTgyZThkYzJhMjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI3ZDZlM2E5MTJiYmMzZjE5Nzc1NDY5ZDljMjRkMTU3ODRhZDM4YzFmNTIxYTZlYjRiYmVlZWJmZmMwNTAwMGYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/metric/metric_service.py#L343-L379",
+          "version": "repo-lines-v1:sha256:af94afb0ae61f2bb38d79aeac0b2ceee15b15e61ed1a25d9db2f3f240eb3ef5a:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlZWNkYTRjODgxMjM1YTQ3MWY1MzQ4ZWZmNGFmYWNjZWY3MzU0YzIxNmU2NDE0OTgyZDdiMWM1YjcyYTkwMmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4Mjc3OWQ0ODRlYjM2ZTE5OGM3ODA0NTZhOWE0MDg0NDAxNjQyMjVjMzBjYTA2ZTdhNmNlYjk4ZTQ3Nzc4M2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVlOTE5ZTdmMzc3MWQwNDkxN2JkMDUxZDdiZGNmOGFjMWZlMzYxYzQyMjFlNzc5ZTA1YzJjMDM4ZDQwODQ0YjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d43d7e13a8db4a1290a11b59b2fc78c8",
+      "statement": "Condition semantics: a None value (no rows) never fires; kpi_rag fires when the computed RAG state is in the selected 1-2 rag_states; metric_threshold and standalone alerts compare the float value with lt, gt or eq. There is no cooldown or state-change deduplication, so a persistently firing alert notifies on every scheduled evaluation.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/alert_tasks.py#L114-L130",
+          "version": "repo-lines-v1:sha256:b57352c817659192f13e441025dbded463114bdbd96bc90fcdafd396e9f8adb8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2ODE5YmFjZTc1ZDJlZjBkMWQ3MGRmNWJiNzA1Mzk0ODc5NDJmN2Q2NzM1MmE4NzVjYTkzOGRiNjA1ODBmYzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2YTViODA4MGI5M2MzMDA2NTM2MGZhODlhZDk2NmVjYmE3NmZhNDVlYTAwMzAwMDk2ZTkwNzMwYWIwZjc0YzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgyYzc5YWQ3ZjZiMjk1MzRhNTA0YmYyMjAxMzA3NzFkMTIxY2JiNzUyZTY3ZjY0NzM3YmI3NWYzZjlhMjFlYjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM5ZmM0NzI1YmE3MjhjYWI2ZmU5YjYyNmM2ZWZhNDBkMzY3YjhiODIxYzZmY2ZkZTg2NGYxMjNmNDZjMWQ0MmMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/alerts/condition.py#L14-L66",
+          "version": "repo-lines-v1:sha256:845dc21edc47f9b00083e898a531d3252699889aab092de9dce1f30ba0b5772f:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkZTUwYzAwOWUwNzAxN2I2YTdhNmExY2UzMmQ1YWM0ODkwNDhmNDZiY2RhOWQzNzkxOTAxZTAzZTU4NzZmZDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1YmM0NzExZWNjYTA0NTBhZmM4MzI3NzlhODg2NzZhN2M2OTYwZmEzZGE1YWY0MTBlZTAyZDFlMDE1MTU5MWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwYjRhMmZkMTk2OWZhMTAxMGE3ZDM3ODdjNDMyMGVlMGEwMTIwNzQ0ZWMzYTU2M2UxMmIxZDVjMzcxMWE4ZTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdkOTk0YjljYjdjZWEyZmM5M2MxOTJlYzFmMjZkNWZiMzRmMDk4NGQ4ZmYyNDZkODQxYjMyZTRmYTZmOTk2ZWIifQ"
+        },
+        {
+          "resource": "repo://harness/features/alerts/v1/spec.md#L29-L33",
+          "version": "repo-lines-v1:sha256:9c2937bbbd2f475e6120d4af8ab5538d8768dc6d1df6ced99a11e00aad3e134b:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDA3MDJlM2ZkZjVjNTUwNTZhY2E1MTA2MzdlZmRlMzgxN2UwNzMxODBkYWRiMGNiZTJkOWRlOTk1MWYyZTQ3MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTQ5NWYzM2NiNTQ1YWQ2N2M1ZDliYzdlNTJkYmI4NDgwODA0OWY5YjJkYmJhYjExNzAwODNhM2VmZDFhYjY4ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzA3NzdhMDhlMjVjNGVlNjkwM2NkMzM1OGE1OTA1YzlkNzY5YWYzZWUwZGVhZjQ2MmI0YTk1NmUzZmI2ODFkMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2U0ZTQ0OTkwMWQ4NTZmMjQ4ZGY5MTQ1NWVlNDAwNmE0MDQyOGJjOWQ5ZGI3ZDAxNWY0NGE4NTM0ZDJkM2MyMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_528a6952040d4d7e9f28de66f4b57803",
+      "statement": "Alert delivery returns per-target delivery dicts stored in AlertLog.deliveries: email goes through notify_alert_recipients (SES, expands orguser and user_group recipients, deduplicates by email address, records unresolvable recipients as failed), and Slack POSTs {'text': body} to the per-alert webhook with a 10s timeout, with non-2xx or request errors recorded as failed.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/alerts/delivery.py#L35-L86",
+          "version": "repo-lines-v1:sha256:c8648c875d90c69414c993a9b69027dbbe403365d0bca163391e2f027fa10744:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwMmVmMmU1YjAzYjk2YzlmNTczOTYwODk3ZDQwMzYyZTJiYzI4ZmU2ZTZjNWE0OGQ0MmY2MmIwMTA1Y2RjZDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBjYTI5MmE5MjNjY2UyMDdkZTY2NGE5NWNlMDFiZDY5OWFhYzEwYTgzNmQ4OGVjYzEzYmNhZDY5NzBhNjBiNzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBlN2QzOTlkZmQ3YTEwYmYwZDFhMTljMWIyNzA0ZDAzOTdmYzgzYmUxMDBkZjBlMTY1MWNmNDkzNDNkNDQ4ZjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMzNTU5NjA2NTJmZjM5NThhMGVjOTVmMTM4MGEzZWM5NDM2NWYwNGVkMTA4Y2ZjYmEyNWY5Y2Q2ZDMxNTQ5ODkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/notifications/triggers/alert.py#L79-L159",
+          "version": "repo-lines-v1:sha256:b5e9008bf6e30ff0617d2ca3a3f9dd2fa1c39e9401a85385f1f0caf1d0522cd9:eyJzZWxlY3RlZExpbmVDb3VudCI6ODEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEwZWMzYjBkYmY3MzY1MjNlZmNmMjIxOTdkZjg4ZWY5YzIzMThiMjJiMzQzODI2N2NmMmU0ODc2ZDEwNTU2NTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBjYTI5MmE5MjNjY2UyMDdkZTY2NGE5NWNlMDFiZDY5OWFhYzEwYTgzNmQ4OGVjYzEzYmNhZDY5NzBhNjBiNzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBmOGNmNmU2MjBjMDg2ZDAzMTIyYzIxNThkMTY2ODZkMmIzYzBkZGE3YjY1ZDdkMjc4YjVkNWFlOGE2MDMxMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9ad1fd0fd4eb4dfe83ec76960c621bac",
+      "statement": "Fired alerts do not create in-app notification rows; the notifications package contributes only the email fan-out and HTML template, while notifications_api.py serves the separate generic in-app notification feed.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/notifications_api.py#L15-L133",
+          "version": "repo-lines-v1:sha256:5afb4a1efb4b573a19981686ac610ba41e7c6a2fcad7c0223fb9cbff9a503887:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJhMjBhNzk5NjI5Nzc3ZGFlMDgwYjM2MWJlM2U4YjIwZjZmNGNjMDc1OGE3NDQ3N2IwMGNiMTU3NTFhNjdhMGNmIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmYTExYzA1NjdkMGE1ZjllOWIxMzVmNjVjZDI1MzcyZGZkNjI4Nzc1ZjdjMWVkMjUzZjhiYWQ0MmRkMmQ2NjY5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI2MjBjNGNmOGMxYWU1NThiZjFkOGMzNThlYWRjZmFhYzgwYTJhOGQ5OWIzZTJmNzE5ZmZjN2I2ODY3ZDY4YmNlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/notifications/triggers/alert.py#L1-L10",
+          "version": "repo-lines-v1:sha256:5fa69b12ef01582571e94aab265704e2db052b6a0b5416a2cbccc211174ce9d8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlZmQzYzg1NjZiNGJlYmVmYTc5ZWRjOGY2OTMzNjFlMjMyNjcyZjg1Njc2MTRlZjY1MmZhMjI5OGVjMmRjNjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU1YjZlODcwNmI0MzA0N2YyYTZkYjY3ZjEzMjYzODU5NTYwNGU2N2YzNjk2Njg3NmNlMDE1OGYwMDUzZTZiZDEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_06487275bfe04e4a82d88ea1b328ec4e",
+      "statement": "Alert messages are rendered with a regex-based {{token}} substitution (no Mustache sections or pystache dependency) using a closed per-alert-type token set; unknown or empty-valued tokens are left as raw {{token}}, and for kpi_rag current and target values are formatted through format_number_v2 using the KPI's extra_config.customizations.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/alerts/rendering.py#L127-L177",
+          "version": "repo-lines-v1:sha256:d5a203593b6ea5556bffeaad79ed5194c1f873affb88281adef86cfcbfdb8e4a:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkMThjMTgxNThkNzEzMjQ2NjFkZTQ0NjFkYmFiZmUxYzA2ZWI0ZmFhMGJmZWRiOTMwM2UyZWYyZjE1ZmVmMzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/alerts/rendering.py#L23-L55",
+          "version": "repo-lines-v1:sha256:dc0ec8603a48301ad883763eaeaad25ae313e0acba577fccbb2476485664df5b:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI1YzVlNzY2OGQzMzVkYjc0MDU0MGViODZiOGY1YzRmZTcyNDVlNjczOGY4NjExNTM0YTE1MWJkZmM3ZTAzMzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzYTE4ZmU5ZTE0YTJhNDI2MTczOGViNmMyNTI0YmQ0YTA4YzU1ZWUwYmVlOWNhMjk5ODFjMzQyODkxZmRiOTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwM2I4ZDRkYjgxMGZkNjgzZDUxOGJhMjgwZmFlNmNhZmFiZDc5MjQ5ZWQ0MjNiYjVlODVkZjE0ZjU5YWI5NTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQxOWMyMTA1MDA0N2MzYzUwZWVlNWJjNTMyMTJlMDczNWUwZmE4ZTdmMzQxMzljNGRjMzM4OWQzOWE0NThmN2UifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3ff039ad55ee40e59107351cd836900b",
+      "statement": "The Alert model stores all three alert types in one table with FK to Metric/KPI using on_delete=CASCADE, JSON condition, standalone_config and recipients (orguser, external or user_group), a UTC schedule_cron, per-alert Slack webhook URL, and names unique per org; deleting a Metric or KPI therefore silently deletes its alerts and logs, while Metric.delete is blocked by charts/KPIs and KPI.metric is PROTECT.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/kpi/kpi_service.py#L297-L313",
+          "version": "repo-lines-v1:sha256:938c5030592cde5c39084f5b7501ff3b50c1912d8b54ac378dd3ac455e00c87e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhhOTdjNzk0Y2YwZWQwMjBjZjllNjlhZTlmZDUzYjEwZjAzZmQ1MWUwZjBhZGIzOGMxMGVmMGI2MjRiNzEzMGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFlZjc4OWNhM2U0YTA0MmVjNDVhMjhlY2VjMGYxNWUxNTYyNjczY2MxZGM0ODk2NThjODE3ZWRlYTgyNTlmNTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI1ZWJmYWViMDE1YjhkZmNlN2RiMTg4MTY5ZTlmNzM2ZmZhZDBlMTU3ZjU4NDY0ZmZhYjllOWUwMjc1ZmRmMGMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/metric/metric_service.py#L298-L320",
+          "version": "repo-lines-v1:sha256:518a5c1cf46c039dc1a086c52afdb85ae8c9acb49c4d77977ba4acb47328e785:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4YTIxZTI1MWI2ZjY3ODliNTQ1NGJhZDAzNGZiOWY3NmM2MzE5MDMwMjNiYWMzMTBkY2YyZTIzYzI4YjI4OTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg0ZTIwOGRjYjEwMTMyMTdhMjY3ZGUxMzQwMDk3Y2E3Y2YxNWQwMWVhNmE3Yjg3NDU1MzZkODQ3YzFjY2ZiZjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE0N2Q2YjkwYjJkMjcyZWVlZDZkZDNjZWEyMGI4ZjExNWM2OGVjZGY0ODE0MDcyMDkwMWMxODA0NzExYTYyNDEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/metric/metric_service.py#L381-L414",
+          "version": "repo-lines-v1:sha256:3ad721b14fec336b35aaf257cfeac1723b44eb7cecfdaa8911e38314f1c98541:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3YzkzNDhmYWM2ZDlkNWRiMjI1OWFhOGE0ZmE1ZWNkMjcwNGUzZTdmYzA3YWYyYTMxZjE0YzI5NmQ4ZWIzNjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDQ2NjljY2E4OWEzOTFmMmM1NzI4NTRkOWQzMzgzNWRmMmZlZTkxNTRjZGY4MjMzNGRiYTNiNjJmOWUzYTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/alert.py#L22-L114",
+          "version": "repo-lines-v1:sha256:e162cd72f7d79fd6eb841abb18094ed06d28a3ebfaddacff129af2e96e49255e:eyJzZWxlY3RlZExpbmVDb3VudCI6OTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiYjA2YzlkMDlmM2E5MTliNzliMDU2ZmI4MTdlMzllMTcyYTEyNDk2YjA0NzU4NDZiODdiMmEzMmM4MGRlZGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwZmNjOGZlZTI2MDU2MzgzOTcxMDUxYWVmYWUxODQ0NDUzZDgwNjQ4YjBhZTUwNWVlOWFjMjBlNDBmYWYyMTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY3ZTlmMmZmMjlhMjJmNzYzNzRjNGZhMTZhNWNhMTkyYTc2ZWEwMWZmYmYxODFhY2E4YmY4NGU1N2EyZWI3NTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg5Zjc2YThjYzMwNjExODBiZDc3OWIzZjBmMjJiZWY0MjNlYThjYzU4NjBkMTZlM2RjMzE3MTM0MzVlMjMzZTgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/metric.py#L84-L91",
+          "version": "repo-lines-v1:sha256:0e14964acff9c798cd22fd4301ba9fd60178f53d82a8c652f4bf7893bac47c8b:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2IzYTAzYWJhYWU3ZDIyN2UzZjlhYzI0ODYyNWMwYjFhMDlmNDJlZGQzNGNmMThmMjUwZWNlN2U4YzgwYzNhNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDM1OTdiMTgzMWYzOGRiNmQ2YmI4MjlkMGI5NTFlNjBhYzU0MGZkZDAyMjRiNjRjM2FkZTg2ZjQwNGJhMGEyMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDg4NGIxODU1MTVlZWIyMWUzODFiODNiM2EwY2ExZTk5MmY5NTA2ZDE1N2FhOWI1Njg2NzNjNDk4YmM3ODA5YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzQwYWUzYmFjZWVhZTc0ZjI2MWFiMWY0YzVkYTkxZTMyODFhN2VjYTA0MjdjYWNmZTZhYjU1MzNkNWNhMjE3ZCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_e95af191b90d41529cf0555b3781a7ab",
+      "statement": "AlertService validates alerts at the service layer (valid cron via croniter, condition shape, exactly one source per alert_type, channels with Slack requiring a webhook URL, recipients and Metric/KPI belonging to the caller's org); alert_type is immutable on update, and update/toggle/delete/transfer are restricted to the owner or an admin via is_creator_or_admin, with transfer targets needing can_edit_alerts.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/alerts/alert_service.py#L228-L463",
+          "version": "repo-lines-v1:sha256:b3e3013abe7267633302e6a62b02883ab45e7053b16240af6310ccdf5ad8985d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjM2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0MWFiY2QwY2M2OTEzZDRmNTFlYjIxZTRmNWFmYzJlOTBmODZkMzZhNDUwYmI0MmNiMDVjNmYzZTBkNzA2ZjhjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJhZDNhMWZkYTgwZWFmNThmYWI0NTQ2N2EzMTJhMTE1ODI3NzcyNGYwM2MxM2JjZWQxZTU1MDE4YThlYzA2MDJkIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJhNGI2OWQ0NTQ4YzFiNzZiYzdiN2I5MDkyMTE1ZWJiNzcxNTAyMGU0MzJhOTJkOTgwM2QyODUyNjBkYmVlMjFkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI4MTQ5YTAyMzc2ZTUyYjdlZjBiNWY4ZGQ3Y2QwNTFiMTMzN2YxMjAxN2RlOTU1MzJiMTcyZjAzYjA1MzZhNDljIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/alerts/alert_service.py#L46-L132",
+          "version": "repo-lines-v1:sha256:528e4a70f62e4e6d889b480629ca5897ecee90625557fc85ea6684bdb290257e:eyJzZWxlY3RlZExpbmVDb3VudCI6ODcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU0NThjYmU0NjM5MjIyNWJmZDA4NTNhMzEwYmUwNjYwZmEwY2UwZGIxNjg0ZDBlMTY2NzYxMGIwMzkyMThlODQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQxNTI1Y2M5ZGQ2ZmQ2NTE4MGE3Nzk2ZWU3MzllMmU1OWY5Nzg5OGU1YTdiMDAwYWQxZDA0NTY2Y2RiODg3ZTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhjNjhlMTE4NjdkYjFjMmJkZjJiMzRmYWIyYjRjOGZmOTA3NjA5ZTNmMmM2ZDNlZTUwNDgyYWJkZTI4Y2M5MWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ea3b78addea0497ba1d94a2d11b24c1e",
+      "statement": "The alerts API (/api/alerts/) provides permission-gated list/create/get/update/delete, toggle, transfer-candidates and transfer-ownership, logs, a persistence-free dry-run (/test/) and a Slack webhook test; static paths are declared before /{alert_id}/ to avoid route shadowing, webhook URLs are masked in responses, and mutations write audit logs.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/alert_api.py#L242-L520",
+          "version": "repo-lines-v1:sha256:007736270cd567e45e72c1604cc168e092fb8cef19bbc97aed43d2077409c7ce:eyJzZWxlY3RlZExpbmVDb3VudCI6Mjc5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzMzc2YmIxOTVkNWMyN2RmYWQ2ZTMwN2IyNzZhMTUyNzIzMmEwZTgyMDljYWNhNjU3YzJkOThjZDg2NDViNDY2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIzMGMxZjE4OGYxNDJlZDdhODI0NjgwYjIwNzE3MmM1NTE5YmM2MTRhNDhmZGE3Y2YxNjdlZGI4ZGRmNzk5NTZjIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyNDhjOGRkZDE2M2YyMDliMjU3ODI4NjhlZmNmNzliYWYzMTJmYTBmZjkwZmFlZGJlYTYwZmQ5Yzk5NzUwZDg3IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/alerts/alert_service.py#L465-L541",
+          "version": "repo-lines-v1:sha256:496b9eb798e2860ea98acd2c226af621552e7eead43eadf5a7d1456d317cb6f4:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyOWY5MWYxMDhjZGJmMTA0NjI2ZmZlZTZjZDEwMThiMTJkMmU3ZmEyMjBlMWUyODU0YzMxYmI3NzVjMTEyZDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZkN2RkMTAzNTQ5OGJmZTUwNWYyNDg0MjZmNDFkMTYyMzhiZDdmM2NlYzJiNmI4MGFiYjE5MDFhYzczYzI2M2IifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/schemas/alert_schema.py#L104-L115",
+          "version": "repo-lines-v1:sha256:f1d8a9065ddf972524ad3afe567f2274f12630014ba3f719bbf6b0db7e9ebf84:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyYTgyMTkxMjE2MDNlMzJkZTgzMzgwYzYxNWJhNDE0ZjNiNjExMDJiN2Q3MzZjMGM5YjM1MzNmNjRjOGQzY2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwZWNlOTNlODkyMmIzMmJkY2UxMGFlNjRiODc4ODhmNDVmMjg4M2ViNDYxMGM0MjVmODM0MjlmOTY0M2NlODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ1ZjJmMDkwMWE3MzY4MDM1M2MxNGE1YzRlZDU4ODNhZDNlZTliM2UxYmUyMTZiNjExYTFiMjY5YjdlYzRmMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjExNDM1ZTljMmE3ODAyNTBiMzgwYThmZjE0NjNhMDExYzBiNzMyYmRhOGIxYjRjNzU4OTQ4MGRhNTA5OGFiZmEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d0f7c5e574dd4e6bab9f2411daa4f209",
+      "statement": "Metrics are defined either as column plus aggregation (Simple) or a free-text column_expression (Calculated), validated so exactly one mode is set, with SQL statements rejected via sqlparse and a test query run against the org warehouse on create/update (and via POST /api/metrics/validate/).",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/metric_api.py#L126-L145",
+          "version": "repo-lines-v1:sha256:f23f4f8a73866a9b8dd1400dc1580eec79f9df7b4e3cdbf3a97303a52ae21469:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkMzVjNjFlYzIzYTY2NjZiZTk0YzNlZmMwZjlmYjVhM2NiMTZhMTU5ZmZlZGU2NjNkOTUwMjQ2OWUwNjI2MjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhjNTNmYjlhNWE5MzRmMGM1MDYwZjJlNGU5ODc2ZjNjYThkMGNjNTIyMGVmNGFkNDU2NzYyODc3NTk3Yzg4ODkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNlYzk4YjIwNWQ0MjZhZTBjM2Y3NDFjMGNmMGJjNmZiOWY1YTc3ODMzYzI4YTUzNDYzNzBkMzg0NGQzNjZlMmUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/metric/metric_service.py#L88-L171",
+          "version": "repo-lines-v1:sha256:bc385458d22e9be7e8188d2f1b72978ba43565911947eeec05e3a079592a3b73:eyJzZWxlY3RlZExpbmVDb3VudCI6ODQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxZThmN2U3MzEwNmZiZjYzN2VlMmEyODBlMzVkM2JhZGJiMzNmZjU4Njk3NDFhMGUyNzhjMDU2ZDk4YjU1NmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY3NWRjNWM1ZTc2MTRlZjhiZDY1ZDY3MDE0YjVmN2E0YzNkODlkYTY2NjAyZTc1ODcyMWJkZDNhNDU5NmNiYmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI3MzIxNWVmMWM1OTAxM2IyYzVlNGMzZmU4NjNmZTViN2EyN2RlYzliMTBkMTcyYTViZjE1ODQzZWEyYmQzNDEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_910b342f40074c3f9f2162069fe06a4e",
+      "statement": "KPI RAG status is computed on demand by the pure function compute_rag_status from target, direction and green/amber percentage thresholds (not stored), with direction-specific threshold ordering enforced on save; trend data from _compute_trend is the single source of truth for current value in the KPI API and report paths.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/kpi/kpi_service.py#L429-L504",
+          "version": "repo-lines-v1:sha256:ae6ea77ef00574fd7054ebb6443b020ce52f708ea5d132fee8237b2c6d99a43d:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxMjYwODNlMGNhNDUyZTI3ZGJmOGIyMTUyMjYxZTQ2YmU3NmU5MWQ2MzAxYmUxNWZmZTJkMTcxYWJjYzRjM2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ3YTM2YzQ4MTg2M2E4ZTQxZmQzYTc0ZGJhYWZkOTE3NDQ2YWMzNjA1ZmRmYmU1OWZmNWE5MzQ2N2IxZTIyOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg3NDNiYmFkMzRiZGI4ZjUyZjkyMTQ5NzEwZWYyNGFjYzNkMTNkMDZkYjczZjNiNDA2NjIzYjE1Y2QxOWYwZDMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/kpi/kpi_service.py#L56-L131",
+          "version": "repo-lines-v1:sha256:3f4edf74bb6162c8fb6b679f1142054c60319fbc00965d8f47df36d789ed6371:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJmNzM0NmYyMmM2NWI5NjllNmZiYjhhZmRhM2EyYTRmNzFkZjJlMjRiODAzNGI0NjRmZDIxYzQwZTcxZmY0MGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MDMyZTk2NGQwOTMyMzUxZTVkMTg1MjY5MjgxYjE3MWEzYTA5YjA4YjI4NmU2NjFlYTQ3MDMyM2M4MmViNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdhZjQxYmRmYjUyZmFkZTg2YzliYzc4ODlmNDhlZmU4Nzk2MTFlZGU0ODNjMjU1NjY4MmMyZjllMGMyYmNkN2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE5OTk2YjI2MTRjM2ZhMTE2YjE5NTYyMmFhM2M2NmY4ZGQxNzJjZTkwNTVlMWVlNjllNmE5NzNjYTlmNDdhZGQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/kpi/kpi_service.py#L578-L656",
+          "version": "repo-lines-v1:sha256:c1fab3bb3f23f655f987d1795fb10a37b09b860a27f4008906d37fcb5d977861:eyJzZWxlY3RlZExpbmVDb3VudCI6NzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0ZDAxZjZkNjA0NWVjYmU0ZjFiZGNjY2RhYTc1Y2ZjMGRiMTAyMGI2MDc5MTE0NGIwZDU0ODZmM2U2NzlhOTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY1OTEzNmQ2NGFmMzRhYjYwNzE1ZTYxYmM1OGMwYzA4OGE4MDYyMmQxZGE0NGFjZDFhOWRkMjUyYjY2NTA1YjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFmMTRkNGY1ZTk1ODQyNGY0MTU5ZmQ2YTI3ZTRjZGZmMTRlOTc3YmM1N2EyMjg3MGY1ZmM5MTI0YmM3MTU0NGEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a13996a99c244de5a5662504aa4266d4",
+      "statement": "Metric and KPI consumer endpoints expose alerts alongside charts/KPIs/dashboards so the UI can warn about cascade deletion; alerts do not block deletion, whereas charts or KPIs referencing a Metric do (409) and dashboards referencing a KPI do.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/kpi_api.py#L216-L225",
+          "version": "repo-lines-v1:sha256:4ccc407dd0970a754966a085a207ba0092fe27409baf21a9e6b172b800aa3228:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVkYjJhNWViYzhkMDdmMGMzNDFlNzk0OTM2M2JiMzRmMjMzODI0MmMyNGIzOGVkYzU3N2Y3ZDQ0YWViNGU1MWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhODJjYWYwODhmNDc1YmY2MjEzZDQyNjRlYWU1NWNhNmJjMzQ1YjYxZTQ5YzA1YTBiMjA1ZmU5Y2Q1OTA4OGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIwYzkzZGNlNDczM2IyYzc0ZTI2ZjZjZDI1ODZmMzYyYmJhNWRkNzdiOWIzMWU3NGFjZjI0NjAxZmYzNjE2ZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBlZTU3NDcyOTBlNmViZmYzNDEzN2RkYTE5ZTUwYmRjMTI0ZTk4ZjgwODY1ZDNhNWRiNDVkZDg2Mzc1MGZiMzcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/metric_api.py#L225-L250",
+          "version": "repo-lines-v1:sha256:1479d3052db1bb9832cb6bb225ed6637445f46bbf741533c629b7b901410866a:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0ZjkzMDdlZTRiOTAxY2EwNmI5N2IxMzI5YmI5ZDZkOTkzNmQyYzQ5MzAzMzcyZGY4ZTg5OGQ0ZThjNmYzZGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBjOTdmMGRmNWEzMzY0ZGY0ZDYyYzU4MDI1ZmZiNmU4Y2RjZWE0MWExMThhYzY1MjY2NDJjOGFiMDNiY2M2NzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdjZGY2MzBhMGI3ZDRmYTI1NGExNGQyYTNiNjJmMjViOTE3NDdlOTAwY2UwNGFiMDRmYjNhYzYwMDE5OWM5NDMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/kpi/kpi_service.py#L297-L359",
+          "version": "repo-lines-v1:sha256:8771858f47efc7268c78c80b8de8c44dbe20baa6b33054645a5996a362548a13:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkNDg4NDE5ZWFiZmYzNTdmNmIyMzE4ZTJiZjA0ZjE1ZjhiNzc3NzQ0NDJlMDUxYWMyZDNlMTRiNzhjOWNlMGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFlZjc4OWNhM2U0YTA0MmVjNDVhMjhlY2VjMGYxNWUxNTYyNjczY2MxZGM0ODk2NThjODE3ZWRlYTgyNTlmNTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhZjZjYTFkMDFmZGJlOTBiM2M5ODNlZThiMDIwZjlhOTFhMTQyMzVkMmY3NDhmZmZjM2VmNGQ0M2Q4OTYxYzUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/metric/metric_service.py#L381-L414",
+          "version": "repo-lines-v1:sha256:3ad721b14fec336b35aaf257cfeac1723b44eb7cecfdaa8911e38314f1c98541:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3YzkzNDhmYWM2ZDlkNWRiMjI1OWFhOGE0ZmE1ZWNkMjcwNGUzZTdmYzA3YWYyYTMxZjE0YzI5NmQ4ZWIzNjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDQ2NjljY2E4OWEzOTFmMmM1NzI4NTRkOWQzMzgzNWRmMmZlZTkxNTRjZGY4MjMzNGRiYTNiNjJmOWUzYTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_67697d697da149699e2a479d1a43cf1c",
+      "statement": "The alerts webapp has a paginated /alerts table with an alert log modal and transfer-ownership dialog, a CreateAlertTypeModal choosing KPI, metric or custom query, and a three-step wizard (Define, Notify, Test) that converts the author's local schedule to a UTC cron; the wizard is also launched from the Metrics row menu and the KPI drawer.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/alerts/v1/tasks.md#L90-L105",
+          "version": "repo-lines-v1:sha256:9c45064f0c241db7e5a36b2ceeb49d05cbe266f6c990aec6120030f94972aa46:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwZWUyMDU5ZjNjYTE0NzI1MDQxYzhlMWFlYjM0ZTNkMGZkNjkzODI5NjEyNzYzNDU0MTFhNzQ0MzU2OTkwYjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiZGI0Y2M4ZjNiY2YzMjNmZThkNWMzOGI0NDhiMmQ3ZGU3MmI4OTBiZWQ4ZGNkMWRjYjE1YTljODRiNmQ2ZjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlZmIwODY3NGMwNTQyNDVkZDA2OTRhYzYyNDYxZTViYzJjZjQ2Y2Q5NDU1NTVjYzZmZTYzM2ZlYjM4ODViZmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVkYzk5N2UxZmUyODNkNDgwMWYzY2I0MGYxNDFjY2I1YTM3YjAyZjA1NzNhOTZlY2RmZGQxYTNhY2NiNWU0NWUifQ"
+        },
+        {
+          "resource": "repo://webapp/app/alerts/page.tsx#L26-L60",
+          "version": "repo-lines-v1:sha256:26e0848643cf25233e9ca2d07c434583a9f8f51e45fa9fcb8857f0a2ef1a154d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkODk5ZGIzNDgxYTNlYTkwZWU0Y2NhOWQ1N2VkZGRhYzQ5ZjU5MTgzMjdiNGYwNzdmNmEwYmUwNjcwMTY2NTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjYTZiYWRjYzM0ODJkZDI5YzQ5ZWE3MzM1ZTBkM2FhYzQwMjIyNzEyOWM1MTI4YzIwODU1ZGZiMzhhYzMzODQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQwNjcwZTc2ZmRmOTI2MGZlZDk4YTY1OTVhNDkzNDgzZjU1NDNjOTgwNjkyZTU5ZWJjNWU0YTE4YmFiNDJlYzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY2NjRiYTMxZGRiOGVjYTNmZWRkZmYxNTBkZjJjMjZiYTJmZDk1OTljNGI4Yjg2YjdiMTlkOWRjOWFiMDIyZWQifQ"
+        },
+        {
+          "resource": "repo://webapp/components/alerts/CreateAlertTypeModal.tsx#L35-L71",
+          "version": "repo-lines-v1:sha256:5722491fed99c1233dbefbd53d68ce98a1338f73dd3e45f3dc1351b1b7b36b04:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI1M2RhYTMwY2U0Zjk5OGU0NjczOTc5NzVkY2M1OTIzN2M3MTVhZTdhZWUyMGYwODUzN2Q5ZDgwNzJiMTcyNmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNmMjZkZmU2NzRmNDVlMDRkZWZkNWY4YzlkOGM4MWRkZGY4NGJiY2I4ZGE5MDY3YTZlNGZjZTcxYzY0NjE4ZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc0NTY2ZDZjZWJjYjBkMGJjYzhmZGNmNDcwNGFlMjY4M2RmNmRiZjZhNjM5Yjc1ZDcyN2I0MWZkNTNiMWY3YTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3fec5b342c084786b68d01d901210d3a",
+      "statement": "The alerts harness v1 tasks.md marks milestones M1-M5 complete, but the current code has diverged from that checkpoint: it adds user_group recipients, owner-or-admin gating, ownership transfer, audit logging and KPI-formatted tokens, and no longer has the /firing/ endpoint, recipients/orgusers endpoint or a Firing tab.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/alert_api.py#L242-L520",
+          "version": "repo-lines-v1:sha256:007736270cd567e45e72c1604cc168e092fb8cef19bbc97aed43d2077409c7ce:eyJzZWxlY3RlZExpbmVDb3VudCI6Mjc5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzMzc2YmIxOTVkNWMyN2RmYWQ2ZTMwN2IyNzZhMTUyNzIzMmEwZTgyMDljYWNhNjU3YzJkOThjZDg2NDViNDY2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIzMGMxZjE4OGYxNDJlZDdhODI0NjgwYjIwNzE3MmM1NTE5YmM2MTRhNDhmZGE3Y2YxNjdlZGI4ZGRmNzk5NTZjIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyNDhjOGRkZDE2M2YyMDliMjU3ODI4NjhlZmNmNzliYWYzMTJmYTBmZjkwZmFlZGJlYTYwZmQ5Yzk5NzUwZDg3IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://harness/features/alerts/v1/tasks.md#L289-L354",
+          "version": "repo-lines-v1:sha256:25705596b99760e60963186195e69c79ef824ecb972e355084c22d35854868ae:eyJzZWxlY3RlZExpbmVDb3VudCI6NjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0ZjIzNzg4ZThkMTViYjFiYTEzYjE0MDJiYTU0YjlmZmIzM2RjNGY2OTBmOWIwODI4M2UxNmMxYjkwM2NiOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiMzAyM2M1Y2Y3ODQ4YWY3YzMzZWI5YzI4MTNiYzMwZDFjNzYwYTg2NGIwNTY1NDA0MjhmNGRlNDQ4MDBkMjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/components/alerts/RecipientPicker.tsx#L1-L45",
+          "version": "repo-lines-v1:sha256:98daee27554dd9c3a171333277f35ed4594067fd8f24f40c80cb06a251077cb7:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmMzdkYjFiOGRiM2ZiZWEzNmE1ZDJhNmZmZDVmMzM5M2E1M2VmMDUwNDdlMGI1ZTZlMTRhNDM0ZTQwNmZkZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwMWRkZDc5ZjZmM2UxNjBkOWM4NTRmZmQwOGE2ZThkOTMyZjA5ZmJmZGZiYjFlZTA5NmYyOWRlNjY1ZWY4YTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a131798d39324ddaa00d878936583223",
+      "statement": "The Metrics & KPIs harness task lists mark v1 (milestones 1-5, 7, 8) and v1.2 (inline metric creation, 3-step KPI wizard) complete, while v1.1 leaves M3 (freezing KPI customizations in report snapshots) and M4 (formatted alert current_value) unchecked even though the alert formatting is already implemented in rendering.py.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/alerts/rendering.py#L127-L177",
+          "version": "repo-lines-v1:sha256:d5a203593b6ea5556bffeaad79ed5194c1f873affb88281adef86cfcbfdb8e4a:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkMThjMTgxNThkNzEzMjQ2NjFkZTQ0NjFkYmFiZmUxYzA2ZWI0ZmFhMGJmZWRiOTMwM2UyZWYyZjE1ZmVmMzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://harness/features/metrics_kpis/v1.1/tasks.md#L107-L131",
+          "version": "repo-lines-v1:sha256:fa3ab0a4ed7a0a973e66c1c65f7cd7559f934bbc46c3d74bbf2a4fde215b964b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjViZGM0NTE1NjcxOTJjZDc1N2MwOGEyZWJhNTdlOWQ3NjEwNmFiZDc0YmYzNjBlOTk5M2E0OTRiYmZiMDZkNzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY1MmQ3MTExMDNkNTBhNDM3ODMwYzZmYmNkMDRmYjRiYWI0OWEwZjgyZjZkMjZkMWM3OTFjNmU4NDg4ZGQwOTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdhNmY2MDFlOGNiNDNlNjJjYjIwZmIwN2NlNmQxY2NiNWI1Y2Q5MjZlMzhkMzg1NTk4MGIzNjY0YjUxNWI1M2UifQ"
+        },
+        {
+          "resource": "repo://harness/features/metrics_kpis/v1.2/tasks.md#L1-L9",
+          "version": "repo-lines-v1:sha256:cb0facac02d9cdd6bcb5ef7fbbfeb8f97451722689ccd5954aade43371c03b64:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjViNjVlODhlNzg0OTUwMWEzYzE1ZDIzMTAzOTZiOWRiNDQyODgxZGM5NTE2ZjIxYjAwOWZjZjJhZTAxOTA0OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTgyNTA1NDc5NWE5M2E4NzRkYWMwNDQwNzBlNWViZTgxNDBkYzFjNzY3MzYwZTRiMDU5OGNlMjFlYTNhM2EyMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://harness/features/metrics_kpis/v1/tasks.md#L326-L341",
+          "version": "repo-lines-v1:sha256:3fe2c12aefb2ce7e5d01b60c9a2a2d635d33024ebea93bb2678c518fac18236b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1ZmI4NzIyN2NiYWE2ZWQwNTRlNmM2ZmM2NjM0ODZkNTY2MGE4OWQyYTc5MWQ2NzZjMDI0NmQwMGQ1NDEyMDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4MzFhYThiOGJkZDc1NGU3MmNjMTcxYTlkYWI5YzcwNDk2MzkxMjRmNTU1OWQ0MTAyMThiOTg5NTkzYmExYWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJlOWQ4NjlhZGJlNDBiYzlmNmZmYTM5MTU2ZTY3YjI5ZTUyMWFiNGE0ZjRmMDdlOGI5YTMzYjY2YTRjOGUwY2UifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

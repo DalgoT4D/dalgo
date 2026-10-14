@@ -1,0 +1,338 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:0156082778eeb676ddbb0ea08865d8cc8e4e9716dacb1f706fa61826dc90c619",
+  "claims": [
+    {
+      "id": "claim_103c6e4cbec1488fbfee4513a9d6cc66",
+      "statement": "The dev compose stack (project name dalgo) runs two separate Redis instances (redis for backend Celery, redis-llm for ai-llm-service), Prefect server, prefect-proxy, two Prefect workers on the ddp and manual-dbt queues, the backend, four Celery containers (default, canvas_dbt, alerts, beat), the webapp and ai-llm-service with its own Celery worker, while Postgres runs on the host reached via host.docker.internal.",
+      "evidence": [
+        {
+          "resource": "repo://docker/docker-compose.dev.yml#L1-L220",
+          "version": "repo-lines-v1:sha256:cffeffe146acb585993e8c10c044014fc3612c26395b5f3d9aa874592e851bf6:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmZGNkNDg4YzNhZmYwNmI3ZTYyOTcyMzgyNGU1NmYwM2ZkNDQxYTRmY2MyMjEyYjUzYzA1MWFhODdlOTU4Y2Y2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMDU2MDhkYmI4OTQ0YmFlMzEwMTBkM2MyMzI2MDNkYTk0ODUwMjM2YjZiNDljZjQwOTg2OTU5NzAzNDc1MjI0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_aad637b5120948b6b6ad13aec661bb44",
+      "statement": "Compose files inject only container-networking overrides (Redis host, PREFECT_PROXY_API_URL to prefect-proxy:8080, LLM_SERVICE_API_URL to ai-llm-service:7001, DEV_SECRETS_DIR, USE_AWS_SECRETS_MANAGER false) while all other app configuration comes from each service's own .env file.",
+      "evidence": [
+        {
+          "resource": "repo://docker/docker-compose.dev.yml#L1-L51",
+          "version": "repo-lines-v1:sha256:dc9beb03838b65212e8551612716dd062e37a8d2d633d1c7fa44f1f939a59735:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkY2Q0ODhjM2FmZjA2YjdlNjI5NzIzODI0ZTU2ZjAzZmQ0NDFhNGZjYzIyMTJiNTNjMDUxYWE4N2U5NThjZjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0OTg5OTM2ZmYzY2Y3MDQ3OGRkOGI5ZDVlMzdlMjViNmY0MzM4MDUxZmY2YTY4NDMxYWFhNDQxNGYzZDBlZWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZkNGFiNWYxOWQyYjQ1NGNlMmVmMjNmZmNhOWEyZWEyMGY4MDBlYmNkMDE1NjU4NTc3NTM2NmU0N2MwY2ZlNjcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1f5db9e6106e42bcb3bd8d87b6da5a4e",
+      "statement": "The production compose assumes Postgres and the Prefect server are managed externally, has no bind mounts, starts beat with the redbeat scheduler, and adds an extra_hosts entry for an Airbyte abctl service name.",
+      "evidence": [
+        {
+          "resource": "repo://docker/docker-compose.yml#L1-L100",
+          "version": "repo-lines-v1:sha256:7c6578d000b73e88597bac39e8d404d1f9164c7132c6276bac997f0ad2201405:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwN2NhZmU1NDAzYTlmN2Y5ZjZkNjQ4YTU4N2ZmODk0OTdhMTczMWJmMzIxMjI0YWNlZWFiODVkOTI1NDE0ZTAyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIyZmRkNTVlZjJhZTNjYTY3NGE0YzNhNTZkYWIzNGY4OTA4ZDc0MDQzMjNkYjU0ZWFkZGM0ZTRjZjE4OWU4ZmNkIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI0Nzc0NWNiMzVlYmQ5YjZiZDk4YzE0ZGZkZGU5NzU4ZjRhOGQ1ZjQ2MTZhNGExNTI2ODU5ZDI3MTczMjgyYjM1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_28b6697c536742b2a0215a1585fe9399",
+      "statement": "Backend Celery configuration is centralized in ddpui/celery.py: Redis broker, results and redbeat each use their own numbered DB from RedisDB, beat uses RedBeatScheduler with state in Redis, and tasks are routed to default, canvas_dbt, trial_clone and alerts queues with prefetch 1 and task events enabled.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celery.py#L1-L67",
+          "version": "repo-lines-v1:sha256:c97f37f9db14bc95db0d49d7cc18925bf3b2319c23be4e67e493952944b8c1da:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiMzczNTg5NmRjOTE0ZDY0MTMzYzYyN2FiN2U5NjdiNmUzYjg2MjMxMTk3YTNmYzM3MzRhYTg3MDU0MTQ1OWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2Y2FiMzQ4OGY4ZjYxNTlhYzQ5NDMyOWZjMGM0MGQ3MmViNDhkZWRlYWI4YTJhYmI2MzllYzRiNmQ2YjZlOTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/redis_db.py#L14-L21",
+          "version": "repo-lines-v1:sha256:74f98c69db3f93dc1406e8ca9b8accdc34c5a26bfb5732efb2dab4ab4431116b:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmUyOWQ5ZDJhYjEwODJhNjU2M2Q5MjMwNGZlMmRiODBkYTFmNmViOGViZjFmOTE4YzRkMDhmMGFmOTNkNGRhOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmZjNzlmZjMwZTA5M2ZjYjIwODM0ZTI4NTlmMjYwOTY1YjlmODAzNDM2NGJhZGIyZTNjOTE0Y2U4NzhhZDFiOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmRkZDdlN2UwNDQ0ZGY3ZGJkZjEwNWZkMmFhMmZjZmM4YjU5ZWNmYzNjNTMyOGNhM2I4ZTQ1NDk5MjNmMmQzMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_53244184bbd140c98dab1deab2e3d79c",
+      "statement": "The trial_clone queue is routed in the backend Celery config and documented in the backend README as needing its own worker, but neither the dev nor production compose starts a trial_clone worker, so tasks routed there are not consumed by the compose stack.",
+      "evidence": [
+        {
+          "resource": "repo://backend/README.md#L183-L209",
+          "version": "repo-lines-v1:sha256:3fe5a2fea78a497450d8138b860c2be78676daeb07d7cc5a47e044a767e6501e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhYzRhNWIxMjZmMzQ1NzgxOTYyMDc3NjRjODk2MjllMTg4NmY0YTVjYTNlMDhlM2IzYzg4YjMwMjJkZmZjYTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNjZjM5ZDJjMzJjMGZkNjFiZmEyZjQzNzZlYTU0MjgxMDFhYzc4ODljZTNjZjJhNGFiNmQzYzVkODVhOGM2ZjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY2MzIxMGQ3ODIzMjJlNzIyMWM2ZTg5MmZmMDY2ODlkNzc2ZDI3NWE4NTgyZDk1NGE0YjMzNTVmYmM3Y2ZkN2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg1NjY2MzZhOGUyMDBkYTMwYzg5NWVkZjYyNmViNzhhZjc4MDIxZmIxYjRkMjVkNWJkMTQ3N2QxMjI4ZTEzM2IifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celery.py#L38-L47",
+          "version": "repo-lines-v1:sha256:39958b0379fcf1688b03818db6bc5ace4aec954cc492de6bb8eefbf1ed225d56:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3Yzk3NjZiMThmM2ZlNzI4ZjQ2ODg5MGVkZjIyNzMzYTAwM2QwMzBiN2MxZThlMjhmYTcxYmM2MWZmNjhkYmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk1MDAzOWVjNmEyZmEzMTA5OTQwMTMxZmNjYzgzOGEyYWM0MDYzNzFiMGJkZjJjNDZjOTMwZWZiMjEyMTYyZWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyZmVkNGQwYWE1N2I2ZTIyOTFkMjhhYzcyNDA3ZjcwNmJhNThiMmFhNDYwYTliZTY1N2E4YzBkZTdlMTAzZGIifQ"
+        },
+        {
+          "resource": "repo://docker/docker-compose.dev.yml#L151-L177",
+          "version": "repo-lines-v1:sha256:bd893ad0e464be5392e2a2a7a7d31f35b6120c4d1d5e9c094aff929780e4b33f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzYjc3ZTg4NjU1ZmQzYWM5YzJkOWM4YWEwYmM2MGJlN2RmYjk3YTFmMmVkYmFmODAzNjMyYzRlOWQxMGFkMTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmZGUwMmQ1Yzc3YzNiNGIzNzc0M2FiZTg4YzZhYWQ4YWY2NDI2MGYxNzM4ZGVhODc1MTM2ODc2NmVmZDJhMzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNkZTUzYzMzNzllOTA0MTBhNTgwZGNlODA1ZTg5OGQxZWE0NDhkMjEyNzc4NTMxZGJhYzEwNzhlMDBhMWUzMjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU2ZmUwOGQ0YTE2NDNjZjQyNjNiNTk3MmQ5NWRmYzEyYjUxOTE5NmYwNGUzMjBkZDFiZGIyOTgyMTllN2QyMTUifQ"
+        },
+        {
+          "resource": "repo://docker/docker-compose.yml#L79-L99",
+          "version": "repo-lines-v1:sha256:831070302627f4061ec989eac81d41d19824027992a952dabd1b960c546e7fd9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzYjc3ZTg4NjU1ZmQzYWM5YzJkOWM4YWEwYmM2MGJlN2RmYjk3YTFmMmVkYmFmODAzNjMyYzRlOWQxMGFkMTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3M2RkNzIyNGU0NDU3N2Y2NjMxNWNlMzVlMzhjYTZmNjk1NzI5YjQ1ZTc5MTMyZjliMGM2NDc0MDNiY2ZjZGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI5OThhOTNhMWMxZjFmYzdlMmEzYTU0YTViYmI1NWUxM2JlNjgxNGE5NDk3M2QxY2ZjMWY3YjUzNWI1N2JlOWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIxYzE1ODhjMTg3NmEwZDJkYmQ0ODczZTJjOWNlYzk2Yjg2YTdkZWU2YzJlOGJmMTE3NjE5NTJiNWI5YzRkMjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0a2f68acb6144c149e1bc7682980b88d",
+      "statement": "The backend talks to Airbyte over plain HTTP(S) via abreq(), building the URL from AIRBYTE_SERVER_HOST/PORT/APIVER and optional AIRBYTE_USE_SSL, authenticating with a Basic token, with a 30-second default timeout; connection errors become HTTP 500 and non-2xx responses are re-raised with Airbyte's status and body.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbyte_service.py#L33-L88",
+          "version": "repo-lines-v1:sha256:f911d1a09b9900a5ba1a7e65ab0ff072d7960c5e27b42943961bd7f6b00bef2a:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2MzU3OTEzMDc0ZThlYWY4ZjZiOTM2MjMxMWE4NWMzZDVkZGExYjdkNDU5YTc3YWRkZTZkYThiOThiNDgyMTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3YWM4NjllMDJlNmI4MjE5Njg4NzJiODEwYTA4M2Q4NTlkODZjNzY5YWJjMTgzZjcyNTA5MGJiMDg5ZDk3ZDciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc3MWQxMDQ1OTAwZDc3MTYyODBjOGZmNjU2NWQ0ZWMyZGU1ZDgxODU0ZDZmYzE0YmUyZDgyYTgzNGRkNzAxMjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU4MTgzNzA2YTZmYjdmMzM2NzE1MTE5MThlOGYwMDBkMjYxMDNmZDU4YWEyODk4MGMyNTRmMGQ3ODI2MDMxYzkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_85243163af1c4fd8bc4d844590e4c943",
+      "statement": "Airbyte connection settings are also forwarded to Prefect through the proxy payloads, and Airbyte can call the backend webhook /webhooks/v1/airbyte_job/{job_id}, which is guarded by an X-Notification-Key header and enqueues a Celery job-stats sync.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/webhook_api.py#L71-L79",
+          "version": "repo-lines-v1:sha256:e1ce00abeb68901c89e79af3e9a7e19292f3c3280a2b681898f2a5289da083db:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjFhOTZkMGIwMTQ1NDMzNmJkMTBlNDljZmQzZjk5YmQwYWM4NTE3YTZhNzdiNTQ2OWZmNTM3OTEyMmEyNDg2MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGU2NGVkNmFmOGQzZGVjNzA3MTIyOTU5NjVkMmM3Yjc1MzM0NTUxMTI2ZTZmZjM2YWNjNThlMmYxN2UwZWEwNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTU3MTJlYTMxZDgzMTY1YWI0NWY1MDNkMzNhMmM2ZmU5YjIxMTc5NDgxZGRmYmY3Mzg5M2MwM2FkNzZkNTMyYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/prefect_service.py#L225-L255",
+          "version": "repo-lines-v1:sha256:57150abc0a595e732fdeaa50cf8d35c582998de3fdcf91f952125fedf69b571a:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4YTRiZTg3Yzg3MDQ1NGZmNDhmMTkyZDJjMWMyMWE3OTNkOWMyZDI3Y2M0ZTlmZWNjYmY4MWQ0YTY2ZWQxODkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjczMDMyNWY5ODBiNGFiZTBhNWJmZGViMmQzZWI5MzQ4NzZkM2EwNDMzMjU2NDQ0NzJjMTM2Y2NhMDJiOWE4MGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmMzM0ZGUyNDBjZjRkZTcyNjM5MzIwMDNiM2ViYmQ3NDZkMWE4MGY5MjEwZmJlNDk3Yzg0NjkwOGQ3MTMyMDYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2f09c8640de942c686fe5675cf454103",
+      "statement": "All backend Prefect traffic goes through prefect-proxy at PREFECT_PROXY_API_URL under /proxy/..., with an x-ddp-org header and PREFECT_HTTP_TIMEOUT, turning connection errors into HttpError 500; the proxy exists because Prefect's async interface does not suit Django and reaches the Prefect API at PREFECT_API_URL.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/prefect_service.py#L42-L96",
+          "version": "repo-lines-v1:sha256:e599a190a1a84f115ed388a8853f48fb19ddd4043cd8769b21ff4b04fc59524c:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzNWY5Yjg0OTAwNDc0NzZiY2YyMTFjNzFkYjNiY2EzYjNmZjVjMzc3OGU1ZDE2ZGUxZmI2YTg5ZTY2NTZhZTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzMDcyNjkzYTFjNjQxNTg5ODI4MTI3NDQ1ODMyM2UxYjJmZWMxZDcyOWYwMTEzYmJkNzhiYWQ4ZjMzYzcxNGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZkMTA1NmU1Y2E2ZGY4ZmVmNmIwY2Y0NTlhYTAwMWI3MTAzYTI0ZWUwMDlmODQ1ODA4MWJiODg0MTAyZWI1MzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmYzk2NWM3NTA4MDU1M2M4ZGQ4MzUzMTk5NzE5MWI0ZDBlNmU5ZWU1MjFkZDM1MzU5ZDhhNGU4MTUwNTNmZWEifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/README.md#L145-L158",
+          "version": "repo-lines-v1:sha256:3a2b70e54b7e4961c05269b008fd608acd2db356fc7019d4397981ad1ab31d05:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQxYzE3MDgyYjc5OTIyNTlmMWFiOGM1NTBkODZhNGFkYWYxODcwMmRlMjZkZmVmNjE0NDlhNjY1MjQyMDEzYTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdhMmFhNWY2MTNiNjVhMTY3Y2I5Y2Y3Y2EyOTExYWViMDllNjRkMDgwYmYzZjNkMWIxYmFhZjMxZDRhZDQyOWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMzZjczYzAwMGI2OTMyNTUyMWE3NmRjMDg5MzUyZjhjNmNlNDM5MzY3YzE5YmVmYzRjOGY1M2VkODJiYjdiM2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJkOWYzYzI1NmM4Y2ZmZDNmYWUzOTMwMTFjYzQyODI2ZWM3Mjg3YmM4YWI0ZWEwZWI0NWNhNzRhMzQ5NWI4ZWYifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/README.md#L7-L9",
+          "version": "repo-lines-v1:sha256:2693d797554dcff6119f9495f16b6220fcc5ff1e3db2fcdaa160902ca2d6e3c5:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjk3NTc0Y2RlMWI2ODEzMGEyYTk5NWMyZTk5MDM3MWUxOTM1YTNkNmEwYzVjNGQwM2ZjNTRhNmMxOTZjNDViMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDJkZjUwMzBhYzUyZTczNTIzODdjMmJkMTJlMTM4NWI1MjIzMDk3ZjBhMDkwN2RiZjNmMmFhYzUzYjRjODFiZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWFlMzM3YTQ3NzlmZTNlZjY5NzA0YTM0MjExODg1YTUwZGU4MjhhM2JmYTZiZjYxNzMyN2I4OWZmYTQ4ODI2OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzA3YjBjYjQ5NTJlYmU0MDM5YTg2MDZmOGIxMDIyNjEwZWNiMDhlNzExNGU3ZWRhMzBlYzg3OTVlMDQ3NDlkNCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4b94295714654fb5b7439303224caea6",
+      "statement": "Manual Prefect setup requires starting the Prefect server on 4200, creating the dalgo_work_pool work pool, running workers on the ddp and manual-dbt queues, and running the proxy under gunicorn with uvicorn workers whose URL is placed in the backend's PREFECT_PROXY_API_URL.",
+      "evidence": [
+        {
+          "resource": "repo://docker/docker-compose.dev.yml#L78-L133",
+          "version": "repo-lines-v1:sha256:56bed2379886aa3c1ead71246c0e8cc28418a46b63b34111a851f8c4881de248:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlNDViOGQ4NzBiMDViZTQxODRjZDRlMDZlY2Y2ZGE3Y2FiZDk2OTc3NjRiNWQyN2M4OTIwMjMzYzBlNmViZWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1MzFlMjYwMzk4YWQ2MTA5MTRkZmMyOGYwNDhkMzkyNjRiYTdkNTAzMjc4ZGQyZjhiYjFjNGMxNGI0OTlkOTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFhNWNkZmUxZWFmMzE1ZjU1NWE0MWFkY2NhZjg1ZTI5MGExNTcwNTNiNjY5MzBjODk2Y2I2YmZiZGY0ZjY2ZTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZmNmNjYjMwN2I4Y2ViMTU2NmIzMTE4YTFmZDc2MDE1YjhjYTQ0ZGZhNjcxMDViOGY0MjJkNmViNzA0Yjk5ODgifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/README.md#L49-L73",
+          "version": "repo-lines-v1:sha256:d1dc9688fdb0849463f59e5bc5c4b1e13c645f85df0f5f71f45c314bed0be8ab:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhMTI3YjNiYzRhZmM5OGNlNjQxZTA3OTYwNjYyOGU0ZmM1NjUyNjdjYjZmM2EyYTQ3MWViYWE3MWQ5Njg4YWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4MmQzN2EzY2I5N2I1MzRiZDQ2MDNlMzRjMTkwMTg2YjU1MmNlMDVlYWUyN2MxNjlhNzI4MjcwMzRhOWNjMWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJjMGExYzczN2ZmNDZjZmFkNmNiMGEwNjJiYjNmMGY5YTU4N2VmYTcyYTdkZWZjZDVhYzcxYzk0NTgyYjMxYTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI0OTYxMzI0MzBkN2ZlZGYxYmExYzU4N2UwMmQ3NTQ1NGY5ZGMxNzAwN2YyYjliYmY5YzA0ZDA2YjQwZmVmNDAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_154dbef7733e4c249bafedacf2cbb16a",
+      "statement": "Prefect must be configured with a Custom Webhook notification posting terminal flow-run states to the backend /webhooks/v1/notification/ with an X-Notification-Key header; the handler rejects a wrong key with 400, extracts flow run id and state (parsing the message template when the body is not JSON), and queues handle_prefect_webhook on Celery.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/webhook_api.py#L17-L52",
+          "version": "repo-lines-v1:sha256:eebb0d646eff3c24fbbf7fdb0e731801f0e1d8dd415dc5c940a35f537435686c:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2ZmUxMmQ0Y2NkNGZlZTVkNjllYjdlODcxMTVhODliN2M4NTgxMWU2N2MzM2FmYmM5N2JjNWI1ZDg3YTI5YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlNjRlZDZhZjhkM2RlYzcwNzEyMjk1OTY1ZDJjN2I3NTMzNDU1MTEyNmU2ZmYzNmFjYzU4ZTJmMTdlMGVhMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVlYzhlNDNmNjgxMzQ2OWIxNmJiMWQ0YmI5ODVhNzJlNzdmZWVhOTcwOTE2ZjQyNDQyYTU5YjMzN2JjMTcxN2EifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/README.md#L75-L105",
+          "version": "repo-lines-v1:sha256:0c17266784a06a3a7c8345b8db24a1e1633ec493a1c7eba7cfa43a9085150195:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyNjAzYzZiZDhjYzAxNzBiYTA2ZDA2MDA4MTQzZDM1OTYzYzgzNjBlMmM3OTNhMTYwMjAxNGE2NjBlYTNkYTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE5NWI4MjM5MTNjY2ZiOTQ4MTJmMWYyMTkzY2JlYTkzY2NiY2QzZWE5N2MzYzkzNTA1MDM4Y2U1NjRlZjNiM2IiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYxYWUzODcyNWQ4N2IxMDJjMTRkOGRkZGRhZWNmMjM2NmVjYTFmOWQ2MGM0NWYzMzczMmExZjMyODQxMGFmNzEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI3MGE3MGRkMTA1MjIyMjVkYjA2YmMyOWU5Njc5NjI3Y2Y0OGNjY2I4OWYxZDBmZmU5ZjU0NWVhMzI5YTIyZDAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2b0a6b39ac804d0681086a577302dca7",
+      "statement": "ai-llm-service is a FastAPI app on port 7001 whose requests run as Celery tasks on the llm queue against its own Redis; its /api and /api/v1 routes require the Authorization header to equal API_KEY, /health is open, and /api/v1/callbacks is authenticated by HMAC signature instead.",
+      "evidence": [
+        {
+          "resource": "repo://ai-llm-service/config/celery_config.py#L12-L21",
+          "version": "repo-lines-v1:sha256:8c8b84097a6fc65f7afed6a6d2f5000797291e1deda79a9ddbcf7b23341eb54f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhjODJkMzk3ZGI5ODM2ZTY3MTEzMmVkNDQyNjc0NTNjMWMyNTVmOTcyNTdjYjNiMjllYTJiZWRmNGJiOTk1NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlMTMyZTQ4OWE3OGQzZDRlNzVmM2I4OGFjYWM0NWUwYzI5YTU4NTZmODc5ZTk2YmVmN2Q2ZDZlOTYzOGVlZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM2MjY0MTRkM2U0NTE1ODVmYWQxZmYyNDk2MGI3YjM0N2VlYjY3YWU5ZDgwZjFkNWU2ZTIwNTU4OWFhNTg5MjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE4YTVkNjEyMmE2YjlhNDA2MDIwYjFiODE1M2E1YzRiNzdkNDk4NjM5OGFjOWExODEwNWQwYjM0NmNmMDhkNGYifQ"
+        },
+        {
+          "resource": "repo://ai-llm-service/main.py#L70-L123",
+          "version": "repo-lines-v1:sha256:f99f07733168d0101bcb63d5dcbcfee1694094b446cc95133a09a7c0aec3101e:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2Y2QxZWMzMDIyZDlmYzcxYzMwMmJhYWViOGM4ZTgxOWU5ZTBkMGM5ZmIyNmUyMmQwYjhiYWQwMGNkZGUzMDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjczNjY0ZDE4ZjEzOTQwNWM4ODI3Y2MwYTgwOTM4N2YyZWIxZWUwODZmZjVlNjg2Y2E1NjJjYTIyOGU5YTdlZTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5OGIwNjNkOWI0N2U2NTM3OTYyNTU3MmNjZTE5NzY2OWQ1NzY3ZTEyYzE4YmUwNzU2NTJiOGNkOTgxY2U4ZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNkNDEzNDBjYzIzOWExNTljZTliNjAyMmU5ZjYzMjI4MzJlMmVhZDc2Y2FlOWU0NzU0ZDIxMGViOGZiNmQ1ZTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_403c75a156b94b98ad8ed8e8c64e4642",
+      "statement": "The backend calls ai-llm-service via LLM_SERVICE_API_URL with LLM_SERVICE_API_KEY as the Authorization header and an optional version path segment, raising if the URL is unset, and polls /api/task/{id} until a terminal Celery state, raising on failure states.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/llm_service.py#L13-L52",
+          "version": "repo-lines-v1:sha256:97f3e4f2a01c283b27a7ed169e0efed3ed7b2054f04d3fda5e01f942f0ba1695:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjMTYyZGI1ZDcyZjcxMGRhNWVlOThkZGM0M2FhZWMwNTBkZTI5MGFmMzhiMmE0NzNjMDJiNmQ5YzRjMjdkZmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzZjU4Njg0OTc5YjY1MmNkNjY0ZTI4MTM2ZDg4MzViYWYwMzRiYzQ1MGI1ZmQ4ZmY1YTE4YmExNGQzYjc5OTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU3MGRjZDcyMGM0YjQ3OTRlMmNjYWIzZmNmYmRjNmZlYTg4MDBjM2FiZmRlMWY1ZmRlYmMzMjZiM2QwYjg2YTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY3OTQ5NGQzMzQ1MzYxNzIwNWNhNTk1OWFhZWJjZjdlMTNmOTFmYTNmNGM4NTNmMmFiMTMyY2RlMTM3MmRmYmEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_20badf0ccd264bab8f7ad0204c300aef",
+      "statement": "ai-llm-service depends on Kaapi (base URI, API key, timeout) for documents and collections and on OpenAI for file search; Kaapi calls back at AI_LLM_SERVICE_PUBLIC_BASE and callbacks are rejected with 401 unless KAAPI_WEBHOOK_SECRET is set, signature headers are present, the timestamp is within 300 seconds and the HMAC-SHA256 matches; the module fails at import if KAAPI_BASE_URI is missing.",
+      "evidence": [
+        {
+          "resource": "repo://ai-llm-service/.env.example#L1-L18",
+          "version": "repo-lines-v1:sha256:68837a7ec1d2f80d613ed8c1570f8d5a0ec8745a30499a17972707f435791d3e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRmNzQ0ODQxYjMwMzEyYmNlYjc3NTNkOTY5ODJiNzhiYzYzNDdjZjliNWMyMDEwY2Y3YjI0OGUwODI5YjgwMmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRkMDE0NjhhMDIxMGQzNmQzZWE5MmI2ZDVkM2FjMjM3NDdhZmI5NDIyZTFiMTQ3ZGQyMzlmNzMwMDMzNGNhYjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://ai-llm-service/src/apis/callbacks.py#L42-L80",
+          "version": "repo-lines-v1:sha256:20d2c20f51076da83b64766968edb0d30263425dcbb134a23bd353bc7b473426:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg2NmUxYjkwNGNiNmIyNmQwMDg3NzhjZjg2NGU4NWMyOWExNTRkMTZhMmMzMTgzMjgzZDdmYjcyYjgwM2ZiZDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkxODdhZjM4NDI5ZTY4YTU0YTU3NGM5MjUyYjEwYjBmMjYwYmEyY2M0YmE1NzkyY2Q5ZjUyYjE3NzQ5ZGU3MjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZhNGY4YTZlYmE2ZjBlOTU2MmZjMWQzNzg0MzE0OGJjMGY2YmJhYjRhN2U0OGEwZGY0MDI3YzA2ODJkNjBiYjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYyMzRhYWZkNTFlNWMyMjI3NGFmOWVkZTNlMjRlMGRjODYxZmVmODVkMmU5YjAwODdiZDY5ZTdiOWQzMWE2MzUifQ"
+        },
+        {
+          "resource": "repo://ai-llm-service/src/services/ai_platform_src.py#L11-L56",
+          "version": "repo-lines-v1:sha256:0041021f9a57e7de0a9a11aabb9e5a18632339d812536d9e5d96e49c44270004:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhZWVjMWJlMGM5YTc4MWJkMzNkYTk0NmY1OGFlN2NmYTk2YWY3NWRjNmViNTgyMDI4ZTM2ZDE4MjM0MzU4NTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg0NzFlYWVjZWQ1MjNiMmQ4OThhYzExMWRkZjljZDU3ZTAxZTM1ZGJjZTg4NjA1YzJlN2RmNzhiOTEyYWJiNzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNlM2ViOGIwMmMzMTc5YTZmZTlkNjIyMTRlNDNlNjk3Y2NjNTU4YWM3ZmJjMzc5MTE2MWM5MWNlY2M5ZTdjOTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4e9df32f3d61403e8ee3c5cb1707f84d",
+      "statement": "The backend's own AI agents build chat models with init_chat_model where the model id selects the provider (Anthropic by default, OpenAI for GPT ids), each job reads its model from its own env var, and every model carries the Langfuse tracing dispatcher.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/base.py#L1-L43",
+          "version": "repo-lines-v1:sha256:f29da0b8ddb57e12e1ad139968c3d6e27073319b109a695e9a99df19230c5959:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA5YjcxNWM4YmM1YzU1YTk0YWMzNTg0NzVhNzk4ZGQzNzM0M2ZjYmQ5MTdlNGViY2U3ZDdkNDA1NDMwYTVjZGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NjI5ZjA0ZGEyMTU0ODM5YjllMGQ2ZmM4MDQ0MjY4ZjlhNWUyOWExYjVhMDVlNGM4OTdhNmE3M2RhYWUzNjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_70f70b7a367942a4983e5954e638f936",
+      "statement": "Langfuse tracing is off unless both LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY are set; it uses a singleton Langfuse v2 client at LANGFUSE_HOST (default localhost:3000), is fail-safe so outages cannot break a chat turn, can mask tool results via LANGFUSE_MASK_TOOL_RESULTS because they may hold warehouse rows, and reuses one trace for a resumed question.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/tracing.py#L1-L11",
+          "version": "repo-lines-v1:sha256:648652b922246801fad7cbf1fa11684cfb6300574b24d0f73cf1c6fb77449f53:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRmMmM2MWI1Y2VhM2YxMTI3MzYwYjk2ZTI0M2M1ZWE0ZGJhMjMxNzhkNGQzZTAzZDMwYTUzYTVkZTNmNGM1ZTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImViZWNmZDQyNWNmYTQ3ZGNiMmMzNzU2Mjg0MTc1OTE4NWVkODZkNDA5ZDc1NGQwOGI3MjM5YWI1NDNiMDFlYzMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/tracing.py#L112-L149",
+          "version": "repo-lines-v1:sha256:808d50c5ff62adaa1645d272e8ae038b0fc47c502aa6873fb7dfe4bfc60f84ca:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlZGU4ZWQ0YzgyMjg5ZWQ3YjQ0MGY2NzExMjkxMjE1ZGRiOTcxZmFmYzJkY2E2N2FiYTg0YjM2NmZlYWY2N2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIyOTUwYWY0YThmNmU3Y2YwYWE3MmM0YjQ2NDFjMTdkN2Y3MWE5ZjcyMzIxNGZlMjE1MWNlODY4OWQ3YjRlYzEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU3NTBjNjhkYmEwMjc1NGUxMGViMGQyMDdkOThhNWYxZDQ4OWQ1OGEzNTBlYjNiMWQzNzNhNzc3MzE4YzMyNTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ5Y2Q2YjVkZGUxYzliOWU5Nzc4Yjg3NmZmNTJmZjhiY2RhN2Y5YjA4N2QwZTJhNWI5OWVlM2VmZmExNzZiNDcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/tracing.py#L380-L433",
+          "version": "repo-lines-v1:sha256:ea00fdbef6bfaccd8d9fbffd6cf18633a7a8db1de1121ee4ac024da46f0c7d02:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgzOGNlMjVjZGQ4NjRjZWRmMTNlZDE0MzYzNjFmY2U0ZjUzZTljYjgyZmYwMDRjMjFhZjlhM2U3ZjVhYmYzZDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlN2M5NTdiY2I0NGZiNjczYzk4YjAwNTBhNzVkMzgwODJkYjgxZDkxOGRlMzEzYTNmMDdjMTIzNTMwNmQ3ZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQyMDNjZmY3NTE0OGZmMGZkMmU3ODE4NDgwNWQxMTRiNjU3MmE1Yzk2NWI0YjE3MmZiZDU4YjA1N2M1MDNkOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM3ODFiZDNkODEwMzc1ODk0YjJiNzc2MGQ3YTI3Y2UyNjg2OTU2ZWYwMGFkZjQ2MzMzMGU1NzRkYzFkNGY3NWYifQ"
+        },
+        {
+          "resource": "repo://backend/docs/docs/features/chat-with-data-dev.md#L45-L68",
+          "version": "repo-lines-v1:sha256:8b0f804c5bcf59f3d6d7d60ee7ba147762d51875c166722d43c98337c36f2087:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdhNzhkNjJmZjBmNzQ0ZWNjZTYxMjk3NTdhNjFkMjM0OTFkNjNmODFhZDg1OWVhMDc1MjdiOWY0MGFhYmNmYWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJiYjUyM2U1NTk4YmVjYTczMGY3MDViZjQyMGE3M2RhYWM1YTJkNjQzM2RiMWY0YjhlNGIwMDAwODY0MDBiMzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwZmM1MDJlNDIwNmVjNWMwNGQ1MTUyMWJiYTFhYWUzYzJkNWI5MDA2ZmZlM2RlZGQ5ZDNhZmFkMTY0NjZmMWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUxNmUzMjkxN2ZhYTI0NWQ4MzA5ZjNmZTc1ZWQzYjliNDM2MjZiMzViNmNmNmZmYjZmY2ViNDhlNGI4NTM5ZTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7889c1d9e1db46548a901fec9c3648a9",
+      "statement": "The backend initializes Sentry in settings.py with Django, logging and LangGraph integrations, configurable via SENTRY_* variables with 100% default trace and profile sampling, and sets LangGraph include_prompts to false so warehouse data in prompts does not reach Sentry even though default PII is on by default.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/settings.py#L16-L53",
+          "version": "repo-lines-v1:sha256:b6e5a7e25d0e2ce8895f1d5a329caa2516812e501423305be55da0b70f0e56ba:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3ZjU0MmFjOWUxNTkwZTE4OTk1ZWM3YmYzYjkyZDhmMmE4YWQ2OGUyOGMxOGE1MWQxMDljMTZlZmY2ZjM5OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdlYTM4NTg0ZmI4ZGFkY2I3Mzc0MzgyOWJkNDJmMzA3YWExNWZkMDU0NTkzOWNhNWZhNGRjODU5OTk0MDdmZTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZjYWRjNTUxMWFmYTY2MTQyNWM3ZTkzYTc5NzIyNTMzZDFlYmZmY2UxNmU5OGJmYmU4OGJmNDZhZjRlZjZhNDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b0805cd1e6a84683822b40fbc674fef8",
+      "statement": "prefect-proxy initializes Sentry from SENTRY_DSN and exposes a /sentry-debug endpoint that deliberately raises an error to test the integration.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/proxy/main.py#L67-L88",
+          "version": "repo-lines-v1:sha256:108a9fe4fb49c66fe748ac205d246226c2e119167589f6603a0dd149bab9403b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwYjQxOTQwOWFkODI5ODRiZDMxYjE0ODMxMTA5MjVhN2ZiZWE1ZTBkNmZkZjM1NWJmZTVjNzg0YTlmMWI2YWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5YzlhZGZmY2FkOWJhNDEyOGUwMDE4Mjk3ZTE0YTljZDNlYThiNTkzZGFlNmEwYTliYzEyODE1ZmYwODk1ZDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEwN2I0ZGRiZDViZWM0MDE4MzFjNDA1N2ExYzVkODY5MmQ4OTk5YjljNzczNWJlM2YzMDhhNzMwNGExYzE4MmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d7069fc58f9e40f0b84153ac5bec87bc",
+      "statement": "Webapp Sentry is wired through Next.js instrumentation.ts (server and edge configs by runtime, onRequestError captured), a browser config with 20% tracing, replay only on error sessions with masked text and blocked media, and next.config.ts withSentryConfig uploading and then deleting source maps and tunnelling browser events through /monitoring.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/instrumentation-client.ts#L8-L58",
+          "version": "repo-lines-v1:sha256:4db6b0ff21f83e1dccebd34dd6e99e3c929d9fb55028c5ac427cbe8f7b63c750:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwODMxYWExZGU2NWEyNmUxNjYyNjdhMzc1Njk0MTM2YTE4YjA3M2NhYzZmMzdjMjc4MGNjYTJmMGY5ZGE5YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMzNDJhOGVhZGQxYmE1MDM5MDg0OWZkYzg1YzA3ZmRiNDhiZmViYmEwNDI3MDExN2ZkZWNmOThlOWFiMzhlYTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlkMDgxZjE0OWFhMWZhOTMxZGQzMjFiMGNkNDZmNjgxZGE0MTkxYTI5NzkyODk0NDkwY2UyOGJhMWNkOTcxYjcifQ"
+        },
+        {
+          "resource": "repo://webapp/instrumentation.ts#L1-L18",
+          "version": "repo-lines-v1:sha256:7ec040e6f1530c88a14976be429d6e573ebca0c84b99ce20ed183a89a326e92c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMjk0MDQxMTAxOTY3ZjNhOGRiNjZhMTRmODM5ZDFjOTM2ZjAzYWQxNjdmNjk4YjhjYmFhZmJjYWM2MTg5YzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5ZjYxNThkZmQ1Y2FjZDZiOWQ2OTNkMDhiNjRkN2ViZTY0YzcyOWE3NWEyNzlmODkxODM1NTU0NzRhN2EyN2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/next.config.ts#L46-L74",
+          "version": "repo-lines-v1:sha256:7b876826258cec93dab145db5d33ae0f07f886fb102bc9ef6dc2973c92baa1ce:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxOWY0ZGZmNjY5OGNiZDkyYWRmMWMwNmZhNDlkODNmOGU5NzQ0MzYzNWQxYjBjY2VlZWQyYjBhZTAzNDJlNzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhMzhlZTljYzczYzlmMWYyYzhmOGM1NmQwMGJkMDBkZTViMDczNjlmMTJlMDgwYWJiZDc5YzhjNDM3NTZjMTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/sentry.server.config.ts#L1-L15",
+          "version": "repo-lines-v1:sha256:3c89540a68866d1fa85dbf5b3522338e78c851e087fbf844059bd41e20542739:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiMzkyOGZjOGMxNzZkNTNiNzBkNjM3YWYyNTM3NzY2NmYwMDU5YWEwNmI5YzE0MGNmNWQ5OWQwY2JjYTkwOTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_287d3dfcd2e342b995cdbed1106a4680",
+      "statement": "The harness sentry-setup plan describes hardening items (enabled flag, beforeSend PII scrubbing, replay rates) that differ from the checked-in client config, which sets session replay sample rate to 0 and has no beforeSend or enabled flag.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/sentry-setup/v1/plan.md#L129-L200",
+          "version": "repo-lines-v1:sha256:5f2ed79de972513e099e1e59a2b22c57bd221116d325dddd4cc8bb2bd71da142:eyJzZWxlY3RlZExpbmVDb3VudCI6NzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImViNjMyZmQzNmE4NjJiNGJkOGRmN2RhNjNkNTVkY2I4YTVkYTc1ZjI3MGQ5Y2YwMjYyY2UxZTI4MjQ5M2ExMzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0MmFjMWNkMmM4YzFlZjllNmY5ZDFhMmQ5ZDZmODYwZjUxY2MzMWNhZmVlZWMzMTMxMmNkMDYxNWJmN2NkYmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIzNDNiYjIwMTI0OTMwMzcyNWY2ZjExNjVmYTNkOTE5OTAwM2E1OGVkOGM3YmE2NGJkYjg3OTA5ZmFiYjhjMDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYzZmUyNTZkYjViNzU3YTc0Y2M1ZmU0MTY0OWY1OTVkNWFlNWYwYzc3MTczNjI5Y2FjZTJmMjExYWQ4NGU1OTYifQ"
+        },
+        {
+          "resource": "repo://webapp/instrumentation-client.ts#L8-L58",
+          "version": "repo-lines-v1:sha256:4db6b0ff21f83e1dccebd34dd6e99e3c929d9fb55028c5ac427cbe8f7b63c750:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwODMxYWExZGU2NWEyNmUxNjYyNjdhMzc1Njk0MTM2YTE4YjA3M2NhYzZmMzdjMjc4MGNjYTJmMGY5ZGE5YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMzNDJhOGVhZGQxYmE1MDM5MDg0OWZkYzg1YzA3ZmRiNDhiZmViYmEwNDI3MDExN2ZkZWNmOThlOWFiMzhlYTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlkMDgxZjE0OWFhMWZhOTMxZGQzMjFiMGNkNDZmNjgxZGE0MTkxYTI5NzkyODk0NDkwY2UyOGJhMWNkOTcxYjcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0a9eab59c60d467ba41609b2ef406593",
+      "statement": "PostHog is initialized in the webapp only when NEXT_PUBLIC_POSTHOG_KEY is set, ingests directly to a configurable host rather than the /relay rewrite, creates person profiles only for identified users, disables exception capture because Sentry owns errors, and masks inputs in session recording.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/app/posthog-provider.tsx#L7-L49",
+          "version": "repo-lines-v1:sha256:7dc86e32293afe1fbc0344690f777e5d8b908d128b1aabdd644fa5896c52c7db:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2MWRlNmQ1YmUzN2U2YmM5ZTllMDQ1NTFjYjhkNjEyM2JjMjI3MGI3NzhkMjU1ZGYyNTQyM2M3Y2FiNWIyNjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNhNmYzNDRhZDgxNjE0MWU4Y2FmOTkyYzc2MDczYjA5YTUwZmQxMzM5NDMwYjgwZjBkYmZhOWQ5MmE5NWNmMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/next.config.ts#L13-L23",
+          "version": "repo-lines-v1:sha256:550b2cd231346d4c14b429dfc25dda72233f843114306da9f24220241a65c6ad:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlMGIzNGE5MTNkZGE3MzQ5MWRiNjAzYTU5MWY0YmU5MDI3ZGEyNGU3ODViYzYxMWVjZTc0Y2M1NWYzZThmMjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE1YzU5MThiOWRmMTMyODg5ZWViNjhkMTdkZTFmOGMwNWU2MGU0YTdjMTU2YmExYzRmMTZjZDI5YTQ0ZWY5NTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjExZmVmZGM4ZDJlNDQ4NWNiYzUwZWQ0OGIyMjQwNThlM2YyZjIyZTFmMDlmNzk3NDBkNWQ1NGM5YjY4OWU5OTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_80835932aeed4e4bb1bf61feac92f909",
+      "statement": "AWS access goes through a single AWSClient singleton factory supporting only s3, ses and secretsmanager, with a separate credential env pair per service, a default region of ap-south-1, lazily created clients, and a ValueError on first use if credentials are missing.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/aws_client.py#L11-L100",
+          "version": "repo-lines-v1:sha256:dff3c2bb5a21b8ebaf3db4e8fae481d5e161d5e6af39c6d189a482db026a4abf:eyJzZWxlY3RlZExpbmVDb3VudCI6OTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3OTYyMGY4YWQxZWRiNGJiOWQ5NWE5OGU0ZTE2YzZiZDg0NjgzNzUxMmQ3ZWUzMTdjZmNhZTFlYzdjMTNkMmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwODc3ZGQxZDg2MTVlZmFhMTgwOGI4ZmViNTVmYWI1NWQ5MGJjYmEzMGY0M2I1MzkwYzkyZGFjMWQ5NzAzNmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYyMDA5N2U0YWE1MDA2OGJhMTU3ZjlhMjczOWZhZDg2OTk1ZTFlMGNkY2NkYWRjNTg5N2MyMDM0Yzc0ZDNlZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYxNjIyNDg1MTkzMjQ3ZTMxOTU0YzdhODg3MTE0NmFhZDc1YTYwOGM1NjE4OThjYTdmN2NmOWM1N2MwNzRjNDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_60ddcc993c4a426cb0a9474ec6e9c8c5",
+      "statement": "SES helpers send text, HTML and PDF-attachment mail from SES_SENDER_EMAIL, and S3 helpers provide upload, copy, delete, chunked bulk delete, list and existence checks, returning virtual-hosted public URLs built from bucket, region and key.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/awsses.py#L21-L93",
+          "version": "repo-lines-v1:sha256:a6a4e9b52197ca95eaaf6a03b8505a79ac874a96f7b56f1328e1e5b63943a61c:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4ZTJmNzE0YTAwZjZkOTZjMTAyMWI4MjQ0ZjY5ZTU2MDVmMmJiMjY4NTUwZGY0NjBlMWM0YWFlZDRmYmY4ZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI3NDNkNDFhYTY1YmE4NmU5NmVjNzBjOTFhZTJkZDkwY2E0MTI1MDZkMzM2MGNlMTAzYWUzMGVlYTE5ZTg2YWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/s3_utils.py#L11-L120",
+          "version": "repo-lines-v1:sha256:d6ca951e11be4b94fc4f0a1cf4de723c62340eaaf3746b3550d8c05cf3a12296:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJiZDIzYzNlYjJlM2QyOGMxNjE2MDA0MzkzYmQxYTdmN2Y5ZjhiZjk3MTU2MWExYmNlYjk2MDk3MjJlZTU4OGRjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI1N2I5MzVlMzU1ZTVlNjFiMDNlNmJiYzA4MWYwYWQxZTNiMmNiN2MxNWY3OWRiNTQ4NDUwNDlhMGY0MTU4MmY3IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI2MjAwOTdlNGFhNTAwNjhiYTE1N2Y5YTI3MzlmYWQ4Njk5NWUxZTBjZGNjZGFkYzU4OTdjMjAzNGM3NGQzZWZhIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJiOWMzYmNiYzA0NmUzOGY3ZGQwNGIwYmJlYWM2YTU4NTQ4NDc3NmFiYjRjODk1ZTQ1OGRlZTIzOTc1MzBmNGZlIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_19d7588155944d72b609cebe432a24c5",
+      "statement": "Secrets Manager access uses real AWS only when USE_AWS_SECRETS_MANAGER equals True; otherwise DevSecretsManager stores secrets as JSON files in the required DEV_SECRETS_DIR, and it holds GitHub tokens, org warehouse credentials and Superset credentials under generated names.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/secretsmanager.py#L11-L112",
+          "version": "repo-lines-v1:sha256:153964a7f54554e8215d4341b30ceb7ec2d4ee0fb4d7f40b59e243b55f4a4e09:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJjNzgxOGVmOTkxZTgxZWVkZmViY2VhMTNlM2UxODU5ZjFmOWI2MTUwMmViOTUyMDE5MjBkYmRhNGUxMGJkOTJjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiMWVhZWU0ZjUxYzE1ODI1MzA3OWIwYTEyOTRiYjMwYmU5ZThiY2Q4OGZlYjg4MTI0OTQ5YzJkODc0NmMwNDViIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlOWU2OTMzNDBmYzI4ZDMxYThhN2E3OGIzNzIzOTRlZGQwNjkwMGRkYjQ5MmIzNTYxMjM2YmQxMjU2MmNkMzJhIn0"
+        },
+        {
+          "resource": "repo://docker/docker-compose.dev.yml#L19-L31",
+          "version": "repo-lines-v1:sha256:83e3290985a670bcbe4f1e14b08b417129a3e3a99515987dddf0b64bce2c6e2f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0ZGY2MzlhZDFlOTk4Y2E1YzY0MWQ3ZTBjYmYyM2Y2ZGMxMDRiZTA4YjcxNDc1YmFmNjQ1YTc2ZWQ0YzVhYTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiM2FiNTFmNDJlOGY5YWMxNTNiZDA1YWQ2ZGQwYWUyYjY0MGZmOTRhMTAyNGNjN2ZmOTBmODFhYTVmNmMyNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQxNzUxNDQ0MGE1ZGEwMTZmNTU1NDUzYTZlYjJjYjg4OThmNWUxZmVlMDNjNzJiNWIzNjk5NWMzMTE1Mzk0YzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZhOThhOWE2MjQzMTBjZjZmY2I0MzUzYjZiYWM1ZDNlODZjMGI3MGVmNzMxYWI4ZmNlNWQwNGU2MWM5NDIwNjkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f27d38296b6e42a4ab226ff0b03e1872",
+      "statement": "The Superset usage-dashboard endpoint reads credentials from a Secrets Manager secret named by SUPERSET_USAGE_CREDS_SECRET_ID, logs in to SUPERSET_USAGE_DASHBOARD_API_URL, fetches a CSRF token and a guest token with row-level security limited to the caller's org slug, using 10-second timeouts and returning HTTP 500 on request errors.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/superset_api.py#L40-L142",
+          "version": "repo-lines-v1:sha256:adb595065035a056861725a6e3d6102637123d965904a00899e146d976dd7be0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI4YTg0OTQ3MjBlNTRlMDM1MTgzZmE4ZDI1ZGU4YzE0NDhiNGMwMzUxZWI0NmJhYWIxM2Y1OGNjZTQ3YzU0OTE3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI5ZjdhMjAwMzljMWNmYjViNGFlZDI3MTE5ODQ1NzRlMzgxNDdkMTk5OTg5MmUyMTdjZTM3Nzk5MWZjYmE3OWM4IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJjNTFkOTA5ODE2MDZjZTY2YjVkZTEyMDI1ZWNmZmQyMGEzYzViMmRiNzI5MWQzYWEwOGEyNmFmYWM2ZDU2YmFkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIxM2EwOTRjY2M1MTRjZTZlYTM3YmNmNjI4YTJlYTIxZTczODYxZTRjNDk1ZDg1M2FkYjQ4M2U5YjFjMzhjYmIzIn0"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

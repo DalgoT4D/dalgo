@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:39167143f7f7c6349bd0f6164f39091bf312ead6e88dd5a5c6c421b47521b7d5",
+  "claims": [
+    {
+      "id": "claim_481294a5bed5403b8a0163d430385af8",
+      "statement": "prefect-proxy CI (prefect-proxy.yml) runs black via pre-commit, then pytest under coverage with --asyncio-mode=auto, uploads to Codecov with flag prefect-proxy, and finally fails if coverage is below 68%; coverage source is only the proxy package (schemas.py and exception.py omitted).",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/prefect-proxy.yml#L44-L82",
+          "version": "repo-lines-v1:sha256:8facb3d495668d0d12383999afb2f917a95ef6fdeae391649b6b6e29b46a4dde:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlMTQxOWIzMGIzYWI0NjJmZmQ5MWI0NDNhYWQ1NTU2OGI4MGNjZTU3YTAwNmE0YWVlN2Q4NGY1YjM1ZGZkZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNjYmY4ODg0MDBlYWYxOTYyOTliNzI5MTRjYTJjYmVmMTAzOTMyOTliMmNmMjkzZmRkYTgxODcxZjRjYjgxN2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdlNTk5OWVlYzZmZmJhMWZjNjMyODQzZjdhZWI3OWJkNWYyYmZlZWIzYjUyYjQ1NzEzY2Q2NDEyZmI1YWIyYzEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/.pre-commit-config.yaml",
+          "version": "repo-file-v1:sha256:07f6f35dc3c845b849d764db4bcdeaa49685f1226944a3695f47aea83bfa057c"
+        },
+        {
+          "resource": "repo://prefect-proxy/pyproject.toml#L63-L78",
+          "version": "repo-lines-v1:sha256:6a341db3c962c0cdb600c1d3b32940df08436778fe150e6b88ed1c850205e3f8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg2NzZlNjQxNDY1YTY1NTFlOWU5Y2ZmZDdmYWExZTZhNDJmOWI3MjQ4MDk4MTNjOTAzZDdlZGNiNTJmMzAwNmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NDE2ZTA5Zjc4YmEzMTZjMDMyNTY4MjEzYjg1NWVlNzU2ZTQxNTY1ZDkxOGYwOTUxOWM4MWZkNjIwZjQwNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmMGMwYzExMTdkZDk3ZTlkMzYyYWNkZTNjYjhlZThlZDQ2ZDBlZjgwNzY0YmExYTBhNTQ3NmUwOGNlNjE5NGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9188164249ba4fb98a1eb244cadc0075",
+      "statement": "The prefect-proxy workflow uses dorny/paths-filter to run the slow tests/prefect_airbyte suite only when prefect-proxy/prefect_airbyte or tests/prefect_airbyte changed or on workflow_dispatch; otherwise pytest runs with --ignore=tests/prefect_airbyte/.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/prefect-proxy.yml#L53-L72",
+          "version": "repo-lines-v1:sha256:0c27d1c1a17368b3164bfb29434d28fb66ba03d2246e3ab3c36c61997d2c6f40:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVmMDU0ZWUwOWExODRlYjk1MjQzZTRkZTUwNTVmN2VhYmMyNWJhNWI0MGZjMzlmNDUzZDljNTRkODNhMjM1NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwZTA1Yzc5ZjkwNzExNjEyZGUxNzY1OTU5NWZjZmI3MGFhY2EyMGI3MjBiYjMzY2FhZmVmNTczMmRhNzVmMmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY5NDhmM2U4ZmJmOWI4YjEzOWZhOTA5ZTA5ODJkYmQwZjExYmI3Mzk4ZWQ5YzdmNzAxYzIzM2Y2MDdmYmYyYzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE1ZDQ1ZDFmMmIxYmYzZDZjYzhhOGE4N2VlNGRkYzQ5NTg4NTlmZWRiNDYwMzBiYmFiNzcyYjg5M2Q0NTE5ZGIifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/prefect_airbyte/CLAUDE.md#L53-L60",
+          "version": "repo-lines-v1:sha256:a9f37f6ce6d7bedfe0a1659e9e799b49b6feec894f8598f9e983034b8e6c1848:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDI1NzU1ZjFiNmFkOTJlNjM4MzA3MDliMzAxZjZkNDI5MmJmMGQyYjRkZjkzNTk0YjY1ODQ0ZTVlMzkwODlmNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTY4M2JlZGRmYzBlNTg1OTQ3YmUyMzU3ODJmMWFmOGIzOGI0NWY0YjI1MWZhYzVkZjI5MTA0NGMzNmM2NTk4MyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTkzMDBmOGI3ZmNkMGNmNDYzMDM2OGU0M2QyZTZlMGUzYmVhYzVjNmEyODhkM2JmMDg4ZGQ2MTI0YWNmZGM4YiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_56609a60f54841108f1efd34454505f7",
+      "statement": "The prefect_airbyte tests use a session-scoped autouse prefect_test_harness fixture for an ephemeral Prefect API and DB, and an overridden respx_mock that passes through 127.0.0.1 while requiring all other calls to be mocked (assert_all_called=False); fixtures mock the public Airbyte API.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/prefect_airbyte/CLAUDE.md#L53-L71",
+          "version": "repo-lines-v1:sha256:4d9b54c627f21dba94be8ecee69d29f299b9482e78127ebb4a212c46f6a3a8d9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyNTc1NWYxYjZhZDkyZTYzODMwNzA5YjMwMWY2ZDQyOTJiZjBkMmI0ZGY5MzU5NGI2NTg0NGU1ZTM5MDg5ZjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzYTRmNmM0MzBlNTk3MmVhYzVhMTQxY2JmYjAyMmY2NTEzYzViYjkwYzYwYjEyNGU0Zjc2YWQ5OGZjYTQxZDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2ODNiZWRkZmMwZTU4NTk0N2JlMjM1NzgyZjFhZjhiMzhiNDVmNGIyNTFmYWM1ZGYyOTEwNDRjMzZjNjU5ODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/tests/prefect_airbyte/conftest.py#L1-L26",
+          "version": "repo-lines-v1:sha256:92ea91c2803d17d9e53c023d591946b8aedbba066a508091c74a42b3cfe153f2:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3NWE4MzAyYzYyMTkwNzQ2Y2Q4ZmMyMjljNjE4NmYxMWZiNTMxNDIxOGIyMGQxYjc0MjkyMDMwMWE0OTViNzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA1YzBiMWU1ZTc4ZTk2NjBmMjlhMGQyMzI5ZDk1ZWQ4NzUxMDU2NjQ3MTRjMzIwZWNkNGI5NjQwZjJkMDExNzAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_99843570e66143a3bd423fd9e426fd60",
+      "statement": "test_block_standards.py parametrizes Prefect's BlockStandardTestSuite over every registered Block whose qualified name starts with prefect_airbyte, so new blocks are automatically checked against Prefect block standards.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/tests/prefect_airbyte/test_block_standards.py",
+          "version": "repo-file-v1:sha256:1e60394ff221c47057c1624b813918777088da5072db889daaec18a9e53a9278"
+        }
+      ]
+    },
+    {
+      "id": "claim_9d8038de2dbc4dac82bef3c11474ac16",
+      "statement": "prefect_airbyte is vendored as a plain local directory targeting the public Airbyte API (POST /api/public/v1/jobs, GET /api/public/v1/jobs/{id}); client.get_job_info retries HTTP status errors and unhealthy-server errors with backoff up to 8 attempts but not JobNotFoundException; cancel_job on a cancelled job reports job_status cancelled.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/prefect_airbyte/CLAUDE.md#L1-L71",
+          "version": "repo-lines-v1:sha256:3ffd5204c92ba6a6f993c653fe11165937cf7705a00be525c577e2e0f6cb7d43:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxNzBhZmY0ZmE4YjQ2YmU2Y2ZmODQ0MmJmMWM0OTNmOWQxZGFiYzc2ZThkZWU4NWQyZDU0MWUwOWFkMjkwNWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzYTRmNmM0MzBlNTk3MmVhYzVhMTQxY2JmYjAyMmY2NTEzYzViYjkwYzYwYjEyNGU0Zjc2YWQ5OGZjYTQxZDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/tests/prefect_airbyte/test_flows.py#L75-L117",
+          "version": "repo-lines-v1:sha256:831a62767e08726bc68e65a3d46c5dd75622f6db6e4b2c725cb7e7a8f7924cc5:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBmY2EzY2RhZDk4N2NhZmZiNzgxMDhiY2M5ZDI5NTA1NDQyYWE3YmI2NTI5NTQ1ZmFkYmNhOTE2MGE0Y2U5MTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlYjE5ODg5ZTA2ODVmNWE1MzA5NzVlNTgwOTg3MGZhN2U1ZTVkM2FjZTIyMzhmODAyMjgxYzBmOTUwMzk2OTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk3MjYzMWNmM2NiMWJlNTcxNTFjZDE5NjUwYTk3MmFjODJmMWMwNDcyZWY1ODYyOWQwZjBmMDUyNzc4ODM0NDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRhYTcwMjI5MzBkNmY4NzJjODQ1NzhmNzMzNTVmMmFlNGE2NDFjYjRjZTUxNzU4NGM0M2M0OGQzOGJhYTQ4NGIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_919da1f0210b45baa1ea706375427db8",
+      "statement": "prefect-proxy runner tests call Prefect flows and tasks via .fn(...) and patch get_run_logger, Secret, ShellOperation, AirbyteConnection and similar names in the proxy.prefect_flows_runner namespace; they pin behaviors such as dbt-test failures returning a COMPLETED state named DBT_TEST_FAILED while other dbt failures re-raise, post-sync errors being swallowed after a successful sync, and sync failures skipping post-sync ops.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/tests/test_post_sync_ops.py#L1-L30",
+          "version": "repo-lines-v1:sha256:c2760a62a9049f82a60c4af23343aee71403cd29ce219dfdf4251db6ae904aa6:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0M2I4ZDg1YTg3YzE5OGYzMTc0ZDQ5ZjBhZDgyODljNWU0ZWFhOTM5YzEzYTkwZWZiYTg4N2YyMmY1MWUwMjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4NDUwZWE1YWVjMjQ1NzZmYjVjYTYyYTc5MGQ4OTA1M2YwMmQwMzgzYjdhYmQxOWM2MTBjM2M2YmVhMjlmMTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVhMzUzM2FiNDlmZjY0MDdmYTU1NGJiMWMwMjI3YmVhZTIxZjBlZTZiZDY5ZDdlZGFkMjhhMzAwMjNhZWUzMDUifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/tests/test_prefect_flows_runner.py#L163-L420",
+          "version": "repo-lines-v1:sha256:e3932e9a0fd6be6df1750190b25e5d0ffc66408f9170b2d99f1f947d5a6f28db:eyJzZWxlY3RlZExpbmVDb3VudCI6MjU4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIxNjBmMjFiZDI4MTUxM2QyN2IxMzM0N2M5YjFmNmQ5YmNkOGMyYzQ5MjlkNTBjMzBmZWQ3NmRiMjYxM2I0ODZjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI4NGJiMDEzNDVkOWU0ZmNmMmVmODNjOWY3MTkxNjViYjQ5ZGY5OThhYmZlNzMyODllNDc3YmY3MDViNmUzM2MzIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI0ZmJkMDA5MzE0YmMyNzA4NDE2NzM0YTAyYWU1ZmYzOWExZTQ4YTA1MGJlOTFmNDNiMmZhYTkyMDAyYzYyYmZjIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJjOTIzODc0M2ZhZDg3N2E0NTdmZDY1MTc3MzdjYzJlMTY1YzM4ZTRkMjY1MmE0Zjk1Y2Q3N2RkMzQ0YWFiYzBkIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_900a72f5ace747e09a08b4c3066d2466",
+      "statement": "tests/test_main.py exercises proxy.main endpoint functions directly with patched collaborators and pins the error contract: non-schema payloads raise TypeError, runner failures become HTTP 400, and unexpected block-lookup failures become HTTP 500 Internal server error; tests/test_integration.py is entirely skipped as it needs a real Prefect server.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/tests/test_integration.py#L22-L68",
+          "version": "repo-lines-v1:sha256:2eb1c00f715958e7986d16429a0ea2cea87a10e79ed893a4cc0a526bc9d90753:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlNmI5MjczODljMTIyOGQ4ZTk1MTg0YWMxNGQzNTZlYmRiNzlhZDYwMGFlMmQ1NWQ4MDBjZTRlM2IwOWUzZjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiMGViZjQxNWEwNWU5MzYwYTk4OGZlNmIyYjU3NmE1NTBjNTBmNWI3YmNhZGZmMTI2YWNkNGNhNzE4ODAxNTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5OGIwNjNkOWI0N2U2NTM3OTYyNTU3MmNjZTE5NzY2OWQ1NzY3ZTEyYzE4YmUwNzU2NTJiOGNkOTgxY2U4ZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ2MzVhNDQ4ZWExNzZlODAwY2M1ZTYwMzExZGE1MDM1NzZhOTVhODVmYTJkYjM4ZDBjZDNiM2IxOWIxM2FiNGMifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/tests/test_main.py#L64-L187",
+          "version": "repo-lines-v1:sha256:8bce5704aa06e5680717b49263e9d792b3297919577abb3ee0cacd07af1e41eb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0N2Q2NWZiNTRjMmQwYzA0NDJjMzFjMmQ2ZjA5ZWM4NDNiYjFkYjkxOWEwYzkwODZiNTk1Y2IzZTY2ZDE2ZjNiIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI5NjU0MjdhNjIyOTg4NzIyOWFiMDBmMzg5NzVkZWFlMTgxZWRhZDc1OTFkYTYwOGNkNjcwOTBjMjg1M2ViODdmIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5YzdkNjFmZTg4ZDY0MzViMDk2YWI4YWViNjFiZjExN2UxNjVlYWEwZGIxNTU0M2UzMWViNDZlZTMwMzExOWFmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJmYTVjZDQwZmMyYzlhYjhiMGFhMWU2YjVjNGUzOTQyYTliYjMxNDZiZGNhNDUxZjczNTNkZDdlMTYxOGY5MTNhIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_e09bca75e60946cdb93852895cb65ea9",
+      "statement": "ai-llm-service has only a placeholder test (assert True); its CI runs pytest under coverage with the dev group, uploads to Codecov with flag ai-llm-service, and builds docker/Dockerfile.ai-llm-service without pushing, with no coverage threshold.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/ai-llm-service.yml#L20-L61",
+          "version": "repo-lines-v1:sha256:18264c500d5d42e7c760ea658715f8fe56b2e9b9418229b94544cca70b825d1a:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5ZDgwMTU0ZWQ0MmZjNWM3NzliMTMzMTU3OGI1OGI4OWM4MDFlYWNlNzRmMjRjZDQ4ZWI0YTIzNTc5NDBhOTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkMTA1ZTc2MjM5YTFjMDY4Y2YyMzcwMjQ3M2ZlOGY5YzRlNzI4ZGMzZWY4MGZjOTQ5ZGIyYzg0MzBmZGVmNTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFiNDliMjEyZDllZjk0Njg5MjgwOTYxYTIxMzU3ODk2Y2NjNDMwMWRjMDllMTdkYWQ1Zjc0NzVmZmU4OTQ0NzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://ai-llm-service/pyproject.toml#L75-L84",
+          "version": "repo-lines-v1:sha256:867ca971959700ede0f5c7a2710bf03f854001c7b6a03f31be5fea12e5c61ee8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRiYjc0OTliMWNlMWM0ZjRiMjUyN2YzYTMyODRjYWM2YjZhMWUzYmY0OTg4YjU2Nzk4MmMzZGM4ZTlhMTdmMjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwODg4NDU2NmZiZTY3Y2U3YmI2YmZiMDRhYjg4ZTczNGQ4YWI4OWJlNjUzYmM5Y2RiZjc3OWUyYTUwZWMzOTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ1YTkzYTNjNmY4YzFhNWJjYTkzYzI2OTQwN2M4ZWZkZjVkMWFkMmNiODgyOWExOTA4OTU1ODI5MTRjY2I5ZmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://ai-llm-service/tests/test_placeholder.py",
+          "version": "repo-file-v1:sha256:f4e054e275adbb4aeb276542e9a752144476e34e618695553074ed7acefc40e7"
+        }
+      ]
+    },
+    {
+      "id": "claim_a0685cd197df42639c44cc8ff077c441",
+      "statement": "The backend eval runner runs each EvalItem through a fresh TurnGraph with an in-memory checkpointer and human-in-the-loop disabled; eval_routing and eval_sql_correct are hard gates (gold SQL executed and compared against the agent result, or expected_value substring), while LLM judges (faithful, expectations, sql_judge) are fail-open and informational; hard_pass treats None as pass.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/evals/README.md#L106-L128",
+          "version": "repo-lines-v1:sha256:8df95514665b15f6a32af61d591c1e4c5165d2ef9ab57a839332cccfb1beacac:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwYjk5YzMxMTU2NWNmZTc5MjIyNTI1ZWVhNjMxMTNhYWJmY2Y1NmNjMjM0NjA3MWY1NmZjZmU3M2E3YTA2N2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkNjBjZGYyMDU1ZGNjMDZhYzk0ODVjOGEyNDdiN2U0ZDYwN2M5NmFhMTg1Y2U2NTc0YTNmN2NlOWM1YzQ5N2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVhOTQ0OTZkYmQyMjQwZmUyZDI0YjMzNTQzMTlhM2RmZDI3ODVjYjdkMTBhZjIxOTZlY2JlZWQxMDI1NjgwODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYzM2JhODFjZjk1NDM3ZDc3MmJmZGU1NWQ0NGJhZmIwNmI3OGNjZTRmYWM4YzkxNjRjZTUzMDA1MDRjYjcwYTYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/evals/runner.py#L36-L226",
+          "version": "repo-lines-v1:sha256:62bbeb936c2688f3ed215b6e165664f88586354f2f664cc3b184f5326a02fde6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTkxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJiNmZiYWUwYjkxZDQ0ZmMwZDQ5ZjVkZTY5MWRhNmZjNDMxZjI2MDEzNGJmNzMxZTBlMjFmNzY0ODA5NDMzNGNiIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJlZTdjOTU3YmNiNDRmYjY3M2M5OGIwMDUwYTc1ZDM4MDgyZGI4MWQ5MThkZTMxM2EzZjA3YzEyMzUzMDZkN2VjIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiMWVhZWU0ZjUxYzE1ODI1MzA3OWIwYTEyOTRiYjMwYmU5ZThiY2Q4OGZlYjg4MTI0OTQ5YzJkODc0NmMwNDViIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI5MzllZGI1MzRmNmM1ZWIxNWY4OTAxN2UxODVmYWQxZGM0NzYyNTIwMTQ1ZDViMGRkNmM2MWIzMGQ4OTYwZTMyIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_589b8f84770e4e8dafd3e33b489f2ff1",
+      "statement": "run_items runs items sequentially and, if a Langfuse client is supplied, records a chat_eval_turn trace tagged eval with scores and links it to the matching dataset item by question; Langfuse recording errors are logged without losing the local result.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/evals/runner.py#L229-L286",
+          "version": "repo-lines-v1:sha256:5a23e9aa3e0216728c0a3ad31c21e22534b7104c1c3a918eab85df49064af0bd:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3ZTRjYjhjOGNmODg1MTRjNDQ5YWRhYmQ0N2EyNzlhZTEyMzZmNWJiN2I3ZGY3YjgzNmExYTc1YWZjMGQ3ZjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkYTJhMzk0MzFlODIzNmU0OTU0YTY5OTllMTc3MGRhOThmYjBjZjc2ZTQyY2M5NWVjYjc1ZTVmNTVhMjcyMzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjczM2U4NDg3Yzg1ZGZkY2Y5ZmE3YjkzYzc0NmM5NDYyNWFlNDdlMTIwYzc5N2U3OTFlNzM3ZjllZDdmZmM3M2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fd3e502b4a7e4230a00aa7c1a88ece36",
+      "statement": "sql_compare.gold_satisfied compares result sets as order-insensitive, alias-agnostic multisets with numeric tolerance, requires scalar and single-row golds to also appear in the narrated answer, allows extra agent columns but not extra or missing rows, and has a label-tolerant fallback.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/evals/sql_compare.py#L1-L153",
+          "version": "repo-lines-v1:sha256:499052d2b0a03f779781b7d1f982e15f815bf62b6892e16ccca6b884a700bc96:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIzN2NjODk2YWNjNWRmY2VjYjUyYTkxMzdkNWZmNWI4MDg1Y2Q1M2ZiODZkOTRmMDFmZjRkYmY2Y2NiYzM0N2Q3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIzMzk0ZGQ5YzNhNmU3Mzg4MDIxMDUyZDcwZDU5MGU2ZTYwYjc1MDIwNThkODhkZjk2MjU5N2YzMjBkMTRlMzNiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/core/ai/test_sql_compare.py#L1-L60",
+          "version": "repo-lines-v1:sha256:b17acda6807b6265c638fb01d8750d0375f5ddfd1025484451b02c07bba63442:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM5Y2FkOWQ3ZTJjNTczMDU1NDU0Yjg2OTFkZDdhOTFiYjE5ZTEyNTJmNGJhODI4ODc1Y2RmMTQ2MDc0ZWMxNDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyYTg0NGIzOTQ4MWZhNmFkMDU1YjMzMGQ5MThlZmU4MDM3ZmQ0NTI3ODg0Y2JmZDgyZDIwZjY4OGY1ZjU4M2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ1Y2E1NmYxYjQxOTQ5YjYzNTViMmY2YTViMGY5YmZlODUwNGNhYjIzNGZkZjM0MThkNmYzMjM2NGEzZDI1M2IifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_264a63cd27bc422aa1ae0d726e5c5eeb",
+      "statement": "Eval runner tests are offline: test_eval_runner.py uses ScriptedChatModel, FakeWarehouse and a fake Langfuse client, monkeypatches route_question and casual_reply, and calls run_item with judge=False so no model or judge API is hit.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/tests/core/ai/test_eval_runner.py#L1-L60",
+          "version": "repo-lines-v1:sha256:1b71ed890b6cf8ddd97b7386cc3712e1d9219778dfa1bb5c4538ddab281000c7:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhNWRjYjU2NmY1M2VmNDFmYjk3NmRlZjgxNWI1MTk4YjM3YjM3NDM3MmRiYjMyNjg3NjBmZWYwNTZlZTBjZTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwMTkzZDk3NzE1YzA3Njg2N2RjZTlkYTBlNjU1ZGU3MTBhZGQyZWEyOGI2Yjg2ODVlNTY5MGRhMjQ1NjE3NTMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/core/ai/test_eval_runner.py#L151-L212",
+          "version": "repo-lines-v1:sha256:bd10f0250a1642902f254b4d7a60fcde01a9ed2511fa638123a6311e1ab52ce9:eyJzZWxlY3RlZExpbmVDb3VudCI6NjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhkYTYxMDU4MTFiMzYwMGRmZTQ4MTkwNjllYWI2ZDI1MjM4NTk0ZDNjZDE0N2I5MjQ3NTA3OGM5YmRmMTdkODYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkMzMxMjgyYTM5MDFhMWU0MjZiZWMwYmQ0ZDFkNGUyZDA2OGRjNGY2NzVjOTU3Y2M0M2I3NmU2ZGQyNWRkNTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJjZGMwYTkzZjRmMGU0ZDJjZmJjMzg2ZjFiYzQ3YWVlYjU3N2UyODdjODI4MWIxZjY0NTdjYjkzY2YwZmJiMjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c5f2d4f309764ed6a4ef2c83eee0b231",
+      "statement": "The eval README documents a manage.py chat_with_data_eval command and golden JSONL datasets, but no such management command or .jsonl file exists in the backend tree (only chat_with_data_setup and chat_with_data_dashboards commands), so the quickstart cannot run as written.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/ai/evals/README.md#L11-L28",
+          "version": "repo-lines-v1:sha256:2308372efcfef75ceffb0f7d4e33ecc89e11b64886567e8e6c7681ebca72ac8f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5NjMwNzMyY2M2MjYzMGI3ZDg3N2Y0MTMzYTc3ODFmZjcxYWE3ZjhkYTdlODU5NzQxMDNjZTQ3NWY3YmE2ODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExYzhiMTQwNWUzYTg5ZjQzZmFkZjU0MGViZGI5YTNiNjJmMTcxZDY5YTIzZDhlMzk3NGU4N2Y3MWYyYWM5ODgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFjYjg2MTY5NWE3MWY1Y2Y5ZWFjOGExMzE4MmMwNzI0MzBjNTAyZTA3ZTEyM2RmZGE0MjMzM2IwYTFhM2U3YzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNiNDQwM2VkNjFiYzQ5MGEzM2Q3NzlkM2UwYTA4NTE4YjFiZWFkZTA2ODk2NGU3ZTNkOTZmMzc4M2Y0MWUyODQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/management/commands/chat_with_data_dashboards.py",
+          "version": "repo-file-v1:sha256:c32f2a2fe756441aed260bd258ebf4a5d3fd953af539130e83a715c397af0b2e"
+        },
+        {
+          "resource": "repo://backend/ddpui/management/commands/chat_with_data_setup.py",
+          "version": "repo-file-v1:sha256:2896ca9930235a6517b289ed6bd7707eab455a35790789397f6e655fce650258"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

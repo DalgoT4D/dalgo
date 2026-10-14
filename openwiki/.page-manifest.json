@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "pages": {
+    "/openwiki/architecture/ai-features.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:b7a3b97bd1e5c7cd09b3aa026895c1be98938019cac1d005be0f4f547bce2a87",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/architecture/auth-orgs-permissions.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:440f990695931871e3d16fd404b046e457eb9c553e91a867ebac2f28dca1e8a8",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/architecture/backend-layers.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:7fae4b0f162b5796e90deebd075e8590a8380882cc53535e4e80d11acc04cdd0",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/architecture/background-work.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:a8a451493f69781f305a039171157c1bbbdd883715a45b8c140cc37b98a8813b",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/architecture/charts-dashboards-reports.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:4e95c930c17cc2cbd9de90b6fcef0b9c3e310e4c39635a250ee918405f4f1dc4",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/architecture/ingestion.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:e5e151402f9ab805e02b0c677414bf45680defc913bad1e5a723e010330ebb1c",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/architecture/metrics-kpis-alerts.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:cae968b258fccaa0f624f3cbd67f9323c079982ecc506303fab1654bd3839044",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/architecture/orchestration.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:4daf5d4c858c373a62b6e9ad7805d1f6dddb1a9cf8a807287000a2b75ffe519f",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/architecture/platform.md": {
+      "pageVersion": "sha256:2a044acdface1c445094feed5feabc6d65d021cc1e2ed1b3085c21bc12817b0c",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "8d801c16-bbcd-4f08-9336-3040d6a1c042",
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:b003a54df0e93f08d28d83dd495093a1313792658eff5479fdbd64680a5145df"
+    },
+    "/openwiki/architecture/transformation.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:9f13a60dd97a62c7666006f0627977b41fada80c161f94330aa2563ada50e233",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/architecture/warehouses.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:7363ee6875d3054a8726187141470a15539f0ece6bbd3c2eea83624eef8ae29c",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/architecture/webapp.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:7ac95c71a6743ae3ae600d297f219f04b6d60e83e1f9902062a80552004a5c10",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/concepts/domain-model.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:87451badecb5885550399b216059a4a237748edba36fc4ce681815cccb46cdfe",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/concepts/feature-specs-and-harness.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:bc89ecaaea7577c0ac7f6ff56f31ca974168e26711f27c74c46e78de83b57595",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/operations/environment-variables.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:0ff3460f2afde1cc0236c1bf8679ba82b9d43e5c24b38e5fa79d480bda105672",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/operations/local-services-and-dependencies.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:0156082778eeb676ddbb0ea08865d8cc8e4e9716dacb1f706fa61826dc90c619",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/quickstart.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:2966b27e809c66fc6248d2152dd28ed619934324c6e82e5b641c927d6352328c",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/testing/backend-pytest.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:d71ed5889caf901fd3a3fda215953b8dff42bf45744755ddafafa9363158326f",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/testing/prefect-proxy-and-ai-llm-service.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:39167143f7f7c6349bd0f6164f39091bf312ead6e88dd5a5c6c421b47521b7d5",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/testing/webapp-jest-playwright.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:02b26e4a533026f1c4cef6a154f8c8d395727c37239c9a6c62eea5c58097d470",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/workflows/add-endpoint-and-webapp-feature.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:99ee4dc3931501cd3dd84fdc64ad7cfd14f45c2cdb7092ae7cdc80db8fc1f7ff",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/workflows/deploy-staging-production.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:63328a483c956ffbcb8c9d64c229de38d87f41b093263e4db66fafcdef26883b",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/workflows/django-migrations.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:88865b3f332432b28daf91a62ec9030b6347509b339f3b03c35673a6efa7a7e8",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    },
+    "/openwiki/workflows/ngo-pipeline-end-to-end.md": {
+      "gitHead": "5d6ef6a159b001ce8929f3f2c089978f58e25de9",
+      "sourceFingerprint": "sha256:1b70d74724c6091f33d65ecc2469cc5137e1ff2e38bde12938c64af00ca14691",
+      "pageVersion": "sha256:ebbe8c00c4ec8eda0f199789caf4786a8eb5497a4af56e8d1ededbb813b84e4e",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "e5c31128-317f-4a64-b7b8-f329bc443b05"
+    }
+  }
+}

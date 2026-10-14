@@ -1,0 +1,436 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:e5e151402f9ab805e02b0c677414bf45680defc913bad1e5a723e010330ebb1c",
+  "claims": [
+    {
+      "id": "claim_c5b3d579fc42413d9aafd60e40158e67",
+      "statement": "All Airbyte calls go through abreq() in airbyte_service.py, which builds the URL from AIRBYTE_SERVER_HOST/PORT/APIVER/USE_SSL, authenticates with Basic AIRBYTE_API_TOKEN, defaults to a 30s timeout, and converts connection errors to HTTP 500 and non-2xx responses to HttpError with Airbyte's status code; the module does not touch the Dalgo database.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbyte_service.py#L1-L88",
+          "version": "repo-lines-v1:sha256:305eae26dc0cbec0f89a70c39a8173426ebed08259336607629281dbceec6205:eyJzZWxlY3RlZExpbmVDb3VudCI6ODgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3YWM4NjllMDJlNmI4MjE5Njg4NzJiODEwYTA4M2Q4NTlkODZjNzY5YWJjMTgzZjcyNTA5MGJiMDg5ZDk3ZDciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU4MTgzNzA2YTZmYjdmMzM2NzE1MTE5MThlOGYwMDBkMjYxMDNmZDU4YWEyODk4MGMyNTRmMGQ3ODI2MDMxYzkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1016a2a4732c44298d6f192381ff6f55",
+      "statement": "Dalgo validates input before any external Airbyte/Prefect side effect: Ninja Schemas validate request bodies, airbyte_service functions isinstance-check ids and config and raise HttpError(400) before calling abreq, create/update_connection require streams and primaryKey/cursorField for incremental modes before posting to Airbyte, and airbytehelpers.create_connection verifies warehouse, destination id, server block and Task rows before creating anything.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbyte_service.py#L308-L374",
+          "version": "repo-lines-v1:sha256:9e94c391f162f171c35307bc53bf8cbd8127ca92456658aa759b18ab26f0fd2d:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjOTI0YzE5OGI5OGZhYTFkZDAzNzQ0ZTdhNTM2YmU4ZTE4ZmU4NDhmYjc4NTM5MDcwYjE3N2ZjNzk1YzU1NzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMTliNDBmNzBjNDM2MmE0MmJmMDIwMDdjNGIxNjI3YjE3OTEwMjE2NmMwNzA2ZTAyM2E1ODIzNjQ5NmZhYjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1OGViOTFmOWIxYTk0Y2RmYTg4Yjg2ZmQwNWYzZjk1NDdlZjE1OTQ4NWM1NWRlNGRiZTMwN2U4YjViZjNiNDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFjMDI3YmNhZWUzMTI2YWE0YmM5MDY2YWRkYWRjNTdkZDY2ZjY2YzhlZDIzY2IyOThiMjg1YjM3ZWMyM2YyMzkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbyte_service.py#L733-L850",
+          "version": "repo-lines-v1:sha256:58bb23b95db2cbe5fb46a3d762a16f12452a54818c56ef55f18be81d8238fbe2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI3NzBmOTNhMmY4ZjVkYTc2N2VkOWJlYjc2MjA2MmFhOWM3NTkxNTVjYTg3N2RkMDUwMjAxNmM4ZWM5ZTI2NzRjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJiYzE5YjQwZjcwYzQzNjJhNDJiZjAyMDA3YzRiMTYyN2IxNzkxMDIxNjZjMDcwNmUwMjNhNTgyMzY0OTZmYWI0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJhNThlYjkxZjliMWE5NGNkZmE4OGI4NmZkMDVmM2Y5NTQ3ZWYxNTk0ODVjNTVkZTRkYmUzMDdlOGI1YmYzYjQ5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIxZjdiMGU1N2JmMTEwZGM5YzZmNmYzYjNhODMxMjc1Y2ZlM2M0M2FkZDViNWY3ODZhZjZiN2JhOTdlZWM3ODlmIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L300-L324",
+          "version": "repo-lines-v1:sha256:e1fb87c6277051d10bbe36735803be513f8cd2f311dbc674a842a79c81c45d15:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkxMTA1Zjg2ZTMzYTBkZDZjMTVhMGE0NWM0MzI0NmE1NWEzOGU1MmRhYmNjYzgwM2QxMDM3ODhjNzMyZWQ5NWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlZTZjNTEwNjFmNGVlNmQzY2M1MDBhOTUzYTgzZTY0Yzk3M2NiNTk5N2E5MTczZmJlYTRkNDgwODU4ZTEzYTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJjMDc5ZTkyMzc0OWYzN2VlOGFhYTBlYTI3ZjU1MWE2ZjAyOWEyNWQzMjU1NWM1YzNiMmFkYjk2MDNmNDAxMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM4NzQzZDA2MzMzMDRkZDAyMDlkMjY4MTc1ODQ5NjM0ODMwYzUyNGI1YmJjYjZjYzkzZmVlZjYzYzE5OWQyOGYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/schema.py#L108-L168",
+          "version": "repo-lines-v1:sha256:e8375a27f84ff2c581b98c4aa2fcf467cb64ae7d070a08d2d76594a3c34275d6:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjYjUzZTEzZmU5NGJiY2Q0MzdjOWJjMzVlNDY5ZTA2OThhMmM1N2RlODUyNGM5NDc0NDZkYWEzMjdkOGEyZjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ2MjU0ZjhmZDk2ZjIxNjNjYWMzNThkOGI2MWEwNWQ2OWYxZGRkZjhjYmU0YzBkODExZTkxMzIzZDA2MmFhY2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY5MDYwN2IzNjU1MjFjNGFhOTE3MzFhOWE0ZWFhZjUxN2E2ZDA4OGZlMjI2NTkxYTMyMzVkYzhmZWJkNDkyYzkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e59d87abcd3b43f2a4d8bd885f3d30ae",
+      "statement": "Airbyte's sources/update is not workspace-scoped, so update_oauth_source fetches the source and compares its workspaceId with the caller's org workspace before updating, preventing cross-org overwrites; source and destination audit logs deliberately omit config credentials.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/airbyte_api.py#L97-L137",
+          "version": "repo-lines-v1:sha256:085d653a4f4a803c3cfa519c5a8e648a08c5a39684326f04957d912db0bdc04b:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyYTI0YTk4NWE2Zjk4MGJmNTM2MzM0OGJmZGZiMGJhZGY5Y2NiZDhlOTRlOTc0MTQ1ZTllNTJhMDhiOTI5MjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1NmM0OGI4YmE1Y2IzZWE4Mjg1NjFlMDUxOTRhY2YwMjkyNGFkN2YzNDg4YTgyMGMyNzU2OGU0NzczMzhhOWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM4NDI5YjZjOGZlMDhkMGZmMGUzYjdlZGU2MDkxMDg4MzRkMDEyNGY4MGExZTRjMTU0YTc5ZDExNTE4Y2VhYjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjliMWUzZGVmYWU2ZWZiMzA1YmIyMzY4MGQ0MjZlZTk0NjllNzU3NDQxYTY3N2ViMjJhZGY1NmJlYWE2NjVkMDkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L123-L139",
+          "version": "repo-lines-v1:sha256:567bbd2fb4371d0cd9071032340bee79e17285ac169a5424b6a64767b01d549f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2ZDI5M2I2NmY1NDkyOTAzY2VjMjM5ZTg2OWZlOTU1ZTE2OTMzYTNjZTU5NDE5OWE0Yzg1MDE5ODdjYTczN2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1NmM0OGI4YmE1Y2IzZWE4Mjg1NjFlMDUxOTRhY2YwMjkyNGFkN2YzNDg4YTgyMGMyNzU2OGU0NzczMzhhOWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQyYTE4MDNjODc4YzY4OWQwOGNlNjA5YzFjMDQ3NjZjYjkyYTEzZjJhODlkZDA3YTVlNTdjZGI1ZmU5ODcwYmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcwMjljMzUxN2Y0NTg3MzBlZDU3NzM2NDJmN2M4ODlmZmY0NzI3NjUwMDAxMWEyNjA4YWZkMjVkMWM1NzI0YzYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_085ab853abb548ffbda1e52d1c729c11",
+      "statement": "Deletion is guarded rather than cascaded: a source used by any connection cannot be deleted (403), and a connection used by an orchestrate pipeline cannot be deleted (403); delete_org_connection otherwise deletes all OrgTasks for the connection, the Airbyte connection and its OrgSchemaChange rows.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L958-L1005",
+          "version": "repo-lines-v1:sha256:fe05324a1626eae307925ea9dd0f57a1e7f48ddfd33b755467f1b401898b3668:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk3MDBkMjA1ZDA2MTllMmQzMDk4MTg3NDk5YTM2ZmY2Y2Y3ZWQ4YzBiZDNhNDkzZDE5ODY1ODczZDQ4Y2I4YjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3ZGNlYmVjMGNiNTU0OTRiNGRlZDk4NWQ0OTg0OGEzNGQ5MjJmYzQ0NTc5Y2VmMDVjOTYzYzc4MGE5NGE4ZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM4N2QzYmE2NDNjZmMyYmU1OTY3Njk3NjE2MDE4ZjkwMzNmOWZmMWQxNjg4ZjY1MmI3Y2Q4YzNjYjgxNDVkNmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQzMDAwMzM5ZjRkZjY2NzJhNTU1YmZjOWU1MmUwOTBmZDY1Mzc0YzY4MzJhNzYxNzI4MTBmM2NmYjM3MTRkMzUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/deleteconnection.py#L14-L48",
+          "version": "repo-lines-v1:sha256:83f507d7ae34c0194820b29fed5f19ebe8b3cb427d595d806d7de6d27ef807ca:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRhNmNkYjk4NzIzZWFmODE3NGI5MGQxMjkzOTFmZTQ2M2M2ZDI2OTk5NWIwMzE3YjY5ZDg3ZWQ1MWUwM2M4NzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3ZGNlYmVjMGNiNTU0OTRiNGRlZDk4NWQ0OTg0OGEzNGQ5MjJmYzQ0NTc5Y2VmMDVjOTYzYzc4MGE5NGE4ZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc3MWQxMDQ1OTAwZDc3MTYyODBjOGZmNjU2NWQ0ZWMyZGU1ZDgxODU0ZDZmYzE0YmUyZDgyYTgzNGRkNzAxMjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_175739ebf4fa4c0b800e6f9c08c541b8",
+      "statement": "Creating an Airbyte connection creates the Airbyte connection first (manual schedule, destination = org warehouse's airbyte_destination_id), then in a DB transaction creates a sync OrgTask (with post_sync_transform) and a clear OrgTask, each with a Prefect deployment named manual-<org.slug>-<task.slug>-<hash> created via create_dataflow_v1 on the org's connection_sync_queue, an OrgDataFlowv1 (dataflow_type manual) and a DataflowOrgTask link, links the sync dataflow to the clear dataflow, and writes ConnectionMeta; if this fails the Airbyte connection is deleted as manual compensation.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L101-L113",
+          "version": "repo-lines-v1:sha256:15a13adc08d0b8715b390c0c9e872ee9065403294664019c2a1a76ae734e17cc:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwMGJhYzA1NDEwZWVlMDg4NjEyYzQ4MGRiYTEyMDI0ZTY3YjdlNzg1ZTM1YmFiZmE1MTExMDBjNTkxNTgyZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlhMjBjZTNhZThmYzYxNjYwNDBlYmI5YmMzYzI1MGFmODQzMDQ5NWUxY2UzNzE4NTY2NTIyZjk4Y2E1MTk3MmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwZTgxZDM0MzcwMjZkZGMzOWNjYmU4MzQwZGM0YjQ5MmE1YWY4ZjYzYzc0NjdhZTZiYTgxNzU5NTI5NGE0YzIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L258-L396",
+          "version": "repo-lines-v1:sha256:a6287f57d45301a88894271421e3091eebc39467c1630dbb26ca75e557b4d14d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTM5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI5NWIzN2YzNjljYmYwMGQ2ZmI2N2UxZDcwZTM3YmM5YjUxYzRjNTRhNDhlMzMzZjEzNDZmNWRiYzIxODdkMDhmIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwYmVhZjBkMTMwYzBkZGI1NTUzYzI5ZmQ0YzI1NDNjMzcwYTE5OTk3NTM2MGFkNmViNzdmYjAwNDYxNTRkN2I4IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4Y2M0YTdkMWNjNzk2YWJhM2U0NjcyMzMyN2Y1MTdlOWY4MTE5ODJkMjUwZjA3MDI5ODZlNGI1NzY0YWQ5NTg5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI4YzMyNWE4NzE2NDZmMTM1MzNhMTc4MDQzNTU5YzA4YzlkNTRjMDU0OWM2MzZkYTBhYjNmYzFlZDRjNmRhMDcwIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_d81875e7bcf648f99b0f5ac342a47e33",
+      "statement": "The Prefect task config for an Airbyte sync (PrefectAirbyteSyncTaskSetup) carries the task slug, the org's airbyte_server_block name, connection_id, timeout and orgtask_uuid; the deployment params are {config: {org_slug, tasks:[...]}}.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L101-L113",
+          "version": "repo-lines-v1:sha256:15a13adc08d0b8715b390c0c9e872ee9065403294664019c2a1a76ae734e17cc:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwMGJhYzA1NDEwZWVlMDg4NjEyYzQ4MGRiYTEyMDI0ZTY3YjdlNzg1ZTM1YmFiZmE1MTExMDBjNTkxNTgyZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlhMjBjZTNhZThmYzYxNjYwNDBlYmI5YmMzYzI1MGFmODQzMDQ5NWUxY2UzNzE4NTY2NTIyZjk4Y2E1MTk3MmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwZTgxZDM0MzcwMjZkZGMzOWNjYmU4MzQwZGM0YjQ5MmE1YWY4ZjYzYzc0NjdhZTZiYTgxNzU5NTI5NGE0YzIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L258-L277",
+          "version": "repo-lines-v1:sha256:31afb4e08a685dba8060e8035367110defc74557409748f4de22f20dd11c3106:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1YjM3ZjM2OWNiZjAwZDZmYjY3ZTFkNzBlMzdiYzliNTFjNGM1NGE0OGUzMzNmMTM0NmY1ZGJjMjE4N2QwOGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI5MGFhOTBiOTFmZTRhZWM0YTk3M2UxMDVlOTFjZjkxZWI5MDUyZmEwNDMyODVhYzRlY2Y0NjdjNmE5ZTNhNjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a4e656a7398a46268070eda4ec42d5c6",
+      "statement": "After create and update, an AirbyteConnection block named by the connection id is upserted in Prefect via PUT blocks/airbyte/connection/ on prefect-proxy, carrying the connection name and post-sync ops in extra; upsert failure is logged but does not fail the create or update.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L356-L372",
+          "version": "repo-lines-v1:sha256:a9ced02248e6586df6a416368e07f4874ec160b7dcad95344c98d27c3647a124:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhODc5YjgyNmMyYzk4NTI3ZDk4NWFkNDZmNDA4YWY4YTVjZDZkYzljYWExZjk3ZmY4MjI5OGIwNjhkMWFiNDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MDMyZTk2NGQwOTMyMzUxZTVkMTg1MjY5MjgxYjE3MWEzYTA5YjA4YjI4NmU2NjFlYTQ3MDMyM2M4MmViNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUwNzk1MTA0NjM5OGY5NDQyNWJlZmQ1Y2FmNDAyZjk4Nzk0OTYyY2Y1ODdhNDMxMDBiOWVkMTc4ZDYzNDExYzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNmNTZhYzI3NWQxNTkzZjQyZWUwNjU1MDRjMjYyYjlkNmI0YjM3OGNiNDljZDNmNDgyZjliNGViZjk3YWMzMDYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L737-L760",
+          "version": "repo-lines-v1:sha256:4645c3fbefa7109da25531185720c91792e08f57663760dbe7649d25d90519f4:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg2N2RmYWQyMzYwOGE1NzNjOWRhNTEzYzA2OGNlZmMyMjFjNDdhNzQxYzg3OGEwNTc2NTc2NzJiNmNhODFhMGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxMDM0ODFjNTdkMGYwZGMwZjc2Y2QyY2M4YjM2MDRjNGU4Mjk2ZGE0MTIyYWRkMTllODE3NDVkYzdlMzMxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhhOTIwMTk2ZTFlZDI2NDlkOTA2OWNiYjYwYjk2Mzc1N2NkODg0MzBkZDRmMGUzYzQ3NDQ0NDY1OWVjMmIxOGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxNzQzZDg0MzgwODBkYTlkZDUwZTYzYmNkYjhhNTdiMjM2MTc0NjIzOWEzZDMzOGUwMmVhMzQ1M2EyMTU0N2EifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/prefect_service.py#L256-L273",
+          "version": "repo-lines-v1:sha256:74c37ff959646e8017add921afae28ec144b1f58202e381ca5b02f62b7d6ea23:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZmQ2Njk3NzU4YjYzNzNhYjlmODAxMzA3OWY4MjUxNzEwMDg3M2M1ZDgxNWMzZmI3MDNhZDE2OGE0OWQ2ZGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1YjY5ZTNhZDA2MDgwZGVlNWEzNmIyYzgxYzIyZDQ2M2UxYWM5NWZiZmRmODQ2OTc4M2Y3ZjY3YTAxNmQwMTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhOGY3ZTU3YTVjNDE5MDNlYThkNTUzY2FlNDJkNmM1OTFjZmI0ZmE2NGQ0ZTBlNDBjNjRlZjE1MTJkNzg4OTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ2YTcwOTZiNTJiMTk1NjIzZWRhZThmMzAzMWMwYzgzYTE0MDZkZmFjZTA2MmFmOTFiNzc2NzVlNTA1OTRlMzYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7bedda7005494e9ba885a49ee993cf4a",
+      "statement": "Listing connections joins the org's manual dataflows and their sync/clear OrgTasks with Airbyte's web_backend connection list, computes lock status from TaskLock and PrefectFlowRun (queued until the flow run is RUNNING, lock deleted when the flow run is terminal), takes lastRun from the latest AirbyteJob per connection, and schedules async deletion (Celery, with a 10s Redis de-dup key) of connections missing from or deprecated in Airbyte.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/airbytehelpertasks.py#L11-L56",
+          "version": "repo-lines-v1:sha256:afa25895bfec43f6630ca950e0827a679c1b546432e8e81b89805cb7150732a6:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRjOGM3YTNjN2E4MTY4ZjM0MGVkYzc4YmE4ZTI5ZWE4MGVkYmNiMjI0NjBiZWRiMTE0NDQzZDMzYTc1YTc5YjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRiNzM2M2RiZTE4MDUyYmI4M2I2YTc5YzBkN2EzZmZlMTY0ODVkM2Q0MTdjM2UyNjhkMGNjOTdmMTRmMzM4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/orgtaskfunctions.py#L250-L278",
+          "version": "repo-lines-v1:sha256:c04292fbd2bb500b43ada08eb9318dffbe3612541fa14e0bb6953a8f25d61c69:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyYzJkZTBhYTIxMWU4ZWMzMDIxODM0N2E2N2U5NmRlNzg0OTRhZmEyYjU4NTliMjBmMDVkODc1ZjNhOGU0NzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTYwMGE3M2QyZTAyZjM1MmI5MGZlZjFkOGQ2MzgxMWJhNGE4ZWUwYzFiZWFhN2FlNDY1OGYzNmFhMmUxOTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyMTQ2NjU1Y2E1NjgwMzdlNzAxZTlmZjk3YjY2ZWRmOGQ1ZDhiZDdmMGJiNTQ5ZTAwMDA1ZjBlNTY4YzJhY2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L399-L625",
+          "version": "repo-lines-v1:sha256:ac083427bcfef7490da1560916463f1aaee35339bcf32cf165dece3adf3b931d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjI3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyOTA4MzE1ZWZhMDNlYWJmM2IxNzE0ZjVhYzViYjFlZTlmODI5ZTAyYTUwYjJjN2VlOTU5Y2FmNzg5ZDI3NDJkIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwYmVhZjBkMTMwYzBkZGI1NTUzYzI5ZmQ0YzI1NDNjMzcwYTE5OTk3NTM2MGFkNmViNzdmYjAwNDYxNTRkN2I4IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJkZjcxYTgyNzEwY2U3YzIwMmIwNDRhNWIyZmY5ZTdlZWU2ZThiMTVhODMwNTY0NGI4OTkwODUyNDdjZTQ1Nzg2IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIyYzc1MjQ3YWRjZWUxMTBiZGIzYzUyOTc1M2E3YTA3OGQyYjJkNzQ2MTZhM2QwNDkxN2M0MzZjYmY1NDg5NmRlIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_75dfdd792fc14576aab3a54f467392b9",
+      "statement": "Updating a connection always resets it in Airbyte (skipReset False), renames ConnectionMeta, saves the new post_sync_transform on the sync OrgTask and re-upserts the connection block so every pipeline using the connection sees the current cast config on its next run.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L694-L762",
+          "version": "repo-lines-v1:sha256:23705f4af51c321e895ae4b7a0f0a8c372d33567daa51f2b0ed78babfb357c43:eyJzZWxlY3RlZExpbmVDb3VudCI6NjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdjNWQyNTgxYjQyNDkxOWNhYTNkMzJjZGIzMDBhMjIyOGM2YzYyNDQ3ODVkZDIwZWVlYWY1MGIxYmVmMzhiMjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiZWFmMGQxMzBjMGRkYjU1NTNjMjlmZDRjMjU0M2MzNzBhMTk5OTc1MzYwYWQ2ZWI3N2ZiMDA0NjE1NGQ3YjgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRmNzFhODI3MTBjZTdjMjAyYjA0NGE1YjJmZjllN2VlZTZlOGIxNWE4MzA1NjQ0Yjg5OTA4NTI0N2NlNDU3ODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYzNDFkOGNjZTY0NWIyMDFlODdkNDkyYTczYjBmNjEzMGQ3NTkzY2Y0YjNiZTAwZTVkZjNlNjZkZmQ1Yzg2YjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3a2ef754ba0b4f7f8879a736aec9a5f9",
+      "statement": "New-connection schema discovery runs over the websocket wss/airbyte/connection/schema_catalog: SchemaCatalogConsumer validates the workspace and sourceId, reuses an existing SingleTaskProgress entry if present, otherwise enqueues get_schema_catalog_task (600s TTL) and polls the progress entry every 2 seconds, responding with the catalog on completion or an error.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L483-L508",
+          "version": "repo-lines-v1:sha256:0b09fc6310c3df0cf5b14e6f248ec3a059a19d5e2b9c4a5bb89513b3b6716f86:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljYWRmZDM1ZDEwMzk3NjE3MTc5YWNiMGFlMWQ0NWI3YjkyY2IxNWU2MWI3ZTBmYjg3YTFmMGNmMDk2ZjQ3OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFhYjljOWQ1NDBiNWEyNDJkMTFhZWUwZjU2N2RiZmNmNjcwNjAzYzkyZDE4OTZkYTA4NzQ3YjY2MGRkNzc1ZTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY5MTg2MGJkMWUyMDZkNzU3MmY5ZDE4M2QxMzc3OWE1ZTg3YjhiOGZmMTViMTk3ZTJkMzdlOTk1ODdhMzc4NmQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/urls.py#L34-L44",
+          "version": "repo-lines-v1:sha256:734726b05d78660afd5658efafa0ca462a0016abd6ca63937fc2143251d6811f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNkNjUzNDc2YzVhZjUxNzI4ZDgwOWYyZTVlZGMxN2YwYWVmZDk4NDcyMTEyMDQ1ZDI2ZTE2NGYyNGIwZGFlMjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NDE2ZTA5Zjc4YmEzMTZjMDMyNTY4MjEzYjg1NWVlNzU2ZTQxNTY1ZDkxOGYwOTUxOWM4MWZkNjIwZjQwNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZkYmZmZjQ0Yjg0ODAzZTZjMWI1MWYxMjNhNDNlMTBmZjQwZDI0N2Q4M2ZjYWY5YWY4YmUwNmFiMjkzMTMxMzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/websockets/airbyte_consumer.py#L134-L235",
+          "version": "repo-lines-v1:sha256:cb88dfe9720184d274d4c10237a8b4096bacae71de209c82d5b3ea3631fb2b13:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0MzA2ZDhkMjE2ZDc2MDE0ZDkxNjZhYjlkMTQ3YTZkODJlM2EwZGM0MWM4NjRmZjhhMzA5ZGJlYjc3OTM3NTcyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0Y2Q5OTFmNGJiNTlhNDhkZjU3ZWNjOWUwODU1MTUyYTIxMGM4NDg2ODUyZTY4OGI0Zjc2YjZhMmI5NGUyZTQ4IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiM2RmMmFjZjA2ZThjM2YwM2M3MTM1YzZlOGFjNWE5Y2E1NDMyYWJlMDZhNzRhY2EwZmRkOWE1M2EwMDhmOTg3IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_474e15f8cb864199bbc15b61475e1018",
+      "statement": "Schema drift for an existing connection is checked by GET /v1/connections/{id}/catalog, which enqueues get_connection_catalog_task and returns a task_id polled by the UI; fetch_and_update_org_schema_changes fetches a refreshed catalog from Airbyte and upserts or deletes OrgSchemaChange rows by breaking/non_breaking/no_change, auto-accepting non-breaking diffs (with skipReset and an audit entry) when OrgPreferences.auto_accept_non_breaking_schema_changes is set.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/airbyte_api.py#L795-L818",
+          "version": "repo-lines-v1:sha256:4cbbd488e7e6ab53a3e6aa3fe283e9b2aa25525524c641da0c86452136dba1c7:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2ZWIyOTFjODA2ZmQyYThiMzAwNjc4OTgyZmNhNzkxMWMyN2QyN2IzM2MzNjVkYTY4MDQ5ODc1ZjQ0YmY1OTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE5YmYyMjVlYmViMjdkNjM1MTMxMTE1NzE2ZWU2ZDU0ZmRhZmQwZmU2NjdjYTBjNWIzZmYxOTk0YjBiNGNiNGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY5MmNmMDIyODUyYWRiZThlYzY5ZWQ2YzYxZDc1MjM1NWY1NDFiNWNiNGM4Yjg5ZDQ2NTZhMDMzNzViYWU2ZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBiOTdhM2ZhZGZjZjc3OTM5NTJkNzU4YjNkZWEyYjAzNmRiZTIxOTViMWRmMmQ2OWIwNWZhNzUyMWNmOTYyMmIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L437-L480",
+          "version": "repo-lines-v1:sha256:be00b619429e7e5dca1172e4d85ea1496a2b5189e0e89391df443069b7a00928:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRjOGM3YTNjN2E4MTY4ZjM0MGVkYzc4YmE4ZTI5ZWE4MGVkYmNiMjI0NjBiZWRiMTE0NDQzZDMzYTc1YTc5YjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3YTgxNDQyMTc0N2M4OWNmY2VlZjdhZDQ0NjZhODkwNjM1NDZlOWVjYWJkOGZhZmFjZTYzOTVjYmQ4NGM4YzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE0MjI3NDgyMTZhNDE0OTVlYTgyOGFjMTViMTQwMTQ0M2Q0OTA2MzlmNTRjOTc3MGIxNzViZWFkNzFjNTZhNmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY5MTg2MGJkMWUyMDZkNzU3MmY5ZDE4M2QxMzc3OWE1ZTg3YjhiOGZmMTViMTk3ZTJkMzdlOTk1ODdhMzc4NmQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L1008-L1095",
+          "version": "repo-lines-v1:sha256:ef1e53cc5f2a1dbe903a391035adf886eb7e38290cb2fa2899e2aefec77f426e:eyJzZWxlY3RlZExpbmVDb3VudCI6ODgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3MTBjYjgwNjc2NzQ4MmUxYjU2NWMxYmQ1YTIzNzJiMTE0ZDFhMTdjMzRhZGU3OGMyNzZmNmU4NWM2MzIyNzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkYWUxODVhOTlmMWM3ODhiMDZiZmUyMTllYjlhNzUzN2E5ZGNiMzU3M2QzMGU4N2ZlODc0ZTNjZmYzNGM2MDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyMTQ2NjU1Y2E1NjgwMzdlNzAxZTlmZjk3YjY2ZWRmOGQ1ZDhiZDdmMGJiNTQ5ZTAwMDA1ZjBlNTY4YzJhY2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVhYzRlMmQyMjQ5Njk2ZGY2MWFhYjQ1MDViNWZmNTc2YjUwZWNiMzg1NTNkNTkxYjRmODMxNzA2OWZkYzJiOWIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_56762d72aec242babe9471d382f01ca8",
+      "statement": "Accepting schema changes (POST /v1/connections/{id}/schema_update/schedule) locks the connection's tasks, creates a flow run on the sync deployment with a refresh-schema task config (UPDATE_SCHEMA slug), records a PrefectFlowRun and stamps its id on the TaskLocks, and deletes the locks if flow-run creation fails.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L135-L151",
+          "version": "repo-lines-v1:sha256:f5d0104bea8c69e8956a94308ce672a39ed15b321d7e5aa29ab2ceb7c96f869a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI4NzFlM2JmMTYyZDZlODZhYTMyMDRhOWNkZWJjODFjNjZmZTFmNGRlY2Y2ZWNkMDVhN2QzMzI1ZDMxODM4MjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYyZjYxZDA1NzUxZDJhNmIyYTcyMjVhNzMwZTc1MDllMWMxOTdjMzhkMWUzZmVhZjgyNDZiNjA1YjAwMTkwNzAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L1116-L1189",
+          "version": "repo-lines-v1:sha256:0f002c2a78fa626fcc8b176a6e728ac28ec9821ecf7e40c12bba9f2de743a493:eyJzZWxlY3RlZExpbmVDb3VudCI6NzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiODMzZWUxYTMxYmM5ZjdjMjc0ODY1Zjg2YzQ5NTNhZTM4NTI4Y2M1OWI2OTQyZDI5OWRhNzA1MWY2NjVjOTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMTliNDBmNzBjNDM2MmE0MmJmMDIwMDdjNGIxNjI3YjE3OTEwMjE2NmMwNzA2ZTAyM2E1ODIzNjQ5NmZhYjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYwYzQ0ZmQzMzVkZDdjYjQ0Y2UyNGZkMGUyMjNmODlkODliNWZhYWM1MTVmM2Q4MDhmYzUzMTA2NWQ1NWM2NDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMyMWIxN2Q0NjcyNTE1ZGVjNGI2NWJmYjBhZWM4MzNkYjVhMGVhMGIwYmU0MWFjM2E4YmU0NmQ5ZWFhMzQ1ZWMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/prefect_service.py#L580-L612",
+          "version": "repo-lines-v1:sha256:6fc0306908145ace9e593bdd378464d9bb009051af8261a6cdf12c6c04356357:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzOGI3NjJkZWFlYjBlNTEzMzc2ZDRlOWYyZGQ3ZjY0YTIzOWNiZmJmNzdlZWRmMGFkOTgzMzhhMWM0ZmY5MWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3OGEzODIzMWZhMDYzNzNlZWQ1MGZhOTM2MjE5MGZhZWExMTBjMmM2YzJmYjkxNmJkYThiNDMxY2E3MDkzNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1OGViOTFmOWIxYTk0Y2RmYTg4Yjg2ZmQwNWYzZjk1NDdlZjE1OTQ4NWM1NWRlNGRiZTMwN2U4YjViZjNiNDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjViZjI5ZWJkM2RhMzViZjg3MzYwNzgxNTM5MmE5OTlhMDk5YWI3NzUxMDBiNTdkYTYzMDkxZWExMDY1ZDA4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b230b9608dd34c8f8aebe6af2f0e0305",
+      "statement": "A sync is run by Prefect, not by the Django backend: the webapp POSTs to /api/prefect/v1/flows/{deployment_id}/flow_run/, and run_airbyte_connection_flow_v1 loads the AirbyteConnection block (falling back to an inline block with no post-sync ops if it does not exist), runs run_connection_sync and then the post-sync-ops task.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/pipeline_api.py#L256-L291",
+          "version": "repo-lines-v1:sha256:b1d340e38ee961ba6f608df7c6b2424e0d09f5b23556dd7e16df2aac27beb09e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYyOGIxOTQ1MjQxZDQ2NDRhNGZlMDBhZDhkM2Y5NmY4M2ZkMjZkZGQyYzg5M2RjY2E2MDEzYjJlODhkMDJkMjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyNDMxMjU3NmYyNDc5NDI1ZjhkNTM3MDRlMGE0NmRkNGZkNWQ0NDhlZmM0N2M0Nzk2MDQ0YTQ1YmRkOTIxZDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJmZmVkN2M0ZjBjNjMzM2RjZGNlZWM1ZjIwMjViNTUyMDQzZTE1OGIwZjExMGE1OTdjMDU5NDQ4MWU5N2ZkMmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY1NWMxMWIyNmJiZmVjY2QwZTgyYTI4ZDhhNmJiMWIxMmMyMzc0NTlmZjBkMjNiZjFlYjRjNzdlNDM5YTE1NTAifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L280-L321",
+          "version": "repo-lines-v1:sha256:bfaf8e172c60a253e466197d701cf4c93d18afc90076cc87e8d4eb8a4bc3e28b:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1ZjdiZmVjMGIwN2YzMDQ1ZTY1MzhjOTljMWY0ODkzODRiZjZlZmQxMGNhM2Y0ZDM4OTYxYmZlNTg5MDBlY2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMTFjMDU2N2QwYTVmOWU5YjEzNWY2NWNkMjUzNzJkZmQ2Mjg3NzVmN2MxZWQyNTNmOGJhZDQyZGQyZDY2NjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI5ZTE3MTM3OTdmOGE5ODQ0YzYzM2ZiNjUwZDZhYjg3YzYzYTUwZDg3MzQxYzllZDNkNTAxYjQ3YmY1ODQyMzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjllZTgxNzNmNWZlZTU2OWU5ZDAxNjRjYzRiMmU2MmI5Y2U5NzRjMmQ5MTMyMTY4YTE1MjdkNWU3ZWE3Y2E3YWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_04970aa503314b7cacdbe1903d5a5117",
+      "statement": "The vendored prefect_airbyte package triggers and polls syncs through Airbyte's public API (POST /api/public/v1/jobs, GET /api/public/v1/jobs/{id}), and its job-status polling retries transient errors with exponential backoff up to 8 attempts but does not retry a 404 job-not-found.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/prefect_airbyte/CLAUDE.md#L21-L51",
+          "version": "repo-lines-v1:sha256:4550ff73897190f3b5db1a81bfd5240ef1974506af3561e3edc79e2deb051a0c:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhNjQ1YjNmMjMzNGI2OGYzYTBhNmZiNDU4ZDQ0MTYyZTNhMjMwYTY4MWNkMmQ2ZDk5NTY0ZWYxMTJhNTA0ZGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA1N2I0ZGY1OTkwMzI5YjM3YzRmZDk2NGQ3NGY1ZGI4N2E0MmU4NGZmZWU3YzdmNzYyNGQwZGE3MmE4Y2I5NWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFmODc4Yjg3Mjc0ZTc4NDQzNzY3ODZiY2FlMjBjNTEyNmY0N2NiODVhZDZlYmJkNTYxMjhjOWNhZDVkYzUzZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM3YzI4OTdiMmEwOWYyZWRjNWU1ZDM5MjdhMWI0NGE0NTdlNzRkMGI2ZmFhYWU4YTU4YmUyZGU2OWFhMTQ5YTQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4751bda65ae14866aca91eec6bba1e24",
+      "statement": "Sync job stats return via POST /webhooks/v1/airbyte_job/{job_id}: an unauthenticated-by-JWT endpoint that requires an X-Notification-Key header matching AIRBYTE_NOTIFICATIONS_WEBHOOK_KEY (else 400) and enqueues sync_single_airbyte_job_stats, which calls fetch_and_update_airbyte_job_details to read jobs/get_without_logs and update_or_create an AirbyteJob (latest attempt = highest id, started_at = min attempt createdAt; no attempts or no createdAt raises).",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/webhook_api.py#L71-L79",
+          "version": "repo-lines-v1:sha256:e1ce00abeb68901c89e79af3e9a7e19292f3c3280a2b681898f2a5289da083db:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjFhOTZkMGIwMTQ1NDMzNmJkMTBlNDljZmQzZjk5YmQwYWM4NTE3YTZhNzdiNTQ2OWZmNTM3OTEyMmEyNDg2MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGU2NGVkNmFmOGQzZGVjNzA3MTIyOTU5NjVkMmM3Yjc1MzM0NTUxMTI2ZTZmZjM2YWNjNThlMmYxN2UwZWEwNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTU3MTJlYTMxZDgzMTY1YWI0NWY1MDNkMzNhMmM2ZmU5YjIxMTc5NDgxZGRmYmY3Mzg5M2MwM2FkNzZkNTMyYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L1138-L1143",
+          "version": "repo-lines-v1:sha256:1c5d7e6caa6051bbc7e0730a5129d4c793c95f5ecf21b2e01116f4d450c9af54:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGI5ZTZhZjVjNjY4MWQ5Yjc2NzVhNTMyY2UxN2UyOTZiZjllMzdjNjQ0YTg3NzZhMDMxNDY0ZTlkNGE5NTQ4YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjNkZjJhY2YwNmU4YzNmMDNjNzEzNWM2ZThhYzVhOWNhNTQzMmFiZTA2YTc0YWNhMGZkZDlhNTNhMDA4Zjk4NyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTAxYTE0YjRiZDRhZDRiNGE1ZWQwY2I1NmE0NjIwYzY3MTg3YzU5NTg1MzAwZmRmOWYxMjI3OTU0NDUyMDlmYSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L1192-L1248",
+          "version": "repo-lines-v1:sha256:ffdf01b89ee4d7dd9ea7c567a1f474c6d2cc34221ceb1b918768fc6330790535:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxNWJmZTgwMTE2MDlkZjJhMzNhYTlmYmZhYTA4NDViMjY1NDgyMWI3NjFiY2U0N2QxM2VkMTYzZTZiODg1NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0OTkyN2U0ZTM0NjFmNmIwMjUzOWQyN2ZjMjU3YTRmMTM2N2ZiYTlhMjRkOWNiMTZlY2Q4OTU5ZWQ2M2Q2ZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1OGViOTFmOWIxYTk0Y2RmYTg4Yjg2ZmQwNWYzZjk1NDdlZjE1OTQ4NWM1NWRlNGRiZTMwN2U4YjViZjNiNDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNjMmI3MmQ1MmFlOTE2NmY2MmQ3MDU1NGJmN2RmNTZjZDA2N2NiMTc2YjUxMGIwNGZjYWYxMmJjZDVjMGU4ZGEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/routes.py#L114-L114",
+          "version": "repo-lines-v1:sha256:a232929e868e9b77a9e3a8f79d97086ab01a58e625bdcd40c70b09eec75072fc:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTIzMjkyOWU4NjhlOWI3N2E5ZTNhOGY3OWQ5NzA4NmFiMDFhNThlNjI1YmRjZDQwYzcwYjA5ZWVjNzUwNzJmYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTIzMjkyOWU4NjhlOWI3N2E5ZTNhOGY3OWQ5NzA4NmFiMDFhNThlNjI1YmRjZDQwYzcwYjA5ZWVjNzUwNzJmYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDU4YTY5ZjQzOWYxZTQ3MGMyMmU1ZDBkZWU5NzlkNWNhYzA3ODAzZmIzMzc1NjA5NWNlNmYyZWNlMDMzMzc3YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNWZjY2E2MjIwMmJhNzU1ZjBiYWFiOGZlZGJiMmZiNmVhNjFlNzZmYzBhZjQ4YjFiZTU0NTU5ZGRjYjc1NTlkYyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_85394e6797bb43d2b130079b6973e2a9",
+      "statement": "AirbyteJob rows are also backfilled without the Airbyte webhook: the Prefect notification handler re-syncs the last 6 hours of jobs for any flow run containing an Airbyte sync/reset/clear task, and a nightly Celery beat task syncs the last 2 days for all connections; the UI's lastRun and sync history read AirbyteJob rather than Prefect.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L1333-L1338",
+          "version": "repo-lines-v1:sha256:135b8db546fb4548f4e85c8bc6f66c710e61246940972465c9c67b38e1b5ea1b:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGZmY2VmNTcwYzdlMDEyNGVhN2Y2YWFmMzZmYTcxNDZiZWFlN2M4ODY2MTM4YWM0YjQxNGVkZmE0ZGVlYzE2NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzBjMWYxODhmMTQyZWQ3YTgyNDY4MGIyMDcxNzJjNTUxOWJjNjE0YTQ4ZmRhN2NmMTY3ZWRiOGRkZjc5OTU2YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzg0MmYyOGQ0NThiYWY3NDMzMzY0YWNjYzlkYThjNDIwYzc2Mzg5MTYyYTlhNzA1YmNlZjE2OWY5MWMyMjMyZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNWQ0ZmQ2Yzc0OTMyMGI2MzQ2NjEyNDMzMzM0MjNkOTQ4N2NjMDg5MDQ3MWYwMGVkYzRlYjk4NGJjMGNiMmZiYiJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/webhooks/webhook_functions.py#L370-L388",
+          "version": "repo-lines-v1:sha256:329d678f1d0a655a924ca79aff1a4c34e20f0dc31b8dddc96f7d4c1d3fdd4b30:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3MGRhMDMyZmJmZGJkMWI0MjRlODE0YzIxMmFlNTg0ODRlNzZmNTdkYzU2ZGJmZDEzYmY4MDM3MzZkMzI0YjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwMDEwNWUwYTY4NTIxYzNkMzMyNjE1MzkwZTg1OWUzOWNmMjQxMjc0YTdkNzgxZDE5NmEzYWRhMDdiMTBmZDciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhhODNhYTUwYmE0NDJlOTExMmNkZGExZmZhZGQ5MjE5ZGNmMGE2OGQyZmMwMzhjMzkwM2RiYzU3ZjM4NGNlNGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlmNWM2Yzg5ZjMwZTY3N2NiN2E4NWEzNGUzMTQ5NGRkNDBhZjAzODMyODFiMzA3ZTZjNjU4OTIyNzIyMjU4YTkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L789-L846",
+          "version": "repo-lines-v1:sha256:9b4fe94c05a6d92a79cf0fa9d5853ea37f6c15f93ea772249a3552e5a5316f17:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIwOTkyYzIyMTE2NmU0MDY4M2QxODhiOWU3ZDJhYzNlN2NiNzMyZDRiYTA3NWUwZTg0MTk3OTI0Y2I2YzRiMjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiZWFmMGQxMzBjMGRkYjU1NTNjMjlmZDRjMjU0M2MzNzBhMTk5OTc1MzYwYWQ2ZWI3N2ZiMDA0NjE1NGQ3YjgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM5YjZjM2RhZmQ2NWQ1MWNiYWZmZmUwNTkwOGQ3ZGY2ZjkyMTZiYmE4ODg0NzEwMmFmNmUxNzczNGIyMDY4N2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZjMjUwZDk1NjIwODhhYjk2MTQ5NjVlMGQ5YTdhMDdlYzVkNzkyOGRkOTQ1YzFhN2NjNTlkNGRiNDExMWQxMjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2f00a821cfb541d6bf913548f1621d90",
+      "statement": "Ingest-cast stores the user's column cast config in OrgTask.post_sync_transform of the sync task; build_connection_block_extra converts it into the AirbyteConnection block's extra (env with the warehouse dbt-profile-secret-block, and post_sync_ops with Airbyte-normalized column names), skipping ops with a warning when the warehouse or its secret block is missing.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L52-L98",
+          "version": "repo-lines-v1:sha256:af465c24181a2f7f961dfc73bae1ade09501e0b880edf363df0dea035d60bd3a:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2NzVmNTU3ZjVkYjc2MjJhNzI4OWU2OTMwZTA4ZDNjZDBkZTM5NWVlZDFiYmRlNDJiMzhhY2UzOGRlMmYzMmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3NDQzYWQyYTI2NDU0ZWNkN2I1NTA5Yzc0ZDk2YTBiYTNmNjIxM2Y4ZmNjNWUzMDExMzU1NzgzOThmMzE5N2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUwYWRlYmYxNTUzYzIxZGI2MTk0ODk1ODU2OWFlNDdmYTgxODNkYTIzMmQ2NjNkOTZjYjZlMmJhMzE3YmFhNzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ5ZmMxYWI5NGYxMDU3Y2ZlOWE2M2QyYWM0ZjI0YTlkMDAxNmRlOTUzNGQyYmU0YzRlMDA3ZTY5OWQ4YTlkMDYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/tasks.py#L85-L99",
+          "version": "repo-lines-v1:sha256:3b31c87983617885937b0d15a2ef6d703267b9ffea5d6c4dcdf9694659ddb429:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0NWYxNWQzZTE4YzhmYTI2ZTg1MmI3NWNkZTE5NGEzYTM1NjFlZGQwY2FlZGIzMDFlNzc5MDYxZjZiOTlmYzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwOGVlYmNkYTI1MDcwYjExN2VlYjc0ZDVjMDkwMmY4NWUyYWZjODRmYTRmZmI2OWVjMzVkZmY0N2E1YzUwMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBmOGNmNmU2MjBjMDg2ZDAzMTIyYzIxNThkMTY2ODZkMmIzYzBkZGE3YjY1ZDdkMjc4YjVkNWFlOGE2MDMxMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUyZWYzYmNmN2M4MGJiMGUzZjE4ZmExNDhjMDBjY2MyNTdhZmM2MDA1OTRkNjA5NDhhYWM4MWQ2ZGMxOTE3NjgifQ"
+        },
+        {
+          "resource": "repo://harness/features/ingest-cast/v1/plan.md#L11-L52",
+          "version": "repo-lines-v1:sha256:4a10820d972d911ed27b7c8a11435403f2f893038d6eeeb610253d3f2ecb2b03:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlYzQ3NmJkOGE5OWY3ZTJhMzYzYzZjZTczMTM0N2I1ZTk1ZTE2YTYzZTA2OTM0NTI0YmE1MmQ1YjBlZDUyZjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE0MzgzMTk4YWRkY2RjMDFkMzlmN2Q5NWJhZWU1M2NkZWY2NmUyMzliMTJmMTU4YzRjNTIwYzdkZmZmOGVhMGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_987aefe459294649b643965b5f306b5c",
+      "statement": "Post-sync casts execute in prefect-proxy at flow-run time: _run_post_sync_ops loads the secret block for wtype and credentials, builds dialect SQL (Postgres ALTER TABLE ... TYPE ... USING; BigQuery CREATE OR REPLACE TABLE with SELECT * REPLACE preserving the live table's partition and cluster spec), and a failure in this task is caught and logged by the sync flow without failing the already-successful sync.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L304-L321",
+          "version": "repo-lines-v1:sha256:0a161c1ac824ee03a1b8d2fe5bf158fbdcac5fa6e4979799430b0eab8e23a6ac:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkYTVjNjZlMTdiMTQ1Mzk3ODM0YjhjODU0ZGM0MTkzZTIxMjUxODBhODk5NmExNGMzMTg4MzMyNmIyZWZiY2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMTFjMDU2N2QwYTVmOWU5YjEzNWY2NWNkMjUzNzJkZmQ2Mjg3NzVmN2MxZWQyNTNmOGJhZDQyZGQyZDY2NjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM4NmQ2NjdkYzQ1MDkxNTM4YjgxMzcxM2Y2YWMwYmNlZDg5ZDQyZWY1Y2VkOGM1YzM3Zjc3Y2E1YTY2YzBkYzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjllZTgxNzNmNWZlZTU2OWU5ZDAxNjRjYzRiMmU2MmI5Y2U5NzRjMmQ5MTMyMTY4YTE1MjdkNWU3ZWE3Y2E3YWMifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L72-L277",
+          "version": "repo-lines-v1:sha256:6e08c15ea3923e70e9187bdc83dab4978f19e12a56fe38e11e9e9dd0a86a6ea7:eyJzZWxlY3RlZExpbmVDb3VudCI6MjA2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJlNzVjZDkxMmVkYmNhZDg1YzllOWJiN2QyY2I3NDYwMmRhYjQwYmNkY2NiYWQ0MjQ4ZWE3ZWU0MjNhOTE1ZDMwIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJiMTgwMTA5YjQ0MTVkNmE2OWQ1OTMyMDIwMTk0MWFmZjkzOWRiNWMwMTA2ZTAyY2E5ZDA0ZWMwZjg1NTI3MzE5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI0NGIzMzk1MjZhNDJkNzQxZWUzZThlYjE0N2Q4NzQ3YjJjOTk4MzFhZmNhM2E5MWYwNDBlMGExMDE0ZGI1NTdhIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzZTQ4MzkwYmU1YmZjYjQ0MjNkMDliMWNmNTViYzU3NjgyMTc5NWNlYmQ3NWVhNTI4M2ZhOTFlYmY2MmZjZjViIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_ec82234115c64fa090ad602f87bcb60f",
+      "statement": "In the webapp the cast column is offered only for sources listed in CAST_SUPPORTED_SOURCES (currently Google Sheets), requires column-type confirmation before save, builds post_sync_transform ops from selected streams' cast types (null if none), and analytics reports only a boolean has_post_sync_transform.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/.claude/rules/ingest.md#L47-L54",
+          "version": "repo-lines-v1:sha256:9650f5ab767bf22a2665aa04d14e6b211a5461f489cdd81e54e0c1145e415316:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTlkNGMyMzI2OTlmZTllYzg2NTY0NTFmNmZmNDAzODQ2MTdhMTliMWI0MGEzMzc1Y2JiYWJkOTMwMTQ3MThhNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2Q1MzMwNTZkNGE4MjQxY2U4NmYyMTA3NDQyNWVhNjcxMjkzOTJkY2ExMjA0YzM3OWYwOTg0OGJjOGFmMzQxYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDRjNDhjOGZhZDFjZThmNTcyNjFmOGNjMTEyZTgzNWQ0MzgxM2FhYzUwZGJmMzBlZWY4NTFiN2NkN2ZjNmNiOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://webapp/components/connections/connection-form-body.tsx#L157-L224",
+          "version": "repo-lines-v1:sha256:9cc53fec007b95961f296b02fefe1aa088bdeff7bdd452142db42e02d4107d33:eyJzZWxlY3RlZExpbmVDb3VudCI6NjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUzZWNlMzQ3NWU2NWM3Nzc3NTVkODY1YWFhOGZjMDM1MGNkNWY1NGNkMTZmNjgwYjJmOWZkOTQ1MjNlZTRhOTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0OTVkZDRiM2YwNjY2ODQ1MzkyZWNhOGE1ZjhlYTVmOTc4Y2VjNTUxYzI1MDQ4NDcyMmFiYmQxOTBkOGM0NWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZlNTk5Y2FjNzc3ODhhNTIwYjQ2NmEzMDIzN2ZjNTUzODRjMGZiNTE0N2RkYTNlMWE4OTc5OWFkNzBkZDhlYTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyZmJjYWRiZjNiMTQwYTU2ZmZmMTQ4MTI0ZTM1YjE4ZTNiZjAzMjlmNWExNzVlMDQ5MjJkZDQyNTkwZTVkZmIifQ"
+        },
+        {
+          "resource": "repo://webapp/components/connections/connection-form-body.tsx#L404-L416",
+          "version": "repo-lines-v1:sha256:aa39b70a5c3b91a5d431b109bcae6acbd5dad4ba4b3992d981206e0b81bef43b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiOTE4MTYzNzY1NTU2NWRiMGNlZjJmYWIxMDE3ZmRiZDgxYWViZWIwYmJiNGZiZjAyNGVjN2RjNjNmNmE0N2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0MTVlMTFlYmYzMzFlZTc4NTQxMWNhNmUxMTY0ZGNlMmE3YTdhYTZkMjJhODg1NjcwMDU4YjA1MWZjOWFmMWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY1ZDNlZDZjZmQyMWNiYmYzMmRjNzMxZmVlYWM0NTdhZWZlNDVmMmJhNGZkM2Q2Yjc0NGU5YmI0MjgxZjZhZGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE2NjdiZGI0NWRjMGQ4ZGQ4NDNjN2MzMDIxOThmMWM5MTIwYWYwZjE3YzNjODUxN2VmZTMyNmE4ZGQ5ZTAzYmEifQ"
+        },
+        {
+          "resource": "repo://webapp/constants/connections.ts#L93-L112",
+          "version": "repo-lines-v1:sha256:bb8e7d3dbe245ac1c9dc53d318818fa7dea469fb0fc6d6317afe9bb90ce756bf:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIwYWE2ZTYzMDY5N2FlZTUxODA5NDgxNjljZjg3MDRjYTdlZGViNWJkM2QxZWQ0ZWY2YjdiYzdiOThkZDAwZjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwMmQyYzBkNmRjNWU3NGQ5MmZhMTRiOTFkYmVhMjY0MDkwYmViMzVmZGI5MTg4ZDliMzQxMTgxZGNlOWY0Y2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZjODFiYzE3YmQ5MWNkNGM1ZGEwNzA0MzUyNWMwOGY2NWI3ZDJlNjcyNGIzZGYwMTkzMDNhZmRmN2U4MzA0MzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e5476c83f980451481a4791bca0b75cd",
+      "statement": "Google Sheets OAuth sources keep the refresh token off the browser: the backend builds the consent URL and state nonce, a public callback exchanges the code and stashes the token under an opaque refresh_token_ref, and create/update endpoints redeem the ref server-side to merge a backend-built credentials block into the source config.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/airbyte_api.py#L140-L237",
+          "version": "repo-lines-v1:sha256:0ead91e47c782a21b2f88ca318cbcc7fde04064431cebabf8d6b9b1ce04dd896:eyJzZWxlY3RlZExpbmVDb3VudCI6OTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxNDA5OTNlODJiYWVlZTcwYTUxNzQwNGY1MzNkNzI4YTExMjBjZWM4M2IyODM0OTIxMjFlM2Q2ZTA3Nzk3YmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMTliNDBmNzBjNDM2MmE0MmJmMDIwMDdjNGIxNjI3YjE3OTEwMjE2NmMwNzA2ZTAyM2E1ODIzNjQ5NmZhYjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQyYTE4MDNjODc4YzY4OWQwOGNlNjA5YzFjMDQ3NjZjYjkyYTEzZjJhODlkZDA3YTVlNTdjZGI1ZmU5ODcwYmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUyNGQxYmYyODMyNTg2N2U3MDYzNGQ0MmZjMWRiMTNmMTg5ZGViYjc2MWNkMWNmZGIyY2MyYTU0YzMzNDRlNDMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L92-L120",
+          "version": "repo-lines-v1:sha256:f120663f71fc5666cf79882af0f59f78d190e2b4333290163baeb2df1f2d228f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0NTYxMWE1NmRmYzU3MzVhZGZiYmNiNjgwZDU0Y2NjMTliMDEzN2Y5YWU1MmNkYjdhYzE0NjIxNmM5ZGIyYTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1NmM0OGI4YmE1Y2IzZWE4Mjg1NjFlMDUxOTRhY2YwMjkyNGFkN2YzNDg4YTgyMGMyNzU2OGU0NzczMzhhOWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc3MWQxMDQ1OTAwZDc3MTYyODBjOGZmNjU2NWQ0ZWMyZGU1ZDgxODU0ZDZmYzE0YmUyZDgyYTgzNGRkNzAxMjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc0ZmE1OTRmNTJkZTc5MzQwYjgwY2IzM2E0Yjk2ZmE5ZTI0YjA0YmNhYjQ2OGRmYWY3YjhiZDc0ZjI5ODU1N2YifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_53831f825bab479489698580e3615c25",
+      "statement": "The webapp source-save flow (useSourceSave) tests the connection over the wss/airbyte/source/check_connection websocket and only creates the source when the check status is succeeded; the Google Sheets path runs consent, popup/Picker and createOAuthSource with a refresh_token_ref instead.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/websockets/airbyte_consumer.py#L24-L85",
+          "version": "repo-lines-v1:sha256:6fc74babce07c1829abc1b30ea7345ced45c11fb40d3347f6be9b333ec5fe685:eyJzZWxlY3RlZExpbmVDb3VudCI6NjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI1NmQ5NjAwZWNmZDUyMzgzYWU3MjA3NWM5M2IzZWVhNWM1MDQ0ZDRmMTZkYWQ5NGVjNDU1MDY1NWJjZTIzODAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwMWFlYTMwZDUzNmE4NjNlMzM1ZDA0NjA0ZWYxOTBjNzEzODU2YTM2YWFjOGRkOTFjNjQ0ZjA2NGIxNWMyZTkifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/useSourceSave.ts#L42-L139",
+          "version": "repo-lines-v1:sha256:8b62d4d1d83bb5cc879dd3c9dc32e96585777a5983fe5e6092a9448503090313:eyJzZWxlY3RlZExpbmVDb3VudCI6OTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY3NTRjN2ZiMTAwNGQxMTE1NDhjYWNkNGQ4ZDAwNTIyZDM3NDI3NGZlZTUzZDIzNDU0YmI2NDdmMTNmMTlkZWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY3ZDBiMzgxOWQ4Njc3ZDQwNWM4ZTg2ZGQwOTJhM2JiOGYyYzBhNGIzYTBmZGFlZTlkNzFmM2I3ZjY3MmVjYmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c79292dd98514a7cb96cf94f5d0fe7a9",
+      "statement": "The connections list in the webapp polls /api/airbyte/v1/connections every 3 seconds only while some connection has a non-null lock, and useSyncLock keeps the sync button in an optimistic loading state until the lock returns to null; the UI needs both connectionId (Airbyte config) and deploymentId (Prefect run).",
+      "evidence": [
+        {
+          "resource": "repo://webapp/.claude/rules/ingest.md#L47-L52",
+          "version": "repo-lines-v1:sha256:6b3e2650d42011752382b3f82db814052272cfd100a5f4601021b237bf142083:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTlkNGMyMzI2OTlmZTllYzg2NTY0NTFmNmZmNDAzODQ2MTdhMTliMWI0MGEzMzc1Y2JiYWJkOTMwMTQ3MThhNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWI3NWZmMTM1MGQ2ZmFhOTMyOWQwNmEyZDRhNjZjMDk5YjFhOGJmNTg1MmYwZmRjMjM4NjZlNTJiZWJhM2ZlYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDRjNDhjOGZhZDFjZThmNTcyNjFmOGNjMTEyZTgzNWQ0MzgxM2FhYzUwZGJmMzBlZWY4NTFiN2NkN2ZjNmNiOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjIsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmFlZGJiNzllODc2MWIzNzIwZjljYjMxNTc3YzZiOGI1ZDQ0NzEwNGVhNmU1Y2ZkN2NkMDA2YWYwMzhiZjk1ZCJ9"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/useConnections.ts#L8-L26",
+          "version": "repo-lines-v1:sha256:409e6d01c48ec930c6f99da9445670914a18aa9d1113bb994516a9269bae73fb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwMjQxZDI5OTg0ZDdlYjZhMmVhMTQyMjRmZjU3NjZlNGJkZGQ4ZmJjMWEwZDVhMDAxZWEzZGNjZWJjNDQ5ZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjViYjhkM2YzZmExMzgyMzRjODI2M2YzZjI3ZTVmMmVjNGNiNzA1MDE2YzFjNjVmNGMxNzQ3ZDdhNjNhMWU4ZDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU1OTI4N2FmNmMzYWMzMDI4NzM1Mzc1YTM1Nzc3NmEwM2U5ODY2YzhiZDhjNjI0MzE2ZGRjNDFlYzEyNDBiNmMifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/useSyncLock.ts#L25-L50",
+          "version": "repo-lines-v1:sha256:f42174e7bf38e8135f05eeb0feca2a1b73d29eb41c1121c748e264269fd06619:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1N2NkYjcwNjMzNDBlYmQ5NmY1NzhhNjY5NzJmNDA0YWM4NTE4ZGI2NzNmN2M5N2U2ZWJmYzA4MzlkMTk5MzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQwNWMxZmUwZjM3NDllYmFhYmYwYzViMzk4YjNiMTUzNTA4YzlmODU2ZWJkZmY2ZDdhMmRlNWFjMjg3YzA5MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_900bbf39259e485581349f91b35b0a17",
+      "statement": "The ingest page state is a pure function of warehouse and source data (LOADING, ERROR, NO_WAREHOUSE, NO_SOURCE, STEADY) with ERROR checked before emptiness so a failed fetch is not mistaken for an empty org; connector config forms are generated from Airbyte JSON-Schema specs by spec-parser.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/app/ingest/page.tsx#L1-L10",
+          "version": "repo-lines-v1:sha256:319b14c1b2af4f25e719fa4b7914d144dce92961846454d512c3440cddf28e24:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmMzdkYjFiOGRiM2ZiZWEzNmE1ZDJhNmZmZDVmMzM5M2E1M2VmMDUwNDdlMGI1ZTZlMTRhNDM0ZTQwNmZkZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxMGI5NzVhNDQ3ZGNhZjI5YWVhZGQxMzMzOTJlNjU4Y2FiMzA4YjUzY2MyMWM2Y2ViMjEyYmI5ZTc1ZTBhNGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdiOGI2MDBhNWI0NDhiMWU0ZDAyZGYwOTc0NmVkM2NhMzE3MmY3NWM0YWFiYjAxZGRlMDgwZTM2Y2FiMDc0YjQifQ"
+        },
+        {
+          "resource": "repo://webapp/components/connectors/spec-parser.ts#L12-L80",
+          "version": "repo-lines-v1:sha256:b9b257267bf170ac84305a5654392da3ea97c8edc041cbee32806fbb61bfd64c:eyJzZWxlY3RlZExpbmVDb3VudCI6NjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjYzc3YmFkZTdhZDIzOTU3NjRiNDZlMTJlMTk0ZDkxZTg2YzVkNmMwZTEzMmYyNTI0NGY4Yzc0NTU4N2MyMGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI2YTZmMmI3NmE2OGFhNzI5MzZhNmUwNTEzMjg0ODE2OTA2OTY4OGVjNTlmZWZjNTdjODgwMmEyOGQwMWZiYzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMzMDQwMDU3NjFlYzFjYzFhMWJiM2JhNzk0NDJmZTdhYmUwOGY4MDlhZDAxMTRjNjlmOTc1MjhhZTMwM2Y0NWMifQ"
+        },
+        {
+          "resource": "repo://webapp/components/ingest/redesign/state.ts#L1-L37",
+          "version": "repo-lines-v1:sha256:8ab9d33226eabd5bc242fffcfe1fb426801dc078310eca13111fd990a17cd27d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMyNmNhNmRlYzQ3NDlmNTAzNDE0YTllZTViMDAzMTc5MmJlM2VjYTMxNmRhZDBmMDJiNTc5YjNhMTNiNzlhMTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c510db7f49f44c2f8f920fc5c9ecebdc",
+      "statement": "Each org has one Airbyte workspace created by setup_airbyte_workspace_v1, which also creates or reuses a Prefect Airbyte Server block named <org.slug>-airbyte-server recorded as an OrgPrefectBlockv1 of type AIRBYTESERVER, and the endpoint enqueues registration of custom source definitions; most endpoints reject orgs without a workspace with 400.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/airbyte_api.py#L546-L560",
+          "version": "repo-lines-v1:sha256:6763ce1067a4724a51b76fcbf1d8d7ebfcaa2ee98e262f37e213de3e403ef530:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwZjZlNTdkNWQ5OTEyYzFjYzBmNTZkYzhiNDU0NDU3ZjQ1MzI1NjQyYjQ1NzNiZjZkMzljODdhMmM5MGQ2NmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0OTk2YzJlNzdkMTY0MDE5MDMyYTE2NGZiYTcwNGQ0ZTdlOGQyOGJkMWUzODYzYTAxMjM2MTg4YmMzNDY5NmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdjOTkxNDdjMjBhMjdiMmViNjZiYjkwOGIwMjEwY2E2YWEzNmQxMjkzMTA1NGY5NTgyZDQ0ZTIxMTdjZWVmNmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhYzNiZWNkZGQ0MDlkZDdlZDg3YTY0MjQ0NjMyMzgwZDA0MDBmOTY1ZjI0ZmE1MTQ4MjBlNTM4Y2Q1MmZjZTIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L211-L255",
+          "version": "repo-lines-v1:sha256:f8a459ddd674b6d2aab98db546db870c26dff0d37126671d935fb40293679d22:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4ZjhlOWI3YzRmZjFmOWNmYTgwZDExMGYyYzQxMDc4NzY3NGUyM2EyN2VhNTE4MjllM2I3YWMwNWUxNWIyM2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2ZGZiZjQ1M2Y3ZjFiZWJhYjcyODM2MWIwZjM5M2VlYjRjMWZiNjY4ZjllYTIyYjkxNmRhY2Y1ZGZmODFkODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM5OTY2NDM1NDgzY2U1ZGZiNmMxNWY4ODQ4NWM1MjlhY2EzOThhMGUwOGMzZTBjMjM4NGU0YTQwNDdlYWQxMjIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_67fc02a9f72844b0a01255f5f3307293",
+      "statement": "Demo orgs have submitted source configs replaced by a whitelisted config and source definitions restricted by DEMO_AIRBYTE_SOURCE_TYPES; AIRBYTE_DESTINATION_TYPES filters destination definitions and settings.AIRBYTE_SOURCE_BLACKLIST hides source definitions by dockerRepository.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/airbyte_api.py#L381-L396",
+          "version": "repo-lines-v1:sha256:9910d368eee0baafa21c62b29c36192d281377ab0153ed23f3592b16fd283a3d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwYjMyZjkyMWNkMzVkZDc5Njg1ODlhY2I5ZjRjNTg4ZTBjYzVjYjNlZmVmMDM0MzY0ZWE5NGVmNzJmZTFmY2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMTliNDBmNzBjNDM2MmE0MmJmMDIwMDdjNGIxNjI3YjE3OTEwMjE2NmMwNzA2ZTAyM2E1ODIzNjQ5NmZhYjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1OGViOTFmOWIxYTk0Y2RmYTg4Yjg2ZmQwNWYzZjk1NDdlZjE1OTQ4NWM1NWRlNGRiZTMwN2U4YjViZjNiNDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjczNGFlNzgwOWRmZmRiMDgxYTRiZjlmZTliMGYzOWY4ODRlZGQxZjQ2NjA0ZTc2OWZhZjQ2MzYxYTc0YTY2MWEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/airbyte_api.py#L57-L137",
+          "version": "repo-lines-v1:sha256:bba729b16f08f3f7a4127ef292672013234556e4fd917875037a5213b02038fb:eyJzZWxlY3RlZExpbmVDb3VudCI6ODEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzOTQyNmQ5NjEyNTJmYmZkMjUyZWVjYzY2MTg0MWY2NTA0ZmNkNDZhNDg3YmU2Yjg1ZDJlNmY4MDJhMzE1ZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1NmM0OGI4YmE1Y2IzZWE4Mjg1NjFlMDUxOTRhY2YwMjkyNGFkN2YzNDg4YTgyMGMyNzU2OGU0NzczMzhhOWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc3MWQxMDQ1OTAwZDc3MTYyODBjOGZmNjU2NWQ0ZWMyZGU1ZDgxODU0ZDZmYzE0YmUyZDgyYTgzNGRkNzAxMjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjliMWUzZGVmYWU2ZWZiMzA1YmIyMzY4MGQ0MjZlZTk0NjllNzU3NDQxYTY3N2ViMjJhZGY1NmJlYWE2NjVkMDkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbyte_service.py#L172-L194",
+          "version": "repo-lines-v1:sha256:ac267077cdad1179f3544401753df5c1c8f19a43ad35fd401573557213bbcf4d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNkNmFjOTNiNTlhNDVlYzU5Njg4ZDIwYzEwNmZjYmE3NjZkMmUzNjE5ZDY4YWZkOWIyN2ZhNTE4Y2FiNzk4MDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMTliNDBmNzBjNDM2MmE0MmJmMDIwMDdjNGIxNjI3YjE3OTEwMjE2NmMwNzA2ZTAyM2E1ODIzNjQ5NmZhYjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1OGViOTFmOWIxYTk0Y2RmYTg4Yjg2ZmQwNWYzZjk1NDdlZjE1OTQ4NWM1NWRlNGRiZTMwN2U4YjViZjNiNDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE3YTY5MDI0YTgwY2M4NjEzZTM3NDgwNjA3NjMxZWYyZjAwZjgyYjIxYTIwZWVhODFmNjk2NDBhNmY0OTlhYWIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ca4ceb8bc9d249e2a473b9533982a981",
+      "statement": "AirbyteJob (models/airbyte.py) mirrors Airbyte jobs keyed by Airbyte's job_id with job_type, config_id (connection id), status, stream_stats, emitted/committed record and byte counts, attempts and timestamps, and exposes duration, attempt_duration and last_attempt_no properties.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/airbyte.py#L37-L100",
+          "version": "repo-lines-v1:sha256:b19240eab8a896927e6505850dca090ab9219f44275d20ad70233b13a2528666:eyJzZWxlY3RlZExpbmVDb3VudCI6NjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhYjZlMTAxZjdkY2YxYWExZGRhMDcyMjhiNjgxYTBlNDA4ZWM5OWUwZDA0ZGQ4MTI1NmI3NmZkYWZiMzJkMzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzZDAwY2YyNzA5NjRkNDRhMTNkZmFjODc1MmIwOWZjYzQzNWIwZjE5YjMxNmFiY2Y4MWE3YWE2NGJiMTIyZDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBmOGNmNmU2MjBjMDg2ZDAzMTIyYzIxNThkMTY2ODZkMmIzYzBkZGE3YjY1ZDdkMjc4YjVkNWFlOGE2MDMxMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0ZWZjNDU1NmJmOWUyOGI0Nzg0YjkwYWI2ZmRlMDk0YTlmNTM5NjZkZDNmYmMxMTc0OThmNmFlMjc2MGJhNDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_acd8606111d94da7a3aac9c107501dd0",
+      "statement": "TaskLock is one-to-one with an OrgTask, and lock_tasks_for_deployment refuses to create a second lock (HTTP 400 naming the user running it), serializing runs and schema-update flows for a connection.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/prefect_service.py#L580-L612",
+          "version": "repo-lines-v1:sha256:6fc0306908145ace9e593bdd378464d9bb009051af8261a6cdf12c6c04356357:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzOGI3NjJkZWFlYjBlNTEzMzc2ZDRlOWYyZGQ3ZjY0YTIzOWNiZmJmNzdlZWRmMGFkOTgzMzhhMWM0ZmY5MWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3OGEzODIzMWZhMDYzNzNlZWQ1MGZhOTM2MjE5MGZhZWExMTBjMmM2YzJmYjkxNmJkYThiNDMxY2E3MDkzNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1OGViOTFmOWIxYTk0Y2RmYTg4Yjg2ZmQwNWYzZjk1NDdlZjE1OTQ4NWM1NWRlNGRiZTMwN2U4YjViZjNiNDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjViZjI5ZWJkM2RhMzViZjg3MzYwNzgxNTM5MmE5OTlhMDk5YWI3NzUxMDBiNTdkYTYzMDkxZWExMDY1ZDA4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/tasks.py#L149-L158",
+          "version": "repo-lines-v1:sha256:1c313589081cec2c7616c438993ae76475df81a2c803de2aacdaeffac4b1dd8e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgxOGE0OTc3MjJjMWM2Mjc3NjA0OGJmYzE1ODA3ODI5M2E1YzY0NzY0YTBlYTZiMWUwNTIwYThmMzAxMTU1YzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwOGVlYmNkYTI1MDcwYjExN2VlYjc0ZDVjMDkwMmY4NWUyYWZjODRmYTRmZmI2OWVjMzVkZmY0N2E1YzUwMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjYmFmZjM5MGViYjllZTdkNWJjMDkxNmYxOGRlMjMxYzE5YjIyYWJmMDBiNGU1NTc1ZDk3MmJlMjQ5YTkwYTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

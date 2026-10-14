@@ -23,11 +23,17 @@ CLAUDE.md for run/test/lint commands and conventions.
 
 ## Knowledge Base
 
-Deep reference lives in `harness/` — always accessible without loading a skill:
+Deep reference — always accessible without loading a skill:
 
 | File | Contents |
 |------|----------|
 | `harness/domain-map.md` | Product entity graph — source of truth for blast radius analysis |
+| `openwiki/` (start at `openwiki/quickstart.md`) | Generated code wiki: architecture per area, workflows, operations, testing — each claim pinned to source lines. Open the page for an unfamiliar area; don't preload it. In Claude Code, `openwiki_search` / `openwiki_read` (`.mcp.json`) return just the section. Source wins when they disagree. |
+
+The wiki is generated, never hand-edited. Run `make wiki-update` before opening a PR that changes an
+endpoint, model, flow or service boundary; fix a wrong page with `make wiki-fix MSG="..."` and steer
+coverage through `openwiki/INSTRUCTIONS.md`. The scheduled `openwiki-update` workflow opens a PR on
+`openwiki/update` daily (needs the `ANTHROPIC_API_KEY` repo secret); it never merges on its own.
 
 ---
 
@@ -139,3 +145,11 @@ Every feature lives in `harness/features/{name}/{version}/`:
 - ~20 partner NGOs, ~₹2L/year budgets, small engineering team
 - Users on slow internet and old devices — performance and simplicity matter
 - Open source (AGPL-3.0)
+
+<!-- OPENWIKI:START -->
+
+## OpenWiki
+
+@AGENTS.md
+
+<!-- OPENWIKI:END -->

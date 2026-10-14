@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:7363ee6875d3054a8726187141470a15539f0ece6bbd3c2eea83624eef8ae29c",
+  "claims": [
+    {
+      "id": "claim_e6af3dfdf1134aeca75c8c9d6e475e75",
+      "statement": "WarehouseFactory.get_warehouse_client(org_warehouse) is the primary entrypoint: it raises ValueError if the warehouse is falsy or its credentials cannot be retrieved, fetches credentials via retrieve_warehouse_credentials, and delegates to connect(creds, wtype), which builds PostgresClient for postgres, BigqueryClient for bigquery, and raises ValueError otherwise.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/warehouse_factory.py#L9-L28",
+          "version": "repo-lines-v1:sha256:8f02a7afa59591c626c8d8961f300af160cf19682464c89110e43b27fc12a767:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiY2I3ODcyNDUzZmIwNTdlODc2ZjEzY2VmMDlkOTMwNjc1YzY3MmRlOWQwNTA3M2U2MGZkNDdmZWY1NWE1ODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkMDc3NmJkMjFmYjA5Y2Y3NTFiMzZhMWRmNmI1MjkyODE3ZDE4ODRhZWI3YTQxYzZhOGJmNjkzYmI0MTIzMTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJmZjVhYWE3YWYyNGU1NDg2YzIxOGFmMzFjMDIyNGE3OGY1ODczYzg1YTFjMjYyNmVjMTg5YTI5ZDU2NjA2OWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/warehouse_interface.py#L5-L12",
+          "version": "repo-lines-v1:sha256:65570745cc4ba9300f056a529594aad81be53728af0d5dcb7f141cd8200e8487:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODQ4YTY0ZjUxYjdhZjY0ZTQ2MjMzNTFkYzJjNzlmZTg4OGMzMTY0YWYzMzI0NjgxM2QwZmQyNjcyNDY2YTFmYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTFmMDYzNDI3NzJiOTdkMDEzZDdhNTQ1ZDllNDBkNjQ0YzY0MjhkZjhkNDFhMDg2Yzc0YzJkNDNmZjUzZmU2YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjM5Nzc5YjY0ZDc3ODFlYWE3NzNkMGYxMGY0NDliZGJkY2I3ZGE1YmRiMjYzZWZlYWZmMTUxYjVkMDAwODA5NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_df072a49e51745a9ba5a65acedee7278",
+      "statement": "The Warehouse ABC defines only execute, get_table_columns, get_col_python_type, get_wtype and column_exists; execute returns list[dict] rows keyed by column alias and takes raw SQL without exposed parameter binding, while callers compile AggQueryBuilder statements against the client's .engine with literal binds.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/charts/charts_service.py#L996-L1021",
+          "version": "repo-lines-v1:sha256:69d76fd69db83e33fd633de638501228507333ecb7d639c6e0b50bf48729672d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg3ODk1Y2E1MDNlNzhmNWFiZTZhMTU4MjVlYThkMzBhMTkxYTI3N2FiMzIzN2FiMTE3ZWY0ZWJjZWZkMzM1ZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjN2VhMWM5ZjJkMjIxZDJkMTQ3NWEyNWZmOTRkZjJhMzk1MjUzZGE2NzM4NWFhZjVmYTEzMzJhODMzNDdhYTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzNjRkNzMyMGI5N2NmZTNmMjAxOTEyMTZlMjIxOTNjMTM0NGMzNWI1ZjE2ZmM3ODVmMjAxYjVmYWE3ZjJhMDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg4MzdmMWQ0ZTI5Y2RmZjI3Zjg0ZjVkMzYxMDViM2MyNGZkYjAzMjg5ZTUzMTcyZDk1MjNlMjEwZGUyMDVjZjAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/postgres.py#L80-L87",
+          "version": "repo-lines-v1:sha256:e8e768d2b26e102c0b5b44cd2f12e10d021f1b04a0dcf583a6ed562643ccd8de:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOGVlYzY0ODMxMDVlNTA2MDg0YmU5YWI3Njg3YWYwNjE3YWM1YjdjODA0NGY4ZGVlNGJjMjUwYTM5NDExNDM0ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjA4NTlhNTZjMmIyODdiYThjMmJkNTdiNWQ0ZTA4MjM2ZDQyNjA0ZWZlODcwOGU3Y2Q4ZDFlMzZlMWNlYzg1YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2FlMWJjOTQwNDYxZDRhMmY0YjJkMjI4MTcwYjEyYzJiYmI1NmYxN2U3NDU2ZGY2ZGZhYzgwNTY0NTgwMThmYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYThhOTgxMWJmNDU1M2FkMmI2NDUwYTIzMjhmOWY2M2QzZmJiN2MyNjFmMThhZGU5OTA5Y2EwY2I0OWVlYWVlMSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/warehouse_interface.py#L14-L33",
+          "version": "repo-lines-v1:sha256:82ec2a89ff431cd47d9f9e57d529616ceb8534126eb9bba9ee849b85da7328c2:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyNzYzMDk0M2YxZmZhODY0N2ExNjBjZDNiNjA2ZDJmNzYyNWQzNTE1MzhkMmE3MmE0MDIyZmNmODE3MzM2ZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwNjJlNThlYTBiMGZkMTk1YmEwNzY2MTNiNjMwZDU5ZTY3YmQ0NzBiYjE5ZTk3YTIwYzkwMjM2NmU1YmEwZTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgxNzY2NzcyOWMxYThmMTYwNmRmOGQyMmU1OWZiZjY2Y2VjOTQ2NmE0OWZhYmM0M2Y4Yzk5NTY0MzJkNmNhMTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5861620e946d4c35a8b0625e81832ddf",
+      "statement": "OrgWarehouse.credentials stores a Secrets Manager secret id (named warehouseCreds-{org.slug}-{uuid}), not raw credentials; secretsmanager.get_client uses AWS Secrets Manager when USE_AWS_SECRETS_MANAGER is 'True' and otherwise a DevSecretsManager that stores secrets as JSON files under DEV_SECRETS_DIR.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/org.py#L257-L285",
+          "version": "repo-lines-v1:sha256:c9fe9d405205636aa2e7afcc122475facd50a3b0e5ba639c3240e540ac487c03:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhMzgxNDA3MjQwY2ZkMDRlY2UyYjM4NWVlYTA4NmViYzhkNzM3YWFlNzVmMTVkMzUyOTk1MjMwOTQzNDQ2YmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlOWRmMGJiYWNlNDA1MDBiYmM4YjJmZDM0NjUwOWRkNWI2YmYyYmE2ZjBkZjM0YmNlNTA4OThhZjcyOGE1YzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIwNDc1ZGI1ZTU4Njg1YThjMGQyMTg2NTY1YjJjOTJkYWQ3MWE3ZTBiYTRjZDI3MGNmY2QxZjc2ZDlkN2FlNTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQzYzAyNDRiOTcxZGEwY2FhN2RlOTBlMTVkYTFiYTRiMDhmNDg3ZTgwYjdjNDcwYzU4M2Q3MjM5ZjMzYjhkNDAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/secretsmanager.py#L11-L83",
+          "version": "repo-lines-v1:sha256:a7df7cd3a8d7f35bb38d4aaada7e4f0169f2ef48e4eafe341b52e78aa7f83ffc:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3ODE4ZWY5OTFlODFlZWRmZWJjZWExM2UzZTE4NTlmMWY5YjYxNTAyZWI5NTIwMTkyMGRiZGE0ZTEwYmQ5MmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlMWRmYTMwMDc2NjY4NTA1NjcyZmRjOWI5YjVkMjBmNWZiMWRhZWM2NWNlOTk2ODcwNzJmNDM0ZjRkYzIxZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwMDFiYzMzMmM5NmY5ZDQ0NjMzZWE3NmVmNGRiOTA3NTkyMTE4YWU5MGYxZWM2M2Q4NDIwNGI3YTE0MjQzNjQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/secretsmanager.py#L162-L197",
+          "version": "repo-lines-v1:sha256:b55989125ac895da63d08d5a5952da922e4473bb686829ee5a3023b47a195b80:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlM2RmZGFkN2Y5ZjA1OGQ3ZWE1ZTlmMTg0OGU1YzlmMGVlOWQzOTkwNWUzZGU1YThjMjNjNmUwYmVhZTJhYzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwNjJlNThlYTBiMGZkMTk1YmEwNzY2MTNiNjMwZDU5ZTY3YmQ0NzBiYjE5ZTk3YTIwYzkwMjM2NmU1YmEwZTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg3NDVhM2FjMmM5MDk0Y2MyZDQzNWE1ZjFmYzFlYjc1MmI3YjIyZDc1ZjVkOTIwNWFmZjBjMjVjY2Y3ZDFjYjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZhODE2YWQzNDU3Mzg4ZGEwMTQwMGZjY2U2NTQ2MmU5YzA3NzZiM2YwMzk1ZjI1MjdjMzE0OGEyZTIzY2QyYWYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/secretsmanager.py#L99-L101",
+          "version": "repo-lines-v1:sha256:69091e6d62b003310470e8d7fd5e0d61f292903f8c1336e4d69dd346083accd6:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTQxYzQwNTRmMjkxYmZlZTU2YzE3OTUzMjNmNzgxMzFkZWExZjc1YWJiMjkxN2ExZGM1OTEwYWMyYjc5ODRhZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWI0OTgxMWQ2YjE4MzRmZDJmMzY4ZGYwZDMxNzBhYzhmY2ZhN2UwMTJkNzE1OTkxN2U3MTFkZDA3MjEzMTI1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTM5ZWQyMWI4YTU1NTExMmE5YmU1Mzg2NzY1OWYyOGM2ZTgwNWYwNDExM2M2M2QwYTYxY2IwNTZjNDM0NzA5ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTA2OWQwOTQ0ODliNmE3NWExOGMwMzcyZDhjODgzZTYyMTRmNmI1Y2M2MTc4YmYzMDAzZDk3MWRlNDBlNzg5MCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_a35bd02c31f94790850cbf86a5e89925",
+      "statement": "Warehouse creation and update in airbytehelpers accept only postgres/bigquery, save Airbyte config as a secret and store its id in OrgWarehouse.credentials, set bq_location for BigQuery, and on update resolve masked (starred) values from the current secret before updating the secret and the dbt profile block.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpairbyte/airbytehelpers.py#L849-L937",
+          "version": "repo-lines-v1:sha256:14486e908586ffdf7e853476dcde5dfb3f3803c2eab1ce8f3befb766629b6c6d:eyJzZWxlY3RlZExpbmVDb3VudCI6ODksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc4Nzc5ZTRmYjk0NTdhMjg2NDA0YmI3MGY4ZGMwZjE4YTBjOWI4YTJkNmQxYTA5ZWI2N2ZjN2Q4MmQ0ZjYyMjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdjYmJiNzlmMTgzNzdmNDBkYjQ3MzFlMDI0M2I2N2EwOTY4NTJlMDg2YTIxZGYyZTAxYzA0YTA5MzE5MTdlNWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRmNzFhODI3MTBjZTdjMjAyYjA0NGE1YjJmZjllN2VlZTZlOGIxNWE4MzA1NjQ0Yjg5OTA4NTI0N2NlNDU3ODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ3MjkzMmNhZTFmZTFlNmI0MWIzY2FhOGM3Y2Y0MTNiMzQ2MWJkYWZhNjVkMDM3MTRjMTJhMGE2MmE3MTgzNzQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_062850f7f2b3448a879748be1eda35aa",
+      "statement": "PostgresClient does not create an engine per instance: it fingerprints the full credentials (SHA-256 over sorted JSON, scoped by warehouse type) and obtains a shared pooled SQLAlchemy engine from the process-local postgres_engine_registry, so distinct databases get distinct engines and rotated credentials get a new engine.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/postgres.py#L15-L35",
+          "version": "repo-lines-v1:sha256:0245e6f6bce6750306622a13b9ee3fd6ba5a802fb38d68bb38c8e98810523eb1:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkOWFkYzVlNWJkOGE2MjZkNmM3MWM0MGMyOTYzOWZiNjUyYWMzMDdlZDkzMTRkZmIzYzczZThlOWU4ZWE1ZDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZjNzEyYzBiZjIyOWIxZWU0NzAwODYwOGQzYjc3YjdmODVhZmFkYTlhY2VlZjExMmVlYjZiOWNlY2I0ZDMyMTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI3YjhkMDkyNzAwMjU1MjQzZjU0NDQxMTU5OWJjZTRiNDhkMDA1MTg3ZDk2NzgwNGVjNGExNTZiZjM0NmU1NjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZhZDkzOGQzOThkZTk0ZmQwMTg5ZWRhZTE2OTQyZGQxM2FhZGM3ZDNkMmQyOGUzNmQ4YWU2OTgwNjkwYmIwYzgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/postgres_engine_registry.py#L186-L212",
+          "version": "repo-lines-v1:sha256:f912c17629c149c00b8fa7ef6265bba6f93e9c16e877771edec379ec92c982ac:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2ODM1OWVjZjkyYTk4M2E0ZTJiYTU1ZDVlZjJhZGZkMDNiNDNlNDBkMzVhMmE0MGJhOTZkNGY5MzcyMGIwY2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwZjE3NjhmNjljMzg1ZTYyNGI5OWZlZmFhZDI2MDI5ZDI3OTI1NDZiY2U1ZTFjYjE1MDBlYTk2NGZmM2MyODciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIzZGYyYWNmMDZlOGMzZjAzYzcxMzVjNmU4YWM1YTljYTU0MzJhYmUwNmE3NGFjYTBmZGQ5YTUzYTAwOGY5ODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVlMDE5NmQzOTUzYjQzYmI2ZTI3NjcxOTJhZjRmNjAzNjkxZTY0NjUxYTVhMjk4OWNiMjM3M2UxNzkyZWEyMGEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/postgres_engine_registry.py#L96-L106",
+          "version": "repo-lines-v1:sha256:b7f80452bc61b6185e6c91a2815b37f67ee7e05c6d249cb9556fe903c3a53049:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0YTcwMGQzZjMxNTI0ZTZmYmY3NzI3MDdhNjg3ZGNmNTIyZDA5NGEwOGFhYTFjMDk1ZjNiNTFhYTYzOGYxZWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY1MTQ0MTY4ZWM5NGM4MTY3M2U2N2IzNGRjMTUwMWYzODBjN2EzOGY5YmI2MzUyNzk5N2ZjM2VmZTgxZmZmNjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjllNGI2ZDU5NThhZWIxZjE0Mjk2ZWJkYTgwYjAwYTRkZmNkOGZkOWFjZGQzNTU1NTMxN2IxYjJiMzE5YzBmZDkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e580a5b045de4b9b947a1e133a75cae5",
+      "statement": "The Postgres engine registry bounds connections with pool_kwargs (pool_size from WAREHOUSE_POOL_SIZE default 5, max_overflow 7, pool_timeout 30, pool_pre_ping), uses per-key locks so engine creation for one org never blocks others, and the peak connections per warehouse is n_processes times pool size plus overflow.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/postgres_engine_registry.py#L1-L38",
+          "version": "repo-lines-v1:sha256:3dc68246681a4dd9326c2b0b18f98b2bf6a20157c363517dabd2ddea6a6b8d77:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjczNjQzODFmNTJjNzM2ZmI5MzIwOTJmYTU5MmI1NjM1Mzg0MzU1YjJjODBiNWM1MGRlOWIwYmYwYWZjNTQ3ZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZjMWYwMmZkN2VjMWQ0NjJjMGNiODE4Yjk0OGZmZTRmNzE1YjJjMmM0MzI2MzBjMjMyZGZlMzRkNDI3NDNmYTkifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/postgres_engine_registry.py#L186-L212",
+          "version": "repo-lines-v1:sha256:f912c17629c149c00b8fa7ef6265bba6f93e9c16e877771edec379ec92c982ac:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2ODM1OWVjZjkyYTk4M2E0ZTJiYTU1ZDVlZjJhZGZkMDNiNDNlNDBkMzVhMmE0MGJhOTZkNGY5MzcyMGIwY2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwZjE3NjhmNjljMzg1ZTYyNGI5OWZlZmFhZDI2MDI5ZDI3OTI1NDZiY2U1ZTFjYjE1MDBlYTk2NGZmM2MyODciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIzZGYyYWNmMDZlOGMzZjAzYzcxMzVjNmU4YWM1YTljYTU0MzJhYmUwNmE3NGFjYTBmZGQ5YTUzYTAwOGY5ODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVlMDE5NmQzOTUzYjQzYmI2ZTI3NjcxOTJhZjRmNjAzNjkxZTY0NjUxYTVhMjk4OWNiMjM3M2UxNzkyZWEyMGEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/postgres_engine_registry.py#L83-L93",
+          "version": "repo-lines-v1:sha256:d4e7839609ef4a11a95e8f752958ccbab47c3243c43f87005763e7102bf17af3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhNzk2M2QzMjJlYzVjODM4NjQ5NmQyYzJhNDAyZWZlMmE3ZTZlNWYxOTE4ZDQ0MTRhYjc3ZDBiYTkzNTg2YjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFlNjhiNGVkMzBmN2ZkMGMwYzExNDhhNjRhYTEyYjExMzZiYzkyNWJiZDZmM2UwNWY3ZWRlMmVjNWZiYTA5ODgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ5OGRiM2ZhMTUyZWE4NjMxN2MyMWRlY2NhMDc3MWEwZmExMWFkZDViN2Q4MDE1YjNmNzBmY2JjNTRkYjMyMDUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_29dd4bef620d4ab0b686c89d6f468066",
+      "statement": "A lazily started daemon sweeper thread (started on first engine use, because gunicorn/celery fork workers) wakes every 300s and disposes engines idle over 600s, skipping engines with checked-out connections or no idle sockets; disposal keeps the registry entry so the engine reopens connections later, and entries are never removed from the registry.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/tests/utils/warehouse/test_postgres_engine_registry.py#L160-L272",
+          "version": "repo-lines-v1:sha256:3d2b1313a7cb06b97c72e7477bb1c3cf68f2f6de2e0734977bea97fe41db244e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1OWE1Y2Y5ZDZmYmJjZDgwNDliMjE0MGQ2YzI5OTJjNjE0OTc4ZjU4MjNmNTZhYTExODkxMzJiNjRjOWQwYTY3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMGJiZjFlMWQzODU5MTE0Y2RlMjllYzJhNGFjMmM3OGE5MjZkYzM5OTE0NGJjMDY5ZjNmNGFjNjI1YmU3OWY0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIzMWQ1ZDU4ZjMxYjg4YjAyYzYzOWJkMDZkYzgwZjk1MDQwMDlhZDY0MWE3MzJmN2ZjYTc2NTdjYTQxY2I5MmE0IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlN2M3YTdhZDFiNjlmZjRmOTUzNDYyYmI5NTY2YjY1MmViZmNmODgzOGRiZDM5MWVlZDdkY2NmZjY3M2EwNjk3In0"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/postgres_engine_registry.py#L109-L183",
+          "version": "repo-lines-v1:sha256:fcbafed96e8363dc9c015e07c995e49e27c12b8d906d487095c521c26c4df8f2:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwOWM2YjcxZTBiZGUzZWU2Njk5OTg1NGQ4MzdlODgzZDIzZTM3YWUxZTFhYzE0OTEzZWU5MzlmOTQ3ZWNjMTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxZGQ4OWM3MTFlYWQ5Mjc5ZDIzZWJiMTcwYzFmMzI1NzA4Y2FiMTUzNWVlZmM1ZDc5NzUxMjE5Y2YxYzIxOTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg3NDI0YWYyOTg5ZDU5YmNlZDc2M2JiMTQ2ZmFhZmNjNTZhYmE4Njc0NjY1Mzk5ZjM5YWU2ZWJmODU1MDMwYjAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/postgres_engine_registry.py#L73-L76",
+          "version": "repo-lines-v1:sha256:cf97f6c7ae7829aab9f9644dca886125698eec1a8dcd3a59d9489baef5b6403f:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDIyOGE4ZjUwNGU3NmZjYzUxYmM2MWU2N2YyMTA2NDlhMTY0M2ZmN2ZiOGE0NzRmN2RlYmYwZmFjMGUwZWRmZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTAxZWQ2ODE2MDQyN2RkM2FhODk4M2UxZTg0YTg3Nzg0ZGE1YmRlNTA3YTIwYjc2ZTdlNmQ2MTU2ZDk2MGI5ZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTg3NDE0ZTgxNTExMmFiNjBkNWFkZTY1Yjg1YzNkYThhNTRjZTk2NjM4ZmJhZGM0MWM4OTZiNTI5NWJkOWE1YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjM5NWNjMTM3OTVkNGE5NDNjZjI4NjRkNGM2Y2I5ZjU1YTkzZDAxOGEwYzllMzg2ZjAwODhmM2JkMTU3M2FmMiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_c66314a9ec4141c0b27eb3d07790c929",
+      "statement": "PostgresClient.build_connection_args maps host, port, database, username and password and normalises ssl_mode/sslmode (string, boolean, or dict with ca_certificate written to a temp file) on a copy of the credentials; it performs no SSH tunnelling.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/postgres.py#L37-L78",
+          "version": "repo-lines-v1:sha256:89bb278ca8dd8b73cc5f2fc23ea81d10d2292a0de50e54a7093dd378fdd8ef1c:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE0NTYxYWFiNWRmZDQxMjk1ZWY4OTM1NGVmMjgwMTM1Zjc1NmViZWU1YTM2YjBiNjBkMTE2YzYzNTQzMGM1NjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhlYWMxZDhhZjZmZTU1MzZjYmQ4M2ZiOTI0OGI1M2MxMzFkYmMzMmQ0YTgxYTNmYTIwNzNiYWQyNzYwZmRkMTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU3MjE1OGZkYTlmYTA2MjcwNjI2M2U2NTA5YjM0MTkzNjQ3MGU1MGVhMTQ3ZTRmYTNkOWU1MzM3NmVhYjBmZjYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_86f6aac7ea7c4a3b9071915cd2eb36b6",
+      "statement": "BigqueryClient builds its own SQLAlchemy engine per instance from the service-account credentials (bigquery://{project_id}, pool_size 5) without the registry because BigQuery connections are REST clients; its get_table_columns silently skips STRUCT columns and their dotted child columns.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/bigquery.py#L17-L79",
+          "version": "repo-lines-v1:sha256:b65f699dba2428c14908839d57614c2e9d723f8631a52f8ab62d8bf73fa06baf:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRkOGZmZGRmYjJlMjdhOWM5ZTk0MWFiYWMzYzgxM2QwY2RiMTE1OWJjNzVjYmUzYjg5MDA2ODZhOGE2Y2Q2M2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlNDg0ODEzOTgzOTc2NTRlZDZiNmY1NDYxMGVlMzE5ZjMxOTU4NDk2MGMzMmQ3ODg3YmIxZGE1ZGQ1NTkyNzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImViNmI1ODYzNGE3YTAxYWVmNmYyNDY2NTA0ZWU3OTY5MDgyNGE2ZjBjNDM5NWI1NzY4NDhmZTFkNjQyNDkyNzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJiNzljMTYxZTcyNzAzMDA3ZTg3ZmE3NjMxNTY0ZjIwMDIxMjhmNjc5YTdmYzBlMDFlOWQwMGViY2Q0N2E4NWQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/client/postgres_engine_registry.py#L1-L14",
+          "version": "repo-lines-v1:sha256:bd98d72d7a9c7fdd3073b6f00db8330f28e9155ce3a9a90787057082a0197785:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ1MDJlYjI4OWU4NmEyZjY4ZDE1OGJkZDUzYmE2ZDZjNTVjNjNmNzA4NTRmMmM5MTg1MmUzYzY2YmJlOTBiY2QifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4d8f1c5beb954212825bdbe175e307d7",
+      "statement": "warehouse_api.py routes are all permission-gated by can_view_warehouse_data and scoped to the caller org's OrgWarehouse (404 when unset); browsing routes go through warehousefunctions.get_warehouse_data, sync_tables caches schema/table lists in Redis for 24h while refreshing in a background thread, insights are queued to a Celery task, and /ask/ restricts to a single SELECT with a capped LIMIT before queuing summarize_warehouse_results.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/warehouse_api.py#L222-L253",
+          "version": "repo-lines-v1:sha256:e140707d9d33b488f3ca6e369736719a29272b63d0af49e97f3db979e857e8e7:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjYjI5Yjc5YTA4Y2UwMTI1ZTNlMmQ4NmRjNzgxMzg0MTUzMDAwN2M3YWMxZjYwNzliYWUyMzY1ZWVhYmM4OTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUzNTEzM2VkYTY4YjM4NmNlNWY5NjU1Y2I1OGY2OGZiZjBiYzQxMjRjMmNmOTU4YTA3MDQ3MzFjNTUzY2JkYzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY0NjY5MjM2NGMwNTE2Y2IxODBmYWQwZmRhMjZhZmJjNTg5ZTU0ZDY0MDBlZjE2YjJhMzRmM2I1ODJmYWE4NDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjllNWRmODAwNDQ4ZTllODlhZWM0MzU2YzU1YzljZDAxYzcyNzlhOTY4N2U2YzIyZDU1MTJjNDc3M2Q1Y2U4NWQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/warehouse_api.py#L320-L382",
+          "version": "repo-lines-v1:sha256:5f8e90ddda24172b4fe6d1b7d59cd23a147499f0d6034e3e2f4f4ed155b0e268:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyOGJkMzk1ODFhYjcwZTMxYTA0ZGU0ZjlhNTkxYTA4ZjRhNzM3Y2Q3NWY0MzI5YjY5YjBjMzk4YzQyYTJmMzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc2NWMyNDE4MDU1ZDNjZTljZTBmZDcxODk1ZWQ4YWY2NGQ3OWNhMTI1ZjViNjMxNTA3OTBlYzdhYWFhZTAwYmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjczMDMyNWY5ODBiNGFiZTBhNWJmZGViMmQzZWI5MzQ4NzZkM2EwNDMzMjU2NDQ0NzJjMTM2Y2NhMDJiOWE4MGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQwNWE3NWNlNTlhNzc3M2ZmMzY5Y2FhNjcwY2NmNTZkMmM2NTI5OTQxNGJlODZhOWQyNjU0MzEzNzc4YzA0MjgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/warehouse_api.py#L50-L70",
+          "version": "repo-lines-v1:sha256:07054ec232762c7a59cdec7318258ffea742fb93aae443e194f5a80ecdb4dd8e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0OTNlZDIzOWNiOGM4NGM4OTA0ZGU0OTcyNzQ1OTI4NTEzMTBlMmRlODBhY2E0NTJmYWM1YjUxZTFkZDQzYzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc4ZjAzMWY5NzJmNjFlNTk4YTIxZDEyNjVkYWEzZDY5MmRjZjcxMTM3YzFhYmZiYjM2ZDViZTgyZTMwN2FlMDcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/api/warehouse_api.py#L513-L546",
+          "version": "repo-lines-v1:sha256:9b8f882cef029e2af0299c333a112fdc3bc962ac4fbbc13ca186731d18ea12a2:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFmMmVlZmViYzk5MjkzNTljYWM4N2E2ZDNhMWIwZDY5ZjIwYzhmOGFiNmViODZkMDhmNmY1ZDYwZTM0NzU0MWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMTliNDBmNzBjNDM2MmE0MmJmMDIwMDdjNGIxNjI3YjE3OTEwMjE2NmMwNzA2ZTAyM2E1ODIzNjQ5NmZhYjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/warehousefunctions.py#L18-L77",
+          "version": "repo-lines-v1:sha256:ecef581f6b12a4b403865b22a94367da1dabdb4a09c9b9828301e26bce3c66cc:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzN2JiMGIzMDFlZGEzNzE0NzEwNGZlN2NhMGEyOWM5MDY1NDlmZGU1YjIyZjEwNmZlNjM3YTkzNjdkYmJlYjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMTliNDBmNzBjNDM2MmE0MmJmMDIwMDdjNGIxNjI3YjE3OTEwMjE2NmMwNzA2ZTAyM2E1ODIzNjQ5NmZhYjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhOWRhZmQyMDcwNjBlNjFlZGNkZWE0ZjllNGUzMDAxYjI1MWMwNTU5Njg2ODIzYzdiMGJkMzhjOTQwZDg2ZTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0997f2cb2be24139a26e4e5d884dd56b",
+      "statement": "Application features obtain warehouse clients via WarehouseFactory.get_warehouse_client (charts, public API, reports, KPIs, metrics, alerts, and the AI chat run context), while insights, LLM summary tasks and dbt manifest parsing retrieve credentials and call WarehouseFactory.connect.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L968-L989",
+          "version": "repo-lines-v1:sha256:f5857924b1270440add84112a78558b4a75e779079bb750c115f1b2c55875bda:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM4YmIyOWMzMzg5ODQyNTRmODNhZDM0ODRiZDc3ZDhkZGQzYmFmNGQ2N2I1MGJlN2E5YzY3MzlhNTA2ODNmNmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNjhiMTBjNmFhMzZlMTNkNzQ2OTc1ODUwNTZiNDA1MGY2MjYwNDliYTM5MTdjZDFkNGJjMmUyOWEyY2MyMWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU0MTEzYWY2MzYwMDk3ODU2M2MzZTFkMjk0NGIxZmVjNjNlNDRjNmQyOTkyZjM3MjEyNzNkYzczODkwNjgyMzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc2Yzc2ZTE0NmQxZjM0NTU4Nzc2NTliMzhlMzQ5Y2VjN2ViODhmMjgyNTQ4NzIwYTY4YzY3N2M0OTZhMDZkODAifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/ai/agent/context_builder.py#L54-L83",
+          "version": "repo-lines-v1:sha256:90eef0cce32451eff2a952c28cf32a715518234269ab72ad020733dab2a79e19:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFmZTk1OWJkNjI1MTI0NzQ3NDkyNWE4NDkxYWZlNTIxZGM4Zjk0YTUwODExNzUzZDE0MzZlNjAzMzZhOTA0YzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzYjZiNzZhOWY3YjQyMTY4ZTdhMzgzZGJiY2NhNmQ2N2NlMWMxNmRlM2Q1MWM5MmJiZmM2NTRiODU1NmYxNzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/charts/charts_service.py#L308-L310",
+          "version": "repo-lines-v1:sha256:06787b499566dacb770b572092b6ec67fd4d92d86bfdf9fbffa81e32e3b14a4b:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODQ3ZDQ0OTQ4MTA2NDc0YzQ0Zjg0ZGY4ZmM5MTNlMDZkMjU5YzA3ZGMzZWFhZjY5NmRlOWU5OGIzNTM0ZjU0ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTVmMTYyZDYxZDc3ODFkMTZiNDA1ZGM1ODE5Y2FmYTc0ZjI5ZTZmMWZjZjg0MTY0NGVlZWNmYjhmMDBkNWExNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDZjYmQ5Njg2ZTFmZTcxYjgwMDg3Mjk4YzE4YWYzZmU0ZTgzYjA5ZDQ2YTZjYTAzMzY4YjAzMDY5MDUyODk0NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTg1NDI1MzZmYWNjYzAwMDg5NTczY2Y1YmM0YmE1ODM3NGJjYjMyMDRlNzIwMmNhODAzNTNiZDgzNmY5M2ZkYSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/datainsights/generate_result.py#L121-L129",
+          "version": "repo-lines-v1:sha256:472e7dccc58211770c8fb8566e263ae635968f8b7e9d15f30a24ba013517859c:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWRhNWM2NmUxN2IxNDUzOTc4MzRiOGM4NTRkYzQxOTNlMjEyNTE4MGE4OTk2YTE0YzMxODgzMzI2YjJlZmJjZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTkwOWE1M2E2MThkMDI4ZTFkMzAwMGMwYTdhYmNlZWNiZTVmYjM3ZjRlNTExZWZlNDY2NDNmYWQ2ZTY2ODcyZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDhkMWFjNzMxMjU1MTRmMzkzM2UyNTk2NzVlN2NmZWJmMzQ2ZWIyMzNhMzk2YjNjODg0Y2VjMDM3MjU4MmQyMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTA4NjgxZWY4MDIzYjkzMDU0ODNlNTJiMzlhYzVkYjBlZTVhYzYzZjkwOTE2Y2M0Njg2NDQxYzQ2ODBlNTU2NCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpdbt/dbt_service.py#L605-L605",
+          "version": "repo-lines-v1:sha256:53bfeb11d5118d3ec7d48b391a33786051f0d6be35d36b94b3d8f463819df8c4:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTNiZmViMTFkNTExOGQzZWM3ZDQ4YjM5MWEzMzc4NjA1MWYwZDZiZTM1ZDM2Yjk0YjNkOGY0NjM4MTlkZjhjNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTNiZmViMTFkNTExOGQzZWM3ZDQ4YjM5MWEzMzc4NjA1MWYwZDZiZTM1ZDM2Yjk0YjNkOGY0NjM4MTlkZjhjNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTU4YmMwN2I4NzVkNDkxNTQ4NWI4YTk0NDczMDJiZGEwZDViMDg2NzMyMDkwZDU0MDZlMGRjMGIyMWQ2NGU3OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzg3NDNkMDYzMzMwNGRkMDIwOWQyNjgxNzU4NDk2MzQ4MzBjNTI0YjViYmNiNmNjOTNmZWVmNjNjMTk5ZDI4ZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b7bfe939d4774b9fa41f1eae4c8a3ab2",
+      "statement": "The deprecated old_client (psycopg2 with SSH tunnelling, google-cloud BigQuery, a larger WarehouseInterface, no pooling) must not be used in new code, yet remains referenced by dbt_automation operations and by dbtautomation_service._get_wclient, which backs several warehouse_api browse routes.",
+      "evidence": [
+        {
+          "resource": "repo://backend/.claude/skills/warehouse-client/SKILL.md#L10-L22",
+          "version": "repo-lines-v1:sha256:4bf0a55843d9c80a5efadc5c3b44a5b9db17438878072965a32b84d98d67e2e9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwNDlhMDA0ZGFhZGM2YWRjZjY4ODUzZDY5YWQ5NWEyZTM1NThlNGU0MGFjODkzOWIzNzM0ZDE4OTNmNjMxYjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI1ZDdjMzdlZGZhZGE3NGYxYmRjNDVhMjA3NTZkYmE4NGJiODU0ZGQxNTVmMGI0YzNhOGY5NWZhZDA4ZjYxOGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVmM2EzNjA5OGI5Mjc4YWM1ZGQ0MjAxNmJiODkwZGUzZGVjYWIxOWRkNGIzOTcyOTBlNjgwZmZiZjU2YzkxMDgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/dbtautomation_service.py#L361-L366",
+          "version": "repo-lines-v1:sha256:7036031a8d860cc40234695d51b781b6eaed0d4a0c18aadbd23c59a6047b0a34:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDY1NjkyMTkzNGE4ZThhYjJiZmViMWY1ZGQ5MDg5ZDkyNjVjM2I0YTgxZTcwM2NkZDQyNGNmNzFlYzRlMDNjNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODVkMTA2YmQ5ZjgzOWJhOWJhNGIxNWMyMWE5Y2E3MDNlMmJiZmNiYzU3MjU1YjJiNzMwMDhiNTM4YmVlYjM3MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjFlYWVlNGY1MWMxNTgyNTMwNzliMGExMjk0YmIzMGJlOWU4YmNkODhmZWI4ODEyNDk0OWMyZDg3NDZjMDQ1YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjJiNjU5ZjQwMWZiNWExNDU4Y2JkYjk2NDNkM2ViYWU4Y2NiZTYxZjMxNTc3NzcxZmM0YTFhNWEwOTQ3NWIxZiJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/warehousefunctions.py#L18-L50",
+          "version": "repo-lines-v1:sha256:5e641088463730b343d20b5de86835bde265e16264e0d1698e2cad953ae962fb:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzN2JiMGIzMDFlZGEzNzE0NzEwNGZlN2NhMGEyOWM5MDY1NDlmZGU1YjIyZjEwNmZlNjM3YTkzNjdkYmJlYjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwNzA2MjZiYTM2YzhjNmIwY2NhYzVhMjQwN2VhMWZiNjE4ZWRlMmE5OWJhMzU2MmFjYjAzODAxOWZmZTZmODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJjMDUxYTZjMmI4MWMxMzU4NzA1OGM4MWQ4ODIyY2JkYjQ2NDlkZDQzZmVjOWQxMDViZmEyZDZiZTk2ZTkwMWIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/old_client/postgres.py#L82-L120",
+          "version": "repo-lines-v1:sha256:0229ea2079f41d853cf44cbe37d6a073965d4ea3ed9c5daac8b13a4a8b9f3a43:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjOWI5OWYwMmI2OWQ2YTQzYTViZTg0NmY3OGVkOWQ5YzFjNDBlNGY4NjgyZmZiMjdhYmRjNWU1MDIwZWU0NWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2NDNlMzJmODc4YmQ5NzMyMjE4OThiZjA4YTNiYjZhMWJjNDY4ZGIwYWRkYmM3ODM5YzQ2MjI2NjNiMTEzMmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM3MjkzMWY4MjM3ODEyYzgxOGQzOTk4MDc2MjBmNGZlYzgzZWQ2MjEwNmEyYmM5ZjlmYjZiMmQ1MjRkY2YwYzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE3NDIxNTNkODZlNDRjNmNjOWE1MWUxNDUzY2Q1YTUyOThlMjBmMjc5NGI5MjQzYjRhYTgwY2JiYzQzNmY2N2EifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/warehouse/old_client/warehouse_factory.py#L8-L16",
+          "version": "repo-lines-v1:sha256:c45e63ddd61db5b7a09c1ca3626f7f8935367b3e72daff7178807aaf0a28d852:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTljYzVhZDFjZWVjMWMyMDg3M2VmODEwOGIyYmY2ZDVkODBjNjVmYmRhYjlhNWU2OWVhZjdmZGJkYTk1NGQ1NCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMmQwZTkxYzcyMzdiN2EyY2JmZmFjYWQ1NGI3YzJkMDZkMjRhZjhmYWUzOTAwNzhkNjliNDhmYTlkNzhjODU1MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGY2N2YyZjI3MWI2MjgzZDhhOTU5ZDZkMmM3MmUwNzY4ZmZhYTdhZWIxMDdhZWQ0ODA5ODU5OTY3ZDQ1MzM1OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_86407c2d27b949efa5dc149df625f53c",
+      "statement": "The webapp useWarehouse hooks treat the org as having a single warehouse (first item of /api/organizations/warehouses) and fetch exploration data from /api/warehouse/ endpoints such as sync_tables, table_columns, v1/table_data, table_data and table_count.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/hooks/api/useWarehouse.ts#L52-L200",
+          "version": "repo-lines-v1:sha256:a0cf905e2ae1ee4b167042bc5b456cccd8b9de6bfd2cb7683f52407091f28a9f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQ5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwMzg5ODJiNzM4N2NmZGI2Y2Y1MDI2M2Y2MzNlYzcwMTJlNmE4MjM5Y2E1NzBmMzJhN2EyZGVmMjMyMzRhOTQyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwMWJhNDcxOWM4MGI2ZmU5MTFiMDkxYTdjMDUxMjRiNjRlZWVjZTk2NGUwOWMwNThlZjhmOTgwNWRhY2E1NDZiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5MjA0MGUwOTVhOTRlMmFkYTc0ZTQyMWYzNzE4NzUxYTkxYTgxMGJmZDY2ZjQ4ZjRlOTM5YzdiNzQ4MGViNjcwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI5ZDYxYjkyNWFjYjI3NGZiNTlmNjEyNzVhYWYzMzRjZDBhN2MyNTVmNThmZmVlZWJkMzAzZjQ1NDEwMDgxZmEwIn0"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

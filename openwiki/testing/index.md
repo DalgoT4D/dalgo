@@ -1,0 +1,5 @@
+# Files
+
+- [Backend testing (pytest)](backend-pytest.md) - How the Django/Ninja backend is tested with pytest, covering the ddpui/tests layout, the autouse SES guard in conftest.py, the seed_db and orguser fixtures, calling view functions directly with mock_request, mocking Airbyte/Prefect/warehouse/Redis, commands, CI coverage gating and the one-test-at-a-time workflow.
+- [prefect-proxy and ai-llm-service testing](prefect-proxy-and-ai-llm-service.md) - How to run and write tests for prefect-proxy (including the vendored prefect_airbyte package) and ai-llm-service, what their GitHub Actions workflows enforce, and how the backend chat-with-data eval runner is tested and used.
+- [Webapp testing (Jest and Playwright)](webapp-jest-playwright.md) - How the Next.js webapp is tested. Jest and React Testing Library unit and component tests sit in colocated __tests__ folders with a global API mock. Playwright e2e specs need admin credentials from the environment. The page also covers the no-faked-tests rule and the CI workflow.

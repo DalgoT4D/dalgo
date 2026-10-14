@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:bc89ecaaea7577c0ac7f6ff56f31ca974168e26711f27c74c46e78de83b57595",
+  "claims": [
+    {
+      "id": "claim_29bd0cc3ee87401290fc0bbf1018b6b3",
+      "statement": "Each feature's design reasoning is kept as artifacts under harness/features/<name>/<version>: spec.md (from /product/write-spec), design.md and FIGMA.md (from /design/design-handoff), research.md and plan.md (from /engineering/plan-feature), and tasks.md (from /engineering/execute-plan, the milestone checklist and resume checkpoint).",
+      "evidence": [
+        {
+          "resource": "repo://CLAUDE.md#L121-L134",
+          "version": "repo-lines-v1:sha256:878ed0ac980ed237673d05130b7b248ae0882c3b2a8f6b15be554714bafeddca:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlY2Q0MGQ2ZWJjNDljYWZiNjUzNTNjMmY0YzQ5NzQ1ZTVkODgwODVjMzI4MzE1ZDk3NWVmMjk3YzUyMDcwZmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY1MmQ3MTExMDNkNTBhNDM3ODMwYzZmYmNkMDRmYjRiYWI0OWEwZjgyZjZkMjZkMWM3OTFjNmU4NDg4ZGQwOTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJhNGYxMjY3MzdmMmJlMDcwNWQ5NTJiZWRhNmY3YjYzZjEzYjE1MDQwMDQwMmM5Yjc4Y2FmMTk0ZjY1NTdkNGYifQ"
+        },
+        {
+          "resource": "repo://harness/README.md#L7-L28",
+          "version": "repo-lines-v1:sha256:404c996f1624d7aae5c2fa4b4fdda7fdb0d82f2c23542fff05972de57f17a540:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlkZmNlN2I5MjA2Mjg0NzA3YzdmNWE2N2Q2YzQyMWRhZTVkYTQ2ZDA2MDdiOGI2YTdiNzA5Nzg3MGYyMDZhOGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ1MjgzZTA1MzZjYWMxODA4ZmVlMWFmYjhkYzg4NDBkMmIyMjRlNGY5NmQxYTFiZTg5ODMxZjcwYjlmYTQxNWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b895afdced434a86b0d8a3c6092a2636",
+      "statement": "Specs are PRDs describing what and why with no Open Questions section, while data models, endpoints and library choices belong in plan.md. Plans are produced as Draft v1 that engineers refine, and must begin by reading harness/README.md and harness/domain-map.md and building a Blast Radius table, stopping to ask the user about any affected surface the spec does not address.",
+      "evidence": [
+        {
+          "resource": "repo://.claude/commands/engineering/plan-feature.md#L1-L56",
+          "version": "repo-lines-v1:sha256:b4b3b2e93a438b8672e217ac3fa6f6ee50ca381b1bb9303548c339a022ac6632:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAzMjhmZDViMjRlODg4M2ZhNDE5NmY2OGM5ZDY2YjA3NjhiMWFlYzE2NjNhM2YxNTBjZTY0NjhlOWQzYmFlZDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkxNTEzNGRkMmZlMTc2NjdhOWNiYjU5ZDk0OGMxNmFkMGVmMTgwZGIzMjM3ZmY0YzUwZTY4NjE0MDk1YmZlNGEifQ"
+        },
+        {
+          "resource": "repo://.claude/commands/engineering/plan-feature.md#L100-L118",
+          "version": "repo-lines-v1:sha256:2b06e3bd5f645dffcf12586371e794869646f99475cb6799e8adb01c4d21228e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1ODQ3M2NmMDU1OTBiYjQ2MzUyMDgzNDQ3NzdkMzg1NTFkYjJhOTdiNzAyMzM2OGQzYzQwZmViMDRmMzI4YmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyYjM0OTZjMGM3Mjc4ZTk3N2I3ZDJhMGJmN2E2NzZhZjljZmExZjIwYTA3MmZlYjEwYzQzMWM4ODBjZDBiYzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBlNWYyNGM5MzZkYWY4YjU0MDNlODYwNDIwYmIyNjAyOGY4OTllMWMzYTc5ZDMzNTRmMzAyNDU3YmMzZTY0MWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkyZDcyMDBmY2E1NTExODVkNjRiMzczZTY2MTQ0ZDQ4N2U2OGY1MTc2NmViOWU2OWViOTk5ZGUwYjEyZDQ3ZDEifQ"
+        },
+        {
+          "resource": "repo://.claude/commands/product/write-spec.md#L12-L37",
+          "version": "repo-lines-v1:sha256:feed1306b31b53a737a3373ebb368bc95520797d707f1aac7bef54f5d517dc29:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmZWEzM2EwYjA3NTIwMWE1MGE4MjdlNmZmNDNkNTFkY2MzYTUyYzk3OTgwYWRlZWRhMmU0ZDI4NmU2ZjMwN2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwNjEzNjdkMmY2MDJhNDRiYWM2Y2Q1OWYyMDk1YjQzNjU0YzMxYjExYjJiMWRhM2NmMWI3ZTA4OTVkZjA1MzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk4MjUyOTZmMjdkMjg0MDA5MWM3NmIyNzgyNTEzZTlmNzk1MGQ3MDA3MjM0ZDE5ZDQ3NzEzY2EzZDQ4ZWUwODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU2NmJhMjA5NGRiYWU0YTczMDFhNjQ3ZjEwYmFjMGUyNGVjMTFjODlkODdhMmExNzRmMDYwZDQ0NzRmOWQyMDgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7ab5a7f65f5340a398dd3138d9eed861",
+      "statement": "harness/domain-map.md is the product entity graph used for blast-radius analysis. Entities carry labeled consumption edges (snapshot-of, compose, embed, reference, trigger, query-from) and a confidence tag (verified, draft, tribal-knowledge-needed), and planners traverse Consumed by edges one and two hops.",
+      "evidence": [
+        {
+          "resource": "repo://harness/domain-map.md#L5-L57",
+          "version": "repo-lines-v1:sha256:ba5798c6a7e213ef137e9137eb9d5059114cbf706bcf2256e997034d2ea8ab6f:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5NDQxMzI5N2EzZTk1YTliNzJmNWU0YzA0YWE5YzMwNmY5MDA5YWQ4OGZhMGY5OTQ1M2QxOTYzODM1NjY4YjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhNmUyM2JhNTAxNjQ2YTIwNDM3MTQ0OGRmNWQwZmE5OTAwOTQ5ZmU0MTE1OTQzOTIzODg3NmZlNDEzMjQxYjIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxYzg4MGQ3N2FhNGE3NWVkMzBjZjIyZWY2ODUwZTlhYWUxN2Q5NzhlMTU1YzNlYTRhNjc3ZmM5MzFmOTFmNjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_894a3f7d18e64014b18001b8748f4d83",
+      "statement": "/engineering/execute-plan creates tasks.md in the version folder if absent and uses an existing one to decide where to resume. The executing-feature-plans skill requires a git worktree per feature, inline single-session implementation with one-test-at-a-time red-green-refactor, reading each service's CLAUDE.md first, subagents only for read-only orientation and review, and one PR per branch (backend first if split).",
+      "evidence": [
+        {
+          "resource": "repo://.claude/commands/engineering/execute-plan.md#L5-L41",
+          "version": "repo-lines-v1:sha256:187a647b57429a3d48d9319bc59bb920658fb00f0f61f1effeac530f6e657d81:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3NjljOTQ0MzY3YmFlYTFmOWU3NjViODlmZTk0ZmRlNGI2NTgwMDM5YmVhYmVlM2Q2ODg1MDhjOTUwOGFlMjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxZDU4N2Y4YTFhMGRmYTlkYmU5ZjA0YzEwMzQ1NjBhOTQ1NzVmMzE4OTFjNGQwZjgzNDE4OGViZTM0YWYwM2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU3MmQyZmZiMDBjYzkwMzc2NTAxNTYwNzhhNzRhNGQ3MDQ5OWRjMzAyYjBhNjYxNGI3ZTAxOTRhNTNkODYzNmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJmZDIzZWZmMTViZTlhMDk2N2Q3NTU2MDA2NTk0OTZhMDhhOWViOTRmYWE5NTU3MDNmYjYxYmYzYTAxMDI4M2QifQ"
+        },
+        {
+          "resource": "repo://.claude/skills/executing-feature-plans/SKILL.md#L37-L131",
+          "version": "repo-lines-v1:sha256:216c6328c8ccf72cfb7b271b442b45343fb5ebf9a658cf7610500d2d5b944db3:eyJzZWxlY3RlZExpbmVDb3VudCI6OTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3MzI5ZDFkMDE0MzdlNjcwMDUxYjBlYzFjYzA5YmU4YjY2ZjY4Mjc4YTZhZTA0ZDc1MTEzMGNiZjFlZWUzYjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwNWE5ZmY0OWRjMGFkZTNjOTYxYjQ1MWJhN2EzN2Q0ZDQ0NDRiZTZhNGVlZWFjNDVkNTFkMGI4MDg1NTY0MDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ1OTkzNThkYTYxMGQ0ZTc5MjQ2M2MxMmZlOWQxYjEwNzM2MmY3MzIzZWQxOGMyZDAxZmIyMzIxYmRmZjk5ZTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdjN2EwNjJkZWIwODAzNDVkODRkMGU3NTc1NjU3N2MzODQ1ZWExYjVhMzliNDdjY2NmZGFiMTZmOGM3YmZkMjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_77c8fd9e09ad485388ac74a547833695",
+      "statement": "/engineering/plan-enhancement plans minor version bumps (v1 to v1.1, v1.1 to v1.2) on the latest existing version of a feature, refuses when no versioned folder exists, and does not auto-generate a spec.md for paragraph-style enhancements; metrics_kpis is the feature with v1.1 and v1.2 folders.",
+      "evidence": [
+        {
+          "resource": "repo://.claude/commands/engineering/plan-enhancement.md#L34-L56",
+          "version": "repo-lines-v1:sha256:e55f70df8b092575248805494c775b55775b048cb8d248320c2555883dd2bc99:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU0Y2I0NzgyOWM0ZWQ5ZGFkMzY3YmYwNWVhMWZlMTExOTFjYmE3MmYzZjc5NWFkN2FkNGU4ZGJkNmQzN2YyYWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBjYmJiNzFiZTVmNTc0YTQ5MTdlZGZjMTQzMTZkZWJiNzBmNDFjNjg3NTlmMmE0NDFmM2VlMjdkZjFmMDNlNWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkMjljMWMxMjU1NTM1N2U0ZmI2ZDQyODgzODcxMWU2Y2Q5ZWI3MWM5NzFhZTg5ZDQxZWNjOWIxMWNiYzcwZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0NzhiYWY5NTY2M2YwOTEyMWU3YmUwZWQ4MWYxNzY5NjkyMGQ4ZjRhNzdhMzA5OWE3NWI0Zjc3ZjE1M2EwODQifQ"
+        },
+        {
+          "resource": "repo://harness/features/metrics_kpis/v1.2/tasks.md",
+          "version": "repo-file-v1:sha256:cb0facac02d9cdd6bcb5ef7fbbfeb8f97451722689ccd5954aade43371c03b64"
+        }
+      ]
+    },
+    {
+      "id": "claim_af844000d6304908bb773aa41111f1df",
+      "statement": "The features tree is not uniform: admin-portal and access-control/role-collapse use a flat layout with plan, research and tasks directly in the feature folder, while most others use version subfolders. dependent-filters has only a v2 folder, and access-control groups role-collapse, resource-sharing, dataset-access and rls-access as layered efforts.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/access-control/dataset-access/README.md#L1-L5",
+          "version": "repo-lines-v1:sha256:8ec7064c7d7cc55838effa76525df9c023100aaf614461091f392401eebd85ea:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2MyMjY0MWJkOTcyMTJmYzgxYTllYTg0MDBiZjNlZDMxYjZjZTUyNDkxYzc3YjYyMjJhNmIwMGM1YTdlM2ViNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDk3MWY2YTcxODYxZTI1NzdmMTAxZDlmYjljMDgwODFhODAzZGZhOTgyZWU3ZjhmNDk3YzI3OWEyYzMzZGMxNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjM4YTRlN2Y4OTdiZDJmZjVmMTE3MDQ5NmNmMTdiODFjMDMxNTQwZGQwYmMwMGRhZGNjYzMwNWRhZWQ2Zjc5NSJ9"
+        },
+        {
+          "resource": "repo://harness/features/access-control/rls-access/README.md#L1-L5",
+          "version": "repo-lines-v1:sha256:01f1d0c2d9d94ff5d6319f63e8df39cedabd4581f27453fc7d7f17e1176e96cb:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmIzYWYzMmFjOTJhN2FlODM0Zjc2Mzg3YTJmYjY3NDE2OTExMjNhNjhkY2UzMDQwZThlMzY1NjU3YzAwNmFkYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDk3MWY2YTcxODYxZTI1NzdmMTAxZDlmYjljMDgwODFhODAzZGZhOTgyZWU3ZjhmNDk3YzI3OWEyYzMzZGMxNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmQzZjc0YzcwNjQ5MTAyN2UzZDg3NGViZjM0Yjk0NWNiMGFhY2ZlMzg5NDhmZTNjYzA2ZThhZTllNWVmYWYxYyJ9"
+        },
+        {
+          "resource": "repo://harness/features/admin-portal/tasks.md#L124-L125",
+          "version": "repo-lines-v1:sha256:83ecde425a46dc445a1e25de1bfaaf8ee29a5eb86e9dc9b4150202f20ea9c5c1:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWJlM2VhMTU2NzllYTIxMzlkZTRmNzQxMWY2OWI4ZDY3ZDI3NDljZDY5N2RjOTYzY2FhZTQ5ZGVhODRjOWIzNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTQ4MGY4MDk0ODU4MDk0MGNlMWNmMmNiNDEyNzVjNTFhZWNkYjNlNGUwOGY0M2NjZTRlM2MwMmMxZTQ2ZjFlOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjExODEzY2EyMTY0ZThjZTk2OTVjYjA1ZTBiMzg3ZjI1MmJkMDVhNTA5NDI4N2E2MmYxYTQxNWM2ZTRhYzg1MSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDhhNDY1ODUzZGNiMGIzYTJlN2RlZTVkYTAwNjUxNjA4NTRlNjVlMjliMDEyZGE3MGM0ZDA4OWUyMTFmMjU2NCJ9"
+        },
+        {
+          "resource": "repo://harness/features/dependent-filters/v2/plan.md#L1-L5",
+          "version": "repo-lines-v1:sha256:c8acd4aee25d36c053814f9f3d7f3f9a61b63fc839336150a3389434ded34e86:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjYxOGFlODkzZWU3MTNhZmIwYzk2ZDcwZTcwZGFmNDk0OWUzYmU2Y2Y3MDQyOGM4NWQ4MjFlMjc2ZmI4MjhkZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQwZDM1MDZjNmU4NTA4NjIwODMxMmZmNjVjOGZiODYyNzhlMTdjOTE4ODA2ZGUzNTg1ZDFhYThhM2U3NTVjNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjkyY2U3MGEzODM5Y2NhMTkwMzFmMGEzMzYxZGM2ODM4MTZhNWRiOTQ4NTg2NzVlZDczYjg3ZmE5NmE4ZTdhNCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_c311a0bbf6d34fee8eca87b097973252",
+      "statement": "dataset-access and rls-access have no tasks.md and are scope stubs or scoping drafts that are explicitly not yet planned for implementation, so their completion is unknown.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/access-control/dataset-access/README.md#L1-L5",
+          "version": "repo-lines-v1:sha256:8ec7064c7d7cc55838effa76525df9c023100aaf614461091f392401eebd85ea:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2MyMjY0MWJkOTcyMTJmYzgxYTllYTg0MDBiZjNlZDMxYjZjZTUyNDkxYzc3YjYyMjJhNmIwMGM1YTdlM2ViNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDk3MWY2YTcxODYxZTI1NzdmMTAxZDlmYjljMDgwODFhODAzZGZhOTgyZWU3ZjhmNDk3YzI3OWEyYzMzZGMxNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjM4YTRlN2Y4OTdiZDJmZjVmMTE3MDQ5NmNmMTdiODFjMDMxNTQwZGQwYmMwMGRhZGNjYzMwNWRhZWQ2Zjc5NSJ9"
+        },
+        {
+          "resource": "repo://harness/features/access-control/rls-access/plan.md#L1-L5",
+          "version": "repo-lines-v1:sha256:56c8a18dfab0170508e707d8d6db92a134499ebf4997bfc51e93da6a6fb6bc4b:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGQyYjlmNTVlMDU0NmFiYjg3OTgyNThmYWZmZGM0ZTUzOWFjODRlYzcxOWY0ZGNkZjA1NmZmNzViZDdiMjNjYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTcxNjMzYjc5ZmM0M2FiYmM3MDE1ZTE5NDA5NTBjMTA5N2I4YTM4YjJmYzcyNGE2MzBkMjNlODg1NmY5MTQ3MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTcxNzM2NzcxZDQzYjMzYTlhYmJkMTFiZDUwN2I2NDg5OWZjNjYxMmRkMDFiZTBlYjI2OTMyNzc3ZjQyMGZhOSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_7442c852097b4c91aef67959e99d82c0",
+      "statement": "Admin-portal tasks.md records Milestone 1 (admin access model over the shared session) as shipped, with Milestones 2 (broadcast notifications), 3 (per-org feature flags) and 4 (Airbyte and pipeline read-only view) marked NOT STARTED.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/admin-portal/tasks.md#L34-L92",
+          "version": "repo-lines-v1:sha256:7fd419d3013a4a40372ec508466338e006631200254b7db14c61a228e0e5023a:eyJzZWxlY3RlZExpbmVDb3VudCI6NTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5MDExZjQ4NDM2NTA0M2JmMDY3MWU3OWJkOWIyNzFiNDE1M2VmMDIxZDU2NzVhZmQ2MDI5MThkYzA4MTZmZmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZmMTEyMjBhNjU3M2Y3NWI0N2UyN2RhYTg1NmEzNmQ4OGFjNDQ5OGVkZmMzMmJkMzg2YWRiOGNiNzkyZjQ0NDciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a6ad5c78dda6449a81c1b9e83dc0cda9",
+      "statement": "Alerts v1 tasks.md tracks five milestones using status banners rather than checkboxes, and all five are marked complete.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/alerts/v1/tasks.md#L10-L12",
+          "version": "repo-lines-v1:sha256:439b2bed6e59f0b6efdac2c2241872eb5daf1a7f4a3fa8cf9ee1dc7498479c9b:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTYyN2VmNWU5MDRhODYwYWMyMWY0MzBjMmNjNWUxNjg4YzNhYTFmMDYxMDRjNWY4ZjFiNGE2OTE4MzFhMmIxYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmMxNmVhZjNjYzUxYjJhMjhkYjQ1NGMwZjRjYWMwNDg0YWRlYTlhZjU0NDcxYmMxNjgzZGI4OTNlZjNlYjBiMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDAxZjJlYzE3NTkzYzEwNTRlYjQ2MzY3ZDg0NTNlZjI0YTE3M2NlOTZiNzExN2Q5MWY5YTY4ZDQ0ZmVmOGIwMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODFiMjkxODllMjQ1MmI0ZjNiMDg5ZmUxNjFkOTIyN2Y4ZWZhNjc2MjE1ZWNiYjMwYTZlYjBhZDhlNzgyZGNkMCJ9"
+        },
+        {
+          "resource": "repo://harness/features/alerts/v1/tasks.md#L289-L291",
+          "version": "repo-lines-v1:sha256:cd1a8889eb4d5a70efa0c8c93abd1853304ce9fc578f28f04ee888817af3be52:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDRmMjM3ODhlOGQxNWJiMWJhMTNiMTQwMmJhNTRiOWZmYjMzZGM0ZjY5MGY5YjA4MjgzZTE2YzFiOTAzY2I4YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmMxNmVhZjNjYzUxYjJhMjhkYjQ1NGMwZjRjYWMwNDg0YWRlYTlhZjU0NDcxYmMxNjgzZGI4OTNlZjNlYjBiMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDAxZjJlYzE3NTkzYzEwNTRlYjQ2MzY3ZDg0NTNlZjI0YTE3M2NlOTZiNzExN2Q5MWY5YTY4ZDQ0ZmVmOGIwMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODFiMjkxODllMjQ1MmI0ZjNiMDg5ZmUxNjFkOTIyN2Y4ZWZhNjc2MjE1ZWNiYjMwYTZlYjBhZDhlNzgyZGNkMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_0f0c94d2a72144a5bf05e88b2c4ece9b",
+      "statement": "Chat-with-data v1 tasks.md marks M1, M2, M4 and M5 done, while M3 (sessions, REST, gating, audit) and M6 (live validation, docs, PRs) have unchecked items.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/chat-with-data/v1/tasks.md#L7-L66",
+          "version": "repo-lines-v1:sha256:d5ff0739380b8e1796312d7a0683ca86a313cade50b8665835afd55bfb52c632:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmNjE2Yzg4OTVkOTFkZTZhYjFmOTU5NzY2NWQwNWY2NzFkNWYzNDRhOTE1ZWVhZTQ2MGZkZWZjMTc5ZDIwMTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2NTE3YmI2OTVjNTNiMjhiN2FmNjQ0NWM3N2I5NThjNTg3NDhlOThkM2ZmZjVlNWNkMjZiYjE3NjY0MjRlODQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE4NzIxNDlmZTk1YjY5ZTNmZTAxNmRlOTQ4Zjg3MjljOTUzNjE5Y2I5ODZiYTdkODI2OGYyZGI1NzkxOWMzOGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5b551dd515f64c0d973414eb3d52c82a",
+      "statement": "Ingest-cast v1 tasks.md marks M0 to M4 done and most of the M5 connection-block revision done, but M5.5 (moving SQL generation into prefect-proxy) and M5.6 (deploy and verify) are unchecked.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/ingest-cast/v1/tasks.md#L63-L137",
+          "version": "repo-lines-v1:sha256:8ba05cd8b7010c51893a5aa4c216afaa5d73ccf2b0999e16b586873ed74992be:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2YTY1NjQ2NjNjYzFjNzVhOGM3NDc4MGIxY2NmOGM1ZWI2NDA5OTc1M2Q0NmYxOTI2ODJiNWJjZTExZDY4MjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlZmIyM2NiNDg0ZTA5MTg0YmZmNDI3MjNlZjM1MzdkMmUzZDUwNWM4ZGQxMzU3MWM5MjdhYTMyYjI0OTlkNWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5cda55c0090c4dad8156b7cc4cf571ee",
+      "statement": "Metrics and KPIs v1 declares itself complete with one deferred item (card Create Alert action), v1.1 has M1 and M2 done with M3 (report snapshot freeze) and M4 (alert formatting) unchecked, and v1.2 has all five tasks done.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/metrics_kpis/v1.1/tasks.md#L10-L125",
+          "version": "repo-lines-v1:sha256:d1f569e9882859a0c073e60426cb3ca72fd85d2508c213b24eca1478679d47a6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE2LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIxZjNjYzg0ZjIzYTlhOGQ5MGVmODFiZmFiNzhhNWQ1ZWUxYjA3OWVlYzViZWFjYjgzZDdiNTcyNmVkMmRjYWE0IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJjN2Y1YzU5MzMxMDE4NTFjZTY3YmI4YmNmNmUyYTUzZTA1NDczZjkwZDMxZTM5ZGY2ZDkyYTk1YWUyNjU3ZjU0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIwMDFmMmVjMTc1OTNjMTA1NGViNDYzNjdkODQ1M2VmMjRhMTczY2U5NmI3MTE3ZDkxZjlhNjhkNDRmZWY4YjAxIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJmOTFiYmQxNmY4MDZkNTUzMDc2OTA3MTExNzVhOGM5MmY5YTJmNzEzMzJhYWQ2OWQ1NmRhODg2YTQ3ZmU5OWJlIn0"
+        },
+        {
+          "resource": "repo://harness/features/metrics_kpis/v1.2/tasks.md#L1-L9",
+          "version": "repo-lines-v1:sha256:cb0facac02d9cdd6bcb5ef7fbbfeb8f97451722689ccd5954aade43371c03b64:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjViNjVlODhlNzg0OTUwMWEzYzE1ZDIzMTAzOTZiOWRiNDQyODgxZGM5NTE2ZjIxYjAwOWZjZjJhZTAxOTA0OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTgyNTA1NDc5NWE5M2E4NzRkYWMwNDQwNzBlNWViZTgxNDBkYzFjNzY3MzYwZTRiMDU5OGNlMjFlYTNhM2EyMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://harness/features/metrics_kpis/v1/tasks.md#L156-L175",
+          "version": "repo-lines-v1:sha256:c06eb9a4eab3adde435531937253f4ec7663210f0fabdd07fd328c8c9babba55:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3MGY3N2FjZTMzODc5MzJhYjE0ZTRlNzJlNTA4NTliNGJiYTg3MTQxMjdiNDE2Yzc1NGRkZmRkODcyNDRlY2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIzMTI4NDQ0NTFlMTM5YmEwM2RhN2JjY2U5ZDgyYWE1OTM2YjRiMGUzODQwMWRmNGIxOGI4OTk4YmI2ZTE1NTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmMmMyNjlhMmIxYzk5NmMwNDM5MDg4YjI3MWNjZjE2NmQ3NzdmNzEwNDEzNzA3OWU4MDQ1ZTFhNTA2MDcxM2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBhMTc4ZDNjYjZkZjgzNzg0Nzg0YjEwNjY1ODllMTQxYzVmYjY4ZTlmOGQ1NzlkZDVmOGU5ZjNlZWI4YmJlMzYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0cbe4cf945264733a04aee8d145100c0",
+      "statement": "Audit logs v1 tasks.md has all checklist items done across five milestones plus post-implementation fixes, and role-collapse has all items done except removing worktrees after merge.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/access-control/role-collapse/tasks.md#L14-L71",
+          "version": "repo-lines-v1:sha256:fc079a6e2fb669af6af20a6c4f56c691c9f14536660b5552ee24368b03bf6c30:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3YzAzYTg3YjNhNTdiMjA2NGQzMzk5ZWI3MzZkNjdkNmI3MWE0ZmJlZTI4MjY0MTM4NjgwZGY1MTMwYjM1MmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlOGIwOTE0MjIxNmZlODhlMTA1NzFhZDY0ZTgyODJkMDU4ZDk4ZGMwMmE1NWNhMTdhM2MyZGY1ZTZjNjRiZjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://harness/features/audit_logs/v1/tasks.md#L1-L102",
+          "version": "repo-lines-v1:sha256:1bda2e610b5caf5b2645fbe58fdb894d853901c5f0e95bafdd3106689201ae00:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI5NjgxNTU2NmI4MGZmNzM3MGExMGU0NjQzMWM4MGM4NWVlMTFkYjUyZDRjMDk2Yzc1OGE4MzEzZDM1OTdhMzI0IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJkNTllMzcyZWUyZDJjNTAzYjdlYTVmNGQzOTA4YzQwNWM1YzljZTA1ZGY3ZTk3NDc4MmFkNDllNDk0Y2I1OTk5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_c9cd266df7dd442b83576ed5fd8b5eb5",
+      "statement": "Resource-sharing v1 tasks.md spans milestones M1 to M17 and is mostly checked, with remaining unchecked tests, follow-ups and known bugs (such as group edit endpoints lacking a creator/admin check).",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/access-control/resource-sharing/v1/tasks.md#L370-L392",
+          "version": "repo-lines-v1:sha256:7e6609fd43dd669fcd64e2b5e020c8da5dd97941cef6e5141fc7c8ab49604289:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzMDM5NTQ1NWZjMTE0OWMwNjIxZTQ1M2VjMDEyNjdkYThlOGE5OWM4YTNhY2ZmODIwYzg5Y2Q3ZGVlZjY0OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1ZGY2ZWVkZjhmMDgzOGMxOTA3NGExNWE4NzcyZDY2ZTliMWE3M2FkN2YyNmJkZDNjYzM1ZjZlZWI4M2NmOTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE5Y2I0MGM4NmZiNGU2ODdlM2E5Yzg4MDFlZWRmZTNlYWM3YWU2M2Q4ZjUxNDIyMDNmOWNiYmU1MDZjMWQ3NDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9838bd15f378459d8de9fa5533fe1861",
+      "statement": "Report-scheduling, prefect-runner-migration and sentry-setup have only plan (and research) files with no tasks.md, and dependent-filters v2 has only plan and research whose banner claims all milestones complete, so their execution status is not derivable from tasks.md.",
+      "evidence": [
+        {
+          "resource": "repo://harness/features/dependent-filters/v2/plan.md#L1-L5",
+          "version": "repo-lines-v1:sha256:c8acd4aee25d36c053814f9f3d7f3f9a61b63fc839336150a3389434ded34e86:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjYxOGFlODkzZWU3MTNhZmIwYzk2ZDcwZTcwZGFmNDk0OWUzYmU2Y2Y3MDQyOGM4NWQ4MjFlMjc2ZmI4MjhkZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQwZDM1MDZjNmU4NTA4NjIwODMxMmZmNjVjOGZiODYyNzhlMTdjOTE4ODA2ZGUzNTg1ZDFhYThhM2U3NTVjNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjkyY2U3MGEzODM5Y2NhMTkwMzFmMGEzMzYxZGM2ODM4MTZhNWRiOTQ4NTg2NzVlZDczYjg3ZmE5NmE4ZTdhNCJ9"
+        },
+        {
+          "resource": "repo://harness/features/report-scheduling/v1/plan.md#L1-L5",
+          "version": "repo-lines-v1:sha256:83b417b78cc7902dbfaeec920998d2c4df0ee70b9beabcd584c2fd735340ffbd:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDkyZDI1Y2ExNjE5ODNkM2JiNjNmNDdiZDQ4MzhhZTU5YjIzZTY0MmI0NDZjNmY1MGY1ODAzZTZmNWI3YzRlZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDJjMjA1NzMwNTQ3YTk2NTNmOWY5NDNkNGYwOGZhMTM5NDNlMzFkMzcwOGE4YWNjNjIyZDZlNjQ0N2Y5MjI0MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODYwZDZlNGI5M2NhMWUzM2M5MTc5OTEwNmEzYmE4MzE1ZTZhYTQwNDgwZTgyNjQ5YjhjNTNkZjI3YjJlZGI2MyJ9"
+        },
+        {
+          "resource": "repo://harness/features/sentry-setup/v1/plan.md#L1-L5",
+          "version": "repo-lines-v1:sha256:cd38538803f8c5a341572c2c205a96da18da7985f2902d6183a939507557bbd2:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNjVhY2MwNGM5NzUxNjVlNDYwNjNiMWI5YTRkZDFiZjdmMDE2ZWQ0YWI2ODc2NjU4NTQ0MDFiNDQwMjkyOTBiZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzZiNjliZDFkMDRmNTE5ZjVhMjBiOTA2N2Q1MzU5MmZjOGIyMGNjNGM5MDMwODY1NmVhNTBiNWMxOTdkMGNkNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTc1YWQ5ZDFlYjFiODZkODA0ZGVhNGU3MDRlODg5MWYyOTRmZGJjMDIzYTRmZGE5MjE3YTllNzU5ODI0YzhmOCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_992bd74875004de7b6c5b1b5d83e3a3c",
+      "statement": "The harness screenshot engine runs one YAML recipe per feature from harness/scripts/recipes, auto-discovers new recipe files, and aborts a recipe with exit code 2 when a required flow fails while optional flows only warn.",
+      "evidence": [
+        {
+          "resource": "repo://harness/README.md#L229-L261",
+          "version": "repo-lines-v1:sha256:182b5a9733829217dd9fd5b0018e7c71d90df93ac353359fc29808f271494f8e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzODMxNWMwNjMyYjJmMTBkNmZhMjA2OGNmNTI1NDNmY2VmOWQ5YzI3ZTlhZDViYmNkYTE3MTgxZTUxZjkwZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5N2ZlNTY1ZmUyZThlMTExNzVlNDA0OTVjYzZkYzM0ZGI2MWYxYWUwZWYxZmY2Y2ZmNDE0OTc1YzRkMzk3ZDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwMWYyZWMxNzU5M2MxMDU0ZWI0NjM2N2Q4NDUzZWYyNGExNzNjZTk2YjcxMTdkOTFmOWE2OGQ0NGZlZjhiMDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ4ODAwNmI5NGU1M2ExNTY1OTFhYjAyY2YzYzRjYjNkZjdjOGEzNWJjYjM5NDZiNzRkNjVhNzYwMTg1OTY2ZjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_70b946dd649d4c4da96ef06ecac61cde",
+      "statement": "Webapp per-domain rule files in webapp/.claude/rules are scoped by frontmatter paths globs and describe feature domain maps, while backend conventions live as skills under backend/.claude/skills; both are separate from harness feature specs.",
+      "evidence": [
+        {
+          "resource": "repo://backend/.claude/skills/api-endpoint/SKILL.md#L1-L5",
+          "version": "repo-lines-v1:sha256:2e4153e0d143de8c75d155ee85dbebbcd62e2a6e689733478ab09188c0e9bcf8:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjUyZDcxMTEwM2Q1MGE0Mzc4MzBjNmZiY2QwNGZiNGJhYjQ5YTBmODJmNmQyNmQxYzc5MWM2ZTg0ODhkZDA5MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTk2NjI5NzEyZGUwNDVlNjQ2OTI0ZDUyMzI3NTZhOTA0MGU2YWNlMWJhNGU0YTNjMWU5MmUxZDEyNzc2Zjg4YSJ9"
+        },
+        {
+          "resource": "repo://webapp/.claude/rules/metrics.md#L1-L25",
+          "version": "repo-lines-v1:sha256:d3ad3a465a60fd57a13f289d8c4e77ff6a91dccd9ef4b6e96faf9fa0147aa607:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY1MmQ3MTExMDNkNTBhNDM3ODMwYzZmYmNkMDRmYjRiYWI0OWEwZjgyZjZkMjZkMWM3OTFjNmU4NDg4ZGQwOTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmODE2ZDEyMWQxYjlhZGUwZmE1NmMxODg1M2RjNjQyMzI4ZTk3NzdmZWExODEwMTI2OTNkZGE1OGU0YWU0NDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdjMzU5YTU4NWUxM2MyMzI2ZmZlN2MxYWY4YWJhMzg5ZmFkM2QwYzFmZjY3NTg5MGQ5NDUxMThjOWUzZjNjNjgifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

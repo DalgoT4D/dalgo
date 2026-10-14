@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:a8a451493f69781f305a039171157c1bbbdd883715a45b8c140cc37b98a8813b",
+  "claims": [
+    {
+      "id": "claim_0f5b364e416f4fcf9f0456587627cb4e",
+      "statement": "ddpui/celery.py is the single source of Celery config: the broker, result backend and RedBeat beat each use a separate Redis DB index from RedisDB (0 broker, 1 beat, 2 results), while Channels uses DB 3 and the app cache (task progress, auth caches) uses DB 4.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celery.py#L18-L67",
+          "version": "repo-lines-v1:sha256:05f5f3cfc463ed6df3a224451b4be309f04941e5d3af79fc247b922c44393235:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiOTAyZWMzMWJlNzZkMjg0M2YyNmIyMzI5OWE4YmE5ODI0ZWU0MWIzYmZkYTk3ZGZmYzBlNjkyMGJjZTFkNGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2Y2FiMzQ4OGY4ZjYxNTlhYzQ5NDMyOWZjMGM0MGQ3MmViNDhkZWRlYWI4YTJhYmI2MzllYzRiNmQ2YjZlOTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIwZGY2ZGI5Mzk2YWVlZjg1MDBkODA5NzU1N2MxOWQ3Yjk5YWQyZmQxM2M4OGY1NzFlYWZmNWE0NTE4MDg4MDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/redis_client.py#L18-L37",
+          "version": "repo-lines-v1:sha256:23d226f538e852a1500d8cba9dabe5fd50a277b5f4ddf7435e76697f397bbd03:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgyMGI0NTNmNWUwYzkyZDVmNmMyNTFhNWVhMTk2MGQ3MmYzYmQwNzk1NmFlODU3ZGEyMGUzMWE4OGM1NTk2OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJmY2ExYWJhZDg2ZTYxNDYxMWUyZmY4MjNhOWM0OTg4YTAxZDUwNTRhNWNjZWIyZDZmMzkwYjllNmE1YTY5NjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNhY2NlYWRmNWY4ZWRmN2JiYzVhYjJiZjJiYzRjYWMzNWRhMWMwMGI0ZDc4NzUwZTczZTlmMGFjMDJhMDIxZTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU5NGQ0NjcxMWU0YjMwZmM0MWRhNDA4NzczNzIwODZjYjU5ZTk4NmE4M2M0Yzk2Zjc5YTU2ZGE3OTA1ZjRhMTcifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/utils/redis_db.py#L14-L21",
+          "version": "repo-lines-v1:sha256:74f98c69db3f93dc1406e8ca9b8accdc34c5a26bfb5732efb2dab4ab4431116b:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmUyOWQ5ZDJhYjEwODJhNjU2M2Q5MjMwNGZlMmRiODBkYTFmNmViOGViZjFmOTE4YzRkMDhmMGFmOTNkNGRhOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmZjNzlmZjMwZTA5M2ZjYjIwODM0ZTI4NTlmMjYwOTY1YjlmODAzNDM2NGJhZGIyZTNjOTE0Y2U4NzhhZDFiOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmRkZDdlN2UwNDQ0ZGY3ZGJkZjEwNWZkMmFhMmZjZmM4YjU5ZWNmYzNjNTMyOGNhM2I4ZTQ1NDk5MjNmMmQzMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_68fb08785bcc4026bfa97bb3d403abb7",
+      "statement": "Celery routes run_dbt_commands to the canvas_dbt queue, trial clone and expired-trial deletion to trial_clone, and alert dispatch/evaluation to the alerts queue; everything else uses default. Compose files run workers for default, canvas_dbt and alerts plus a RedBeat beat process but no trial_clone consumer.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celery.py#L34-L47",
+          "version": "repo-lines-v1:sha256:8718af284b959b3e2f03e3339e6ab2d6d063f0daedca4e9be426ef55edffce47:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiOWEwMDRjNTQzMTZiMDM4NjZkMTVmNzkxYzkwYTg0N2IyNDFhYzExYWU0ZGE1OWRkNDJiZWZlMzc5MGYwZGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjczNTEyMWEyZGU1Y2YxNjYxYjg4Y2M5YTBmZWU4NDMyMDkxZDE3ZTAxYmQzN2FmYmQ1OWJhZjM2NDdjNDBlYmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyZmVkNGQwYWE1N2I2ZTIyOTFkMjhhYzcyNDA3ZjcwNmJhNThiMmFhNDYwYTliZTY1N2E4YzBkZTdlMTAzZGIifQ"
+        },
+        {
+          "resource": "repo://docker/docker-compose.yml#L79-L101",
+          "version": "repo-lines-v1:sha256:6d84651c1abbeeffbbeeda5e49e29e9beb1906bdad4a5956c1ecfe828eec876a:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzYjc3ZTg4NjU1ZmQzYWM5YzJkOWM4YWEwYmM2MGJlN2RmYjk3YTFmMmVkYmFmODAzNjMyYzRlOWQxMGFkMTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmZGUwMmQ1Yzc3YzNiNGIzNzc0M2FiZTg4YzZhYWQ4YWY2NDI2MGYxNzM4ZGVhODc1MTM2ODc2NmVmZDJhMzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI5OThhOTNhMWMxZjFmYzdlMmEzYTU0YTViYmI1NWUxM2JlNjgxNGE5NDk3M2QxY2ZjMWY3YjUzNWI1N2JlOWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA2YjRkOWJmMWVmYjAwOTQwZTQ0YTYwZTNkMzMzYTRmMWZlNWE3MmU3OWU4MjA3OWIwZWI4NjE3NWMxNTgzZmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d27be47f22024835a86a4ed15edaca96",
+      "statement": "Beat uses redbeat.RedBeatScheduler with schedule state in Redis DB 1, and the periodic schedule is registered in setup_periodic_tasks (on_after_finalize) in celeryworkers/tasks.py, covering schema-change detection, canvas lock cleanup, alert dispatch every 60s, stuck-lock clearing every 300s, 6-hourly flow-run sync, hourly trial emails/deletion, daily Airbyte stats sync and monthly audit-log purge; long-running flow-run checks are registered only if ADMIN_EMAIL is set.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celery.py#L63-L67",
+          "version": "repo-lines-v1:sha256:f02bfe59eeb2bbadfd4a5c8b765cddfc6f4573c7fa8ab163f680588300da9381:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDExNGUxODAzZmRlYzEyY2JlNzE1ZTk5M2M4ZjgxNGVkMzlhYjU2YWUxZTdiMGUxZmI4NDViZGIwOThiYTQ0YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTZjYWIzNDg4ZjhmNjE1OWFjNDk0MzI5ZmMwYzQwZDcyZWI0OGRlZGVhYjhhMmFiYjYzOWVjNGI2ZDZiNmU5MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWE4OTlmODFkNDJjZWZlNGQ0MWM0YmU0MWY0MzEwNTUxOTU5MDAyZDU3NjBkYzM2YWUyYTkwYWQzYjVjNzUzOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L1274-L1345",
+          "version": "repo-lines-v1:sha256:32d5c106c6e78186dd2660b9225817e4978b66018220970e1997fd68392f4a5d:eyJzZWxlY3RlZExpbmVDb3VudCI6NzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0NTBiYjE1NjA2Y2RkNjIyZGY2YzkzNGQ5MWJiNjY4NWYyZjVmMDI3NjJhOTU3ZGRhYzRkMTc2OGNhNWNhNjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFiNDk1MWFhOTYwZjlkZGMyMGM1YWNkNmJmZjYyMDQ1NDQwZDlhMmQ4ZDBmYTEyOGQ3ZDU0M2RhN2UwNTMzZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_dd73664910604403a7cb600b7f1a9928",
+      "statement": "TaskProgress stores a JSON list of steps in a Redis hash (hashkey, field task_id) via RedisClient.get_instance(); the first add overwrites prior state for that task id, and expiry is set once on the first add for the whole hash only when expire_in_seconds is given.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/taskprogress.py#L8-L49",
+          "version": "repo-lines-v1:sha256:6636eb7a1312eabcf2ad9dc2792a6c1c46c4a59bea9bc0c556aec932647de2ef:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlYTEwYjk4NWRlMzA4NzQ0NmNjMzViZDkxNWVkZTllY2ZjYjJlYjQzZGU5MmFjOTAwMjdjNTNjYzIzM2I3MWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjliMmFiMGZiZTA5OGM5NzRmY2NjNmFjYTY3YWRiYmVlOTc4YWQzZmZhMTlmM2VkNWU5YmEwYmJlNmRiYjM4ODYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRiNzM2M2RiZTE4MDUyYmI4M2I2YTc5YzBkN2EzZmZlMTY0ODVkM2Q0MTdjM2UyNjhkMGNjOTdmMTRmMzM4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f933b4e04988499e9167e3ec1a22b395",
+      "statement": "SingleTaskProgress stores a JSON list under a single Redis key; its constructor resets the key to an empty list with a TTL, add preserves the remaining TTL, and the key disappears only by expiry, so fetch returning None means not started or expired.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/singletaskprogress.py#L7-L48",
+          "version": "repo-lines-v1:sha256:1098f3e2bc9a8c7acd22e249f790861326028ec316da20a1463e4c1c5a0fc09e:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyOThlMDAzZDYxNzU5NDNlMTY1OWQ2MzQ0NTFjYWRkNjdkODg3Zjk5NGYyZDg2MzEzZjU0NTg5ZTMzNjYwYTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlYzBiYzM4YzdkYWQ1MWVmNGU4MzZmYTQ3NzlhOGNjZDU1ZTYxYTZkYjFjMjViZDU0YzA1ZWQxMzI1N2YxYzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRiNzM2M2RiZTE4MDUyYmI4M2I2YTc5YzBkN2EzZmZlMTY0ODVkM2Q0MTdjM2UyNjhkMGNjOTdmMTRmMzM4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a23b98d3474345ed8de0a1be091441d4",
+      "statement": "Task APIs under /api/tasks/ (permission can_view_task_progress) expose TaskProgress by task_id plus hashkey, SingleTaskProgress by task_key (/stp/), and raw Celery AsyncResult status (/celery/); missing progress returns HTTP 400.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/task_api.py#L13-L44",
+          "version": "repo-lines-v1:sha256:4ac5789666786e32b3a0142987e80899f11862649a266c417ef8479ff702ca8e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA4YWRhMjM1NjU2MDM2NGUxMGVlMTllODU5OWJmZGQ5YjZjZWI1OTkzZWU4OTExYmMzZGY5MTM5OGYxODc5ZWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMTFjMDU2N2QwYTVmOWU5YjEzNWY2NWNkMjUzNzJkZmQ2Mjg3NzVmN2MxZWQyNTNmOGJhZDQyZGQyZDY2NjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5OWM5ZDVjMTg0M2M0NzI1NjJiMmQ2ZWIxYTBhNDU2MDA5MWQyOGRkZGJhNTZjYjEwOWU1ZGY4M2JmZjI5YjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/routes.py#L109-L109",
+          "version": "repo-lines-v1:sha256:9d813781f47edef8307b182ad439e5691c3031dacc637d801f55377c25bd6a68:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQ4MTM3ODFmNDdlZGVmODMwN2IxODJhZDQzOWU1NjkxYzMwMzFkYWNjNjM3ZDgwMWY1NTM3N2MyNWJkNmE2OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQ4MTM3ODFmNDdlZGVmODMwN2IxODJhZDQzOWU1NjkxYzMwMzFkYWNjNjM3ZDgwMWY1NTM3N2MyNWJkNmE2OCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjBkZmVlYWQyY2RmNzg2ZTYzY2VmYTQ1YzYyZGM5NWE0NDU4ODA1YWY5Yjc1YmQxZGJhOGNjMTk1YmNmNDVkZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzk2Mzg2ZjRlNjU2MzNkYzJlMjZkMTA3MzNjNDU4NmY3ZDNhOTkyYjY5ZjhhMTA4NTQ4ZGJjNDRiOTdhYTU1ZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b92719e6cf574614b1f821d7cb64cb97",
+      "statement": "The webapp polls task progress with SWR hooks that hit /api/tasks/{id}?hashkey=<prefix>-<orgSlug> or /api/tasks/stp/{key} and stop refreshing once the last progress entry is completed or failed; the schema-catalog websocket consumer instead loops every 2 seconds on SingleTaskProgress.fetch and reuses an existing live key to avoid starting a duplicate task.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/websockets/airbyte_consumer.py#L134-L220",
+          "version": "repo-lines-v1:sha256:4944874ec9e7269442b9a1d99a9622336bdd8f5cdb68f38662e0c6d002a0bde0:eyJzZWxlY3RlZExpbmVDb3VudCI6ODcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzMDZkOGQyMTZkNzYwMTRkOTE2NmFiOWQxNDdhNmQ4MmUzYTBkYzQxYzg2NGZmOGEzMDlkYmViNzc5Mzc1NzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRiMWJjZDNiMzE2ODJlZjUxNGU5MDliNDBkNTUzYjkxY2Q1OWQwODdlODNkOWVmZWZjN2EwYWQ1YzBjZmU0ZTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIzZGYyYWNmMDZlOGMzZjAzYzcxMzVjNmU4YWM1YTljYTU0MzJhYmUwNmE3NGFjYTBmZGQ5YTUzYTAwOGY5ODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFkNDU1NDFkOGJiZWIxOTlmMzY4OWE0YjA2ZjhhMGJlMzQ3OGIzOWJmOGIyOGRmNDNhZDc2OTVhYmVhMDg2MTcifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/useConnections.ts#L83-L110",
+          "version": "repo-lines-v1:sha256:b432ddc62d8ddad589018b76874d148ef724a17e66d25d9fb96ec0dfc9e142cf:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBmMDFkNDFhODkyOGYwOGVkZjJlMjdiYjdiOTc0OTA5MDc4NWIxOWEzNzg5YmI5MzVmZThjYTY2MmNlZmMyMGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBmYzlhNzQwZGIyMTJmOWI5Y2JhYjZkNjQyODhkODJmMzc1ODBkYTg2NmNmZTRiZjc5NGE5NGRhYjlhZmFlMmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmNDYwZWZiZmZlM2YxOTI3NGM5OGJjMWNmZWMyYjM4NTVkMWQwYjllNzZiNTg0N2QwZjc5OTUzMjVhZTFkMzEifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/usePrefectTasks.ts#L47-L65",
+          "version": "repo-lines-v1:sha256:e6f897ddbfd95d55684d523971a1bb33454f59ef93a00bdbaa78a25349c97e6e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwZGMyODBlYzZkMWY2M2ZkNzQ1NzNmNWNjMTJiOGM3MjJlZTlmNTU5NTgyM2E1ZWU1OTVmMWM3MGRjZjg2ZDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiNTgwZTk2NGY4M2E0NzNmNDNkNDQzODQ2Mjk0OWQ2OGI1NjAwZmRhNzg3ZjE2Mzc0NWQwMGRlODljYmYzNmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_416268af20904399a32f69d7362b8be4",
+      "statement": "The Prefect notification webhook (POST /webhooks/v1/notification/, authenticated by X-Notification-Key against PREFECT_NOTIFICATIONS_WEBHOOK_KEY) only extracts flow_run_id and state and enqueues handle_prefect_webhook.delay, returning ok immediately; the Celery task delegates to do_handle_prefect_webhook.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/webhook_api.py#L17-L52",
+          "version": "repo-lines-v1:sha256:eebb0d646eff3c24fbbf7fdb0e731801f0e1d8dd415dc5c940a35f537435686c:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2ZmUxMmQ0Y2NkNGZlZTVkNjllYjdlODcxMTVhODliN2M4NTgxMWU2N2MzM2FmYmM5N2JjNWI1ZDg3YTI5YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlNjRlZDZhZjhkM2RlYzcwNzEyMjk1OTY1ZDJjN2I3NTMzNDU1MTEyNmU2ZmYzNmFjYzU4ZTJmMTdlMGVhMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVlYzhlNDNmNjgxMzQ2OWIxNmJiMWQ0YmI5ODVhNzJlNzdmZWVhOTcwOTE2ZjQyNDQyYTU5YjMzN2JjMTcxN2EifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L1084-L1087",
+          "version": "repo-lines-v1:sha256:aedc618bd68b6ba58967f34170271a8ad6bcd6fe4e9326d28f3a68450f09f22d:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGI5ZTZhZjVjNjY4MWQ5Yjc2NzVhNTMyY2UxN2UyOTZiZjllMzdjNjQ0YTg3NzZhMDMxNDY0ZTlkNGE5NTQ4YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGY0MWU4OGUyYWYxMGU5ZTA5YzFkMjg5NGE2MDk1NTk1MjczYWE4Y2Y3Mzg5NGVmZWM5MmE0OGQyZDE0YjZjMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWVkMDY1NTQ0YmI5MWZmMWU2MmM2OGRjN2FmOWIxODI3MzZiNTdmNzAzNjU5YzhmNGM4MDY1ZDRlZjcwMTAwMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGU4MjIwZDlhZmJmNGJjODcyOTRhZmQzMjI3NjI3ZGM2ZmZjZjk1Zjg0NTIxNjQ3MWU4YWQyMWFmMDBhYmEwMSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/routes.py#L114-L114",
+          "version": "repo-lines-v1:sha256:a232929e868e9b77a9e3a8f79d97086ab01a58e625bdcd40c70b09eec75072fc:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTIzMjkyOWU4NjhlOWI3N2E5ZTNhOGY3OWQ5NzA4NmFiMDFhNThlNjI1YmRjZDQwYzcwYjA5ZWVjNzUwNzJmYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTIzMjkyOWU4NjhlOWI3N2E5ZTNhOGY3OWQ5NzA4NmFiMDFhNThlNjI1YmRjZDQwYzcwYjA5ZWVjNzUwNzJmYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDU4YTY5ZjQzOWYxZTQ3MGMyMmU1ZDBkZWU5NzlkNWNhYzA3ODAzZmIzMzc1NjA5NWNlNmYyZWNlMDMzMzc3YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNWZjY2E2MjIwMmJhNzU1ZjBiYWFiOGZlZGJiMmZiNmVhNjFlNzZmYzBhZjQ4YjFiZTU0NTU5ZGRjYjc1NTlkYyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_3b2d9fd150e94b74b97ba4c35ea00dda",
+      "statement": "do_handle_prefect_webhook re-fetches the flow run from Prefect; for deployment runs, terminal states delete TaskLocks for that flow_run_id and upsert PrefectFlowRun (with optional single retry of failed/crashed runs gated by PREFECT_RETRY_CRASHED_FLOW_RUNS), pending state locks the deployment's tasks as the system user and stamps the flow_run_id, and running upserts the run; failure notifications go to org managers and optionally platform admins, with errors swallowed.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/webhooks/webhook_functions.py#L138-L210",
+          "version": "repo-lines-v1:sha256:10eeb92dab59457fda108ef3d0a599a98dc4bd2c77abf720342b27fccbe14a50:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxNWRlNDZkNTVlZGYwZTQyZWIzNTFjYzg0NzkxMDUxYjcyZDllMjgxYjg2YWE3MTQ4NGNlNGYxNzhmNzMwOWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwY2Y3ZWJiNDlmMWM1MzljODk0NDE3ODliNTc0Y2IwMGY5NDdlZDMwMDViN2M1NjkwYjc4MDI4ZGI4ZGUxMzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIxNzQ0ZDE5MjdkN2UwYmRiZGQ5NmNhZTg3YTdkYWFkZjFlOGRkMjRiN2RiOWJhOGFkMzQ1MTgxMGYxY2ZjMTgifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/webhooks/webhook_functions.py#L213-L237",
+          "version": "repo-lines-v1:sha256:b9de8339e957eb924e10cbddb3831c4514933185539cc85ce0fab1bf86b9066b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdkNDIzZjljOGUyM2NkNWI1MmIyYTk4ZTliYjgxOTVjOTAxZTc4ZTJkYzEyZGU5ZjEzZTJjYTc4Y2FlZjUzOGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1NDUxYWZlODljYjhjMjZhMTdiYjAwNDBjNDA0YTJkNDc2ZThlOTUzOTEzNjEyY2JiMDM4M2FmZTA4ZTE1ZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdlOWFlNDAyYTMxMDg4ZTMzOTgwODJlY2U2N2JlNTBhMDExNmE5MDI5NjFjZTU0MWUyZDAzMWVkNDY0NWFlNzkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZhNDc3YmMzMjRkOTIyNThiZDQyMDE2ODExY2QxOWY5NGUwYzA4NDE0YjY3NmRjN2Y3Mjk1ZWUwYjE5YzE1YTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/webhooks/webhook_functions.py#L327-L371",
+          "version": "repo-lines-v1:sha256:0de625c1c2fd7d23a37eff2902d0fc52cd22e8f7e26e5f62e29b02dadbccd3dc:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMwMDc3ODk4Y2VmOWU0YWI1NzFhYWZjYWIxMWZmMDE5Mjc4ZjgwNDdlZGMxZmJlNWIzNzAyZDk4MGZmNmE5ODYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlkNGZkZjc2Yzk5ZWZhMzE5YTBkMGIxZDM0ZDIzOGU2Zjc4MzMzYzMyNWQyYTE2NGJiOGMxZDA4OWMwZGJhM2IiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE0MTMwNDY0OTRhNjk4ZDU2YmIyY2Q1MGE5ZmVjMGE5Yjg4ZGE0YTNiNTJjNjNjM2MxY2Y4NjBjNmNkZjVhYWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU1NTQzNGJjN2ZjZTEyYzJlMzIxZjNhMDU3Nzk4NjkwNjdkZTYxOGQ2MDI2MWFmOTkxODFhYTZhNjVhNDAyM2YifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d37d7e4360514995bec1ef85871aa2c3",
+      "statement": "In a finally block, do_handle_prefect_webhook syncs recent Airbyte job history for Airbyte tasks in the run and, for failed or crashed runs, enqueues trigger_log_summarization_for_failed_flow, which de-duplicates against existing LlmSession summaries, retries up to 3 times, and enqueues summarize_logs for an Airbyte job or deployment task.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L827-L921",
+          "version": "repo-lines-v1:sha256:252df143ac7e24fe7d94c1e0e5e042ad98de2ec4fc33535ac215dbf3d094981c:eyJzZWxlY3RlZExpbmVDb3VudCI6OTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExZjdiMjMzMzRjMTBjNDY1MjQzZGY0ODRjMzRmOWEzNzA2NmUxOTE1OTc1NTAyNzE1ZTJjZGNlMmZhMjJhYmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2ZDU4ZTQxZDk3NWM5NWYwZmZiMTIzOTg0NTVhOGQ5NzQxYzk1M2JiNjA5NWYyOGExOWI2NWUyNGYwMzNkOGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhhZWFkN2JhZTRhN2FlNTlmOTlhOWUyN2Q2YTc1OGEwYmRhMDRjN2M4OGYzMWQ4ZDQ4ZGM3M2NlYmZjZWJhYzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIwNDlhYzkxNDZjOTY1NWQxNzYyNmE0ZjFiMzVjNDQ5NjMwNzA5NDM0ZTFlMTRkMTg2NzUwZDUyY2EyNmRhNGQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/webhooks/webhook_functions.py#L370-L396",
+          "version": "repo-lines-v1:sha256:01fb60d520109ab51cb19144ee1e4fdc8112eca5e74947d48f2a808ad256c0d9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3MGRhMDMyZmJmZGJkMWI0MjRlODE0YzIxMmFlNTg0ODRlNzZmNTdkYzU2ZGJmZDEzYmY4MDM3MzZkMzI0YjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxODFlMDUzZDFkOTJhZDMzMGQyM2M5NGFmMmVmZjhkMzg5MGI2ZDI2Y2FlODI3YTRkYjM5OTIzODBlZjUwODkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhhODNhYTUwYmE0NDJlOTExMmNkZGExZmZhZGQ5MjE5ZGNmMGE2OGQyZmMwMzhjMzkwM2RiYzU3ZjM4NGNlNGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f9a95f9b00834efa89559029814a55da",
+      "statement": "TaskLock is a Postgres row (one per OrgTask) that prevents concurrent runs: lock_tasks_for_deployment raises HTTP 400 if any lock exists and creates all locks atomically; locks are released on terminal webhook states, by run_dbt_commands in its finally block, or by clear_stuck_locks.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L105-L124",
+          "version": "repo-lines-v1:sha256:2fe07f1d549481b09d68e977608eb79219e9e06d3b48ec82985b07b0bb4ad49b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRiOWU2YWY1YzY2ODFkOWI3Njc1YTUzMmNlMTdlMjk2YmY5ZTM3YzY0NGE4Nzc2YTAzMTQ2NGU5ZDRhOTU0OGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlYTBlMzEyMDIxMTFkZWYyMmIzZGEyNDJmMjE3Mjk1OGI1Y2Q2ZjhlMTIyNzkzY2FmY2MwZGI3OWEwODM2MGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmZWIwMjU0NGUyNWRlMDNjOWMzZDYwNGEzZWMzZWI4NDNhYWNkZWZhODc0OWY3YTJkZDVlMjdmN2VmMjhhOTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdhZTNiZmVlOTUxN2M1NWJjNmZhMjY1ODg1MjU4ZGFkYzc2MzE0ODU0M2NkNTYzMGQ1YzM2Zjc4YzYyNTU4ZTEifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L306-L308",
+          "version": "repo-lines-v1:sha256:50d68356012830d3357e8d47dc1096a3bd48412bdb5ebadd0f53c5ec3e77f1d9:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTcwZGEwMzJmYmZkYmQxYjQyNGU4MTRjMjEyYWU1ODQ4NGU3NmY1N2RjNTZkYmZkMTNiZjgwMzczNmQzMjRiMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDFiOTdjMjRiMGM5NmM2ZGFlNDIyYzEyZjI4ODNmZDI4ZjEzZGIzNzkxMWU1Y2ZlMDgyOGNmM2VlNTc3NzkzNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODk4MDc4MjJjMjM0ZDYxNGE4Yjg4OTUxMGNkOGNlZjNmNmUwMGZlY2EwNDc5YjdjNDRhODgyYjc1NzExMzUyMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2FmMzZmNDQ5OTVlZGRmNTU2NmE2MTMyZjNjYjIxMzllZDVjODJlMjIwMjIwZjkzMjE1ZDE5NDYyZjRjNzkzZCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/prefect_service.py#L580-L612",
+          "version": "repo-lines-v1:sha256:6fc0306908145ace9e593bdd378464d9bb009051af8261a6cdf12c6c04356357:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzOGI3NjJkZWFlYjBlNTEzMzc2ZDRlOWYyZGQ3ZjY0YTIzOWNiZmJmNzdlZWRmMGFkOTgzMzhhMWM0ZmY5MWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3OGEzODIzMWZhMDYzNzNlZWQ1MGZhOTM2MjE5MGZhZWExMTBjMmM2YzJmYjkxNmJkYThiNDMxY2E3MDkzNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1OGViOTFmOWIxYTk0Y2RmYTg4Yjg2ZmQwNWYzZjk1NDdlZjE1OTQ4NWM1NWRlNGRiZTMwN2U4YjViZjNiNDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjViZjI5ZWJkM2RhMzViZjg3MzYwNzgxNTM5MmE5OTlhMDk5YWI3NzUxMDBiNTdkYTYzMDkxZWExMDY1ZDA4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/tasks.py#L149-L158",
+          "version": "repo-lines-v1:sha256:1c313589081cec2c7616c438993ae76475df81a2c803de2aacdaeffac4b1dd8e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgxOGE0OTc3MjJjMWM2Mjc3NjA0OGJmYzE1ODA3ODI5M2E1YzY0NzY0YTBlYTZiMWUwNTIwYThmMzAxMTU1YzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwOGVlYmNkYTI1MDcwYjExN2VlYjc0ZDVjMDkwMmY4NWUyYWZjODRmYTRmZmI2OWVjMzVkZmY0N2E1YzUwMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjYmFmZjM5MGViYjllZTdkNWJjMDkxNmYxOGRlMjMxYzE5YjIyYWJmMDBiNGU1NTc1ZDk3MmJlMjQ5YTkwYTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7a9fbb72d77649c0a60a6b4f8f531019",
+      "statement": "clear_stuck_locks runs every 300s: for each flow_run_id holding locks it deletes locks if Prefect no longer knows the run, and if the run is terminal for at least 300 seconds (end_time, falling back to updated) it re-invokes do_handle_prefect_webhook; younger or unparseable runs are skipped and per-run errors are logged, making it the safety net for lost webhooks.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L1163-L1239",
+          "version": "repo-lines-v1:sha256:a6e9df6f23dfc9c94ccf74070d22370b9f042442b38879434d14e900059efc1f:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRjOGM3YTNjN2E4MTY4ZjM0MGVkYzc4YmE4ZTI5ZWE4MGVkYmNiMjI0NjBiZWRiMTE0NDQzZDMzYTc1YTc5YjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5ODI2ZjFhNTNiYmVmNTQ1NzhlNjMyZWQ4N2VhYTdmNDVlMjQyYzkzN2QyMTBhZDVmNTE4Zjc0ZTg5OWM2NzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZiZTY2MTgzMGUwYjc0ODRmN2U1YzU3ZjE0YjJhOGU5NzBiMzVmNjM1MTQ0Yjk5YWI4MDE2NTM1NDU1YjkzMTQifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/core/test_celery_tasks.py#L643-L877",
+          "version": "repo-lines-v1:sha256:a0d23e99a0fbff485a0849500a7df77d86ce158f5fc2e1ef40b0c438ca6fd5dd:eyJzZWxlY3RlZExpbmVDb3VudCI6MjM1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJiZjZiZjI3M2I0ZjEwMTUxZjE1YjNlMzllNTcyN2VmNGM0MGQ2M2ZhN2U1ZWZjMmY5Y2I2NWI2MThlZjY2MGYxIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI4YWJlYzBmZjQyNmJjN2ZlYTNjYjA2MTBlMTI2Mzk0MzMxMTUwMTg5OTA5Yjg5ZTNiZTcwMzE5NTVmNzdlMGU4IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI4Y2M0YTdkMWNjNzk2YWJhM2U0NjcyMzMyN2Y1MTdlOWY4MTE5ODJkMjUwZjA3MDI5ODZlNGI1NzY0YWQ5NTg5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_493723aa08574c438cd01394a550fa8e",
+      "statement": "run_dbt_commands reports staged progress in a TaskProgress hash (run-dbt-commands-<orgslug>) and re-raises on failure so the Celery task ends in FAILURE state, unlike most other tasks which record a failed progress entry and return normally.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/dbt_api.py#L408-L436",
+          "version": "repo-lines-v1:sha256:d8454633b7a6bc2caad6746228fb18103592ff1664dc89ecfd40410111f0dbd3:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNzZlZjhlNTdkYWMxNDBmOTMzN2YyYmQ0NWNjM2Y5ZTVlMTM5OWQ5ZTQwOWYzMTliYjIxYTYxODBkZWFiN2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxNTQxMmRhMTE0MDcyZTU0NDg1ODdmMDJiNzJmZWY4OGJmOGFmNmI5NzYwNWE4ZGYzNmFjOTg0ZDYyMmJlOGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkwYmY4M2YwNzcwZjI2NGFjZDJlMWQ4ZTczN2IwNTA1YjQwNzk2NzEyOWQ3MzY1MWRlMTI0YzI3MWM0ZTUzODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L105-L308",
+          "version": "repo-lines-v1:sha256:6ff644b333b9db01372015721f9cc925c7201ff9850539d4d7a5fa0eea23ec93:eyJzZWxlY3RlZExpbmVDb3VudCI6MjA0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0YjllNmFmNWM2NjgxZDliNzY3NWE1MzJjZTE3ZTI5NmJmOWUzN2M2NDRhODc3NmEwMzE0NjRlOWQ0YTk1NDhjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MWI5N2MyNGIwYzk2YzZkYWU0MjJjMTJmMjg4M2ZkMjhmMTNkYjM3OTExZTVjZmUwODI4Y2YzZWU1Nzc3OTM2IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5ZmViMDI1NDRlMjVkZTAzYzljM2Q2MDRhM2VjM2ViODQzYWFjZGVmYTg3NDlmN2EyZGQ1ZTI3ZjdlZjI4YTk2IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzYWYzNmY0NDk5NWVkZGY1NTY2YTYxMzJmM2NiMjEzOWVkNWM4MmUyMjAyMjBmOTMyMTVkMTk0NjJmNGM3OTNkIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_6d2ac18ebf374d1bad70c06ccfb237dc",
+      "statement": "Alert evaluation is idempotent through a database claim: dispatch_due_alerts (every 60s) enqueues evaluate_alert for due alerts, and evaluate_alert (max_retries=0) conditionally updates last_evaluated_at so only one worker owns each cron tick; warehouse errors are recorded in AlertLog rather than raised.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/alert_tasks.py#L38-L162",
+          "version": "repo-lines-v1:sha256:77630ad4b8dc9850945c7e6b657e9c2e5ec831bfa4f3e4e50896256e799b47be:eyJzZWxlY3RlZExpbmVDb3VudCI6MTI1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1ZDBmNmMyZTgwYjViYTdkODQ1NTI0OGYyYzhkNTcwMmE2NTg1MjFkZGJjNmMzNGFmYzhhMDlhMzc5ZjhkYWU2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIzMGMxZjE4OGYxNDJlZDdhODI0NjgwYjIwNzE3MmM1NTE5YmM2MTRhNDhmZGE3Y2YxNjdlZGI4ZGRmNzk5NTZjIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlNWQ0MzkwZWI0NzBjNDNlYmEyMTE3Y2YxMjY1ZmJjNGExZGM3MmQ2MzBhNzllMDExMTRlNGEzZmMyYTczZmUzIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhN2RmNThlNTE0YzE3OTA5OGU3NTk0ODcwM2NjOTQ0ZjYyMzUyNTQ2ODdjZDA2OWY3ODM2MGNkMDg5NDRlZWRhIn0"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/core/alerts/test_alert_tasks.py#L132-L146",
+          "version": "repo-lines-v1:sha256:27bd7be9470b31c20fe47cedf0f665249568bf018599d9ef91e89e0a4c695d10:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIzM2IzYWY5MDU4Y2Y3YjAyYjcxNGY0ZjIyNTUyMmQwMjhjYmZiY2U2YWFkZTVhNmJmYzdmMjhhYzIxOTc3YzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFmNWE1N2IwN2FhNDI4ZjU1ODA5MWM0YzI5YmM4ZjNjMGJlNTQzMjVmYzRmNmU0YzgwMzA0ZWFiZDJjZWRjNWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjljMjkzNmM3ZWJmZWQ3MDg5NzdhZWE5ZWExYjUyYWFjYTE0NTFmM2E5N2IyODZhNzEwN2VjNTVhZjM2OWFhYWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2d24c3d2a3974068a327598850250eb1",
+      "statement": "Trial clone uses Redis for coordination: clone_trial_org_task has a 300s soft and 360s hard time limit, reports progress in a TaskProgress hash with a 24h TTL without leaking internal errors, and releases a per-email SET NX lock (with TTL as dead-worker backstop) in a finally block.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/trial/activation.py#L85-L96",
+          "version": "repo-lines-v1:sha256:b5b1ecee96620577445190c40e19d30d06f5ac2e43444f8871b214e7a6471f00:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxM2I5ZGRmNWFmMWY2ZTlmMTJlNDhkMGIzMjEzZTRkMzRiYjlmYjQzY2FjMTBkNzQyNTk1OGUyMjkwOTNjYWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0N2UwMzMwN2YzNDQ1NmUxZDNhYWJjNjcyYWU2YmU3OWEzODgxYjMxNDMyZjU4ZmQzOGM2YmY0ZTE2NmU4YmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcwYzI2MWZlMTMyMGI1YzI0MGYxNjgzMGUyY2JjMTdkZjE3NGMyZDYyY2E0NTY4YmY1YjgwMDA5NmIzMjVjNjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/trial/tasks.py#L18-L92",
+          "version": "repo-lines-v1:sha256:947b6292951dc7186dc267d9ed7a44b7ecfd741cd930e6f9cd06b0001115f302:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiZTA5OTE2MTM3NDY4MTU4MDBjYWQ4M2U0MTI0OTBkMjc1YmNhOTRiMzBhZmZjOTk5NzFjNjVmMzQxZTcyMzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkyMjg1YzljYjExZTA1NWNhY2JmMWMxNjIyZTllOTM2OTgwODc3ZjNhMjBjYTQwMDgyMzViMjYyYzA3YzRmZmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI1NjExYmMzYzg1NzYyNjQ5MzM3Y2RhZWNkY2QyNDhhMmI4MDEwOWU4MjU5NjZkZWQxNmQ1Mjg3YzRiZWIyZjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_eb86398875ed4802aff106188177d74d",
+      "statement": "Trial lifecycle emails and expired-trial deletion are scheduled with hourly crontab entries instead of a 3600s interval so they stay on the hour across beat restarts.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L1314-L1331",
+          "version": "repo-lines-v1:sha256:482eaacb1e875dc49f53f98b2d6cae9a87194d4f2bedce5bbf45052b377d9ef2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJmZTcwZTQwNTc0MDQwYzlmMDViZWI2OWFkZTFjOTg1NGYzOWZiNTlkMDMyMzE5ODlkZjExODkyOTY4MGM4NzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIzYjliOGRmNGYxOTYyMjMwOGIxNmEzMTM1MzI1MGE4YzIyZDgwNTk0ZDViOWE2OTc1OTIxNmQ5NjBiNjkyYmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAxNjEzNmFmNTk3OGQyMTAzNmMzOGFkMzVmN2I4NDc2MzMxMjBmMWE2MWE3M2I0ZWU5ZmFjMGRlZWY5ZGE4NjYifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/tests/services/test_cleanup_trial_clone.py#L377-L396",
+          "version": "repo-lines-v1:sha256:f410f15d75c2563cb7cbbf2b3e1eb9d1f86f6d9f1f282f46002fb7647ed18652:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU0NWZlYmRiODQyM2NkZmMwNTBhZjRiMmQzMmNiMGY2N2Y3OWQxMzEwZDJjNjA2MGIxMTg4YWVmZTI5ZmRiNjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhNzkwOGYxZjkwMDRlMDNjMDMzY2U0ZWU5MDhlNDczMjgyNjRiOGViYjRmOTE2YzU2ODhmZThkNjA3NGU4MWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3ZDlmNTg1ZmE1ZjYzYmRkMDY5YzE4MTkwMjIxOTZhODE0NDZkZjc1YTcwMzA0NGJhYzg2N2I2ZTVkNzcxYWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNkODdiY2YxZmZjNjdiZTQyZmMzZWFmMDQ3YzMxMWRlN2Y3ZTkwMGE3MjNhZjE1MDJlMzk3ZWU0ODFjYjM5YWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a91e6841938544f2ba8d7134dc625116",
+      "statement": "Feature flags in utils/feature_flags.py are database-backed (OrgFeatureFlag, org flags overriding global ones), not Redis- or Celery-based.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/utils/feature_flags.py#L1-L104",
+          "version": "repo-lines-v1:sha256:6242c64626e06556919a836e88cc40a2e1723cdfedcda1bf8c458c901d038982:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJlZDk1YTg1YTRmY2M2NTRlYzE1YTdjZmRiYmRjYjE2OTI3YzdjYTlmMTk3MzJiMGEzMWFmYjY5MTI5NTlhMmJlIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIwOWVmZjIzMzY5ZjNjM2NkMDhhOTU3MzBkMzBlYjYyNTUwMmQ2MTdlNjkwOGJmMjM5MGYwZDQ1Y2NiZTMxNDdhIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhNzI3NmM0YTU5NThjN2Q1NjA1ZjZhNDU2NjBlOTQ5YjlkYTMyM2MwYzUwZmE3M2M1MTExMTU5MTc1NTFiY2E0In0"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

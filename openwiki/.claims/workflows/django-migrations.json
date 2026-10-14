@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:88865b3f332432b28daf91a62ec9030b6347509b339f3b03c35673a6efa7a7e8",
+  "claims": [
+    {
+      "id": "claim_2d739c85f02746248203a207a2823b01",
+      "statement": "The backend has a single Django app, ddpui, with one linear migration history in backend/ddpui/migrations; INSTALLED_APPS lists ddpui and no MIGRATION_MODULES override exists.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/migrations/0189_dashboard_filter_dependent_group_id.py",
+          "version": "repo-file-v1:sha256:0108aff14eebfd4865674247c53a1e4650f7c2f3b24c60aaf3294573771147d3"
+        },
+        {
+          "resource": "repo://backend/ddpui/settings.py#L98-L111",
+          "version": "repo-lines-v1:sha256:1579f5cbd209be677cc079329454ad1b9ce56160d4ed1e2d60bf6cd9b5d4acb5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyZjVhNWY2ZjczOWYwMWIyMGZkZmQ4M2JhNTkxNjU3ZjJkY2RiY2VlMWFlYWI0MTczMmZlNDc5MDVlMjQ0NGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NDE2ZTA5Zjc4YmEzMTZjMDMyNTY4MjEzYjg1NWVlNzU2ZTQxNTY1ZDkxOGYwOTUxOWM4MWZkNjIwZjQwNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc0NDJlNTBiZjc4ZWQzOWZkYTgzZjMzOWIwOTkyODQ3N2Q0NzRlZDA1ZjFjMTY5YzRkNzk4NWYxYjA5NTE5YWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRiNzVmNGRiMDdmNzExODI0OGQ5OGM5NzAwYzA4MmYxMjEzZTM4ZDgyMWRhZDExNWM4OGFkZWQ4NjVlZDRhZTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ed720505650649c792b5de6b812a61f4",
+      "statement": "models/__init__.py imports a second group of model modules so they are always registered with the app registry, and deliberately omits MapLayer because it has no migration and registering it would break test-database creation.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/models/__init__.py#L20-L37",
+          "version": "repo-lines-v1:sha256:95af0c35e1f2ee0fdb61d97436fd10e0749e619782636da576b140069e6790e1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1NmUyNzg0OTI5ZWI0ZjJlNTI1Y2IyZjFiZDAzYzI0NTM2YjNjNDlmZDNhNGM4NDFlNDA5ODcwNWQ2M2M2Y2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZmYWE0YTNiNjJmYzc0NDg0MzQ1YjNlYzlkYmE3ZWM5NDA2ZWM1NmUxZWJhODFlNWRlNzZjMTBlZDAzZDEzY2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_49bcf4c6c2dd4ff1b125bc1fe1980348",
+      "statement": "Branch conflicts in the migration graph are resolved with empty merge migrations whose dependencies list both leaves and whose operations are empty, e.g. 0153_merge_20260314_1816.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/migrations/0153_merge_20260314_1816.py",
+          "version": "repo-file-v1:sha256:5679a8b89b1087d6c144fa0fdaae083c12fc0e2b2eeb6c6442b747569e4d06bc"
+        }
+      ]
+    },
+    {
+      "id": "claim_f40c9b7743c04bf8a0da4b553e281cbd",
+      "statement": "Data migrations use RunPython with apps.get_model; permission data migrations (0137, 0183) tolerate missing roles/permissions because fresh databases migrate before seeds are loaded, and loaddata never deletes rows so revocations must ship as data migrations.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/migrations/0137_update_landing_page_permissions.py#L1-L85",
+          "version": "repo-lines-v1:sha256:e2e6e88b39ba0a465c0ac4a42a0b96e02f91a75907d44ef485d13a165338581f:eyJzZWxlY3RlZExpbmVDb3VudCI6ODUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkYmNiNDBiMDVjYjI5NmFkMmQ5ZjBmYTBkZGIxNWZiOTM0YmNiNmJkMDlhMGE5NzZmOTMzYzc3NjAwMTc5NDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkZDI0NDU4MmI2ZmIwM2QyM2I4NDE1YWJlY2QzNDZiMGM5ZjQ2NmI2Zjc1MmIwNjgxODljZTdlOWEyZGMzNTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/migrations/0183_copilot_permissions.py#L1-L39",
+          "version": "repo-lines-v1:sha256:33dcb672b6d375634e5d111324a055db03daf017a6bf077ad75aa6baebe7c65b:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUwY2Y1NzczZWVhOWQ4YzkyMTVlNGIyMmFkNzM0OWU3Y2Q4MGJiNzFlNDI3ZDNiMmU4OTJjNThjNTAwZDU4YTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkZDI0NDU4MmI2ZmIwM2QyM2I4NDE1YWJlY2QzNDZiMGM5ZjQ2NmI2Zjc1MmIwNjgxODljZTdlOWEyZGMzNTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c25019191b2f41a1ad0a1d33aceec65f",
+      "statement": "Reversibility is inconsistent: 0122_set_uuid_in_orgtask has RunPython with no reverse function (irreversible), while 0143, 0144 and 0161 use RunPython.noop and 0137, 0151 and 0183 supply real reverse functions.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/migrations/0122_set_uuid_in_orgtask.py#L15-L22",
+          "version": "repo-lines-v1:sha256:eb9a3fde4dd1345c4a349cd129e97a8d5d5c1ad849d5aa40a3689305133876c9:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmY5OTQyZmU2YTYyMDRhMjM1YTUxMzBjNjkwNDU1OTY3YjIwMzBiMjk4YWFiZDMxZjQ3OGUzOTdlZDRlZDk3MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWRkMjQ0NTgyYjZmYjAzZDIzYjg0MTVhYmVjZDM0NmIwYzlmNDY2YjZmNzUyYjA2ODE4OWNlN2U5YTJkYzM1MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDA4MTY5MmUwMTNiYTk4MjQ0NmNlYjk5MjE4YzYyMGM0YzA3NTZlMDU3YTYzOWIyMTEyNmU0NjNjNzk2YzQwOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/migrations/0143_orgdbt_branch_name_orgdbt_cli_profile_block_and_more.py#L80-L80",
+          "version": "repo-lines-v1:sha256:2372356058eb08bcf0119aad4fa1c82c79b6bdeffb3cc54f377de74d07ceddf1:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjM3MjM1NjA1OGViMDhiY2YwMTE5YWFkNGZhMWM4MmM3OWI2YmRlZmZiM2NjNTRmMzc3ZGU3NGQwN2NlZGRmMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjM3MjM1NjA1OGViMDhiY2YwMTE5YWFkNGZhMWM4MmM3OWI2YmRlZmZiM2NjNTRmMzc3ZGU3NGQwN2NlZGRmMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTEzYTVlNTEwY2Y3OWExOWEyYTBiMzlkYzU1ZTUwNDg4OWY5Y2IzYjk2NjZjNDAyNDdlMTZkNmJlOTZkYTA4ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWRkMjQ0NTgyYjZmYjAzZDIzYjg0MTVhYmVjZDM0NmIwYzlmNDY2YjZmNzUyYjA2ODE4OWNlN2U5YTJkYzM1MCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/migrations/0151_alter_org_queue_config.py#L73-L76",
+          "version": "repo-lines-v1:sha256:a23b0e89e9dac0ce4938d252daf793d28ed6a978b3f83becb386dd8f24dfd45f:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2I3NDU1M2I5YjJmMzcwNDk1ZDM5ZDVmODcyNGU3MjMxNGQ4MDZiNjVmMDA5OGQ2ZWZiM2M5YjE3NjA1NzNhYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTQzM2QwZWE5ZWNmMmYzOWM5YTUwNDA3Mzk1ZWU0MTE3MmZlNjgyYzljODg1YTM1MDhmNzViZGVlMTUxZWZmZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmJlODExMzljMjg5ZmNiNGQ0MWM2NTFhMzJhM2Q3NGQ2OTM2MjhjNzVkOTE3YTQxMmZmMDQ4NmQ1MDIwMmQ2OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWRkMjQ0NTgyYjZmYjAzZDIzYjg0MTVhYmVjZDM0NmIwYzlmNDY2YjZmNzUyYjA2ODE4OWNlN2U5YTJkYzM1MCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b242fc6baf0c4fefb80e4fe9de77e681",
+      "statement": "Migrations should not import app code that can change: 0143 inlines Prefect block-type constants for that reason, while 0144 imports TaskType from ddpui.models.tasks and 0151 imports ddpui.models.org.get_default_queue_config and reads PREFECT_WORKER_POOL_NAME from the environment at migrate time.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/migrations/0143_orgdbt_branch_name_orgdbt_cli_profile_block_and_more.py#L6-L9",
+          "version": "repo-lines-v1:sha256:5d22cbfabb5957512f0935c1fad363568d93aad180417a1ec8c5eac7f1098bb7:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjg5ZWM1YmMxNWFjOWI2NTEzMDk2ZjBlNzdjNWUwNDRlZTRmZjA0NjdmMDQwNzQyYjk0MzU0ZGIxYjQ1Y2IxMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZGUyYTc1MDAzNzM2MDlhYWZhYmE4ZGYzZmU0MjNmYTM4MTQ1OGE0NzI1ODhiNmYyMWRiMjExODM4N2U5NzgwNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzg5YzJjNDgwMzQzZTkwNjAyZTg4ZWQxMTEwOTc0YzdmMDVmNWRjZDNmOTAxOTI1ODliYTA5ODdhZDk3YmM0YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjg1NjhkZDg3NDM0NDU4NTI3ZThiNzFiMzFhZDQ5OTBhZmZkNTdjOTUwMGUwZDM4MWM2NjM3YjAyNjc4ZjI2NyJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/migrations/0144_orgtask_dbt.py#L5-L5",
+          "version": "repo-lines-v1:sha256:2efb991cec59391f13244004a7545afb012c7c9ec2d3cae7ee9b3208c1b9fe88:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmVmYjk5MWNlYzU5MzkxZjEzMjQ0MDA0YTc1NDVhZmIwMTJjN2M5ZWMyZDNjYWU3ZWU5YjMyMDhjMWI5ZmU4OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMmVmYjk5MWNlYzU5MzkxZjEzMjQ0MDA0YTc1NDVhZmIwMTJjN2M5ZWMyZDNjYWU3ZWU5YjMyMDhjMWI5ZmU4OCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjg3MzYwNmM5NmM2NDAwMGFiM2VhNzY0YWZjYWFlODMwMDkyZmU5ZTk2YmNhMGE5YzUzODgzMDVlOTE1MTRmYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGZlMjJhMDk1ZDEyOTc2ODZjYmQyZTg0ZjM2ZmEzM2U3YTEzNGYxNzQwODE5MzBkZmE4ZGQ3YjJmNWI4YTk2MCJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/migrations/0151_alter_org_queue_config.py#L1-L16",
+          "version": "repo-lines-v1:sha256:117ac98ea9b4f5d2695fb042c1a9a0104b126863d6144faa00b60aff61e3683f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmZWYyZTFkM2Y3Y2QwZTQ5ZGNhZGVjNzZiNmYyYjEzMmQ1NjQ1NTY2MWFmZTVkODM4NzcwMGUxYmQ3MDQ3NDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlODAzNmE5NWFiZmE5OWI4NTFmZjFiM2UwMmU1MTI4OGUxMzY4MmU4ZWFmYWQxYjYzODY3YWYxNDdiYjk0NzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc0ZTAxYzJmYTk2ZDcwOGExNzA0NjFkZmZjN2I2M2YxMzcxNWQyMTA5MDhjZWI4NTJkOGE3ZmQyMWNlMzE5NmEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c4a52c2a95c54e69a50a58885c5ac136",
+      "statement": "0161 copies snapshot_chart_id and chart_id values into new nullable target_id columns with RunPython before RemoveField drops the old columns, illustrating the add-copy-drop backfill pattern in one migration.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/migrations/0161_metrics_kpis_annotations_alter_commentreadstatus.py#L7-L60",
+          "version": "repo-lines-v1:sha256:1ea02aa368a3501f43edc6cf92f1553b8212653a2c4a31a304d0c13eec517dfd:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg0ODE2YWIxYmViMjI1YjIwZDZkMzNmNGEzNWY5ZWNhYjdhNzg5NWUyZWJmYzg3MjQ4ZjU5ZmQxMTYxYjc4NDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiODNlZDE4MDI3MzQxZDdiYTIxYmRmYTQyNzQ0MDRkYjkwOTU4Y2JhOWNjZTg3NWViODE1ZmM3N2I1ZWFiZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI3MTE3MjQwZjM3OTZlNDhmYzA2NzZmYWQ1NTM1ODhmOTJiMTkyM2NjNjFmMWQ2Mjc4MDAyZjQ1ZDkyMjM4MTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBjMmRmZWE5ZmRmMDZhNGMyNGZjNTA1Y2VjOTEwMWY2OTNmZTI4MWNjMjUwNmQzYTJkM2IwMDNlZmEwYmM3N2YifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b7c2b6a3468e4153b768f51b2a27b5f3",
+      "statement": "backend/ddpui/oldmigrations holds six pre-history ClientOrg-era migrations, has no __init__.py, is not referenced by any code or setting, and is therefore never loaded by Django; the live history is ddpui/migrations.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/oldmigrations/0001_initial.py",
+          "version": "repo-file-v1:sha256:1bde762122b5738a940b106524dec95bd8408481be745d56058294622c61b31e"
+        },
+        {
+          "resource": "repo://backend/ddpui/settings.py#L98-L111",
+          "version": "repo-lines-v1:sha256:1579f5cbd209be677cc079329454ad1b9ce56160d4ed1e2d60bf6cd9b5d4acb5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYyZjVhNWY2ZjczOWYwMWIyMGZkZmQ4M2JhNTkxNjU3ZjJkY2RiY2VlMWFlYWI0MTczMmZlNDc5MDVlMjQ0NGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NDE2ZTA5Zjc4YmEzMTZjMDMyNTY4MjEzYjg1NWVlNzU2ZTQxNTY1ZDkxOGYwOTUxOWM4MWZkNjIwZjQwNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc0NDJlNTBiZjc4ZWQzOWZkYTgzZjMzOWIwOTkyODQ3N2Q0NzRlZDA1ZjFjMTY5YzRkNzk4NWYxYjA5NTE5YWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRiNzVmNGRiMDdmNzExODI0OGQ5OGM5NzAwYzA4MmYxMjEzZTM4ZDgyMWRhZDExNWM4OGFkZWQ4NjVlZDRhZTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b6bc5a7e52e5450885d782ee62c16d51",
+      "statement": "Seed fixtures in backend/seed are loaded with loaddata, found via settings.FIXTURE_DIRS = ['seed']; scripts/post-deploy.sh runs migrate, then loaddata seed/*.json, then create-system-orguser, then clear_role_permissions with set -euo pipefail, so a failed step stops the rest.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/settings.py#L318-L322",
+          "version": "repo-lines-v1:sha256:041fb2c5befe9a51fef9745e6b86541e4d304f57cac32766e9679f1ec5df2a8b:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODBkODgyYjc4OGYyOWU5OGZmNjlhNDY0NDM5NDNjNjNlZDhiZWIyNzYzOWI4MzVkM2NjODc1MjJkYWM2ZmFkYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjk0MTZlMDlmNzhiYTMxNmMwMzI1NjgyMTNiODU1ZWU3NTZlNDE1NjVkOTE4ZjA5NTE5YzgxZmQ2MjBmNDA2MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjc2YTU0NGNjMDIzZWQ0MDVlM2I5OGI4YTM1NDA5MGZhZDE2ZTllMThkNWVlOWY3YmE2YzNlNzAwNTMwMDlkMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTJlYTU4ZGM1MjhiN2M5YTgzYTg4ZmUxNGU3NjI1MTc4NGEyM2E2MTQ2Zjc1OWU0N2Y3MGY2NTIyOGJjZDliZiJ9"
+        },
+        {
+          "resource": "repo://backend/scripts/post-deploy.sh#L1-L21",
+          "version": "repo-lines-v1:sha256:7a2678df7e80818e03a1b7787fecceb9e600bb91a5cc571a5829fe749048fa22:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkOTVmYzA0YTgwYzk1MmY0OWNlNDE4ODYyN2M1M2IwZmJlOGM0NDA0MWI5NTJkNTkyYWNkMWRlOTk4NjE0NjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljMzJkYjA3YmRkNjg4MjllNWY4M2I5NzdkZjc3YWY4NDM2MWU4NmM4YzQ0MWM3N2M4NjMyYmY0NGU2MDFlNzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5d2da3c64f914cfdbf2f93b0c09806e4",
+      "statement": "Management commands such as createorganduser and ensure_git_pull_orgtasks depend on seeded rows and error out instructing the operator to run loaddata seed/*.json if the roles or tasks are missing; the backend README documents migrate then loaddata then create-system-orguser for local setup.",
+      "evidence": [
+        {
+          "resource": "repo://backend/README.md#L171-L175",
+          "version": "repo-lines-v1:sha256:296ce37f5bcd9765dfc80584e4e3da7f67088d6741e2b5628345f95ada15398d:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTk0NjRjZmRjNmEyOTViNGYyZmQ3OTcwZTY2ODhhMzU3MTlkMWNlZmIyODJmZjE3YjQ3OWRhZDhhMzI3ZmJmOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDgzNDQ1NWZlYjAxNzI1OGI1Y2NhYmQwNjdkZTgyYzY2NGMzMTZlZTlkYmFhYWY1MzY0NjYyNmNjMGM4OWE4NyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDUzODdiNWYxYjVmZmY0N2UwODRhZjgwMWI2ZjNkMTAyZWQyZTJiZTRmYzUwYzA1YTk0ZTcwMWE3MTJkMTQ2NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzc1OTc1MDc4YzlmYjAxMTZiMjM3NjliMzllMDhlZWQ4NWVkYmQyNTJjYjBhNDFiYWQ3ODRhOTEzNTIxMGUzYyJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/management/commands/createorganduser.py#L45-L45",
+          "version": "repo-lines-v1:sha256:a8c8a5a30b7633257ab2065d13816e51bd36070dadac8b2f5bf77060699378f6:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYThjOGE1YTMwYjc2MzMyNTdhYjIwNjVkMTM4MTZlNTFiZDM2MDcwZGFkYWM4YjJmNWJmNzcwNjA2OTkzNzhmNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYThjOGE1YTMwYjc2MzMyNTdhYjIwNjVkMTM4MTZlNTFiZDM2MDcwZGFkYWM4YjJmNWJmNzcwNjA2OTkzNzhmNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzk2YWEwNjQ2NjhlZTFiOTgyMzdlYWNhYTdiNWRlNTg0OTg5YzhlZmI5MTUwOTZiZDAxZGIzYTYwZjFjYmQ3YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTUxODZiYThlMWMyYWRhMGE0MWJjYmYzMmRjMzUxY2MzMzVjY2I5NjI5ZTU3OTM5YmU0ZjI4ZjM3ODlhNjM3ZiJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/management/commands/ensure_git_pull_orgtasks.py#L46-L46",
+          "version": "repo-lines-v1:sha256:98d062a71f247e6fca95ec67f3255d85e9797b7c66ede7e939c91396566a4482:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOThkMDYyYTcxZjI0N2U2ZmNhOTVlYzY3ZjMyNTVkODVlOTc5N2I3YzY2ZWRlN2U5MzljOTEzOTY1NjZhNDQ4MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOThkMDYyYTcxZjI0N2U2ZmNhOTVlYzY3ZjMyNTVkODVlOTc5N2I3YzY2ZWRlN2U5MzljOTEzOTY1NjZhNDQ4MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGNlMTBkN2MzMWJmZDRiNmIyODVkN2IxNzI1NjY2YjNmM2Y0NmRjNDJlMjUxMzU2OGM2NjcwMzAxYzljMWIxYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTE4OWQ2M2U3MzI2ZThlMWVjZDgxNTA5Yjc5MmZlNWY3YWM5YzVkMTZjMzI0N2RmODI4ZDkwNjZiMzE2YzUyZCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_dfe9a0d1378a456e9e35e03b67ea0cd2",
+      "statement": "The migrate_rbac_v2_roles management command transforms pre-v2 databases (fresh installs get the new roles from fixtures), is idempotent with a --dry-run mode, and deliberately does not touch Redis, so clear_role_permissions must be run afterwards.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/management/commands/migrate_rbac_v2_roles.py#L1-L20",
+          "version": "repo-lines-v1:sha256:996f07f7d2f04385817fa024450583d12e583dd04e44727063ac7b3aa856882f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1OTM1NWFiNTk0NGNmNzk4ZGU0OWMzNWVmMjZlNjI3OTQwODlhOGIwM2MyYzI2NmFiYThjZDlmOWQ1ZWM3N2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUwNTk5OTcxODQ5ZGNjMDdmMzk5NzYyNzU5NDFhMDk4ZmFjYzdmNjQzYTFhNzgzN2Q1NjgxOTkwNWI2MmM3MTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a5876758cb8c43cab1c18225a55a4383",
+      "statement": "The backend Docker image starts uvicorn directly and does not run migrations; migrations are applied only when the deploy workflows execute scripts/post-deploy.sh inside the running backend container over SSH, after docker compose up -d, so new code briefly runs against the old schema.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/deploy-production.yml#L218-L251",
+          "version": "repo-lines-v1:sha256:4ed7a09ca465295ade5a6b2c58500f99fceacd5a6fd791db064e777e92f2623b:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwOWMwMGYwZDI1MzM4YzYyMTcxN2M5ZTBhM2YzODFkZmNkYWViZWI3Yjg1MjYwOTUwMGY5M2NkM2MwYzlhNzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyNGY0ZWI0M2IyMDU1NzYxNTFjNjliZjU5NDdlYTU1MDQwZmI1YzgwNGMzYzgyY2Q4YjhjY2JiZDMzMWMzZjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUxOGYzNzUyY2RkOTE2MWEzYTJiMjc2MThiNDU4OGEyYjFmNjAxOWJjZDZiYzlhNzRkMDIzNzg4YTU4MzdmNzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxYzRjN2U0NzVjMjNmZDMxNTg1MWMyOGY1ZWE3MjgyYTBjOWY2NTBhMTg2NzAxMTQzMWE2MmI0MTY0NDk2ODEifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/deploy-staging.yml#L334-L367",
+          "version": "repo-lines-v1:sha256:57e2f880f370deea84e4c12565f012363ec68d20419b59f354d29f307a37344d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwOWMwMGYwZDI1MzM4YzYyMTcxN2M5ZTBhM2YzODFkZmNkYWViZWI3Yjg1MjYwOTUwMGY5M2NkM2MwYzlhNzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhOGMxZWRhNmZiYTU1NDBmZDJiZDYxM2I2MzRjYWMxMmEzMjhjY2EwZDNiMTQ4ZmUwYTEyZjgzZWJjZmU1NzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUxOGYzNzUyY2RkOTE2MWEzYTJiMjc2MThiNDU4OGEyYjFmNjAxOWJjZDZiYzlhNzRkMDIzNzg4YTU4MzdmNzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBiNjEwOGUwMTM2OTdlZDUyYmY3YTRjNzI0MTI1ZWZmMzgwMjUyY2IzZjM3NDRkMjc1MDRlZTUxM2IwM2UzN2QifQ"
+        },
+        {
+          "resource": "repo://docker/Dockerfile.backend#L52-L56",
+          "version": "repo-lines-v1:sha256:2caeeaa5ed8bfd42e0bfd30fcaa681ed85b2072afbea3f0961133ba26b134787:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTI0ZDhlZTY1Y2NhMmRkM2Y1MTY5NzIxOTA2MjRiODkyZjJiOTExYTZhNjEwMWM3OTdhOTliNzM5MTJjYWJlNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDRlN2ZjNzQxMjQ0YTliMGRjODg4NWYxNjEwYjM4MWVkYjNiOGZjOGJkYzI0ZmExY2ZlYWY4NmJhZDFlZjk0OCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjM0Mjk4NTFlNDc0NmQ4Mzc1YzZiYjhmZTNjMTMyYjBhNzM2MzcxODJlMmI1NzM3ZmE4NTg0MDM5MjcyYWQ3NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_191c7385a54c48bf92e7d8aecff3c35c",
+      "statement": "On staging takeover the rollback-plan job checks out main and computes, for each directory named migrations under backend/ddpui, the lexicographically last NNNN_*.py name; the deploy job then runs manage.py migrate <app> <target> in the old backend container before syncing the checkout and pulling new images, so previous-PR migrations must be reversible.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/deploy-staging.yml#L243-L317",
+          "version": "repo-lines-v1:sha256:54eb756c5fd85ae392b8f736f2b9ec4973dd8858ab15818140c2af878cbf22db:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlMzgwOTZjOTMwNzhiOGE1MDQ2M2ExOTQ5Y2ZiY2Y5YzdjNmI1NjMxNTA3MzQ3ZDgyNTI2M2UxOGNjN2IxNTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM4MTMzM2RmNjZkNTk1YzYyMjM3NDEyZTdkMTYwN2I1Y2ZiMDExNDdmMGYzYTlkYjdiN2FjNGU3MjljNDNkMjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5MjkwNTgxNTEyOGYxNDM1ZjQ5ZDI1YThhMDk0ODU4ZDcwMjM0NTQ2MDY2ODMyY2E3MTg4ZmI3YjQyNWVlZjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQyNjAxYjkwZGExN2IwNzI0ODVmNTJlZmQ3MWZjNjBjNzRkZmFiMzQwYmM4ODlmNjdlNWMwZGIwZWM1NDcwMjkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_766075bb3e4f46e68e8a9944cdabcd2b",
+      "statement": "Production deploy has no migration rollback step: it syncs the checkout, pulls images, runs up -d, and then runs post-deploy.sh, so schema changes only move forward.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/deploy-production.yml#L189-L251",
+          "version": "repo-lines-v1:sha256:3b8973760226511e8ac1b77dcfbd7b304b85921743effdd9425a8f38dadeb0ff:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI4ZTY2ZmQ1YzViOGJmNWRlNGUyOTEwYzE4NTZkNzQyNmQ5ZjAwMjA3ZjJiNDQ5ODRjODJjMDUzNWU3MTgxMTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyNGY0ZWI0M2IyMDU1NzYxNTFjNjliZjU5NDdlYTU1MDQwZmI1YzgwNGMzYzgyY2Q4YjhjY2JiZDMzMWMzZjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdiYmQ5ZGUyZmYyN2RlZTk1MmU0Y2MyNjE0MjkyZTMyYjk4YTE3ZjNjNTM1MzQ2MTVmNGIzNDZlYTQwMDg2Y2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxYzRjN2U0NzVjMjNmZDMxNTg1MWMyOGY1ZWE3MjgyYTBjOWY2NTBhMTg2NzAxMTQzMWE2MmI0MTY0NDk2ODEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0e2a444eb7b945bb9cc49075521948e4",
+      "statement": "Backend CI runs manage.py migrate before pytest but does not run makemigrations --check; ddpui/migrations is omitted from coverage measurement.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/backend.yml#L79-L79",
+          "version": "repo-lines-v1:sha256:fa865c161c46cb77b1415cf77b29533bcabdc9726f29dfcb15bb687234de8423:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmE4NjVjMTYxYzQ2Y2I3N2IxNDE1Y2Y3N2IyOTUzM2JjYWJkYzk3MjZmMjlkZmNiMTViYjY4NzIzNGRlODQyMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmE4NjVjMTYxYzQ2Y2I3N2IxNDE1Y2Y3N2IyOTUzM2JjYWJkYzk3MjZmMjlkZmNiMTViYjY4NzIzNGRlODQyMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWM0MjJmMWU0NGFlNTFhOWRiYjE4ODJiZTQ0ODUzMDRmNjU2YTdiMDNjNjIwOTdkNTA3NzU1NzhlYjYwNDkyYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjM0NDdiOGYwNDlhNjE4MzYzYjljYjdiYzJlYWRlOTJlZTA3ZjAwNTk2YTExYzk1YzBiYjVlZjc0Zjk4MGI3YyJ9"
+        },
+        {
+          "resource": "repo://backend/pyproject.toml#L306-L330",
+          "version": "repo-lines-v1:sha256:47b38eac6f561d2754f33760d1e2ce591a7e35c323959254947f6c8cb37cf0d9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRmZjg3ODg3NzNlMzFjN2E5MzkzNmM5ZWFlMWViMTUzMTE2N2M4OTU3N2ZmMzNiN2Y2NWNkOGVjMDhhMmM4MGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NDE2ZTA5Zjc4YmEzMTZjMDMyNTY4MjEzYjg1NWVlNzU2ZTQxNTY1ZDkxOGYwOTUxOWM4MWZkNjIwZjQwNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmMGMwYzExMTdkZDk3ZTlkMzYyYWNkZTNjYjhlZThlZDQ2ZDBlZjgwNzY0YmExYTBhNTQ3NmUwOGNlNjE5NGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI4NGI4NmI2MjEyOGI2YmJkNGE1MmQ0ZDM4NjYzYTZmNzk3NWMwMDNmN2FmZTU3NzEwMDQ3NTlmNTllYWJmZDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_675e3e10b16b4fd79a42805bd295dff1",
+      "statement": "0171_orgwarehouse_org_unique makes OrgWarehouse.org unique, a constraint that applies to all existing data and fails if an org has multiple warehouse rows.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/migrations/0171_orgwarehouse_org_unique.py#L12-L20",
+          "version": "repo-lines-v1:sha256:99e366a85f2ef3e700d0cdbb54766c451636d95034f328a4a4f1e71fd0ebcc20:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODg5MmJlNDU4YzZjYTc0NGI0YzIxNDNjZTZhYjRkNGFmMDUzZGQyNTU0MTAzYzdhNmE2OGMyOGIyNjkwNDE1MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWRkMjQ0NTgyYjZmYjAzZDIzYjg0MTVhYmVjZDM0NmIwYzlmNDY2YjZmNzUyYjA2ODE4OWNlN2U5YTJkYzM1MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGUzZTJlNWQwMDQxOTFkOGFmMDVmNDRkNzM3YTJjZTlkMzM0ODVlZjAwNGI0ZWNkMDE2ZDgxNWY0ZDg5YzZkOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

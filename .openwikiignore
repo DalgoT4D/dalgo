@@ -1,0 +1,36 @@
+# Secrets and local state
+.env
+.env.*
+!.env.template
+!.env.example
+**/.env
+**/.env.*
+!**/.env.template
+!**/.env.example
+.claude/agent-memory/
+.claude/test-credentials.local.json
+.claude/settings.local.json
+.claude/worktrees/
+.sync-cache/
+.sync-state
+
+# Prototype builds are throwaway spikes, not the architecture
+harness/prototypes/
+
+# Data, not architecture
+backend/seed/geojsons/
+backend/ddpui/core/dbt_automation/seeds/
+
+# User-facing docs site: its build, theme and images (the Markdown pages stay readable)
+docs/static/
+docs/src/
+docs/build/
+docs/.docusaurus/
+
+# Generated and vendored
+**/node_modules/
+**/.next/
+**/.venv/
+**/uv.lock
+**/package-lock.json
+*.lock

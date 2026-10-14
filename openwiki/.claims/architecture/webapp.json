@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:7ac95c71a6743ae3ae600d297f219f04b6d60e83e1f9902062a80552004a5c10",
+  "claims": [
+    {
+      "id": "claim_7435b9178ae141039df2eed5e1e8183f",
+      "statement": "All webapp backend calls go through lib/api.ts, which always sends credentials: 'include' (HTTP-only cookies, no frontend token handling) and an x-dalgo-org header from localStorage.selectedOrg, against NEXT_PUBLIC_BACKEND_URL (default http://localhost:8002).",
+      "evidence": [
+        {
+          "resource": "repo://webapp/CLAUDE.md#L55-L59",
+          "version": "repo-lines-v1:sha256:ab93774d2375f8715924a50d610f229dfeafc70860f91760e94d632963410065:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjNlNGUxZDA1Mzk3ZDZjMjBmMGNiNWNiNTNhY2VmM2QwMTgyMzQzNWZkNTU0Y2IyZWUyNWZmMmVhY2I2ZjUyMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTdhYzJmMGZiNjI1Yzg1ZGJhZDVjNGY3NGU0M2Y1Y2IyMmVmODE1Nzc4OGM1NWEzZjE2NzcwMWU2ZjliMDVlMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWE4MWY1ZTlmNWIwNzBlZjgwMmY1MTE5OGZlMWYxMmQ2ODBiYzc5ZjJhMmVjMzk1MmYyNzNhNzY4ZGM2NDMxZCJ9"
+        },
+        {
+          "resource": "repo://webapp/lib/api.ts#L1-L96",
+          "version": "repo-lines-v1:sha256:d04fe79ea7f69963a1cd0a32fc44b4f3b070731d293ee6f1ac7adbe3757c02b5:eyJzZWxlY3RlZExpbmVDb3VudCI6OTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlM2IyZWQ1ZDA5ZGZjOTFmYzBjM2JjYmQ3Y2NkYTVjZmYzNTE2Y2NhZGRhNTcyYzA5NTVhOTM3YmU0ZmJlMjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyZDExY2FmNDNlOTdlZjM2OWU2YmVlZDFhMjY4YmQwNTgzOGYyOWI5ZGQyNTRiZjY5YmE2NDg4NDE0NzIzNGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ4ZmM4ZDMwOWJmNDYyN2I2NjFiYjA5YjRjYTRlMjEyNjRkNjgwOGNhNTFkNjE3ZmMwNzk0ODYxNDE1ZTY1MTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2dc097c701ac4e3593bf8f988a47a659",
+      "statement": "apiFetch triggers token refresh on HTTP 498 (expired access token), not on 401: concurrent 498s share one POST /api/v2/token/refresh promise, the original request is retried once, and failure or a repeat 498 calls handleAuthFailure and throws; a 401 skips refresh and calls handleAuthFailure immediately.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/lib/api.ts#L98-L126",
+          "version": "repo-lines-v1:sha256:771f21f5cf1c3be5bc485e4c2b429471339ad91576525720bc569b7dfbd71371:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlYmM1NGU4ZTFjN2E5ODk3NzBiZjEwY2E2ODY0NWM5YzUwZDhjNGU1ODJlNzQzYWFkMGMxOTAzZjhmNjFiN2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ0NzA4NDQ5M2NkMjVjNDVlOWQ0Njk5NmZiZTdlYzc0NmVmYzUyOWUyOTZlYzVkMzVmZTU5NmM5ZTBhODg5MjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwMjNhYmIyNjk4ZDE1NTY4YTg4MDhhMWMxMTEzYzJhZGE3NTU2YzI4ZjdmNDg4NGUyMDdjYjcwMzU0Nzk1ZTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a592756511254ea1839c808ea41866f1",
+      "statement": "handleAuthFailure is a no-op on /share/dashboard/, /public/dashboard/ and /share/report/ paths; elsewhere it removes selectedOrg, calls authStore.logout() and hard-navigates to /login.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/lib/api.ts#L48-L73",
+          "version": "repo-lines-v1:sha256:66302dbc240fb02e7d67c200586a75bc7c5531518e2b5b88edefd0b6aa958b35:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4NDMzZDE3ODI5NGY2OWE3Mjg5ZWYzMDU3Mzc5ZDZkY2RhM2VjNzQxN2NhNDYwMmIwYTE1YzliZjFmMzI5NjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMDQwZTA5NWE5NGUyYWRhNzRlNDIxZjM3MTg3NTFhOTFhODEwYmZkNjZmNDhmNGU5MzljN2I3NDgwZWI2NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhMzc1MWQ3YjdjMTUxMzZlZTA5YWFiYmU0YTRjMDMxNjYzYWRjNWY0OTgzNWU0NWFkNWRmNWZjYTc3ODYyMWMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ba40240503674295b812c4bee0cdc35b",
+      "statement": "apiFetch converts non-OK responses into Errors with messages extracted from detail (string or validation array formatted field: msg), error or message and attaches err.status; the public (apiPublicGet/Post) and binary (apiPostBinary/apiGetBinary) variants skip the 498 refresh path, and the public variants send no cookies or org header.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/lib/api.ts#L146-L193",
+          "version": "repo-lines-v1:sha256:ca7c733ccdda367e2d4e862af2148b1350c0a5010e8c3a8529cefd1c445378de:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwZjU2ZGRiMGYxYTRjZDExMzhkZGVhNjM2MGE3YjE0OGIyZTk4NTUzMjdhZjc4NGQzMmEyZWRiNmJmMDg1ZTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUxZWQ3ZjQ2NTllN2EwYmVlMDRmMWY0YzdjOGM4OGM0MzA0MGEwMTY3MzYxMzhlYmUyYzM2ODg1NWNjOWFhNDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0YjE0NTVmODM3OWU4ODZhYTI1ZmU5NTMxYTZjZWY4OWY5YWUxZjc4N2Y5ZTVhMmQwYzM5ZjJlOTQwZmVlYjUifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/api.ts#L243-L322",
+          "version": "repo-lines-v1:sha256:275b01b33a42ec5f9bc2ed539c27a33167b8d9594f8d9afaf8831416d87bfa78:eyJzZWxlY3RlZExpbmVDb3VudCI6ODAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJiZTUyMTA4ZGVhZDA1YThjMjFmNzc2MmFjNzQwMDkyOThhMDI5MGMzNmQwZWZhZDFjZmMxN2Y2YjZlYTcxZGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5NmM1ZTFiYzI1MGMxYzlkNWE5M2RjMDUyYWI5NWM0YjI1NmMxNmVlOGViNjVmNjQzMDUwMTAyNTA2ZGFlOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5209449acb894badbdfc3f6cb0512ffa",
+      "statement": "Root layout nests PostHogProvider > SWRProvider > ClientLayout; the SWR provider sets a global fetcher (apiPublicGet for URLs containing /api/v1/public/, otherwise apiGet) with revalidateOnFocus off, revalidateOnReconnect on, 2s dedupe and 3 error retries.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/app/layout.tsx#L41-L60",
+          "version": "repo-lines-v1:sha256:b0b0b60b61face873cf787d31c736771422b764a43839546c91c3abdf8d7cce8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0MDIwOTgwNzA2OTc3YTZiZDU0NGI1OTVhYWQ4ZjgwYTc1M2IyMTNmMmI3NzVjNzgxZGFiZTQ0NmFmN2YzYTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiNTY2ODFhZTRjZDQ5ZGJlNjFhY2M0YTJjNTYyMzMzMGM3MTIxNjdkN2NiMzU0MDZiN2U4OWYzNjQ1ZWJlNmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/swr.tsx#L1-L37",
+          "version": "repo-lines-v1:sha256:5546d407da53e94c28b13ca90fc7083641ba42dc64854bfa28dcc2b7670fdb95:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmMzdkYjFiOGRiM2ZiZWEzNmE1ZDJhNmZmZDVmMzM5M2E1M2VmMDUwNDdlMGI1ZTZlMTRhNDM0ZTQwNmZkZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_eaf898f2c920485fa948ffd4e87d9e80",
+      "statement": "ClientLayout chooses a shell by pathname: share/public dashboard and report routes render bare without auth; a fixed public-route list (login, forgot-password, resetpassword, invitations, welcome, free-trial, oauth) renders without AuthGuard or MainLayout; every other route is wrapped in AuthGuard and MainLayout.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/components/client-layout.tsx#L12-L71",
+          "version": "repo-lines-v1:sha256:1f858b190ff1d1c4bb84149b824e8f18137704b8f5af4ccd420f7ad5956cd7b6:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0YzlhYmFmOTAzYTk2MGY1ZGI2YjcxYjE5YjM0YTlkZTg0ZmNmYzliZTUzYzQ0NDFmMzg4NmI3N2IxNmM1YzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc4YTI2ZDNkMzI1ZTdiZmNmZjAzMjQ4MTFkYzlhMTFiZGFmYTJkOWQxNTE1ODhlNzc5ZjQxZThlYTU2NjViYWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_428fd3c05d564bfbb877ea464d356ec0",
+      "statement": "AuthGuard determines authentication by fetching /api/currentuserv2 via SWR (no token inspection), auto-selects an org (stored selectedOrg if still valid, else first), renders children only when authenticated with a current org, and redirects once to /login on failure unless the store was already authenticated.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/components/auth-guard.tsx#L7-L157",
+          "version": "repo-lines-v1:sha256:503f0af996c54282c4279949c90691ecb6775e4d720cf2ab554e0ac63fd3c210:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI4NzVmODQ5NmEzMWIzOGRkOTAzZjc2ODIzYWQxYmQ2MWJkYTgwN2RmMmY5NmU5NDdlNzgzN2ZjYjA3OWYyNzM3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIyYmFiYmY0ZGFlNzY3ZGJjNWE3N2I2ZWRhNTI5ZTZkMjEzYTk0MjYxYWQxYjJkNjNmNzhjZmYyNTcwZDQwODEyIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_3ee1f733a9a34ca0991d6ea28e164c3c",
+      "statement": "MainLayout builds the sidebar nav from getNavItems, hiding items by feature flag, role (visibleToRoles; empty role is most restrictive) and environment, and routes parent items (Data, Settings) to a child the current role can reach; collapse and submenu state lives in sidebarStore so onboarding can reveal nav links externally.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/components/main-layout.tsx#L101-L289",
+          "version": "repo-lines-v1:sha256:634aa1e72ce68a85d03d80edc3ad41202e70cff6f97579125796f6271b50460e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTg5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmNDIwNWUzOGZmYjQ3MjI0Y2Y0NTFkYjkxMTI0NmU1Mzc5YWU2YjVhOGI4OTkwMWQ2MmFiMGI1YzBlMjdkZDZhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJhYTFkMWE2MzM5MDIyOWM3OTgzNDdlODNhMDQwNTQ0MWM5NDAwMDM1Mjg0YWQxNjhjMWJmNmNkZjFkNzBhMzcwIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiIzNzNiMGRiZTIxOGM3ODViOGFmODAzYThiZWQwZWVlZjU3NzZlMTUzZDNhYzkxZTMxYmM5YTkyZjUyZWEyMTA2IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI5NjE3MGI1ZThjM2Q4ZTMwZDhjZGZkN2MyYWQ0NjI4ODg3OTc2YTA5MDdhMTA1NmJkZjkwNzNlN2QwYmM3MTdmIn0"
+        },
+        {
+          "resource": "repo://webapp/stores/sidebarStore.ts#L1-L60",
+          "version": "repo-lines-v1:sha256:a7624a802856c4b8be7088085bc125c472fca54c769ce9fa6cd909bd4ae7594d:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEwZDZjZDVlZjQ2YzcyNGE2NjcyODEwMzEwYTc3ODM5MGU5Zjg3ZDg5YTgzYTdjZWFlYTZiNzM1NWUzMjBiOWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjllMDBjOTQzNDVkMTc3MmUyMTljZjEzM2U5ODRjYmMxOWJiYTM0ZjQzMTQzZGY4YzI0OTM5ZGJmMmJlMjNhMDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVkZjViNzI3YmViNWViMjM3YTcxYzcyMTlmZjdhOWVmMjBhYzkyNTcxOGFiNDQ4YTU2ZjIwNzNiOWZmYjIzMjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c1ee2b8f8d104c89b2e96c0f529be213",
+      "statement": "hooks/api holds SWR read hooks plus standalone async mutation functions built on lib/api.ts; conditional fetching uses a null key, callers mutate() after mutations, and usePipelines uses a refreshInterval callback to poll every few seconds only while a pipeline is locked.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/.claude/rules/api-hooks.md#L9-L37",
+          "version": "repo-lines-v1:sha256:a69dc0b0d9e27304598776b7b251b2b9728173a33e505b4e6621dd4fe1d9cdc3:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjNzEzMWJhYTNlNWUyMmIwZDc2NmI2N2Y5ODdjZWExN2NmNDBjM2RkMzllYzJkZTM2NmI2ZWQ3N2E2NDM2MmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhMGVjZTM1Y2E0NjkzYTQ1MjNjMmMzNmUxYTU1NmY4MTZmOTc1ZTEwMzU5NGY1OWU2YTc0OGMyNmE0NmIwMzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2ODI2OTRhZDg0YjE5ZjFjMjE3MmUzMTliMDgxMjNhN2E2MDdmZmFkMWMzNDkxODA1MzFlMDE3YjQzZjgzZTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/api/usePipelines.ts#L21-L42",
+          "version": "repo-lines-v1:sha256:4908d1f2718dd1ff03d23405883676c3dd1e7114ec8df514a4da53a247e444ae:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE1MjNhYjU5Mzg2MmY4NWFlOGM1NmY5M2ZhOTgwM2E5YTFiZGEwMTNhNjU1MTEzYTA1MzhiYWFkMThiZGQ4YjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA4Mjg0OThmMzQ3ZmZiMjFmODYzOWVkOThmZmJmMGE1ODI0MDVjOTVhZDdjYTNjMDY4MGVlNWIyY2ZiNGZlOTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_23bf179d74fd40cb8ea49f5d245f4c08",
+      "statement": "useAuthStore (created by lib/zustand createAppStore, persistence disabled) holds auth, org list, current org and org-switching state; setSelectedOrg writes localStorage.selectedOrg, which lib/api.ts and lib/websocket.ts read; logout clears localStorage, sessionStorage and the entire SWR cache.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/lib/zustand.ts#L1-L46",
+          "version": "repo-lines-v1:sha256:b903a77b28e36d04b5306cae07764806eb6b703689a41f994fbbfcdc15205e9d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRhNjhkMGFkOWMxN2U5ZDc1YzY4MDFmM2I0ZTI4ZWQ2YjcyZWRlMGZkMzcyZjJkMTkyMjE2YTgzYzNhYzBlMmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhMWQxYTYzMzkwMjI5Yzc5ODM0N2U4M2EwNDA1NDQxYzk0MDAwMzUyODRhZDE2OGMxYmY2Y2RmMWQ3MGEzNzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/stores/authStore.ts#L59-L163",
+          "version": "repo-lines-v1:sha256:e3307de985ef7cd9c11504a8fa647e2661a507017f83ffc43d1804e7c3dff41c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIxNzFhZmExOTEzYmY2ZDNjNzA5ZWZmMzM4OTAwZGNkMzNlYWYwMzIyMjhjNmM5NDIxYzM4MGJmYThmZjkyZDdjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0OTk2N2VjMWVkMzgzNmY4ZWIxN2FmZjE3MmI1YmZlZjdkZTYwNDg1YTQzOWM2Y2ExMWM1OTFlMTc1NTczOWFlIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJiYjBjMTA4ZTFiYWNlOTE4ZmJjOTE3ODFlYzhjZWQ1NTFjZmM2ZWMxNjVhZjNmYzgxMTdjN2RlMDRjMzhiNjlkIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_35687d157b234289b0652cca8ea753e5",
+      "statement": "Switching org in the header sets the new slug, fires an analytics event with sendInstantly and then does a full window.location.reload so all requests use the new x-dalgo-org header.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/components/header.tsx#L87-L102",
+          "version": "repo-lines-v1:sha256:73751f54bfb2c38d608ed423793958158ad410decf76f48ac66d7a851f6512ea:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmODI4NWJlZmExMzJlNzk4ODQzMTljODgyNjYzYjJmNDYyNjI5ZDkwMzI1OWQ4MzY2MGYzYTJmOGEyZmE2ZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJjMjM3YmY2MzA5NTQxZGM5ZDQ1YjIxOTFkNzFkNTYzYzkzYTNmMGVjNzk3NTQ2NmM3YjE2YTczY2U4ZGNjN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI2NTliODBjMmVmYzFlOGMyNzJmYWFhYmQ3MGEzNWFiOGViOTRiZDM0OTkxODQ1MGEyMmExMDAyODM0MGU1NTQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b0d4f3dcbebe4b0c8df134826951c9b2",
+      "statement": "lib/rbac.tsx mirrors backend roles and permissions and exposes useRbac (reading the current org user from the auth store), RoleGuard (page/menu gate defaulting to NoAccess, rendering nothing until loaded) and PermissionGuard (action gate defaulting to null).",
+      "evidence": [
+        {
+          "resource": "repo://webapp/lib/rbac.tsx#L11-L24",
+          "version": "repo-lines-v1:sha256:ae459cd9d83a1075bad4e75f579fc197b98755a185d11af5de84eccb05d15ea3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg5ODJiMDY3OWVlMGU3M2MwYTBjMDZkNzkyN2Q4YjliMjU3OWM5NjYxMGQzMDEwM2E4YWJjNzQ5MWZhY2FiMDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0OTJlZDFmNTNjMmU2ZTUwZWRkZTNjMjkyYWE4YzIxZjNiZDNmMzQyODMwMDVhODAzMGQ2YWRhYzNiNjg5N2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5MGRkM2Q2NzJiOWZhMjFjNmFkNjI0ZWJlMGEwOWVkOGZlZTQ0ZGNiMzQ3M2Q0NmExYjhiYTM4ZmNlN2Y4NjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0NjlhYjU4Nzg1NmQ3OGY1MmFkZTQ3YmIzNDhlZDA4YTBhNDM2YjE1NWNkMGJjNGVjZjQwYjU4ZWQ2YzAxZGQifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/rbac.tsx#L153-L239",
+          "version": "repo-lines-v1:sha256:2c152c36294a326da41c04cc2068c6fd188427bb70c00fe6d51c8a7b9a7a34af:eyJzZWxlY3RlZExpbmVDb3VudCI6ODcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzNjFiMDZlN2U3YjJiYzMwZDdjYTgyYTMxNzk1Y2I5NTkxMzYxMjQzZjQ1ZjJlNDg3M2I5ZTg4ZjMzYWQ5ODUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE3N2I1NzRkNGI4NGZjMTc5YWFjNTIyY2I4NDE3NTUyNmIyZTcwZmI4ODlhMmU2M2E3NjM5M2RhOTQzOGM3YWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5d0a44a351794a81a32ef37e2699078b",
+      "statement": "WebSocket URLs are generated as ws(s)://backend/wss/<path>?orgslug=<selectedOrg> relying on the HTTP-only cookie for auth; useBackendWebSocket reconnects up to 3 times at 2s except for auth/forbidden close codes 4001/4003/4004, toasts on session expiry or errors, and queues one pending payload until the socket opens.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/hooks/useBackendWebSocket.ts#L8-L89",
+          "version": "repo-lines-v1:sha256:5a987642c44a3f59424270b4f8fe398d6975746a95e2e27c65a14985f3161a01:eyJzZWxlY3RlZExpbmVDb3VudCI6ODIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiOGM3N2MwNzU4MmM4NDFiNTQ1MGY0ODdiM2U3YTg2NzFlNmZmODg0M2E0YjE3Y2U3N2Y0NWU4ODQxMmY4MDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ4YTM5YWUwMmYzNzQ3NzUyMDlmOTJmNDNkNDQzYjcwNGQ0MDM0NDk3OWUxOGQ2ZWQzZmQyN2U0YzhiMTJlYWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/websocket.ts#L1-L44",
+          "version": "repo-lines-v1:sha256:485b6f3caa7b4b84e7ac4bfee7d04a045bde8e666cf487770f2efb9a65ec8140:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0N2RlZTQzNjczMjcwNDQxNGYyZWYyYWY4MTBmNzg1M2QzMGFiMTY5YWZmZDlmOGMwMmY3NjM5ZjJiOGU1MmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fa8fca400d1b4f08aab7932168b634a9",
+      "statement": "middleware.ts only matches /share/dashboard/* and /share/report/*, stripping X-Frame-Options and CSP headers and adding permissive CORS so shared pages can be embedded in iframes; route protection is otherwise client-side via AuthGuard, not middleware.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/middleware.ts#L1-L31",
+          "version": "repo-lines-v1:sha256:0819aeb0435c145e75bc1a0206a939c27257f2d8b77b346690f199cf4cf158f4:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZjOGE0NGRmODI3OTVmOWQ5NmVjYjM0ZTgzZGQyY2E0MGYxZDU0NDZhNWJhMjM3YTQ5NTQ4ZjM2ZTUwMjJiMDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhMWQxYTYzMzkwMjI5Yzc5ODM0N2U4M2EwNDA1NDQxYzk0MDAwMzUyODRhZDE2OGMxYmY2Y2RmMWQ3MGEzNzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_97f252693d47484e99e10938e404797d",
+      "statement": "next.config.ts uses output standalone, ignores TypeScript and ESLint errors during build, defines /relay PostHog rewrites and wraps the config in withSentryConfig with a /monitoring tunnel; Sentry is initialised via instrumentation.ts (server/edge) and instrumentation-client.ts (browser).",
+      "evidence": [
+        {
+          "resource": "repo://webapp/instrumentation-client.ts#L8-L60",
+          "version": "repo-lines-v1:sha256:73fedf38375d97c33ecf179f732f83d34f3cbddd28eaf3dfedfd2b6bcb0b31ca:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwODMxYWExZGU2NWEyNmUxNjYyNjdhMzc1Njk0MTM2YTE4YjA3M2NhYzZmMzdjMjc4MGNjYTJmMGY5ZGE5YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3OGY1Njc0OWU5NGJiYzFjZmFhODY0ZThhMjZjZmI0ZDkyMWQ1ZDBlZjI2YzQxNjYxY2UzNzg0ODFmNDM2ZjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMzNDJhOGVhZGQxYmE1MDM5MDg0OWZkYzg1YzA3ZmRiNDhiZmViYmEwNDI3MDExN2ZkZWNmOThlOWFiMzhlYTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/instrumentation.ts#L1-L18",
+          "version": "repo-lines-v1:sha256:7ec040e6f1530c88a14976be429d6e573ebca0c84b99ce20ed183a89a326e92c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMjk0MDQxMTAxOTY3ZjNhOGRiNjZhMTRmODM5ZDFjOTM2ZjAzYWQxNjdmNjk4YjhjYmFhZmJjYWM2MTg5YzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5ZjYxNThkZmQ1Y2FjZDZiOWQ2OTNkMDhiNjRkN2ViZTY0YzcyOWE3NWEyNzlmODkxODM1NTU0NzRhN2EyN2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/next.config.ts#L1-L74",
+          "version": "repo-lines-v1:sha256:b9a36ec6f7acb7f3f2084ec37e5510f088dd6dcdb82a3ea6812f0eac18c68e18:eyJzZWxlY3RlZExpbmVDb3VudCI6NzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFhZDhhNTFmNGJmNzU0MTMwMzAxYTQ2ZmI4MmM5NjYxMjZkMmQ5MzUyMDU2MzQxZjg1NWY5ZWUxZmU4NTFmN2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f2841871d55b4a01bf714158b355f3c2",
+      "statement": "Analytics flow: trackEvent wraps posthog.capture and auto-stamps is_value_action for VALUE_ACTION_EVENTS; usePostHogIdentify identifies by backend user_id (never email), registers role and org super properties and the organization group, re-running on org switch and resetting on logout; useFeatureTracking fires a deduped feature:viewed from PATHNAME_TO_FEATURE, which a Jest test checks covers every settings page.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/hooks/useFeatureTracking.ts#L10-L21",
+          "version": "repo-lines-v1:sha256:de2739b0ded5d2d90ea45df57b532e6cd3e7edd21fe127417917e24a174371ed:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdiZjg0MjJkNTNmMDg1ODMyZTljZmY1NDc3ZjNlNmNmMjFjMjJmMzgyYjA3Yzc0YTc2MjRiYjBiMGRmYmVmNTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU4N2EzNWY3YWZjYjc3NTA5Mzg5NzIxZDkzNDdmOGFhOTlkYTQ1NTMzMjQzZTVhODIzMzUyOThjMDIzMDhmM2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/hooks/usePostHogIdentify.ts#L7-L50",
+          "version": "repo-lines-v1:sha256:7c8bd20192e132626562f16e323333548bde3c90369947373bcf587bbd1694e4:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkM2JjZDk2YzVmM2YwYjIyNDkwNDY3MTRkZDdlYjk4ODQwZTA5MjhjMGZjMzU2M2E4ODYxZmY0ZmM2YmI3Y2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM5NTBkMDMyNTRlMzg5NTA3Yzc2YmYwNGFlY2M4Y2YzNjE3OTcxYzY2YzZmNzZiM2FjODUyZjZkYTEwNDM2YWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/__tests__/feature-route-coverage.test.ts#L1-L44",
+          "version": "repo-lines-v1:sha256:da27017c580a6f2a55443919b13f55f2f3750f85569c57e3845d20962ab4356a:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NTRhMTI4NGFmY2JmODQ2MTI3OTBhZWNmOWVjZmYyZTMwNGI5YTdhN2E0NGY1MDEzOTUxZWVjNDQ3YmU4YWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://webapp/lib/analytics.ts#L18-L130",
+          "version": "repo-lines-v1:sha256:50a77a81fbf32886f2810c051fae7daeffb5fceb831345e05b8ab403ecaa9521:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmZDRhNGJmYTVlMTI0Yzc1YmM1ZWUyMzM0ZTg4NjUxMjI4Y2I3YWMwMzkzMzhkNzM4ZWM4ZGFmMTZjMTE2MzQ5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI0ZjJmN2M4MzdhYWM1ZTgzNThiNTg2YWJhNDY0MWY5Nzg1MGIwOWZjMDNjODBjOTExOGZjMjRjNTM0YWIyNzdlIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_9fa3181a76d84d9a8e6c73b7b7fee90e",
+      "statement": "Analytics rules require instrumenting each new feature on the success path fire-and-forget with fixed event names from ANALYTICS_EVENTS, no PII or warehouse-derived strings, no tracking of autosave or automatic work, and for long-running actions only a *_triggered event (outcomes go to Sentry and backend dashboards).",
+      "evidence": [
+        {
+          "resource": "repo://webapp/.claude/rules/analytics.md#L10-L34",
+          "version": "repo-lines-v1:sha256:23c07b593c3faedf6674caa8b1fa3dee9f42433dbba59ff63227c7e929211a8d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwOTI5MDg5M2UzOWYwZWE5ZWRlZTczNDU2NjEzYTEwNDcwMjQ3MmZhMzk1NzczZDVkNGQ0Y2FiNzJjMmI2ZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyYjEyZDI3MGRkMzEzNmM1YzUwNGYyZGQzNDMzZmIwNThlNGIwODhkNTIwNDhmODQyYWZjNzRjNmJlMTAyMmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY1NmM4MDhmMzUwODk2MDQ5ZmE0ODljZTEwNTM0OTYxM2VkZTUxNjM0MWNlODg0YzU2YmUwNjU0OTkwNDJjOTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMwZDk5MWYzN2ZlNmY2NjIxZTMzMGFhZmUwZmExNzVkM2MyOWIxN2QyNmFmZTc1NzEzMzFhYmMzYWUwYjk1NWEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5ce7a338292e4cbba3dab456193af6b5",
+      "statement": "The pipeline feature is the declared reference implementation for feature organisation: thin page, components/pipeline files each owning stateful pieces, hooks/api/usePipelines.ts, types/pipeline.ts, constants/pipeline.ts and co-located tests, with each feature owning utils.ts and constants.ts.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/.claude/rules/components.md#L77-L82",
+          "version": "repo-lines-v1:sha256:e3cf0226cc49d55f24db0a578d10465434b093799d5d11e673494904cc9e8957:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDRkYTM2Zjg1YWRhMDAwMTAzM2U2ZDNkMTQyYjRiYTkwMTZlN2Y5Yzk4YmJkMzQxNzcyZjEzODI1NjRlMDk5YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjIyMzkzMjdkMmZkZGY0MTY1YjQxMDNlZGVlN2I3ZDdjMGVkOTRhYjZjZDZjM2VhMTg0OWRkNTI3YTgyNGVkYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNThjYjZlZTQ5MzAzOTg0ZTliZmY3MTU3ZjdjMzRmMzQ1OGUwNDdjNTQyYmRkOGM2ODk4NGI5NWRmMzM0Mjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTNhMjgxZGVjNTJjMDcyNWVlMTg5YmMxZjUyMGEwZjJmOGZjN2Y5YjYyMWM4MzM5MGYxMmQxZGJlYzEwNDU3NiJ9"
+        },
+        {
+          "resource": "repo://webapp/.claude/rules/pipeline.md#L17-L32",
+          "version": "repo-lines-v1:sha256:12df21aaf3eeece6257c2baf1e21e44733ad1e82e85df9a47c48547071e15ca7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ1ZDc3NjY0YTFhODE0Zjc0Y2Y3NDQ5YjU0MWU0YTg5NjgyMDUzZjVmOGYxMDhkYmE0OWI0ZGVkYjkxZjkyOGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmYTgwMGEyNWFiNTQzY2Y0MGU1OGU3M2U1Yjk1ZWE1Yjc4M2JlYTdhY2I5ODA2YmZlNWRlM2EzY2VlYmRhM2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE4YjEwYTRkY2Y0NDA1YzRhOTBkMjkxOTVlNzEyZGIyYTc5Y2Q0ZDljMjRkNjhjMDg0NzQxNDZhMGZhY2NmODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdjMzU5YTU4NWUxM2MyMzI2ZmZlN2MxYWY4YWJhMzg5ZmFkM2QwYzFmZjY3NTg5MGQ5NDUxMThjOWUzZjNjNjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_331f452933f849d7bc5216c8c47312f4",
+      "statement": "CLAUDE.md maps each nav section and its app/ and components/ paths to an auto-loaded per-feature rule file in .claude/rules (charts, dashboards, reports, kpis, metrics, ingest, transform, pipeline, explore, data-quality, settings) plus cross-cutting components, api-hooks, testing and analytics rules.",
+      "evidence": [
+        {
+          "resource": "repo://webapp/CLAUDE.md#L96-L121",
+          "version": "repo-lines-v1:sha256:cba6ff2f14db7531b921758a5eccad0e379aea7cf3168bef6a5e0d4cfd175e6f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlZWRiYTJjNTcwZTgyMjljZjE3ZmZkZGRlMWVlMjZmMDIzODE3ZDM3NWNjYjdkZmYyZmYzNmEyMTNmM2I5ZjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlZmRjYjExZWZiMDk0YTllNGJhZDVlNTM5ODUzZGJlMGI1YTNhNzEwNGYwZTkxNWVkZTY3ZjM4MTI2ZmM1ZDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyMzg0OTFjNjQzMDdmZWQ2NjAxMzQ1MGU0ZDBkN2EzZjYwMGFkOGYzMjYyM2Y0NjgxMDNlMTAxODMwYWU4NTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

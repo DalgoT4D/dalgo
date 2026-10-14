@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:63328a483c956ffbcb8c9d64c229de38d87f41b093263e4db66fafcdef26883b",
+  "claims": [
+    {
+      "id": "claim_379407c8bc4349538b7a77fc5ccb3497",
+      "statement": "Staging deploy triggers on push to main, on a PR being labeled `staging`, on pushes to a PR that already carries the label, on unlabeling (which resets staging to main HEAD), and on manual dispatch (which deploys main HEAD); docs/markdown-only changes are path-ignored. Images are tagged main-<sha7> or pr-<n>-<sha7>, and runs are serialized in the `staging-deploy` concurrency group without cancellation.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/deploy-staging.yml#L1-L139",
+          "version": "repo-lines-v1:sha256:414235c1d9f9d4c11cadbd2f3b674de74932101e6660a82956fdc8c502edbb74:eyJzZWxlY3RlZExpbmVDb3VudCI6MTM5LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIxMjAwZTdlMzkyNmE3MGE2NWI0MDBjYTQxOTk0MzhlMTFlZDhlOTUxMzY3MmNiOGVmNTE4NzkwMDMwMTdmNTY4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI1NDM5OTQ3ODljODFhNmRhZWNiMjFkMzllNjRmZmE5YjgwNmY3M2FhYjY0MzE0ODBhZmZmODMxNzExMTUwOWU5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI2NjU4MTg1MjAzYmRmMWU0ZjhhNmQxOGMwMTZiNzQxMTE0NjhmYjEwMDM0ZTZkZDNlMGJhY2E4MDFiZjA3OTIwIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_6b00f420b1a1443686603d37f67c2168",
+      "statement": "Both deploy workflows build backend, prefect-proxy and ai-llm-service images in one matrix job and the webapp in a separate job (because NEXT_PUBLIC_* build args are baked in per environment), for linux/arm64 only, pushing to GHCR under the lowercased owner with one shared tag per deploy.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/deploy-production.yml#L88-L184",
+          "version": "repo-lines-v1:sha256:eb5e55a2a83d841233b8cf1b6d1a83ae720ac56d177c7277b3ef3ecbb95c2eef:eyJzZWxlY3RlZExpbmVDb3VudCI6OTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwYTJjMWQxN2JkMjA0NDc2MTI5NjNkMGMxMDc3MmYyNjA3ZjM5MTNhOTJjMmJmNjNiYjFkNzE4NmM2ZmU4NGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjczMWYxNjIxNGQ5ZmRlZTVlMjVjNGI5NTdjNWM3ODZkODI2ZjBiMDIyMzA2NmY0NjMyNmFiYmNhYzZjODc0NjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBkMjhjYTkyMjA1N2VlMzIwODY3ZDVkZThhMDNhNzhiZDljYmE0NThlZDFhYTA4OWQ1MjQ0M2JmMTllZjZhZTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU1Y2MzMjE5ZDU1YmQzYjY1NmI0MTBiOTEwODQxZTkzZTA2ZmM5ODUwYWE0YTVjN2ZhYjRjYjg3YTFhNTYxMDIifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/deploy-staging.yml#L141-L238",
+          "version": "repo-lines-v1:sha256:9b011a6b7d9c5911375f6ebd9b3ee8d93e636ca9009a339fa374dc0751f78e65:eyJzZWxlY3RlZExpbmVDb3VudCI6OTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwYTJjMWQxN2JkMjA0NDc2MTI5NjNkMGMxMDc3MmYyNjA3ZjM5MTNhOTJjMmJmNjNiYjFkNzE4NmM2ZmU4NGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjczMWYxNjIxNGQ5ZmRlZTVlMjVjNGI5NTdjNWM3ODZkODI2ZjBiMDIyMzA2NmY0NjMyNmFiYmNhYzZjODc0NjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAxZDk0NzVmZDAwZjczYWEyODg2NDgxYmY0NmJlZmY5MGVmNmZiNDEzODRmNzA3YjA4OTUyNDc4NTRiNWUwN2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRiMWQzODY3YWQxZjhhYjkyZTBmNGNjMWFlOTZmNTNiM2Y1ZGYwMzFhNjg4NzUyNWI4ZmMzZDZiZmQ3OGI4NjYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_aafdeff5acfa40d2ae8c1095aa72ac3f",
+      "statement": "On staging, when a different PR previously held the staging label (or its label was removed), a rollback-plan job derives per-app targets from the highest-numbered migration on main, and the deploy job runs `manage.py migrate <app> <target>` in the still-running backend container before syncing the checkout and pulling new images; the previous PR then has its label removed and is commented on.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/deploy-staging.yml#L115-L127",
+          "version": "repo-lines-v1:sha256:f6d211dfab9992c1abc884aa1597c206166eafd5ce6fce9457e808d978d8e0b0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0OTNiZGM0MGYyMjJlOGI2MzFkNzBkYjUwYmFkOTFiZjIyNGRhNWNiNDVjODE0ZGFhMDExNGEwZjJlZWFkNWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJmNTU5NzljZTczMDIwMzNlNmIyZmQ3ZDg4ZjUzN2EzYjhlMDkxZWEzMDVjODExZmZhMTI3NGJmNTc2NGVhNWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVkYWFlYjdkMjA5ZjI0YzJjMTVjMTcyZjhmMWE2NTE4NTRlM2NiNWFkYmYyODQ1MzFmZGZjM2RjOWQ3MGJmMTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI4ZTk1ZThmZjkxOTkzMzk5MWE2NDE0MmZiMGVjM2FhNGM3ZmM3Y2U3ZmQwMzQxZjIxY2YzNjI5Zjk2NDNjZTQifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/deploy-staging.yml#L243-L317",
+          "version": "repo-lines-v1:sha256:54eb756c5fd85ae392b8f736f2b9ec4973dd8858ab15818140c2af878cbf22db:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlMzgwOTZjOTMwNzhiOGE1MDQ2M2ExOTQ5Y2ZiY2Y5YzdjNmI1NjMxNTA3MzQ3ZDgyNTI2M2UxOGNjN2IxNTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM4MTMzM2RmNjZkNTk1YzYyMjM3NDEyZTdkMTYwN2I1Y2ZiMDExNDdmMGYzYTlkYjdiN2FjNGU3MjljNDNkMjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk5MjkwNTgxNTEyOGYxNDM1ZjQ5ZDI1YThhMDk0ODU4ZDcwMjM0NTQ2MDY2ODMyY2E3MTg4ZmI3YjQyNWVlZjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQyNjAxYjkwZGExN2IwNzI0ODVmNTJlZmQ3MWZjNjBjNzRkZmFiMzQwYmM4ODlmNjdlNWMwZGIwZWM1NDcwMjkifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/deploy-staging.yml#L369-L391",
+          "version": "repo-lines-v1:sha256:9b321a7fe4af7596c881776f34a0dbe1f788938b29f5f81a6817c8b49f9041af:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRmMDg0NDkyMGM2ZTJjMzNkZWMzMTlmMzNjOWE5MWI3ZmNlYWE2YmE0ODY4NWI3ZDJmZDBmNWFjNmM2MmUwOTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjMjM2YjZiNjNkZGMxNDA1N2E4NDVmNTJhYjRhMTM3NzQxZGZjZTI1ZDQ2ZjYzNzE3YzNmN2VjYTk2MzkyODkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjNjQ5ZjRjNjQ4MjI1MWQwODM1ZmRiZThiZGY1MWM5ZWQ4M2I3YTdhNTcwOTJiNWI3NGMzYmUyMzdiZWZjMDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_64bb3e005f90439fb03131015386122d",
+      "statement": "Staging deploy job only runs when both builds succeeded and rollback-plan succeeded or was skipped; it SSHes to the host, checks out the deploy ref, exports REGISTRY and the four image tag variables, runs `docker compose -f docker-compose.staging.yml pull` and `up -d`, then executes scripts/post-deploy.sh in the backend container.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/deploy-staging.yml#L282-L367",
+          "version": "repo-lines-v1:sha256:bdb3525ddcc5192d69375559faba78099973ffd9d2b5682bd33b771f8a4a048a:eyJzZWxlY3RlZExpbmVDb3VudCI6ODYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI4ZTY2ZmQ1YzViOGJmNWRlNGUyOTEwYzE4NTZkNzQyNmQ5ZjAwMjA3ZjJiNDQ5ODRjODJjMDUzNWU3MTgxMTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhOGMxZWRhNmZiYTU1NDBmZDJiZDYxM2I2MzRjYWMxMmEzMjhjY2EwZDNiMTQ4ZmUwYTEyZjgzZWJjZmU1NzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYxYjM2ZjhjZDA4YzVjMjI1ZTVmZDY5NTRkMDBhOGJhZjU4ZDEyZjljOWY0YTA5MzE4NDEyNDMwYTRmZWUxOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBiNjEwOGUwMTM2OTdlZDUyYmY3YTRjNzI0MTI1ZWZmMzgwMjUyY2IzZjM3NDRkMjc1MDRlZTUxM2IwM2UzN2QifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8934bcf8353648818e548e05c6137774",
+      "statement": "Production deploy is manual-only, always deploys main HEAD tagged prod-<sha7>, and a ci-gate job blocks all builds unless every check run on that commit (excluding the workflow's own suite) is complete and successful/skipped/neutral; the build and deploy jobs run in the `production` environment. It has no migration rollback step; deploy runs git checkout, compose pull/up -d with the default docker-compose.yml, then post-deploy.sh.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/deploy-production.yml#L1-L262",
+          "version": "repo-lines-v1:sha256:b9212faec1b282c93ade46697d30aa94de37cc623aa7af7aecc28ddbbf222d40:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI2MTk1NzZlNDcwYjZjYjFkYzhjNzkzODYyYTljNTFkMmE0ODJiYWJiZjQ0ZTcxNjY0MzZkYTAxZmI5OGRmZmRkIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI1NzJkMzFmMmE3MTdlOTk2YWE3ZWVjMDNmMDc4NDU1ZjI5OGJkMGE1MTI2Y2E2YmY3NjU0ODA1NWQxODM4MjNjIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_752f833b10e540609742401cee45255f",
+      "statement": "scripts/post-deploy.sh runs forward migrate, loaddata of seed fixtures, create-system-orguser and clear_role_permissions with set -e semantics; since compose `up -d` runs before it, new containers start before migrations are applied.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/deploy-production.yml#L218-L251",
+          "version": "repo-lines-v1:sha256:4ed7a09ca465295ade5a6b2c58500f99fceacd5a6fd791db064e777e92f2623b:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwOWMwMGYwZDI1MzM4YzYyMTcxN2M5ZTBhM2YzODFkZmNkYWViZWI3Yjg1MjYwOTUwMGY5M2NkM2MwYzlhNzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyNGY0ZWI0M2IyMDU1NzYxNTFjNjliZjU5NDdlYTU1MDQwZmI1YzgwNGMzYzgyY2Q4YjhjY2JiZDMzMWMzZjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUxOGYzNzUyY2RkOTE2MWEzYTJiMjc2MThiNDU4OGEyYjFmNjAxOWJjZDZiYzlhNzRkMDIzNzg4YTU4MzdmNzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxYzRjN2U0NzVjMjNmZDMxNTg1MWMyOGY1ZWE3MjgyYTBjOWY2NTBhMTg2NzAxMTQzMWE2MmI0MTY0NDk2ODEifQ"
+        },
+        {
+          "resource": "repo://backend/scripts/post-deploy.sh#L1-L21",
+          "version": "repo-lines-v1:sha256:7a2678df7e80818e03a1b7787fecceb9e600bb91a5cc571a5829fe749048fa22:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFkOTVmYzA0YTgwYzk1MmY0OWNlNDE4ODYyN2M1M2IwZmJlOGM0NDA0MWI5NTJkNTkyYWNkMWRlOTk4NjE0NjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljMzJkYjA3YmRkNjg4MjllNWY4M2I5NzdkZjc3YWY4NDM2MWU4NmM4YzQ0MWM3N2M4NjMyYmY0NGU2MDFlNzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a590e7f50bb64885aa273d3ab2f6469f",
+      "statement": "The staging compose file differs from the production compose file by mounting a host secrets path (DEV_SECRETS_HOST_PATH) at /secrets into backend/celery containers and setting DEV_SECRETS_DIR and USE_AWS_SECRETS_MANAGER=False; both define the same service set (two Redis instances, backend, Celery workers and beat, Prefect server/proxy/workers, webapp, ai-llm service and worker) with image names and tags interpolated from REGISTRY and *_IMAGE_TAG variables.",
+      "evidence": [
+        {
+          "resource": "repo://docker/docker-compose.staging.yml#L1-L204",
+          "version": "repo-lines-v1:sha256:9332d9683f708ba3b1daa9a7bd4e3f1c43dd96d9d3238a713732e42b21225f20:eyJzZWxlY3RlZExpbmVDb3VudCI6MjA0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmYWYxNWYzOGE4MjkzYmEyNDU2OWU0ODNkYTExM2VhMjEwZWZlOTUyMDlkNzNlNThiYjJjOWZhZWY1YTk4ODRlIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmN2RkZjNhNmY0ZmJiYmEyMzk5MTczYTRiMzAwNDQ0MTExNDBlNDIzZDJlNDVkYTdhODc4YzE2NjA2OTIwMTIzIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://docker/docker-compose.yml#L1-L201",
+          "version": "repo-lines-v1:sha256:677e4fd11c36c2d4346752e3c44e3db6609dfc29bf6fa2d44d498b31df5f6121:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAxLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwN2NhZmU1NDAzYTlmN2Y5ZjZkNjQ4YTU4N2ZmODk0OTdhMTczMWJmMzIxMjI0YWNlZWFiODVkOTI1NDE0ZTAyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmN2RkZjNhNmY0ZmJiYmEyMzk5MTczYTRiMzAwNDQ0MTExNDBlNDIzZDJlNDVkYTdhODc4YzE2NjA2OTIwMTIzIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_d5ecc68e24d440ae863c604e995c0e7b",
+      "statement": "The Prefect job-runner image (docker/Dockerfile.job-runner) is not built by the deploy workflows; it is built manually with build context prefect-proxy/, installs dependencies from prefect-proxy's pyproject/uv.lock, uses a PREFECT_VERSION build arg that must match the pinned prefect version, targets arm64 for EKS, and relies on workers cloning the monorepo at flow-run time for the vendored prefect_airbyte.",
+      "evidence": [
+        {
+          "resource": "repo://docker/Dockerfile.job-runner#L1-L31",
+          "version": "repo-lines-v1:sha256:f5262d4d064255425e61bc2569457448da4993c28bc60031198aa53872e87a5c:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4OTVmODlhY2NmYjE5ZTdmNjUyOTJiZjdlYjE0ODJjMWI1ZTNlZWNiMzA1ZjVjMDg5ZWM2N2YzM2Q5ZTA5ZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0MWE5MTAzNzI2ZjEzYTI4NmE2ODczMWQ5NGVkNzk2MWQ5YzJkNWI5YjU3N2Q0NzZkNzEyZjk2MTExMDYzNGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://docker/README.job-runner.md#L1-L91",
+          "version": "repo-lines-v1:sha256:83a1b64e2ade73376990063c74d41015bc9f3a86786f8b784fac73596e0a9176:eyJzZWxlY3RlZExpbmVDb3VudCI6OTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNjYmRhOTUxYmUzZWQyN2EwMGQ4ZDU2YTlhMTQ4MTkwYTZiN2U1ZWMzMDUwNWNlOWY4NTIxOTAxNDNkNTllMWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3MTUxYTJjMzVkYzFhZDRmODQxZWFiNGQ4ZmViNWJmODlmZjQwODAyZDhhNjc3MzFiZTQzYWVmOGYxMTNhM2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3b9295318de64d798db7b86dc3196c41",
+      "statement": "Backend CI (backend.yml) runs on main pushes and PRs touching backend or backend Dockerfiles, using Postgres 15 and Redis 6, pre-commit, migrate, pytest excluding integration tests, and a 55% coverage threshold; it is path-filtered, so it is only one of the check runs the production ci-gate may see.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/backend.yml#L1-L108",
+          "version": "repo-lines-v1:sha256:ecad1b0cce25e8e70841850f21b68bf5afe586f365e95bd7014eb60217c10c95:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJhYjBhM2I0MDNmOTIwMDZkMTMxZDczMzA1ZWE1OTNlZWVlYjljZTlmZDYwZjg1MDA1MWY3ZGI3ZjlhNzFjZDQ0IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiIxMmFjOWRjMzdhZWVhN2QyZWQ2MjgyMTY1MTg2ZTlkZDRjZmIxZWJjOWYyOTMxMWY0MDM1OTFmY2E1NzY3NGFiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://.github/workflows/deploy-production.yml#L43-L86",
+          "version": "repo-lines-v1:sha256:c064a41b934e0c49a66d56f615b8867912ebb0b1685d1425ea68bca749aa7919:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxNmVjNjViZjEyOGJhZWJhMzc3N2I4NmM2N2U1NGUwZTZjNDc3MjllMzhhY2ExYjdmNzY1NzUzNzgwYzgxMjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUyOTkyYWIzOTI1NTFiODNmMmJlNWI3NTM1ZDA4MjgwNzNhZGQ5YWIwYzI2NjU4M2VjNmEwOGRjNGI5ZTgyNjgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQwMmRiNDNmYzIxYmM5ZWI5MTYxOGRiM2E4MzBhZDlhNmQwYmM1ZDYyNzU2YWRlN2Y4Y2Q3OGU3NDkxZDkzOGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZhYjA4NjA5MTA3MWEyMmM2MDkwZTE4MDYxMzQ5NTU5NmVmOGI4NGVhZDM4NDBmNDc4YWFjZDc1NjhmOWE2ZTgifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}

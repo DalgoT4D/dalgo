@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:4daf5d4c858c373a62b6e9ad7805d1f6dddb1a9cf8a807287000a2b75ffe519f",
+  "claims": [
+    {
+      "id": "claim_89e5bcf7ed2c4cbe8caacb0d959e4e18",
+      "statement": "The backend reaches Prefect only through prefect-proxy: prefect_service wraps requests to {PREFECT_PROXY_API_URL}/proxy/{endpoint}, attaches an x-ddp-org header, applies PREFECT_HTTP_TIMEOUT (default 30s), and converts connection failures into HttpError 500 and non-2xx responses into HttpError carrying the proxy status.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/prefect_service.py#L149-L192",
+          "version": "repo-lines-v1:sha256:072b996b5e83272d108894b54f21848010c24a188a74506b6113208dd300ecc7:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZmMjIwMjM0MWE5NWRkZWViZjRmZTNmZWY2ODAxNDQ0NWUyOTgzMzY0YjkwMjBmZjUzZjc1MDVlMzQ1ZGRlM2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZWNmYjgwNThhN2ExY2IxMTMxOTA1Y2JiY2ZmZDU2NTczNmRjYjk2ODA4ZmY0MzZhZjIyZjk5ZDE2MzAyMTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI4ZGI5MzYzZGNhODY3ZDMzYWI0ZTg5MmJjZGM0NzVmMjYwMWJjY2Y0MjgzOWU3YTMzNDM1MmRkZmNmODQzMWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIxZGFjYThmMjdiODg5ODA1NWM3YzJhYWI0YWYyNTUxODlmYjU3ZWViZWQ0MDE1NGExMmJkMTQ0NzkyMTUxMGIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/prefect_service.py#L42-L96",
+          "version": "repo-lines-v1:sha256:e599a190a1a84f115ed388a8853f48fb19ddd4043cd8769b21ff4b04fc59524c:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzNWY5Yjg0OTAwNDc0NzZiY2YyMTFjNzFkYjNiY2EzYjNmZjVjMzc3OGU1ZDE2ZGUxZmI2YTg5ZTY2NTZhZTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzMDcyNjkzYTFjNjQxNTg5ODI4MTI3NDQ1ODMyM2UxYjJmZWMxZDcyOWYwMTEzYmJkNzhiYWQ4ZjMzYzcxNGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZkMTA1NmU1Y2E2ZGY4ZmVmNmIwY2Y0NTlhYTAwMWI3MTAzYTI0ZWUwMDlmODQ1ODA4MWJiODg0MTAyZWI1MzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdmYzk2NWM3NTA4MDU1M2M4ZGQ4MzUzMTk5NzE5MWI0ZDBlNmU5ZWU1MjFkZDM1MzU5ZDhhNGU4MTUwNTNmZWEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1813002ba57f4e279efdd1005187d1c1",
+      "statement": "prefect-proxy creates deployments from git source (DalgoT4D/dalgo.git, branch PREFECT_PROXY_GIT_BRANCH default main, sparse directory prefect-proxy) with entrypoint prefect_flows_runner.py:deployment_schedule_flow_v5, build=False/push=False, org-slug tag, default queue 'ddp' and pool 'default-agent-pool', and an optional active cron schedule, so workers load flow code from git at run time.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/prefect_service.py#L357-L373",
+          "version": "repo-lines-v1:sha256:7840b230947bb7162db2864dee071f7748e6a0e76b410c77de7cbc5ef7deb50e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM0NTU5NDBkNzg1ZWQ2MzI3YmMyNDE3NTkwOTZmZDAzZjM0ZThjYjMwYWQ5NzU4MDgzMjA2YzQ2NGZlMjRhZmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJjMTliNDBmNzBjNDM2MmE0MmJmMDIwMDdjNGIxNjI3YjE3OTEwMjE2NmMwNzA2ZTAyM2E1ODIzNjQ5NmZhYjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYwMTY2MzA1N2EzOWM2ZjMxZTc3ZjE0YTM2ZGQwOGM5ODkxZWQ4NGI2MTE2M2YxZjA0NTg2ZmZlZDdmN2RmZDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ2OTcyZTQzOWFhOWU4NTkwMTBhYzE5NTQyMWY4YTgzN2ZiMzBhMTEwNGMyNmZiMGEwMTNlNTFkMjM5MTljNzUifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/service.py#L405-L456",
+          "version": "repo-lines-v1:sha256:621432b34e2757ca5462b28f7629e73b8c68e5c42599c6d55735279e622feb2c:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4NzU0M2VkZWI1YTk0MzVhNjIyMWFhZDg2YTI3NDM2N2ZkMjkyYjJkY2RjNmYxNmUzY2UzNjgxM2VlYWZiZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxZGFjYThmMjdiODg5ODA1NWM3YzJhYWI0YWYyNTUxODlmYjU3ZWViZWQ0MDE1NGExMmJkMTQ0NzkyMTUxMGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZiYjdkMjYxOWI2YWE0ZWY3MzEzN2M4ODQwMjk3ZmI5ZWU5OWNiMzlhOGM5ODUyNjJkOWM1ZWU0MjFkZWI1YzgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_075addc7800a4585b630f60225661532",
+      "statement": "Pipeline creation builds a task list with Airbyte syncs first (by seq) then transform tasks; when dbt tasks exist it auto-prepends git-clone (EKS workpool) or git-pull plus dbt-clean and dbt-deps, ignores git/clean/deps tasks sent by the frontend, stores the tasks in deployment parameters config {tasks, org_slug, continue_on_sync_failure}, and mirrors them into OrgDataFlowv1 and DataflowOrgTask.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/orchestrate/pipeline_service.py#L80-L273",
+          "version": "repo-lines-v1:sha256:5547d63764a1f89415316d82846db685c0f83a056ea59e48210b57edc79b06e4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTk0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0MWFiY2QwY2M2OTEzZDRmNTFlYjIxZTRmNWFmYzJlOTBmODZkMzZhNDUwYmI0MmNiMDVjNmYzZTBkNzA2ZjhjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJlNmIwNDQ5MTQ2OTcyMmU4MzYzYTk0ZTQwNDQ1MzhlMDEzYTJhMjE3ZTM2YjFlNTY4YmE2MGFjYjdiNGM4ZjJlIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5NWM5NTcxZjBlMDg2NWRlNzUxOThhM2M0NTU2MTdmMDA3MDNmNDJlMDk2MDVlNmJiMTc0NmZkM2M4NWY1MTA5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJkNTk3OTM4ZWVhNGZiOTY2ZGRkMjM4MTYzZGY2ODg0YTFlYzQ3YzE2MmU3YTk4YTg5OGJjMDM2NTIwYmVhN2MzIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_591112495b4f444496fe6e46166de81d",
+      "statement": "Running a pipeline atomically creates one TaskLock per mapped OrgTask (rejecting with 400 if any is already locked), asks the proxy to create a flow run, records a PrefectFlowRun in Scheduled state, releases the locks if the proxy call fails, and otherwise stamps the flow-run id on the locks.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/orchestrate/pipeline_service.py#L520-L576",
+          "version": "repo-lines-v1:sha256:4ec8b4490a62ee667745dfe5573a8bcc560fb66491905013d57bfffc780e25f7:eyJzZWxlY3RlZExpbmVDb3VudCI6NTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYWJjZDBjYzY5MTNkNGY1MWViMjFlNGY1YWZjMmU5MGY4NmQzNmE0NTBiYjQyY2IwNWM2ZjNlMGQ3MDZmOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlNDg0ODEzOTgzOTc2NTRlZDZiNmY1NDYxMGVlMzE5ZjMxOTU4NDk2MGMzMmQ3ODg3YmIxZGE1ZGQ1NTkyNzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE5YmNjMTdmZTJjZWZhYjk2NmExMDEwN2VkMDQ1ZDMxMjI2Zjk3MmU2YWYzMTk3M2JjYTVhMTkzNDIyODcxOWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc4ODZiZjczNDRmYjI0NmRkMDJhODIxY2M3OWQ1ZDU2NTFlMWU5MGY1ZTYwZjVjODUyYjdlNDRkNjA1YjM5NDUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L368-L389",
+          "version": "repo-lines-v1:sha256:978acdcf08086462bc06aa2e6566deaa09ad861c486bc1a7ca452c98a484d08f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhYjllMDYyNzg0ZDk4ZGMyZGU4NjFlYjEyY2I2YTYwYmYwOTY1MGNjMjcyY2UyZDcwZDUwZmFjN2ZhNGUwN2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3OGEzODIzMWZhMDYzNzNlZWQ1MGZhOTM2MjE5MGZhZWExMTBjMmM2YzJmYjkxNmJkYThiNDMxY2E3MDkzNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3MDE0OWUwNjlhZDY3ZWNjZjQ3MzY0NmZmMWM3NTAwNTBkMzI5ZDExMDAxOGRjNTc2Njg3OGVhZmExZDYwN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEwYmY2ODY0ZDk2MDk3YWU1Yzg4MTBlYjExZWYyZDJkYTRkZjQxNmI2MGU0NWE3MmE2YTNiOTY2YTVkMzYzMDMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/tasks.py#L149-L158",
+          "version": "repo-lines-v1:sha256:1c313589081cec2c7616c438993ae76475df81a2c803de2aacdaeffac4b1dd8e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgxOGE0OTc3MjJjMWM2Mjc3NjA0OGJmYzE1ODA3ODI5M2E1YzY0NzY0YTBlYTZiMWUwNTIwYThmMzAxMTU1YzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwOGVlYmNkYTI1MDcwYjExN2VlYjc0ZDVjMDkwMmY4NWUyYWZjODRmYTRmZmI2OWVjMzVkZmY0N2E1YzUwMGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjYmFmZjM5MGViYjllZTdkNWJjMDkxNmYxOGRlMjMxYzE5YjIyYWJmMDBiNGU1NTc1ZDk3MmJlMjQ5YTkwYTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_04d537ca3fa745dcbc043e8375c4b39c",
+      "statement": "Manual (Transform-tab) dbt deployments are created only for LONG_RUNNING_TASKS, chain git pull/clone, dbt-clean, dbt-deps and the primary dbt task, and are stored as OrgDataFlowv1 with dataflow_type 'manual', whereas user-built pipelines use 'orchestrate'.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/orgtaskfunctions.py#L81-L174",
+          "version": "repo-lines-v1:sha256:f41b7fd3fcd14b29024fea897c77ca15c1ab4d66008d387d5e4905cdf3cba0e4:eyJzZWxlY3RlZExpbmVDb3VudCI6OTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3NGViZjk3MDBhMTIyMTYwYjc5ZjJlMjk3Y2FjMGQ3ZDlmN2Y3MTcyODBkNDc1NjJmN2M0NjE2N2Y3NjQ5ZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkYzViYjY2M2IzYzI1NDYzOTFjNTQ3MjYyMDkyNzRhY2VjNmQyZjgyMjNhZjVmZjEzNzQwMDE2ODM0MTc0OTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyMTQ2NjU1Y2E1NjgwMzdlNzAxZTlmZjk3YjY2ZWRmOGQ1ZDhiZDdmMGJiNTQ5ZTAwMDA1ZjBlNTY4YzJhY2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU5OTI0MDIwYWI5YzEyMDYwYzk0NDViZmUzMmZkYzdjNjNjMTllMWM0YTg0ZTBmOTcyMGU2NzhjMzkzN2NkYWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1283957b3e624a63a82c0348584339b4",
+      "statement": "dbt task configs emitted by setup_dbt_core_task_config carry env['dbt-profile-secret-block'] naming the warehouse's Prefect Secret block; if the warehouse has no such block a warning is logged and runner-mode deployments will fail.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L154-L184",
+          "version": "repo-lines-v1:sha256:d7d8646393aae945342f17e4d738e290ddf0083095757cdfcbff529fcdb84a39:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjZTIxZTZiZGU5YjkyZmRjMGNjNDNhMThiMzZkYmFkMmRlMGNjZWNhYTEzYzg4MmExYTRiMDA5NTk5ZDgwMGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNkMzVmZDk2NDYwOTcxMTI2YjU2ZjI4OWM0NjVmNDM1MzdlN2ExNjY3MjkzMWQyMDVhNmY2YzUxMGQ2MzkwYjIifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L246-L307",
+          "version": "repo-lines-v1:sha256:2ee1ca3ad7639e8d54e1891c452c81c32594dd316b9a2cde7200bfc8ff6ab2a5:eyJzZWxlY3RlZExpbmVDb3VudCI6NjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1MjE3ZTc4OWZlY2U2MzY1NjBiMGFjMTI2YmU4M2U4MGYyMWI1ZTczMGUwODU0NTRkYmUwM2NmMWRhYTA0ZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzQ1ZjdjNmY5Mjc0M2Y0MGI1YTM5Y2UzYmU4ZjQxZjAzMjllN2ZmZTA2MGQzZTNiZDQwMjhlMGY0M2UwZGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJlMjY3MjgxNmQxOGRmMTQzZDc0NThiMzAxOGZjMmRjMDlhMTc4ODliOTM3NDgyZTY1N2UyYmJmYmM2MGZiMjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_346fb71f617b4c2d8135e481337d3874",
+      "statement": "The Secret block dbt-profile-<org.slug> is written by create_or_update_dbt_profile_secret_blk as JSON {wtype, default_schema, creds, extras}; OrgWarehouse.dbt_profile_secret_block is the authoritative FK, with a mirrored OrgDbt FK kept for compatibility.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpdbt/dbthelpers.py#L20-L111",
+          "version": "repo-lines-v1:sha256:fdad46f9cd69dbf3e450a4fa3c5e02681c49dc2e03fcacc67a7dc119fdb98bac:eyJzZWxlY3RlZExpbmVDb3VudCI6OTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFmNGE2YmRiYjFhZjJmMTA4YzRiMmNjMTk5NmExYTVlZWFmMzc0YjdhZWM2YTk4NTQ4M2MyYzE0YjM3ZjQ3NDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlNjczYWJkNDU3YTk3ZWVhMTdhNjAwNjJlYjBmYWVhNmJkZjA5NDg2OGNjNmI4ZjhjMGViZGEyZjYxZWQ0MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE0ZjZiMTQ4OTM5NzliZTkzZGFkY2FjODEyZjY1ZjljN2NlNzhjOGQ1ZDAwZWI3OTkwNzUwYWNjOWMzNzc3NmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg5ZGM3YTZkZjc2YmVlOWUxZDBjMWI4YjgyZmExM2QzM2ZkZTViODY2MzRmY2YzZThjY2IxNjRhODMxNDgxYTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a84940021a4648699cbf358d306897ee",
+      "statement": "deployment_schedule_flow_v5 sorts tasks by seq and dispatches by block type and slug; by default it runs tasks sequentially fail-fast with a 10s sleep between tasks, and with continue_on_sync_failure it runs all Airbyte syncs first, collecting errors and raising before any transform task runs.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L798-L891",
+          "version": "repo-lines-v1:sha256:1308bffb208346ea915027d014040ee3b46b8f5db87d5214f0c447b617c07798:eyJzZWxlY3RlZExpbmVDb3VudCI6OTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMxYjRmMTViMzU4NGExMTQ5MzRmZjBmYTg2M2M4NTZkMGY2MzRjMmZkNTNiMjcwOTM4OTRhMDQ0ODZiZWZhNjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlNTZkYTRmOWNjMGVmN2Y3YzM4OTRjYjk4ZWZlMzI3NjU0OTUwNGM4YzBjMDYyNWFkNjczNmZkOTcxNDdiNGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVhOWIyYWI3NzM2ZjI5Y2FiNTdkYjZiMWUzMWVlNmJhMmUxYmNhMmQ0NzlmYjEwODE0NTdlZDE1MWUyNDgxZTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_db60763b628941ce808cc1f1c9464f84",
+      "statement": "dbtjob_v2_runner loads the dbt-profile Secret block, builds a single-output profiles.yml (target 'default', 4 threads, postgres or bigquery), writes it plus any Postgres root cert, then runs the worker's own dbt binary through ShellOperation with --profiles-dir and --project-dir; a failing dbt-test yields a COMPLETED state named DBT_TEST_FAILED instead of failing the run.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpprefect/__init__.py#L40-L50",
+          "version": "repo-lines-v1:sha256:24ed423f5148f5489b6c7efba42c5c59337d7f941bbe3ba016d9aa68429e2230:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlmYWZmZDg2NDk0OTdiMDBlNjg4ZjA1NTBmNmM5YzZjZGQ3ZjZmYmYyODFlNDA1MTRlNmY0ZjY0MDZjNDJmZmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZkMmFkN2RlOTBkZGZhY2ZjNDY2NzkxZGFkNTI1YTdkY2Y1NzMwZWI1MjFkNWNkMjg2YjcwMDQ2YWVmNjc3OTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkzYTkyZDNlMGMwNGYzMTJmYjA2ODkyNmE0MWEzMjM5MjJlYjc5YjI1NTA5ODE5ZWI5NGRlNGIyNjlmY2RmMTIifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L385-L532",
+          "version": "repo-lines-v1:sha256:0eb8966d2abf60b2095d232b8b4c3bbd1a7f09e6f8cfe38d3c205d7284ffd85a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQ4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJlNTE4NzNmZjQ0NTM5Y2FhYmQyZTM4YTEyZjVjMGY3MDA3N2EwODgwZWQ5YmU3NzA4YTU4ZTRmMTc0MGE3ZDVjIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJiMjljNTI0NDM0YzAwOWFhZjBkN2ZlOWUyZmZlNzIyYjE3MGNmOGViMWM4YzE1NzVlNGUzYmQ1MWU5MjZjNzFiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJkOTY5ZGU5YmZmOTNjNTEzNWJhMTVkZjIzZGZlMDk5OTliNWMyN2U3MmE1YzgwNzQ1OGZjZDllM2U1MzRmZmZjIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlMzdlZDUyNGMzMTMwODg4NWUxMzgyNTJiOTNmNWU1ZTU1OWU1NDhlOTA4M2Q3ZDFjMGJkOTI5ODU3ZjI3YjUyIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_a4a990f1b30d426aaeee780d448efaa6",
+      "statement": "The webhook endpoint /webhooks/v1/notification/ has no session auth and checks the X-Notification-Key header against PREFECT_NOTIFICATIONS_WEBHOOK_KEY with a plain inequality (400 'unauthorized' on mismatch); it extracts the flow-run id and state from a JSON flow-run body or a regex on the message text, returns ok without enqueueing if none is found, and otherwise enqueues handle_prefect_webhook.delay(flow_run_id, state).",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/webhook_api.py#L17-L52",
+          "version": "repo-lines-v1:sha256:eebb0d646eff3c24fbbf7fdb0e731801f0e1d8dd415dc5c940a35f537435686c:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2ZmUxMmQ0Y2NkNGZlZTVkNjllYjdlODcxMTVhODliN2M4NTgxMWU2N2MzM2FmYmM5N2JjNWI1ZDg3YTI5YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlNjRlZDZhZjhkM2RlYzcwNzEyMjk1OTY1ZDJjN2I3NTMzNDU1MTEyNmU2ZmYzNmFjYzU4ZTJmMTdlMGVhMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxZWFlZTRmNTFjMTU4MjUzMDc5YjBhMTI5NGJiMzBiZTllOGJjZDg4ZmViODgxMjQ5NDljMmQ4NzQ2YzA0NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVlYzhlNDNmNjgxMzQ2OWIxNmJiMWQ0YmI5ODVhNzJlNzdmZWVhOTcwOTE2ZjQyNDQyYTU5YjMzN2JjMTcxN2EifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/celeryworkers/tasks.py#L1084-L1087",
+          "version": "repo-lines-v1:sha256:aedc618bd68b6ba58967f34170271a8ad6bcd6fe4e9326d28f3a68450f09f22d:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGI5ZTZhZjVjNjY4MWQ5Yjc2NzVhNTMyY2UxN2UyOTZiZjllMzdjNjQ0YTg3NzZhMDMxNDY0ZTlkNGE5NTQ4YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGY0MWU4OGUyYWYxMGU5ZTA5YzFkMjg5NGE2MDk1NTk1MjczYWE4Y2Y3Mzg5NGVmZWM5MmE0OGQyZDE0YjZjMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWVkMDY1NTQ0YmI5MWZmMWU2MmM2OGRjN2FmOWIxODI3MzZiNTdmNzAzNjU5YzhmNGM4MDY1ZDRlZjcwMTAwMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGU4MjIwZDlhZmJmNGJjODcyOTRhZmQzMjI3NjI3ZGM2ZmZjZjk1Zjg0NTIxNjQ3MWU4YWQyMWFmMDBhYmEwMSJ9"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/webhooks/webhook_functions.py#L48-L68",
+          "version": "repo-lines-v1:sha256:b478402eb323f26e839744846e1e43720ce23833fc8218cfb93b6b96a7aea721:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5MzVjMzc3OTk0ZDQ4MDQ5MTRjZjQ3MjgxMDE5NGYyM2Q1M2Q2MmRjODg4OTcxNzQwNDVhZTg1ZTk4YzgyZWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3ZGNlYmVjMGNiNTU0OTRiNGRlZDk4NWQ0OTg0OGEzNGQ5MjJmYzQ0NTc5Y2VmMDVjOTYzYzc4MGE5NGE4ZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5MTFmYzU1ZTgxN2Q2YTc1MmQwZGM0ZmI2MTczZTc3MzAyY2RkMDA3YzFkNzhmMTgzYWJlNGI5YzczMzlkMzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQyZmZlM2UzOGMzNjI2MjYzYmQwMzA5NmRiYTdiZjI2NDYxMDlkN2I4YWE1YzlmMDk0MzVjNzVmNjljNjVmYjcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c9c17888c79e441eb4d753cddd15ce14",
+      "statement": "handle_prefect_webhook polls the flow run via the proxy and, for deployment runs, upserts PrefectFlowRun; terminal states delete TaskLocks for the flow run, Pending states lock the deployment's tasks as the system user and attach the flow-run id, and Failed/Crashed runs are retried (AwaitingRetry after 5 minutes, at most once) only when PREFECT_RETRY_CRASHED_FLOW_RUNS is enabled, which also suppresses the failure notification.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/webhooks/webhook_functions.py#L138-L210",
+          "version": "repo-lines-v1:sha256:10eeb92dab59457fda108ef3d0a599a98dc4bd2c77abf720342b27fccbe14a50:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxNWRlNDZkNTVlZGYwZTQyZWIzNTFjYzg0NzkxMDUxYjcyZDllMjgxYjg2YWE3MTQ4NGNlNGYxNzhmNzMwOWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQwY2Y3ZWJiNDlmMWM1MzljODk0NDE3ODliNTc0Y2IwMGY5NDdlZDMwMDViN2M1NjkwYjc4MDI4ZGI4ZGUxMzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIxNzQ0ZDE5MjdkN2UwYmRiZGQ5NmNhZTg3YTdkYWFkZjFlOGRkMjRiN2RiOWJhOGFkMzQ1MTgxMGYxY2ZjMTgifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/service.py#L990-L1010",
+          "version": "repo-lines-v1:sha256:ec6776ec6c0e12a02c02a94a5d5ebb05d9577db5067eee69288a4ad8699913e8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc4NGE1ZTllNmZlMmEzNzVmZTQ5ZDI5YjJkMDEwNjdmMTBjOWE0MmI1MGQ2ZGRkOTNkMjA5NGU4MjM0MzJjOGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3MDE0OWUwNjlhZDY3ZWNjZjQ3MzY0NmZmMWM3NTAwNTBkMzI5ZDExMDAxOGRjNTc2Njg3OGVhZmExZDYwN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkzMTNmYzc0OTliYmE4MGRlNmNkZTZmMmZiNDZmMjg4ZmVlOTYwYzM4YzdiZjZjZjU0M2UwMGVhZjc1ZTY2OTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_365276263a574db8889534ddf8d19800",
+      "statement": "On Failed/Crashed (non-retried) runs the handler emails org managers with a message depending on dataflow type (orchestrate generic, manual listing connections or task slugs, generate-edr skipped) and notifies platform admins when NOTIFY_PLATFORM_ADMINS_OF_ERRORS is set; a finally block always refreshes the last 6 hours of Airbyte job history for Airbyte tasks in the run and enqueues log summarization for failed or crashed runs, while body errors are caught and logged rather than raised.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/webhooks/webhook_functions.py#L213-L396",
+          "version": "repo-lines-v1:sha256:0a7794382e59efabed39475771999f28f2f2d437e09bfeabeac7770e7760783c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTg0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI3ZDQyM2Y5YzhlMjNjZDViNTJiMmE5OGU5YmI4MTk1YzkwMWU3OGUyZGMxMmRlOWYxM2UyY2E3OGNhZWY1MzhkIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI1MTgxZTA1M2QxZDkyYWQzMzBkMjNjOTRhZjJlZmY4ZDM4OTBiNmQyNmNhZTgyN2E0ZGIzOTkyMzgwZWY1MDg5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI3ZTlhZTQwMmEzMTA4OGUzMzk4MDgyZWNlNjdiZTUwYTAxMTZhOTAyOTYxY2U1NDFlMmQwMzFlZDQ2NDVhZTc5IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_9e8cf546e3d34460b65f59b6407a0639",
+      "statement": "A second webhook /webhooks/v1/airbyte_job/{job_id} is guarded by AIRBYTE_NOTIFICATIONS_WEBHOOK_KEY and enqueues sync_single_airbyte_job_stats.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/api/webhook_api.py#L71-L79",
+          "version": "repo-lines-v1:sha256:e1ce00abeb68901c89e79af3e9a7e19292f3c3280a2b681898f2a5289da083db:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjFhOTZkMGIwMTQ1NDMzNmJkMTBlNDljZmQzZjk5YmQwYWM4NTE3YTZhNzdiNTQ2OWZmNTM3OTEyMmEyNDg2MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGU2NGVkNmFmOGQzZGVjNzA3MTIyOTU5NjVkMmM3Yjc1MzM0NTUxMTI2ZTZmZjM2YWNjNThlMmYxN2UwZWEwNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTU3MTJlYTMxZDgzMTY1YWI0NWY1MDNkMzNhMmM2ZmU5YjIxMTc5NDgxZGRmYmY3Mzg5M2MwM2FkNzZkNTMyYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_f418b6368113418a864fd104402d1e8c",
+      "statement": "The job-runner image is built from prefecthq/prefect python3.10-kubernetes, installs git and the frozen dependencies exported from prefect-proxy/pyproject.toml and uv.lock (build context prefect-proxy/, ARM for EKS), and pyproject exactly pins dbt-core 1.10.19, dbt-postgres 1.10.2 and dbt-bigquery 1.10.3 with no per-version dbt venvs.",
+      "evidence": [
+        {
+          "resource": "repo://docker/Dockerfile.job-runner#L1-L31",
+          "version": "repo-lines-v1:sha256:f5262d4d064255425e61bc2569457448da4993c28bc60031198aa53872e87a5c:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4OTVmODlhY2NmYjE5ZTdmNjUyOTJiZjdlYjE0ODJjMWI1ZTNlZWNiMzA1ZjVjMDg5ZWM2N2YzM2Q5ZTA5ZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0MWE5MTAzNzI2ZjEzYTI4NmE2ODczMWQ5NGVkNzk2MWQ5YzJkNWI5YjU3N2Q0NzZkNzEyZjk2MTExMDYzNGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://docker/README.job-runner.md#L5-L85",
+          "version": "repo-lines-v1:sha256:2ddc98c3d40514bc14e075bda33451dcbf66bf5fbe415903e9a55c78014155b5:eyJzZWxlY3RlZExpbmVDb3VudCI6ODEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxNjA2OWQxZjNjODk2ZGY2ZjgyZmI1YWMwZGExN2ExNGNlNDc3Y2U3MjNkMWM1M2U5MTg2YzBhZjAzMzE3NTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRkNjcxZTM0ZWFjNzNiNzZmOGI5NDBmNjAwYTcwOWQzYjdmYjIxNzI2ZmY3MjU3YzExM2M0YWViMjYxZWYwZGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRkODY4ZTRiMWMxNWVmNTExNGMwOTU4N2I0OWE5NWMyYWNkNTFiMzE0NzVkMmFmOTJhYTZhNDg1ZThiNzY0YTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY1MTkwYmIxNDY4YTMxNTM4YTE5YTg5MWQ4NDUyZTM3YWNiYmQzZjA1MTFlNDM4NWVhMTAwNjgxOGI1MWY1ZjkifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/pyproject.toml#L12-L24",
+          "version": "repo-lines-v1:sha256:390f3e2e47304e7f390f38b28a6158ce2a25120e3a8d8a9ac71cde6e8f518430:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM5N2E2MDhmMmY5NjFmZjM2Nzk3YTQxZThjMmQ2NmM1MzY3Zjc5OWZkODJhN2FkYTllZmZiNWNiNmQ1MzUxZWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyZjMyZmY5NDE0YTdkZTAzZGQ5OTg5MmM4MWY0ZTMzYzE5MzY1YzQ5ZmVlNTE2MWNjNGY2Zjk5YjA4ZTM4NTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVlOGZkN2E2MDM2MDEwMmUzNGZiZTljMzJhZWNjNGQ0NDIzYTc0ODk0ZTFlZjE0OThkODQ5ODU2NDVkOTc5ZTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZmMWYwYmRiMjgzODE5MWM3MzMwYjA4MTNmNjRmMzIwZWVkZDNjNTA0MzY0NjUwNDg1NTczYTRmMzQzNjRjZjUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f8aa2474d13d42d8a22d789d75bce260",
+      "statement": "prefect_airbyte was vendored into the monorepo in October 2025 so Prefect workers' sparse checkout of prefect-proxy includes it, uses the Airbyte public API rather than the internal v1 API, retries get_job_info on transient errors with exponential backoff up to 8 attempts but not on 404, and its tests run in CI only when its files change.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/prefect_airbyte/CLAUDE.md#L1-L71",
+          "version": "repo-lines-v1:sha256:3ffd5204c92ba6a6f993c653fe11165937cf7705a00be525c577e2e0f6cb7d43:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYxNzBhZmY0ZmE4YjQ2YmU2Y2ZmODQ0MmJmMWM0OTNmOWQxZGFiYzc2ZThkZWU4NWQyZDU0MWUwOWFkMjkwNWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzYTRmNmM0MzBlNTk3MmVhYzVhMTQxY2JmYjAyMmY2NTEzYzViYjkwYzYwYjEyNGU0Zjc2YWQ5OGZjYTQxZDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3063e0024bcb4c31a95b77ff1943e602",
+      "statement": "The prefect-runner-migration plan is only partly implemented as written: the self-contained prefect_flows_runner.py, v5 entrypoint, Secret-block credentials and version pins exist, but PrefectDbtRunner is not used in code (dbt runs via ShellOperation on the worker's dbt binary), the Secret block/FK/env names differ from the plan, no dedicated warehouse-secret proxy endpoints were added, and the Dockerfile lives at docker/Dockerfile.job-runner rather than prefect-proxy/docker.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/ddpdbt/dbthelpers.py#L20-L111",
+          "version": "repo-lines-v1:sha256:fdad46f9cd69dbf3e450a4fa3c5e02681c49dc2e03fcacc67a7dc119fdb98bac:eyJzZWxlY3RlZExpbmVDb3VudCI6OTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFmNGE2YmRiYjFhZjJmMTA4YzRiMmNjMTk5NmExYTVlZWFmMzc0YjdhZWM2YTk4NTQ4M2MyYzE0YjM3ZjQ3NDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlNjczYWJkNDU3YTk3ZWVhMTdhNjAwNjJlYjBmYWVhNmJkZjA5NDg2OGNjNmI4ZjhjMGViZGEyZjYxZWQ0MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE0ZjZiMTQ4OTM5NzliZTkzZGFkY2FjODEyZjY1ZjljN2NlNzhjOGQ1ZDAwZWI3OTkwNzUwYWNjOWMzNzc3NmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg5ZGM3YTZkZjc2YmVlOWUxZDBjMWI4YjgyZmExM2QzM2ZkZTViODY2MzRmY2YzZThjY2IxNjRhODMxNDgxYTYifQ"
+        },
+        {
+          "resource": "repo://docker/Dockerfile.job-runner#L1-L31",
+          "version": "repo-lines-v1:sha256:f5262d4d064255425e61bc2569457448da4993c28bc60031198aa53872e87a5c:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4OTVmODlhY2NmYjE5ZTdmNjUyOTJiZjdlYjE0ODJjMWI1ZTNlZWNiMzA1ZjVjMDg5ZWM2N2YzM2Q5ZTA5ZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0MWE5MTAzNzI2ZjEzYTI4NmE2ODczMWQ5NGVkNzk2MWQ5YzJkNWI5YjU3N2Q0NzZkNzEyZjk2MTExMDYzNGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://harness/features/prefect-runner-migration/v1/plan.md#L1-L292",
+          "version": "repo-lines-v1:sha256:5a0b7b97c74db20649e2e4a80d1430a4f1712dc52230483fd1028b6ec1e43a72:eyJzZWxlY3RlZExpbmVDb3VudCI6MjkyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmMjFkYTU3NjI3ZTk4YmIzMmZkZThlYjE1ODQwZDg4MDM5ZGVlYTg4NjE2MDYzZDdlZjYyODU4MzBhNDgzMzQ3IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJjY2I0ZGIxYzA0ZjY5OTNhYTE5Y2U2OTcyMTBjMjg1YzQ4NDQyMGZmOWM0M2M5ODBkNzUwMDcwNzE0Njg0ZDMzIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L1-L20",
+          "version": "repo-lines-v1:sha256:1995dbb9cbd5494bd8f961b8f61507b3f6853520d7f2e885e2696c1e35b42755:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzMDNlY2RkNGE0ZDEwZjE5YzczZmQ0MmZkMTI0MzdmZDMzNTRhODI2ODE2MDVkYTUyNTVhOTdhMzkwNjhkYmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZkMWJlZmY4MThlOGNkMWJiMDE1MjQ5NzZlZTk5NTQ1Mzg1OTFlMmZhYTcyZDMzNjNlN2U3ODZmNTllZDc1ZWEifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L449-L532",
+          "version": "repo-lines-v1:sha256:66778ec6d33cadd785ebf17a261dfa0b53980c52d9e3630fffa30ecec72d3d22:eyJzZWxlY3RlZExpbmVDb3VudCI6ODQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlMGUzOTkyNGVjY2ZjZDFhYmZkZDVlMGQ5ZjkxMjhlMjcwYWY1ZjVkN2Q2ZmFkOTAwYzUzZWU5OThhYjcwYmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIyOWM1MjQ0MzRjMDA5YWFmMGQ3ZmU5ZTJmZmU3MjJiMTcwY2Y4ZWIxYzhjMTU3NWU0ZTNiZDUxZTkyNmM3MWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzN2VkNTI0YzMxMzA4ODg1ZTEzODI1MmI5M2Y1ZTVlNTU5ZTU0OGU5MDgzZDdkMWMwYmQ5Mjk4NTdmMjdiNTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_71a41c7da2b64bc4bb119ac6d93ec6d7",
+      "statement": "Cutover from the old flow to the runner flow is supported by the idempotent management command migrate_deployments_to_runner_flow (flags --org and --dry-run), which patches deployment entrypoints from deployment_schedule_flow_v4 to v5 via the proxy, while new deployments are created on v5 directly.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/management/commands/migrate_deployments_to_runner_flow.py#L1-L75",
+          "version": "repo-lines-v1:sha256:1eab21bd248e6fe19ab2af84e010ad3138e11fe0bbc9c8e94867418df513275f:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlmMGI2MTA2ZThiYmYwYTg5N2U0MDI1Mzc5NDE5ZmZiYTU3NTMxNWRhZWJhZWQ2YWFkOTE3Mjc4MWE5Y2Q5ZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/service.py#L405-L456",
+          "version": "repo-lines-v1:sha256:621432b34e2757ca5462b28f7629e73b8c68e5c42599c6d55735279e622feb2c:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4NzU0M2VkZWI1YTk0MzVhNjIyMWFhZDg2YTI3NDM2N2ZkMjkyYjJkY2RjNmYxNmUzY2UzNjgxM2VlYWZiZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIxZGFjYThmMjdiODg5ODA1NWM3YzJhYWI0YWYyNTUxODlmYjU3ZWViZWQ0MDE1NGExMmJkMTQ0NzkyMTUxMGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZiYjdkMjYxOWI2YWE0ZWY3MzEzN2M4ODQwMjk3ZmI5ZWU5OWNiMzlhOGM5ODUyNjJkOWM1ZWU0MjFkZWI1YzgifQ"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/service.py#L499-L507",
+          "version": "repo-lines-v1:sha256:8d1bb901421d165d1636d9016ae736eb0fbbf530577239e11ea839e7053d313c:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDc1ZjVmNzBhMTkxZGUxYzczYjJlM2NhZGViMjE1MGY2YjRhNTc0ZjdhYjAwYjkwNzcyY2E2ZjU4YzYwMjFjYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmMxOWI0MGY3MGM0MzYyYTQyYmYwMjAwN2M0YjE2MjdiMTc5MTAyMTY2YzA3MDZlMDIzYTU4MjM2NDk2ZmFiNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTU4ZWI5MWY5YjFhOTRjZGZhODhiODZmZDA1ZjNmOTU0N2VmMTU5NDg1YzU1ZGU0ZGJlMzA3ZThiNWJmM2I0OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNWMxYzY1YzBkY2JkNmFhYzM5ZTk1ZGM3ZDE3Y2RhMTNmMWU4NjI3MGM5NDFhNTk5YTgyOTc3NGMxZWY0OTZmZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_608a31ed0ead4734988e2c6abe21abcf",
+      "statement": "The Elementary profile for the generate-edr shell task is generated at flow-run time inside prefect-proxy from the dbt-profile Secret block, so Elementary already runs on the runner flow contrary to the plan's v1 scope.",
+      "evidence": [
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L574-L707",
+          "version": "repo-lines-v1:sha256:f46903cb7dc8b74eee8e77030714f353a9276f611d01e0b241f4fc0d697bd716:eyJzZWxlY3RlZExpbmVDb3VudCI6MTM0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1YWMxNTUwOTU4YTg5NzA5ZGUxZGEyNDljOTExZmRmYjNiNTczNDM1MjY5ZTRiMzEyNzg5MDc4YTFhOTlhN2Q1IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmNWY4ZjgxYWJkZWNkMjc4OGI3ZTYyYjRmNWE4YjU5MDgzMWQ2NzlkMzYwMTg4Y2JmZDNmYTYyMjg3N2MyNzQ5IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJkNmNmYzgxNDkyNzBiOTAyNzc0ZTUxZTk5YTc4MWJmMDUxYmM4NDgxOGUyZGM4NWU5YmUxNzViZjJkNDNkOThiIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlMzdlZDUyNGMzMTMwODg4NWUxMzgyNTJiOTNmNWU1ZTU1OWU1NDhlOTA4M2Q3ZDFjMGJkOTI5ODU3ZjI3YjUyIn0"
+        },
+        {
+          "resource": "repo://prefect-proxy/proxy/prefect_flows_runner.py#L754-L782",
+          "version": "repo-lines-v1:sha256:0d42968e3b3b924f214939f647c10b3ed67f588d9484492df38d133e245493d0:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxM2NhYWJiZjMyYzRkMzNlNTIwNTU2YjEzN2FlZjQzYjM2Yjg2MzVmYjI2OTMwNTk2ZDllOTUyZGNmYTQwYWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxNzFmMTYxZTU2NTVlZjJmMjExYThjYTdiNzRjMTE4ZmFmMWJjMTRjNTJiZTg1YzRjOTg1MWUxYzE3MzUyMDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdkNjI5NjMzODI3YWRkMDJmMDYxMzU1OTUxZDg2YzMzNWU5YzBiOGYyOGY5ZDdjNjE3ZmIwZTRmYTAxYmQzNTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzN2VkNTI0YzMxMzA4ODg1ZTEzODI1MmI5M2Y1ZTVlNTU5ZTU0OGU5MDgzZDdkMWMwYmQ5Mjk4NTdmMjdiNTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_00431f14691f49c2b9e4383741bf7d09",
+      "statement": "PrefectFlowRun caches flow-run results locally so history and lock status are served from the database; fetch_pipeline_lock_v1 derives queued/running/complete from the cached status and fetch_orgtask_lock_v1 deletes a lock when its cached run is already terminal.",
+      "evidence": [
+        {
+          "resource": "repo://backend/ddpui/core/orgtaskfunctions.py#L250-L278",
+          "version": "repo-lines-v1:sha256:c04292fbd2bb500b43ada08eb9318dffbe3612541fa14e0bb6953a8f25d61c69:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyYzJkZTBhYTIxMWU4ZWMzMDIxODM0N2E2N2U5NmRlNzg0OTRhZmEyYjU4NTliMjBmMDVkODc1ZjNhOGU0NzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTYwMGE3M2QyZTAyZjM1MmI5MGZlZjFkOGQ2MzgxMWJhNGE4ZWUwYzFiZWFhN2FlNDY1OGYzNmFhMmUxOTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyMTQ2NjU1Y2E1NjgwMzdlNzAxZTlmZjk3YjY2ZWRmOGQ1ZDhiZDdmMGJiNTQ5ZTAwMDA1ZjBlNTY4YzJhY2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/core/pipelinefunctions.py#L339-L365",
+          "version": "repo-lines-v1:sha256:4b144652b9d7a0b14059e39cfd54a1fbe08f713db864fb9ce5f3a514adb6004c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZjNjZhYWU5ZTRjMWM1ODg0ZjQ5YjE2ZmZlYmNiMjUzZDQ2MjhjOGQxOTg3Y2RlZTBjYWViNzNjNDBiNmY1MjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTYwMGE3M2QyZTAyZjM1MmI5MGZlZjFkOGQ2MzgxMWJhNGE4ZWUwYzFiZWFhN2FlNDY1OGYzNmFhMmUxOTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3MDE0OWUwNjlhZDY3ZWNjZjQ3MzY0NmZmMWM3NTAwNTBkMzI5ZDExMDAxOGRjNTc2Njg3OGVhZmExZDYwN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUxOWMxMzZiNGQwYWQxOTQ1YTFjNDliM2Y4MWIyZmMyYzJkMWExZTJjNzE3YTdjNjQ5YzFlNDljZjM5YTc4NDMifQ"
+        },
+        {
+          "resource": "repo://backend/ddpui/models/flow_runs.py#L8-L42",
+          "version": "repo-lines-v1:sha256:66444a3b0c0772b7cf2b1f82e2af7ff8d69f0e109aeae0cc6ff4fe3280225ddf:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExN2YxOTI2N2MzNTUwZGEwOTExYTQ4YjNiNmI3OTU1MDFmYzk5NGZlYjM0NmIxODBiYWFhY2E0NzMzZjI4YzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2YjA0NDkxNDY5NzIyZTgzNjNhOTRlNDA0NDUzOGUwMTNhMmEyMTdlMzZiMWU1NjhiYTYwYWNiN2I0YzhmMmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgwMWQwYTg4ZDhlMGJjMmRkYTdkNWVmZmNhNzE5ZTE4ODhlMGY1MDIzNGY5YTlmYTQ1YTVlYjY1MWRjMzExOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-14T16:46:05.062Z"
+  }
+}
