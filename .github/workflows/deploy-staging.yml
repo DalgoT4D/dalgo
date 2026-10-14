@@ -155,9 +155,13 @@ jobs:
 
           # Only look at CI jobs — all 4 CI workflows name their job "checks" (or "checks (...)").
           # Deploy workflow jobs (plan, build, ci-gate, etc.) are never named "checks".
+          # For each job name, keep only the latest run — old cancelled/superseded
+          # runs from prior attempts on the same commit are ignored.
           RUNS=$(gh api "repos/${{ github.repository }}/commits/$DEPLOY_REF/check-runs" \
             --paginate --jq '.check_runs[]' \
-            | jq -s '[.[] | select(.name | startswith("checks"))]')
+            | jq -s '[
+                .[] | select(.name | startswith("checks"))
+              ] | group_by(.name) | map(sort_by(.started_at) | last)')
 
           COUNT=$(echo "$RUNS" | jq 'length')
           if [ "$COUNT" -eq 0 ]; then
