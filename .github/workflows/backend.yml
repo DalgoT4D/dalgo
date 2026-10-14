@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - 'backend/**'
-      - 'docker/Dockerfile.backend*'
   pull_request:
     branches: [main]
     paths:

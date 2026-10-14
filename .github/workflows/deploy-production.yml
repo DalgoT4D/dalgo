@@ -51,15 +51,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Exclude this deploy workflow's own check suite so its in-progress
-          # jobs don't trip the gate.
-          SUITE_ID=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --jq '.check_suite_id')
-
+          # Only look at CI jobs — all 4 CI workflows name their job "checks" (or "checks (...)").
+          # Deploy workflow jobs (plan, build, ci-gate, etc.) are never named "checks".
           RUNS=$(gh api "repos/${{ github.repository }}/commits/$DEPLOY_REF/check-runs" \
             --paginate --jq '.check_runs[]' \
-            | jq -s --argjson suite "$SUITE_ID" \
-            '[.[] | select(.check_suite.id != $suite)]')
+            | jq -s '[.[] | select(.name | startswith("checks"))]')
 
           COUNT=$(echo "$RUNS" | jq 'length')
           if [ "$COUNT" -eq 0 ]; then

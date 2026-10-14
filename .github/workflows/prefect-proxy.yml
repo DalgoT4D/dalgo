@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - 'prefect-proxy/**'
-      - 'docker/Dockerfile.prefect-proxy*'
   pull_request:
     branches: [main]
     paths:
