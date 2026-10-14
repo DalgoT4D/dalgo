@@ -28,7 +28,7 @@ Deep reference — always accessible without loading a skill:
 | File | Contents |
 |------|----------|
 | `harness/domain-map.md` | Product entity graph — source of truth for blast radius analysis |
-| `openwiki/` (start at `openwiki/quickstart.md`) | Generated code wiki: architecture per area, workflows, operations, testing — each claim pinned to source lines. Open the page for an unfamiliar area; don't preload it. In Claude Code, `openwiki_search` / `openwiki_read` (`.mcp.json`) return just the section. Source wins when they disagree. |
+| `openwiki/` (start at `openwiki/quickstart.md`; browsable at https://docs.dalgo.org/wiki/) | Generated code wiki: architecture per area, workflows, operations, testing — each claim pinned to source lines. Open the page for an unfamiliar area; don't preload it. In Claude Code, `openwiki_search` / `openwiki_read` (`.mcp.json`) return just the section. Source wins when they disagree. |
 
 The wiki is generated, never hand-edited. Run `make wiki-update` before opening a PR that changes an
 endpoint, model, flow or service boundary; fix a wrong page with `make wiki-fix MSG="..."` and steer

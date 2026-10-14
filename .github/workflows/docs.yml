@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'openwiki/**'
       - '.github/workflows/docs.yml'
   pull_request:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'openwiki/**'
       - '.github/workflows/docs.yml'
 
 defaults:
@@ -24,7 +26,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'  # OpenWiki needs Node 22
           cache: 'yarn'
           cache-dependency-path: docs/yarn.lock
 
@@ -33,6 +35,12 @@ jobs:
 
       - name: Build site
         run: yarn build
+
+      # The generated code wiki (openwiki/) is served beside the user docs at /wiki/.
+      - name: Export code wiki
+        run: npx -y openwiki@0.7.2 visualize ../openwiki --export build/wiki
+        env:
+          OPENWIKI_TELEMETRY_DISABLED: '1'
 
       - name: Upload build artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
