@@ -153,39 +153,48 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Only look at CI jobs — all 4 CI workflows name their job "checks" (or "checks (...)").
-          # Deploy workflow jobs (plan, build, ci-gate, etc.) are never named "checks".
-          # For each job name, keep only the latest run — old cancelled/superseded
-          # runs from prior attempts on the same commit are ignored.
-          RUNS=$(gh api "repos/${{ github.repository }}/commits/$DEPLOY_REF/check-runs" \
-            --paginate --jq '.check_runs[]' \
-            | jq -s '[
-                .[] | select(.name | startswith("checks"))
-              ] | group_by(.name) | map(sort_by(.started_at) | last)')
+          MAX_WAIT=900   # 15 minutes
+          INTERVAL=30
+          WAITED=0
 
-          COUNT=$(echo "$RUNS" | jq 'length')
-          if [ "$COUNT" -eq 0 ]; then
-            echo "No CI check runs found for $DEPLOY_REF — proceeding."
-            exit 0
-          fi
+          while true; do
+            RUNS=$(gh api "repos/${{ github.repository }}/commits/$DEPLOY_REF/check-runs" \
+              --paginate --jq '.check_runs[]' \
+              | jq -s '[
+                  .[] | select(.name | startswith("checks"))
+                ] | group_by(.name) | map(sort_by(.started_at) | last)')
 
-          echo "CI check runs for $DEPLOY_REF:"
-          echo "$RUNS" | jq -r '.[] | "  \(.name): \(.status) / \(.conclusion // "—")"'
+            COUNT=$(echo "$RUNS" | jq 'length')
+            if [ "$COUNT" -eq 0 ]; then
+              echo "No CI check runs found for $DEPLOY_REF — proceeding."
+              exit 0
+            fi
 
-          IN_PROGRESS=$(echo "$RUNS" | jq '[.[] | select(.status != "completed")] | length')
-          if [ "$IN_PROGRESS" -gt 0 ]; then
-            echo "❌ Some checks are still running — wait for CI to finish before deploying."
-            exit 1
-          fi
+            IN_PROGRESS=$(echo "$RUNS" | jq '[.[] | select(.status != "completed")] | length')
+            if [ "$IN_PROGRESS" -gt 0 ]; then
+              if [ "$WAITED" -ge "$MAX_WAIT" ]; then
+                echo "❌ Timed out after ${MAX_WAIT}s waiting for CI checks to complete."
+                exit 1
+              fi
+              echo "⏳ ${IN_PROGRESS} check(s) still running — waiting ${INTERVAL}s... (${WAITED}s elapsed)"
+              sleep $INTERVAL
+              WAITED=$((WAITED + INTERVAL))
+              continue
+            fi
 
-          FAILED=$(echo "$RUNS" | jq \
-            '[.[] | select(.conclusion != "success" and .conclusion != "skipped" and .conclusion != "neutral")] | length')
-          if [ "$FAILED" -gt 0 ]; then
-            echo "❌ Some checks failed — fix them before deploying."
-            exit 1
-          fi
+            echo "CI check runs for $DEPLOY_REF:"
+            echo "$RUNS" | jq -r '.[] | "  \(.name): \(.status) / \(.conclusion // "—")"'
 
-          echo "✅ All CI checks passed."
+            FAILED=$(echo "$RUNS" | jq \
+              '[.[] | select(.conclusion != "success" and .conclusion != "skipped" and .conclusion != "neutral")] | length')
+            if [ "$FAILED" -gt 0 ]; then
+              echo "❌ Some checks failed — fix them before deploying to staging."
+              exit 1
+            fi
+
+            echo "✅ All CI checks passed."
+            break
+          done
 
   # ─────────────────────────────────────────────────────────────────────────
   # Build + push all service images in parallel
