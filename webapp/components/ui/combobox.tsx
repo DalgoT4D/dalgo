@@ -29,6 +29,24 @@ interface ComboboxBaseProps {
   id?: string;
   renderItem?: (item: ComboboxItem, isSelected: boolean, searchQuery: string) => React.ReactNode;
   footer?: React.ReactNode;
+  /** Live search term, for a parent that also searches server-side. Debounce there. */
+  onSearchChange?: (search: string) => void;
+  /** Extra options merged into `items`, de-duplicated by value. */
+  extraItems?: ComboboxItem[];
+  /** True while a parent's server-side search is in flight. */
+  searching?: boolean;
+}
+
+const SEARCHING_MESSAGE = 'Searching all values…';
+
+function emptyListMessage(
+  searching: boolean,
+  search: string,
+  emptyMessage: string,
+  noItemsMessage: string
+): string {
+  if (searching) return SEARCHING_MESSAGE;
+  return search.trim() ? emptyMessage : noItemsMessage;
 }
 
 interface SingleComboboxProps extends ComboboxBaseProps {
@@ -80,6 +98,39 @@ export function highlightText(text: string, query: string) {
     // Fallback to plain text if regex fails
     return text;
   }
+}
+
+// ─── Shared Search Hook ──────────────────────────────────────
+
+interface UseComboboxSearchOptions {
+  items: ComboboxItem[];
+  extraItems?: ComboboxItem[];
+  onSearchChange?: (search: string) => void;
+}
+
+function useComboboxSearch({ items, extraItems, onSearchChange }: UseComboboxSearchOptions) {
+  const [search, setSearch] = React.useState('');
+
+  // Merged, not replaced, so server-found options also resolve labels and keyboard nav.
+  const safeItems = React.useMemo(() => {
+    const base = Array.isArray(items) ? items : [];
+    if (!extraItems?.length) return base;
+    const seen = new Set(base.map((i) => i?.value));
+    return [...base, ...extraItems.filter((i) => i?.value && !seen.has(i.value))];
+  }, [items, extraItems]);
+
+  // Ref-held to keep updateSearch's identity stable for an inline parent callback.
+  const onSearchChangeRef = React.useRef(onSearchChange);
+  React.useEffect(() => {
+    onSearchChangeRef.current = onSearchChange;
+  }, [onSearchChange]);
+
+  const updateSearch = React.useCallback((term: string) => {
+    setSearch(term);
+    onSearchChangeRef.current?.(term);
+  }, []);
+
+  return { search, updateSearch, safeItems };
 }
 
 // ─── Shared Keyboard Navigation Hook ─────────────────────────
@@ -246,14 +297,21 @@ function SingleComboboxInner({
   compact = false,
   renderItem,
   footer,
+  onSearchChange,
+  extraItems,
+  searching = false,
 }: SingleComboboxProps) {
   const [open, setOpen] = React.useState(autoFocus);
-  const [search, setSearch] = React.useState('');
+
   const containerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   // Ensure items is always an array
-  const safeItems = React.useMemo(() => (Array.isArray(items) ? items : []), [items]);
+  const { search, updateSearch, safeItems } = useComboboxSearch({
+    items,
+    extraItems,
+    onSearchChange,
+  });
 
   const selectedLabel = React.useMemo(
     () => safeItems.find((i) => i?.value === value)?.label ?? '',
@@ -277,7 +335,7 @@ function SingleComboboxInner({
   const handleSelect = React.useCallback(
     (val: string) => {
       onValueChange(val);
-      setSearch('');
+      updateSearch('');
       setOpen(false);
     },
     [onValueChange]
@@ -289,7 +347,7 @@ function SingleComboboxInner({
     open,
     setOpen,
     onSelect: handleSelect,
-    onEscape: () => setSearch(''),
+    onEscape: () => updateSearch(''),
     skipDisabled: true,
   });
 
@@ -318,7 +376,7 @@ function SingleComboboxInner({
       onOpenChange={(next) => {
         if (!next) {
           setOpen(false);
-          setSearch('');
+          updateSearch('');
           setHighlightedIndex(-1);
         }
       }}
@@ -346,7 +404,7 @@ function SingleComboboxInner({
             value={displayValue}
             autoComplete="off"
             onChange={(e) => {
-              setSearch(e.target.value);
+              updateSearch(e.target.value);
               if (!open) setOpen(true);
             }}
             onFocus={() => {
@@ -412,7 +470,7 @@ function SingleComboboxInner({
         >
           {filtered.length === 0 ? (
             <div data-testid={`${baseId}-empty`} className="p-3 text-center text-sm text-gray-500">
-              {search.trim() ? emptyMessage : noItemsMessage}
+              {emptyListMessage(searching, search, emptyMessage, noItemsMessage)}
             </div>
           ) : (
             filtered.map((item, idx) => {
@@ -468,6 +526,14 @@ function SingleComboboxInner({
             })
           )}
         </div>
+        {searching && filtered.length > 0 && (
+          <div
+            data-testid={`${baseId}-searching`}
+            className="border-t px-3 py-1.5 text-xs text-muted-foreground"
+          >
+            {SEARCHING_MESSAGE}
+          </div>
+        )}
         {footer && <div className="border-t px-3 py-2">{footer}</div>}
       </PopoverContent>
     </Popover>
@@ -492,14 +558,21 @@ function MultiComboboxInner({
   triggerClassName,
   compact = false,
   renderItem,
+  onSearchChange,
+  extraItems,
+  searching = false,
 }: MultiComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const [search, setSearch] = React.useState('');
+
   const containerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   // Ensure items and values are always arrays
-  const safeItems = React.useMemo(() => (Array.isArray(items) ? items : []), [items]);
+  const { search, updateSearch, safeItems } = useComboboxSearch({
+    items,
+    extraItems,
+    onSearchChange,
+  });
   const safeValues = React.useMemo(() => (Array.isArray(values) ? values : []), [values]);
 
   // Get selected items for displaying chips
@@ -531,7 +604,7 @@ function MultiComboboxInner({
       } else {
         onValuesChange([...safeValues, val]);
       }
-      setSearch('');
+      updateSearch('');
     },
     [safeValues, onValuesChange]
   );
@@ -570,7 +643,7 @@ function MultiComboboxInner({
       open,
       setOpen,
       onSelect: handleToggle,
-      onEscape: () => setSearch(''),
+      onEscape: () => updateSearch(''),
       skipDisabled: false,
     });
 
@@ -589,7 +662,7 @@ function MultiComboboxInner({
       onOpenChange={(next) => {
         if (!next) {
           setOpen(false);
-          setSearch('');
+          updateSearch('');
         }
       }}
     >
@@ -648,7 +721,7 @@ function MultiComboboxInner({
             )}
             value={search}
             onChange={(e) => {
-              setSearch(e.target.value);
+              updateSearch(e.target.value);
               if (!open) setOpen(true);
             }}
             onFocus={() => {
@@ -720,7 +793,7 @@ function MultiComboboxInner({
               data-testid={`${baseId}-empty`}
               className="text-xs text-muted-foreground p-3 text-center"
             >
-              {search.trim() ? emptyMessage : noItemsMessage}
+              {emptyListMessage(searching, search, emptyMessage, noItemsMessage)}
             </div>
           ) : (
             filtered.map((item, idx) => {
@@ -763,6 +836,14 @@ function MultiComboboxInner({
             })
           )}
         </div>
+        {searching && filtered.length > 0 && (
+          <div
+            data-testid={`${baseId}-searching`}
+            className="border-t px-3 py-1.5 text-xs text-muted-foreground"
+          >
+            {SEARCHING_MESSAGE}
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );

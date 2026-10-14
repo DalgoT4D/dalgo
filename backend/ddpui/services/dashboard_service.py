@@ -16,7 +16,7 @@ from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
-from sqlalchemy import text, distinct, column
+from sqlalchemy import text, distinct, column, func, cast, String
 from sqlalchemy.dialects import postgresql
 
 from ddpui.auth import orguser_has_permission
@@ -1306,10 +1306,15 @@ def get_value_filter_options_with_fallback(
     column_name: str,
     limit: int,
     constraints: Optional[List[Dict[str, Any]]] = None,
+    search: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """Distinct values + counts for a dropdown filter, narrowed by any active constraints.
     Falls back to the unnarrowed list if the narrowed query fails.
+
+    `search` matches case-insensitively in the warehouse, so values past `limit` stay
+    reachable. It applies to the fallback too — a constraint failure shouldn't widen it.
     """
+    search_term = (search or "").strip()
 
     def _build(with_constraints: bool) -> AggQueryBuilder:
         qb = AggQueryBuilder()
@@ -1319,6 +1324,13 @@ def get_value_filter_options_with_fallback(
         qb.where_clause(column(column_name).isnot(None))
         if with_constraints:
             apply_chart_filters(qb, constraints or [])
+        if search_term:
+            # Case-insensitive "contains" match; works on Postgres and BigQuery.
+            qb.where_clause(
+                func.lower(cast(column(column_name), String)).contains(
+                    search_term.lower(), autoescape=True
+                )
+            )
         qb.group_cols_by(column_name)
         qb.order_cols_by([("count", "desc"), ("value", "asc")])
         qb.limit_rows(limit)
