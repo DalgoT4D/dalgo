@@ -57,9 +57,9 @@ jobs:
             --jq '.check_suite_id')
 
           RUNS=$(gh api "repos/${{ github.repository }}/commits/$DEPLOY_REF/check-runs" \
-            --paginate \
-            --jq --argjson suite "$SUITE_ID" \
-            '[.check_runs[] | select(.check_suite.id != $suite)]')
+            --paginate --jq '.check_runs[]' \
+            | jq -s --argjson suite "$SUITE_ID" \
+            '[.[] | select(.check_suite.id != $suite)]')
 
           COUNT=$(echo "$RUNS" | jq 'length')
           if [ "$COUNT" -eq 0 ]; then

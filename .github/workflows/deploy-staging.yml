@@ -139,10 +139,57 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
   # ─────────────────────────────────────────────────────────────────────────
+  # Gate: all CI checks on the deploy ref must be green before we build
+  # ─────────────────────────────────────────────────────────────────────────
+  ci-gate:
+    needs: plan
+    if: needs.plan.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all CI checks passed on deploy ref
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOY_REF: ${{ needs.plan.outputs.deploy_ref }}
+        run: |
+          set -euo pipefail
+
+          SUITE_ID=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --jq '.check_suite_id')
+
+          RUNS=$(gh api "repos/${{ github.repository }}/commits/$DEPLOY_REF/check-runs" \
+            --paginate --jq '.check_runs[]' \
+            | jq -s --argjson suite "$SUITE_ID" \
+            '[.[] | select(.check_suite.id != $suite)]')
+
+          COUNT=$(echo "$RUNS" | jq 'length')
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No CI check runs found for $DEPLOY_REF — proceeding."
+            exit 0
+          fi
+
+          echo "CI check runs for $DEPLOY_REF:"
+          echo "$RUNS" | jq -r '.[] | "  \(.name): \(.status) / \(.conclusion // "—")"'
+
+          IN_PROGRESS=$(echo "$RUNS" | jq '[.[] | select(.status != "completed")] | length')
+          if [ "$IN_PROGRESS" -gt 0 ]; then
+            echo "❌ Some checks are still running — wait for CI to finish before deploying."
+            exit 1
+          fi
+
+          FAILED=$(echo "$RUNS" | jq \
+            '[.[] | select(.conclusion != "success" and .conclusion != "skipped" and .conclusion != "neutral")] | length')
+          if [ "$FAILED" -gt 0 ]; then
+            echo "❌ Some checks failed — fix them before deploying."
+            exit 1
+          fi
+
+          echo "✅ All CI checks passed."
+
+  # ─────────────────────────────────────────────────────────────────────────
   # Build + push all service images in parallel
   # ─────────────────────────────────────────────────────────────────────────
   build:
-    needs: plan
+    needs: [plan, ci-gate]
     if: needs.plan.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     strategy:
@@ -190,7 +237,7 @@ jobs:
   # Build + push webapp (separate job — needs NEXT_PUBLIC_* build args)
   # ─────────────────────────────────────────────────────────────────────────
   build-webapp:
-    needs: plan
+    needs: [plan, ci-gate]
     if: needs.plan.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     environment: staging
