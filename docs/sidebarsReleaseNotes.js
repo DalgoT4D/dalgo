@@ -8,6 +8,7 @@
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebarsReleaseNotes = {
   releaseNotesSidebar: [
+    '2026-10-15',
     '2026-10-14',
     '2026-10-01',
     '2026-09-26',
