@@ -31,8 +31,38 @@ dalgo/
 │   ├── docker-compose.yml        ← production
 │   └── docker-compose.dev.yml    ← local dev
 └── scripts/
-    └── sync.sh        ← pull latest from individual repos (transition period)
+    ├── install-hooks.sh  ← run once after cloning to install git hooks
+    ├── hooks/pre-commit  ← the hook (black + prettier + eslint on staged files)
+    └── sync.sh           ← pull latest from individual repos (transition period)
 ```
+
+---
+
+## Contributing
+
+### One-time setup after cloning
+
+```bash
+./scripts/install-hooks.sh
+```
+
+This installs a git pre-commit hook that runs automatically on every `git commit`:
+
+| Service | Tool | Behaviour |
+|---|---|---|
+| `backend/` | black | auto-formats and re-stages |
+| `prefect-proxy/` | black | auto-formats and re-stages |
+| `webapp/` | prettier | auto-formats and re-stages |
+| `webapp/` | eslint | check only — fix errors manually |
+
+**Auto-formatting:** black and prettier rewrite files in place and re-stage them, so your commit always lands clean. If prettier or black reformats something, just re-run `git commit` — the second attempt will pass.
+
+**ESLint errors:** fix them manually, then commit again. Warnings are also blocked (`--max-warnings=0`) to stay in sync with CI.
+
+### Requirements
+
+- `uv` — for backend/prefect-proxy black ([install](https://docs.astral.sh/uv/getting-started/installation/))
+- `node` + `npm` — for webapp prettier/eslint (node_modules must be installed: `cd webapp && npm install`)
 
 ---
 
