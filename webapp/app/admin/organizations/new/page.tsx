@@ -149,7 +149,7 @@ export default function AdminCreateOrganizationPage() {
             <div className="space-y-2">
               <Label htmlFor="org-base-plan">Plan</Label>
               <Select value={basePlan} onValueChange={setBasePlan}>
-                <SelectTrigger id="org-base-plan">
+                <SelectTrigger id="org-base-plan" data-testid="org-base-plan-select">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -187,7 +187,10 @@ export default function AdminCreateOrganizationPage() {
                   if (v === 'false') setVizUrl('');
                 }}
               >
-                <SelectTrigger id="org-superset-included">
+                <SelectTrigger
+                  id="org-superset-included"
+                  data-testid="org-superset-included-select"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

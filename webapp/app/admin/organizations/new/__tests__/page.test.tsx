@@ -85,6 +85,8 @@ describe('AdminCreateOrganizationPage admin email', () => {
     const user = userEvent.setup({ delay: null });
     render(<AdminCreateOrganizationPage />);
 
+    await user.click(screen.getByTestId('org-base-plan-select'));
+    await user.click(await screen.findByRole('option', { name: 'Dalgo' }));
     await user.type(screen.getByLabelText('Name'), 'Bhumi');
     await user.type(screen.getByTestId('org-admin-email-input'), '  Owner@Bhumi.org  ');
     await user.click(screen.getByTestId('create-org-submit'));
@@ -93,7 +95,12 @@ describe('AdminCreateOrganizationPage admin email', () => {
       expect(mockCreateOrg).toHaveBeenCalledWith({
         name: 'Bhumi',
         viz_url: undefined,
-        base_plan: 'Free Trial',
+        base_plan: 'Dalgo',
+        subscription_duration: 'Monthly',
+        superset_included: false,
+        can_upgrade_plan: true,
+        start_date: undefined,
+        end_date: undefined,
         admin_email: 'Owner@Bhumi.org',
       })
     );
@@ -105,6 +112,8 @@ describe('AdminCreateOrganizationPage admin email', () => {
     const user = userEvent.setup({ delay: null });
     render(<AdminCreateOrganizationPage />);
 
+    await user.click(screen.getByTestId('org-base-plan-select'));
+    await user.click(await screen.findByRole('option', { name: 'Dalgo' }));
     await user.type(screen.getByLabelText('Name'), 'Bhumi');
     await user.type(screen.getByTestId('org-admin-email-input'), 'owner@bhumi.org');
     await user.click(screen.getByTestId('create-org-submit'));
@@ -120,13 +129,15 @@ describe('AdminCreateOrganizationPage admin email', () => {
     const user = userEvent.setup({ delay: null });
     render(<AdminCreateOrganizationPage />);
 
+    await user.click(screen.getByTestId('org-base-plan-select'));
+    await user.click(await screen.findByRole('option', { name: 'Dalgo' }));
     await user.type(screen.getByLabelText('Name'), 'Bhumi');
     await user.type(screen.getByTestId('org-admin-email-input'), 'owner@bhumi.org');
     await user.click(screen.getByTestId('create-org-submit'));
 
     await waitFor(() =>
       expect(mockTrackEvent).toHaveBeenCalledWith(ANALYTICS_EVENTS.ADMIN_ORG_CREATED, {
-        base_plan: 'Free Trial',
+        base_plan: 'Dalgo',
       })
     );
     expect(JSON.stringify(mockTrackEvent.mock.calls)).not.toContain('owner@bhumi.org');
@@ -137,6 +148,8 @@ describe('AdminCreateOrganizationPage admin email', () => {
     const user = userEvent.setup({ delay: null });
     render(<AdminCreateOrganizationPage />);
 
+    await user.click(screen.getByTestId('org-base-plan-select'));
+    await user.click(await screen.findByRole('option', { name: 'Dalgo' }));
     await user.type(screen.getByLabelText('Name'), 'Bhumi');
     await user.type(screen.getByTestId('org-admin-email-input'), 'owner@bhumi.org');
     await user.click(screen.getByTestId('create-org-submit'));
@@ -153,6 +166,8 @@ describe('AdminCreateOrganizationPage admin email', () => {
 
     await user.type(screen.getByLabelText('Name'), 'Bhumi');
     await user.type(screen.getByTestId('org-admin-email-input'), 'owner@bhumi.org');
+    await user.click(screen.getByTestId('org-superset-included-select'));
+    await user.click(await screen.findByRole('option', { name: 'Yes' }));
     await user.type(screen.getByTestId('org-viz-url-input'), 'superset.example.org');
     await user.click(screen.getByTestId('create-org-submit'));
 
@@ -166,6 +181,10 @@ describe('AdminCreateOrganizationPage admin email', () => {
     const user = userEvent.setup({ delay: null });
     render(<AdminCreateOrganizationPage />);
 
+    await user.click(screen.getByTestId('org-base-plan-select'));
+    await user.click(await screen.findByRole('option', { name: 'Dalgo' }));
+    await user.click(screen.getByTestId('org-superset-included-select'));
+    await user.click(await screen.findByRole('option', { name: 'Yes' }));
     await user.type(screen.getByLabelText('Name'), 'Bhumi');
     await user.type(screen.getByTestId('org-admin-email-input'), 'owner@bhumi.org');
     await user.type(screen.getByTestId('org-viz-url-input'), 'https://superset.example.org');

@@ -44,6 +44,10 @@ const org: AdminOrg = {
   slug: 'akshara',
   viz_url: null,
   base_plan: 'Dalgo',
+  superset_included: true,
+  subscription_duration: 'Monthly',
+  start_date: null,
+  end_date: null,
   user_count: 5,
 };
 
@@ -113,6 +117,10 @@ describe('AdminOrganizationDetailPage edit form', () => {
       name: 'Akshara Foundation',
       viz_url: 'https://superset.example.org',
       base_plan: 'Dalgo',
+      superset_included: true,
+      subscription_duration: 'Monthly',
+      start_date: undefined,
+      end_date: undefined,
     });
     expect(mockTrackEvent).toHaveBeenCalledWith(ANALYTICS_EVENTS.ADMIN_ORG_UPDATED, {
       base_plan: 'Dalgo',
@@ -129,6 +137,10 @@ describe('AdminOrganizationDetailPage edit form', () => {
       name: 'Akshara',
       viz_url: undefined,
       base_plan: 'Dalgo',
+      superset_included: true,
+      subscription_duration: 'Monthly',
+      start_date: undefined,
+      end_date: undefined,
     });
   });
 
