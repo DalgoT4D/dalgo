@@ -59,17 +59,26 @@ class AdminOrgSchema(Schema):
     slug: str | None
     viz_url: str | None
     base_plan: str | None
+    superset_included: bool
+    subscription_duration: str | None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
     user_count: int
 
     @classmethod
     def from_model(cls, org: Org, user_count: int) -> "AdminOrgSchema":
         """Build the response from an Org plus its (API-supplied) user_count."""
+        plan = getattr(org, "org_plans", None)
         return cls(
             id=org.id,
             name=org.name,
             slug=org.slug,
             viz_url=org.viz_url,
             base_plan=org.base_plan(),
+            superset_included=plan.superset_included if plan else False,
+            subscription_duration=plan.subscription_duration if plan else None,
+            start_date=plan.start_date if plan else None,
+            end_date=plan.end_date if plan else None,
             user_count=user_count,
         )
 
@@ -103,6 +112,10 @@ class AdminUpdateOrgSchema(Schema):
     name: Optional[str] = None
     viz_url: Optional[HttpUrl] = None
     base_plan: Optional[str] = None
+    superset_included: Optional[bool] = None
+    subscription_duration: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
 
 
 # ── Users tab (M4) ───────────────────────────────────────────────────────────
@@ -213,6 +226,7 @@ class AdminNotificationAudienceSchema(Schema):
     per-org breakdown (plan.md §4.3, §5)"""
 
     org_ids: Optional[List[int]] = None
+    superset_clients: bool = False
 
 
 class AdminNotificationPreviewResponseSchema(Schema):

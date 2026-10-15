@@ -342,7 +342,7 @@ ADMIN_NOTIFICATION_HISTORY_PAGE_SIZE = 10
 def post_admin_notification_preview(request, payload: AdminNotificationAudienceSchema):
     """One combined recipient count across the whole chosen audience -- never the
     recipient list itself, and never a per-org breakdown."""
-    recipient_count = admin_service.preview_notification_recipients(payload.org_ids)
+    recipient_count = admin_service.preview_notification_recipients(payload.org_ids, payload.superset_clients)
     return AdminNotificationPreviewResponseSchema(recipient_count=recipient_count)
 
 

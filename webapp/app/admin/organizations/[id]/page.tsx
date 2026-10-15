@@ -50,8 +50,12 @@ export default function AdminOrganizationDetailPage() {
   const [name, setName] = useState('');
   const [vizUrl, setVizUrl] = useState('');
   const [basePlan, setBasePlan] = useState('Free Trial');
+  const [supersetIncluded, setSupersetIncluded] = useState('false');
+  const [subscriptionDuration, setSubscriptionDuration] = useState('Monthly');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; vizUrl?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; vizUrl?: string; startDate?: string; endDate?: string }>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -59,6 +63,10 @@ export default function AdminOrganizationDetailPage() {
       setName(org.name);
       setVizUrl(org.viz_url ?? '');
       setBasePlan(org.base_plan ?? 'Free Trial');
+      setSupersetIncluded(org.superset_included ? 'true' : 'false');
+      setSubscriptionDuration(org.subscription_duration ?? 'Monthly');
+      setStartDate(org.start_date ? org.start_date.slice(0, 10) : '');
+      setEndDate(org.end_date ? org.end_date.slice(0, 10) : '');
     }
   }, [org]);
 
@@ -89,11 +97,13 @@ export default function AdminOrganizationDetailPage() {
     // Both were previously sent as `undefined` when cleared, which the backend reads as
     // "leave unchanged" — so a blank name silently reverted on the next fetch with no
     // hint that nothing was saved. Say so instead.
-    const nextErrors: { name?: string; vizUrl?: string } = {};
+    const nextErrors: { name?: string; vizUrl?: string; startDate?: string; endDate?: string } = {};
     if (!trimmedName) nextErrors.name = 'Name is required';
     if (trimmedVizUrl && !isValidVizUrl(trimmedVizUrl)) {
       nextErrors.vizUrl = VIZ_URL_ERROR;
     }
+    if (basePlan === 'Free Trial' && !startDate) nextErrors.startDate = 'Start date is required for trial accounts';
+    if (basePlan === 'Free Trial' && !endDate) nextErrors.endDate = 'End date is required for trial accounts';
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -103,6 +113,10 @@ export default function AdminOrganizationDetailPage() {
         name: trimmedName,
         viz_url: trimmedVizUrl || undefined,
         base_plan: basePlan,
+        superset_included: supersetIncluded === 'true',
+        subscription_duration: subscriptionDuration,
+        start_date: startDate || undefined,
+        end_date: endDate || undefined,
       });
       trackEvent(ANALYTICS_EVENTS.ADMIN_ORG_UPDATED, { base_plan: basePlan });
       await mutate();
@@ -201,19 +215,6 @@ export default function AdminOrganizationDetailPage() {
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-viz-url">Visualization URL</Label>
-                    <Input
-                      id="edit-viz-url"
-                      type="url"
-                      value={vizUrl}
-                      onChange={(e) => setVizUrl(e.target.value)}
-                      placeholder="https://superset.example.org"
-                      className={errors.vizUrl ? 'border-destructive' : ''}
-                      data-testid="edit-org-viz-url-input"
-                    />
-                    {errors.vizUrl && <p className="text-sm text-destructive">{errors.vizUrl}</p>}
-                  </div>
-                  <div className="space-y-2">
                     <Label htmlFor="edit-base-plan">Plan</Label>
                     <Select value={basePlan} onValueChange={setBasePlan}>
                       <SelectTrigger id="edit-base-plan">
@@ -228,6 +229,77 @@ export default function AdminOrganizationDetailPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-subscription-duration">Billing Frequency</Label>
+                    <Select value={subscriptionDuration} onValueChange={setSubscriptionDuration}>
+                      <SelectTrigger id="edit-subscription-duration">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Monthly">Monthly</SelectItem>
+                        <SelectItem value="Annual">Annual</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {basePlan === 'Free Trial' && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-start-date">Start Date</Label>
+                        <Input
+                          id="edit-start-date"
+                          type="date"
+                          value={startDate}
+                          onChange={(e) => setStartDate(e.target.value)}
+                          className={errors.startDate ? 'border-destructive' : ''}
+                        />
+                        {errors.startDate && <p className="text-sm text-destructive">{errors.startDate}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-end-date">End Date</Label>
+                        <Input
+                          id="edit-end-date"
+                          type="date"
+                          value={endDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                          className={errors.endDate ? 'border-destructive' : ''}
+                        />
+                        {errors.endDate && <p className="text-sm text-destructive">{errors.endDate}</p>}
+                      </div>
+                    </>
+                  )}
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-superset-included">Superset Included</Label>
+                    <Select
+                      value={supersetIncluded}
+                      onValueChange={(v) => {
+                        setSupersetIncluded(v);
+                        if (v === 'false') setVizUrl('');
+                      }}
+                    >
+                      <SelectTrigger id="edit-superset-included">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="false">No</SelectItem>
+                        <SelectItem value="true">Yes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {supersetIncluded === 'true' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-viz-url">Visualization URL</Label>
+                      <Input
+                        id="edit-viz-url"
+                        type="url"
+                        value={vizUrl}
+                        onChange={(e) => setVizUrl(e.target.value)}
+                        placeholder="https://superset.example.org"
+                        className={errors.vizUrl ? 'border-destructive' : ''}
+                        data-testid="edit-org-viz-url-input"
+                      />
+                      {errors.vizUrl && <p className="text-sm text-destructive">{errors.vizUrl}</p>}
+                    </div>
+                  )}
                   <div className="flex gap-3">
                     <Button onClick={onSave} disabled={saving}>
                       {saving ? 'Saving…' : 'Save changes'}
@@ -241,6 +313,10 @@ export default function AdminOrganizationDetailPage() {
                         setName(org.name);
                         setVizUrl(org.viz_url ?? '');
                         setBasePlan(org.base_plan ?? 'Free Trial');
+                        setSupersetIncluded(org.superset_included ? 'true' : 'false');
+                        setSubscriptionDuration(org.subscription_duration ?? 'Monthly');
+                        setStartDate(org.start_date ? org.start_date.slice(0, 10) : '');
+                        setEndDate(org.end_date ? org.end_date.slice(0, 10) : '');
                         setEditing(false);
                       }}
                       disabled={saving}
@@ -254,6 +330,17 @@ export default function AdminOrganizationDetailPage() {
                   <Fact label="Name">{org.name}</Fact>
                   <Fact label="Slug">{org.slug ?? '—'}</Fact>
                   <Fact label="Plan">{org.base_plan ?? '—'}</Fact>
+                  <Fact label="Billing Frequency">{org.subscription_duration ?? '—'}</Fact>
+                  <Fact label="Superset Included">{org.superset_included ? 'Yes' : 'No'}</Fact>
+                  {org.superset_included && (
+                    <Fact label="Visualization URL">{org.viz_url ?? '—'}</Fact>
+                  )}
+                  {org.base_plan === 'Free Trial' && (
+                    <>
+                      <Fact label="Start Date">{org.start_date ? org.start_date.slice(0, 10) : '—'}</Fact>
+                      <Fact label="End Date">{org.end_date ? org.end_date.slice(0, 10) : '—'}</Fact>
+                    </>
+                  )}
                   <Fact label="Users">{org.user_count}</Fact>
                 </div>
               )}

@@ -6,6 +6,7 @@ Handlers stay thin (parse -> call service -> respond); this module owns the ORM.
 from typing import List, Optional, Tuple
 
 from django.core.paginator import Paginator
+from django.db.models import Count
 
 from ddpui.auth import ADMIN_ROLE
 from ddpui.core.admin.exceptions import AdminOrgCreateError, AdminOrgDeleteError
@@ -58,9 +59,11 @@ logger = CustomLogger("ddpui.core.admin")
 def get_platform_stats() -> Tuple[int, int]:
     """(total_orgs, total_users) across the whole platform. total_users counts distinct
     users who belong to at least one org."""
-    total_orgs = Org.objects.count()
-    total_users = OrgUser.objects.values("user").distinct().count()
-    return total_orgs, total_users
+    result = Org.objects.aggregate(
+        total_orgs=Count("id", distinct=True),
+        total_users=Count("orguser__user", distinct=True),
+    )
+    return result["total_orgs"], result["total_users"]
 
 
 def list_orgs() -> List[Org]:
@@ -167,10 +170,22 @@ def update_org(org: Org, payload: AdminUpdateOrgSchema) -> Org:
         org.viz_url = str(payload.viz_url)
     org.save()  # slug intentionally excluded from the update
 
-    if payload.base_plan is not None:
+    org_plans_fields = {
+        k: v
+        for k, v in {
+            "base_plan": payload.base_plan,
+            "superset_included": payload.superset_included,
+            "subscription_duration": payload.subscription_duration,
+            "start_date": payload.start_date,
+            "end_date": payload.end_date,
+        }.items()
+        if v is not None
+    }
+    if org_plans_fields:
         org_plans = OrgPlans.objects.filter(org=org).first()
         if org_plans:
-            org_plans.base_plan = payload.base_plan
+            for field, value in org_plans_fields.items():
+                setattr(org_plans, field, value)
             org_plans.save()
 
     return org
@@ -342,7 +357,7 @@ def clear_org_flag(org: Org, flag_name: str) -> Optional[bool]:
 # --------------------------------------------------------------------------- #
 
 
-def _resolve_recipient_ids(org_ids: Optional[List[int]]) -> List[int]:
+def _resolve_recipient_ids(org_ids: Optional[List[int]], superset_clients: bool = False) -> List[int]:
     """Merge recipients across a whole-platform or multi-org audience into one
     list -- never a per-org breakdown. A bogus org_id resolves to no slug and
     contributes nothing, rather than erroring (plan.md §4.3, §5)."""
@@ -351,19 +366,19 @@ def _resolve_recipient_ids(org_ids: Optional[List[int]]) -> List[int]:
         if not org_slugs:
             return []
         error, recipient_ids = get_recipients(
-            SentToEnum.ALL_ORG_USERS, None, None, False, org_slugs=org_slugs
+            SentToEnum.ALL_ORG_USERS, None, None, False, superset_clients, org_slugs=org_slugs
         )
     else:
-        error, recipient_ids = get_recipients(SentToEnum.ALL_USERS, None, None, False)
+        error, recipient_ids = get_recipients(SentToEnum.ALL_USERS, None, None, False, superset_clients)
 
     if error:
         return []
     return recipient_ids
 
 
-def preview_notification_recipients(org_ids: Optional[List[int]]) -> int:
+def preview_notification_recipients(org_ids: Optional[List[int]], superset_clients: bool = False) -> int:
     """One combined recipient count across the whole chosen audience."""
-    return len(_resolve_recipient_ids(org_ids))
+    return len(_resolve_recipient_ids(org_ids, superset_clients))
 
 
 def create_admin_notification(
@@ -378,7 +393,7 @@ def create_admin_notification(
         # persisting a Notification + a NotificationRecipient row per recipient.
         return "Select at least one channel: in-app or email", None
 
-    recipient_ids = _resolve_recipient_ids(payload.org_ids)
+    recipient_ids = _resolve_recipient_ids(payload.org_ids, payload.superset_clients)
     if not recipient_ids:
         return "No recipients found for the given audience", None
 

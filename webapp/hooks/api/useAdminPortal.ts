@@ -14,6 +14,10 @@ export interface AdminOrg {
   slug: string | null;
   viz_url: string | null;
   base_plan: string | null;
+  superset_included: boolean;
+  subscription_duration: string | null;
+  start_date: string | null;
+  end_date: string | null;
   user_count: number;
 }
 
@@ -21,6 +25,11 @@ export interface CreateAdminOrgForm {
   name: string;
   viz_url?: string;
   base_plan?: string;
+  subscription_duration?: string;
+  superset_included?: boolean;
+  can_upgrade_plan?: boolean;
+  start_date?: string;
+  end_date?: string;
   /** The org's first Admin — required: an org is never created without an owner.
    * There is no role field; the backend always invites this person at admin role. */
   admin_email: string;
@@ -30,6 +39,10 @@ export interface UpdateAdminOrgForm {
   name?: string;
   viz_url?: string;
   base_plan?: string;
+  superset_included?: boolean;
+  subscription_duration?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 export interface AdminSession {
@@ -424,6 +437,7 @@ export interface CreateAdminNotificationForm {
   email_subject: string;
   urgent?: boolean;
   org_ids?: number[];
+  superset_clients?: boolean;
   send_in_app?: boolean;
   send_email?: boolean;
 }
@@ -460,10 +474,14 @@ export function useAdminNotifications(page = 1, limit = DEFAULT_PAGE_SIZE) {
 
 /** Preview the combined recipient count for an audience, then send. */
 export function useAdminNotificationActions() {
-  const previewRecipients = async (orgIds?: number[]): Promise<AdminNotificationPreview> => {
+  const previewRecipients = async (
+    orgIds?: number[],
+    supersetClients?: boolean
+  ): Promise<AdminNotificationPreview> => {
     try {
       return (await apiPost('/api/v1/admin/notifications/preview', {
         org_ids: orgIds,
+        superset_clients: supersetClients,
       })) as AdminNotificationPreview;
     } catch (error: unknown) {
       toastError.api(error, 'Failed to preview recipients');
