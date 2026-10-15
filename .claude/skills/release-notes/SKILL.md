@@ -134,7 +134,9 @@ Specific reminders when writing the body:
 - If there are no real features (only fixes), open with the one-liner and go straight to `## Fixes`. Don't fabricate a headline section.
 - The footer's only variable parts are the two tag strings (in the URL and the link text). Everything else in that line is fixed.
 
-### 7. Put the new entry on top
+### 7. Put the new entry on top — REQUIRED, the file will not appear without this
+
+> **The file is invisible in the sidebar until this step is done.** Docusaurus ignores any `.md` file not listed in `sidebarsReleaseNotes.js`, regardless of frontmatter.
 
 Open `docs/sidebarsReleaseNotes.js`. **Prepend** the new file id (filename without `.md`) so the navbar lands on the latest release:
 
@@ -146,7 +148,7 @@ releaseNotesSidebar: ['2026-06-29']
 releaseNotesSidebar: ['2026-07-15', '2026-06-29']
 ```
 
-Also bump `sidebar_position` of the previous top entry (2, 3, …) so the order is unambiguous if anyone reads frontmatter alone.
+Also bump `sidebar_position` of the previous top entry from `1` to `2` (and so on down) so the order is unambiguous if anyone reads frontmatter alone. The new entry always gets `sidebar_position: 1`.
 
 ### 8. Verify build
 
