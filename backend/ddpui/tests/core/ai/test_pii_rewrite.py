@@ -10,6 +10,7 @@ import sqlglot
 from ddpui.core.ai.guards.pii_rewrite import (
     UnresolvableProjection,
     _qualified_tree,
+    column_key,
     hash_projection,
     resolve_projection,
 )
@@ -245,3 +246,34 @@ def test_mixed_case_quoted_identifiers_resolve_and_hash():
     # every key the card offers must actually cause a hash when ticked
     out = hash_projection(sql, "postgres", schema, set(resolved))
     assert out.upper().count("MD5") == 2
+
+
+def test_bigquery_mixed_case_columns_resolve_and_hash():
+    # BigQuery columns are case-insensitive: qualify() lowercases them even when
+    # backtick-quoted, so a mixed-case column from the catalog must still resolve
+    schema = {"Raw_DS": {"TLM26_Students": {"School_State": "STRING", "Phone": "STRING"}}}
+    sql = (
+        "SELECT DISTINCT `School_State` AS value FROM `Raw_DS`.`TLM26_Students` "
+        "WHERE LOWER(CAST(`School_State` AS STRING)) LIKE LOWER('%maharashtra%') LIMIT 10"
+    )
+
+    resolved = [column.key for column in resolve_projection(sql, "bigquery", schema)]
+    assert resolved == ["Raw_DS.TLM26_Students.school_state"]
+
+    out = hash_projection(sql, "bigquery", schema, set(resolved))
+    assert out.count("TO_HEX(MD5(") == 1
+
+
+@pytest.mark.parametrize("column", ["School_State", "School Name", "विद्यालय_नाम", "STATE", "phone"])
+def test_column_key_matches_the_card_key_on_both_warehouses(column):
+    # lookup_column_values checks ticks with column_key; it must produce exactly
+    # the key the card offered, or a ticked column runs unhashed
+    bq = resolve_projection(
+        f"SELECT `{column}` FROM `DS`.`Tbl`", "bigquery", {"DS": {"Tbl": {column: "STRING"}}}
+    )
+    assert [c.key for c in bq] == [column_key("bigquery", "DS", "Tbl", column)]
+
+    pg = resolve_projection(
+        f'SELECT "{column}" FROM tap."Tbl"', "postgres", {"tap": {"Tbl": {column: "text"}}}
+    )
+    assert [c.key for c in pg] == [column_key("postgres", "tap", "Tbl", column)]
