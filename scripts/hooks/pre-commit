@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# Pre-commit hook for the Dalgo monorepo.
+#
+# Install once with:  ./scripts/install-hooks.sh
+#
+# What it does (staged files only):
+#   backend/       black  — auto-formats and re-stages
+#   prefect-proxy/ black  — auto-formats and re-stages
+#   webapp/        prettier — auto-formats and re-stages
+#   webapp/        eslint   — check only (errors need manual fixing)
+
+set -euo pipefail
+
+REPO=$(git rev-parse --show-toplevel)
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+staged_files() {
+  # $1 = grep pattern to filter by path
+  git diff --cached --name-only --diff-filter=ACMR | grep -E "$1" || true
+}
+
+restage() {
+  # Re-add files that the formatter may have modified so the commit includes
+  # the formatted version, not the original.
+  while IFS= read -r f; do
+    git add "$f"
+  done
+}
+
+# ── Backend: black ────────────────────────────────────────────────────────────
+PY_BACKEND=$(staged_files '^backend/ddpui/.*\.pyi?$')
+if [[ -n "$PY_BACKEND" ]]; then
+  echo "▶ backend: black"
+  # Strip the repo-relative prefix so paths are valid after cd.
+  FILES=$(echo "$PY_BACKEND" | sed 's|^backend/||')
+  (cd "$REPO/backend" && echo "$FILES" | tr '\n' '\0' | xargs -0 uv run black)
+  echo "$PY_BACKEND" | restage
+fi
+
+# ── Prefect-proxy: black ──────────────────────────────────────────────────────
+PY_PROXY=$(staged_files '^prefect-proxy/(proxy|tests)/.*\.pyi?$')
+if [[ -n "$PY_PROXY" ]]; then
+  echo "▶ prefect-proxy: black"
+  FILES=$(echo "$PY_PROXY" | sed 's|^prefect-proxy/||')
+  (cd "$REPO/prefect-proxy" && echo "$FILES" | tr '\n' '\0' | xargs -0 uv run black)
+  echo "$PY_PROXY" | restage
+fi
+
+# ── Webapp: prettier (auto-fix) ───────────────────────────────────────────────
+TS_FILES=$(staged_files '^webapp/.*\.(ts|tsx|js|jsx|css|json)$' | grep -v 'node_modules\|\.next' || true)
+if [[ -n "$TS_FILES" ]]; then
+  echo "▶ webapp: prettier"
+  FILES=$(echo "$TS_FILES" | sed 's|^webapp/||')
+  (cd "$REPO/webapp" && echo "$FILES" | tr '\n' '\0' | xargs -0 npx prettier --write)
+  echo "$TS_FILES" | restage
+fi
+
+# ── Webapp: eslint (check only) ───────────────────────────────────────────────
+TS_LINT=$(staged_files '^webapp/.*\.(ts|tsx)$' | grep -v 'node_modules\|\.next' || true)
+if [[ -n "$TS_LINT" ]]; then
+  echo "▶ webapp: eslint"
+  FILES=$(echo "$TS_LINT" | sed 's|^webapp/||')
+  (cd "$REPO/webapp" && echo "$FILES" | tr '\n' '\0' | xargs -0 npx eslint --max-warnings=0)
+fi
