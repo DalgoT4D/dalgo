@@ -357,7 +357,9 @@ def clear_org_flag(org: Org, flag_name: str) -> Optional[bool]:
 # --------------------------------------------------------------------------- #
 
 
-def _resolve_recipient_ids(org_ids: Optional[List[int]], superset_clients: bool = False) -> List[int]:
+def _resolve_recipient_ids(
+    org_ids: Optional[List[int]], superset_clients: bool = False
+) -> List[int]:
     """Merge recipients across a whole-platform or multi-org audience into one
     list -- never a per-org breakdown. A bogus org_id resolves to no slug and
     contributes nothing, rather than erroring (plan.md §4.3, §5)."""
@@ -369,14 +371,18 @@ def _resolve_recipient_ids(org_ids: Optional[List[int]], superset_clients: bool 
             SentToEnum.ALL_ORG_USERS, None, None, False, superset_clients, org_slugs=org_slugs
         )
     else:
-        error, recipient_ids = get_recipients(SentToEnum.ALL_USERS, None, None, False, superset_clients)
+        error, recipient_ids = get_recipients(
+            SentToEnum.ALL_USERS, None, None, False, superset_clients
+        )
 
     if error:
         return []
     return recipient_ids
 
 
-def preview_notification_recipients(org_ids: Optional[List[int]], superset_clients: bool = False) -> int:
+def preview_notification_recipients(
+    org_ids: Optional[List[int]], superset_clients: bool = False
+) -> int:
     """One combined recipient count across the whole chosen audience."""
     return len(_resolve_recipient_ids(org_ids, superset_clients))
 

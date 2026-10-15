@@ -36,12 +36,24 @@ export default function AdminCreateOrganizationPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; adminEmail?: string; vizUrl?: string; startDate?: string; endDate?: string }>({});
+  const [errors, setErrors] = useState<{
+    name?: string;
+    adminEmail?: string;
+    vizUrl?: string;
+    startDate?: string;
+    endDate?: string;
+  }>({});
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const nextErrors: { name?: string; adminEmail?: string; vizUrl?: string; startDate?: string; endDate?: string } = {};
+    const nextErrors: {
+      name?: string;
+      adminEmail?: string;
+      vizUrl?: string;
+      startDate?: string;
+      endDate?: string;
+    } = {};
     if (!name.trim()) {
       nextErrors.name = 'Organization name is required';
     }
@@ -129,8 +141,8 @@ export default function AdminCreateOrganizationPage() {
               />
               {errors.adminEmail && <p className="text-sm text-destructive">{errors.adminEmail}</p>}
               <p className="text-xs text-muted-foreground">
-                They&apos;ll be invited as the organization&apos;s Admin and set their own password. An
-                organization can&apos;t be created without one.
+                They&apos;ll be invited as the organization&apos;s Admin and set their own password.
+                An organization can&apos;t be created without one.
               </p>
             </div>
 
@@ -211,7 +223,8 @@ export default function AdminCreateOrganizationPage() {
                     value={startDate}
                     onChange={(e) => {
                       setStartDate(e.target.value);
-                      if (errors.startDate) setErrors((prev) => ({ ...prev, startDate: undefined }));
+                      if (errors.startDate)
+                        setErrors((prev) => ({ ...prev, startDate: undefined }));
                     }}
                     className={errors.startDate ? 'border-destructive' : ''}
                     data-testid="org-start-date-input"
@@ -234,9 +247,7 @@ export default function AdminCreateOrganizationPage() {
                     className={errors.endDate ? 'border-destructive' : ''}
                     data-testid="org-end-date-input"
                   />
-                  {errors.endDate && (
-                    <p className="text-sm text-destructive">{errors.endDate}</p>
-                  )}
+                  {errors.endDate && <p className="text-sm text-destructive">{errors.endDate}</p>}
                 </div>
               </>
             )}

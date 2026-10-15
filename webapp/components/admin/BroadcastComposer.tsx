@@ -207,7 +207,9 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
               checked={sendInApp}
               onCheckedChange={(checked) => setSendInApp(checked === true)}
             />
-            <Label htmlFor="broadcast-send-in-app">In-app (appears in the platform notification bell)</Label>
+            <Label htmlFor="broadcast-send-in-app">
+              In-app (appears in the platform notification bell)
+            </Label>
           </div>
           <div className="flex items-center gap-2">
             <Checkbox
