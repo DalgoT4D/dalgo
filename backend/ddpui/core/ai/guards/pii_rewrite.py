@@ -23,6 +23,7 @@ from dataclasses import dataclass
 
 import sqlglot
 from sqlglot import expressions as exp
+from sqlglot.dialects.dialect import Dialect
 from sqlglot.errors import OptimizeError, ParseError
 from sqlglot.optimizer.qualify import qualify
 from sqlglot.optimizer.scope import traverse_scope
@@ -68,6 +69,15 @@ class ProjectedColumn:
         return f"{self.schema}.{self.table}.{self.column}"
 
 
+def column_key(dialect: str, schema: str, table: str, column: str) -> str:
+    """The key a ticked column carries, for code that checks ticks without going
+    through resolve_projection. Applies the same casing rule qualify() does, so a
+    BigQuery column named `School_State` matches the card's `school_state`."""
+    identifier = exp.to_identifier(column, quoted=True)
+    normalized = Dialect.get_or_raise(dialect).normalize_identifier(identifier)
+    return f"{schema}.{table}.{normalized.name}"
+
+
 def resolve_projection(sql: str, dialect: str, schema_map: SchemaMap) -> list[ProjectedColumn]:
     """Every physical column selected anywhere in the tree, sorted by key.
 
@@ -95,10 +105,14 @@ def _qualified_tree(sql: str, dialect: str, schema_map: SchemaMap) -> exp.Expres
         tree = sqlglot.parse_one(sql, dialect=dialect)
     except ParseError as err:
         raise UnresolvableProjection(f"Could not parse the SQL: {err}") from err
-    # normalize=False: the schema map carries the warehouse's real casing, and
-    # Airbyte raw tables are mixed-case (tap."TLM26_StudentDetails"). Letting
+    # Postgres: normalize=False. The schema map carries the warehouse's real casing,
+    # and Airbyte raw tables are mixed-case (tap."TLM26_StudentDetails"). Letting
     # sqlglot lowercase the map's keys makes a quoted identifier unmatchable.
-    schema = MappingSchema(schema_map, normalize=False, dialect=dialect)
+    # BigQuery: normalize=True. Its column names are case-insensitive, so qualify()
+    # lowercases every column in the query, even backtick-quoted ones; the map's
+    # columns must be lowercased too or `School_State` never resolves. Dataset and
+    # table names stay case-sensitive either way.
+    schema = MappingSchema(schema_map, normalize=dialect == "bigquery", dialect=dialect)
     try:
         qualified = qualify(tree, dialect=dialect, schema=schema)
     except OptimizeError as err:
