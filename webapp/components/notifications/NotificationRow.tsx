@@ -1,12 +1,11 @@
 import { formatDistanceToNow } from 'date-fns';
-import { ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TableCell, TableRow } from '@/components/ui/table';
 import type { Notification } from '@/types/notifications';
-import { MESSAGE_TRUNCATE_LENGTH } from '@/constants/notifications';
 import { cn } from '@/lib/utils';
 import { renderMessageWithLinks } from '@/lib/notificationMessage';
+import { NotificationTypeBadge } from '@/components/notifications/NotificationTypeBadge';
 
 interface NotificationRowProps {
   notification: Notification;
@@ -23,20 +22,21 @@ export function NotificationRow({
   onSelect,
   onToggleExpand,
 }: NotificationRowProps) {
-  const isTruncatable = notification.message.length > MESSAGE_TRUNCATE_LENGTH;
-  const displayMessage =
-    !isExpanded && isTruncatable
-      ? notification.message.substring(0, MESSAGE_TRUNCATE_LENGTH) + '...'
-      : notification.message;
-
+  // line-clamp-2 at text-sm clips at ~120 chars per line; also treat any newline as needing expand
+  const isTruncatable = notification.message.length > 120 || notification.message.includes('\n');
   const isRead = notification.read_status;
 
   return (
     <TableRow
       data-testid={`notification-row-${notification.id}`}
-      className={cn(isRead ? 'bg-gray-50 hover:bg-gray-100' : 'bg-white hover:bg-gray-50/50')}
+      className={cn(
+        'cursor-pointer',
+        isRead ? 'bg-gray-50 hover:bg-gray-100' : 'bg-white hover:bg-gray-50/50'
+      )}
+      onClick={() => onToggleExpand(notification.id)}
     >
-      <TableCell className="w-12 pl-4 align-top py-4">
+      {/* Stop propagation so checkbox click only selects, doesn't expand */}
+      <TableCell className="w-12 pl-4 align-top py-4" onClick={(e) => e.stopPropagation()}>
         <Checkbox
           data-testid={`notification-checkbox-${notification.id}`}
           checked={isSelected}
@@ -50,41 +50,30 @@ export function NotificationRow({
         />
       </TableCell>
 
-      <TableCell className="w-full py-4 align-top whitespace-normal">
+      <TableCell className="w-full py-4 pr-6 align-top whitespace-normal">
         <p
           className={cn(
-            'leading-relaxed text-base break-words whitespace-normal',
+            'leading-relaxed text-sm break-words whitespace-pre-wrap min-h-[2.5rem]',
+            !isExpanded && 'line-clamp-2',
             isRead ? 'text-gray-500 font-normal' : 'text-gray-800 font-medium'
           )}
         >
-          {renderMessageWithLinks(displayMessage)}
+          {renderMessageWithLinks(notification.message)}
         </p>
-        <p className={cn('text-sm mt-2', isRead ? 'text-gray-400' : 'text-gray-600')}>
-          {formatDistanceToNow(new Date(notification.timestamp), {
-            addSuffix: true,
-          })}
-        </p>
-      </TableCell>
-
-      <TableCell className="w-16 text-center align-top py-4">
-        {notification.urgent && (
-          <AlertCircle className="h-5 w-5 text-red-500 inline-block" aria-label="Urgent" />
-        )}
-      </TableCell>
-
-      <TableCell className="w-12 pr-4 align-top py-4">
-        {isTruncatable && (
-          <Button
-            data-testid={`notification-expand-btn-${notification.id}`}
-            variant="ghost"
-            size="icon"
-            onClick={() => onToggleExpand(notification.id)}
-            className="h-8 w-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-            aria-label={isExpanded ? 'Collapse message' : 'Expand message'}
-          >
-            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-        )}
+        <div className="flex items-center gap-2 mt-2">
+          <span className={cn('text-sm', isRead ? 'text-gray-400' : 'text-gray-600')}>
+            {formatDistanceToNow(new Date(notification.timestamp), { addSuffix: true })}
+          </span>
+          <NotificationTypeBadge type={notification.notification_type} />
+          {notification.urgent && (
+            <AlertCircle className="h-4 w-4 text-red-500 shrink-0" aria-label="Urgent" />
+          )}
+          {isTruncatable && (
+            <span className="ml-auto text-gray-400">
+              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </span>
+          )}
+        </div>
       </TableCell>
     </TableRow>
   );

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { trackEvent } from '@/lib/analytics';
-import { ANALYTICS_EVENTS } from '@/constants/analytics';
+import { trackEvent, trackFeatureView } from '@/lib/analytics';
+import { ANALYTICS_EVENTS, FEATURES } from '@/constants/analytics';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { NotificationsList } from '@/components/notifications/NotificationsList';
 import { NotificationPreferencesDialog } from '@/components/notifications/NotificationPreferencesDialog';
+import { NotificationTypeFilter } from '@/components/notifications/NotificationTypeFilter';
 import { useConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import {
   useNotifications,
@@ -17,32 +18,33 @@ import {
   useUnreadCount,
 } from '@/hooks/api/useNotifications';
 import { buildFilters } from '@/lib/notifications';
-import type { NotificationTab } from '@/types/notifications';
+import type { NotificationTab, NotificationType } from '@/types/notifications';
 import { DEFAULT_PAGE_SIZE, NOTIFICATION_TABS } from '@/constants/notifications';
-import { trackFeatureView } from '@/lib/analytics';
-import { FEATURES } from '@/constants/analytics';
 
 const TAB_TRIGGER_CLASS =
   'relative bg-transparent border-0 shadow-none rounded-none px-1 py-2.5 text-sm font-medium uppercase tracking-wide text-gray-500 cursor-pointer data-[state=active]:text-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-transparent data-[state=active]:after:bg-teal-600';
 
 export default function NotificationsPage() {
   const [activeTab, setActiveTab] = useState<NotificationTab>('all');
+  const [activeTypeFilters, setActiveTypeFilters] = useState<NotificationType[]>([]);
   const [showPreferences, setShowPreferences] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const { unreadCount, mutate: mutateUnreadCount } = useUnreadCount();
-  const filters = buildFilters(activeTab, page, pageSize);
+  const filters = buildFilters(activeTab, page, pageSize, {
+    notification_types: activeTypeFilters.length > 0 ? activeTypeFilters : undefined,
+  });
   const { notifications, totalCount, mutate, isLoading } = useNotifications(filters);
   const { markAsRead, markAllAsRead } = useNotificationActions();
   const { confirm, DialogComponent: ConfirmDialog } = useConfirmationDialog();
 
-  // Reset selection and page when tab changes
+  // Reset selection and page when tab or type filter changes
   useEffect(() => {
     setSelectedIds([]);
     setPage(1);
-  }, [activeTab]);
+  }, [activeTab, activeTypeFilters]);
 
   // Reset page when page size changes
   useEffect(() => {
@@ -51,7 +53,6 @@ export default function NotificationsPage() {
 
   const handleMarkAsRead = async () => {
     if (selectedIds.length === 0) return;
-
     const success = await markAsRead(selectedIds, true);
     if (success) {
       await mutate();
@@ -62,7 +63,6 @@ export default function NotificationsPage() {
 
   const handleMarkAsUnread = async () => {
     if (selectedIds.length === 0) return;
-
     const success = await markAsRead(selectedIds, false);
     if (success) {
       await mutate();
@@ -78,9 +78,7 @@ export default function NotificationsPage() {
       confirmText: 'Mark all as read',
       cancelText: 'Cancel',
       type: 'info',
-      onConfirm: () => {},
     });
-
     if (!confirmed) return;
 
     const success = await markAllAsRead();
@@ -90,20 +88,6 @@ export default function NotificationsPage() {
       await mutateUnreadCount();
       setSelectedIds([]);
     }
-  };
-
-  const handleClearSelection = () => {
-    setSelectedIds([]);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    setSelectedIds([]);
-  };
-
-  const handlePageSizeChange = (newSize: number) => {
-    setPageSize(newSize);
-    setSelectedIds([]);
   };
 
   const handleTabChange = (value: string) => {
@@ -180,8 +164,8 @@ export default function NotificationsPage() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="px-6">
+        {/* Read/unread tabs + type filter */}
+        <div className="px-6 flex items-center gap-4">
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="bg-transparent p-0 h-auto gap-4">
               {NOTIFICATION_TABS.map((tab) => (
@@ -191,6 +175,10 @@ export default function NotificationsPage() {
               ))}
             </TabsList>
           </Tabs>
+
+          <div className="h-4 w-px bg-border" />
+
+          <NotificationTypeFilter selected={activeTypeFilters} onChange={setActiveTypeFilters} />
         </div>
       </div>
 
@@ -201,19 +189,22 @@ export default function NotificationsPage() {
           totalCount={totalCount}
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
-          onClearSelection={handleClearSelection}
+          onClearSelection={() => setSelectedIds([])}
           page={page}
           pageSize={pageSize}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
+          onPageChange={(p) => {
+            setPage(p);
+            setSelectedIds([]);
+          }}
+          onPageSizeChange={(s) => {
+            setPageSize(s);
+            setSelectedIds([]);
+          }}
           isLoading={isLoading}
         />
       </div>
 
-      {/* Preferences Dialog */}
       <NotificationPreferencesDialog open={showPreferences} onOpenChange={setShowPreferences} />
-
-      {/* Confirmation Dialog */}
       <ConfirmDialog />
     </div>
   );

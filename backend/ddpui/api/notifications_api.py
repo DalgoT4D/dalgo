@@ -1,9 +1,12 @@
-from ninja import Router
+from typing import List, Optional
+
+from ninja import Query, Router
 from ninja.errors import HttpError
 from ddpui import auth
 from ddpui.core.notifications import notifications_functions
 from ddpui.schemas.notifications_api_schemas import (
     CreateNotificationPayloadSchema,
+    NotificationType,
     UpdateReadStatusSchema,
     UpdateReadStatusSchemav1,
 )
@@ -66,15 +69,32 @@ def get_notification_recipients(request, notification_id: int):
 
 
 @notification_router.get("/v1")
-def get_user_notifications_v1(request, page: int = 1, limit: int = 10, read_status: int = None):
+def get_user_notifications_v1(
+    request,
+    page: int = 1,
+    limit: int = 10,
+    read_status: int = None,
+    notification_type: Optional[List[str]] = Query(None),
+    exclude_announcements: bool = False,
+):
     """
     Returns all the notifications for a particular user.
-    It returns only the past notifications,i.e,notifications
-    which are already sent
+    notification_type accepts one or more category values (repeated param).
+    exclude_announcements=true excludes announcement-type rows (used by the Notifications tab).
     """
+    if notification_type:
+        invalid = [t for t in notification_type if t not in NotificationType._value2member_map_]
+        if invalid:
+            raise HttpError(422, f"Invalid notification_type(s): {invalid}")
+
     orguser = request.orguser
     error, result = notifications_functions.fetch_user_notifications_v1(
-        orguser, page, limit, read_status
+        orguser,
+        page,
+        limit,
+        read_status,
+        notification_types=notification_type or [],
+        exclude_announcements=exclude_announcements,
     )
     if error is not None:
         raise HttpError(400, error)

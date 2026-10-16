@@ -33,6 +33,7 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
 
   const [message, setMessage] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
+  const [notificationType, setNotificationType] = useState<'platform' | 'announcement'>('platform');
   const [urgent, setUrgent] = useState(false);
   const [audienceMode, setAudienceMode] = useState<AudienceMode>('whole_platform');
   const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
@@ -95,6 +96,7 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
         superset_clients: supersetClients,
         send_in_app: sendInApp,
         send_email: sendEmail,
+        notification_type: notificationType,
       });
       trackEvent(ANALYTICS_EVENTS.ADMIN_BROADCAST_SENT, {
         org_count: orgIds?.length ?? 0,
@@ -102,6 +104,7 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
       });
       setMessage('');
       setEmailSubject('');
+      setNotificationType('platform');
       setUrgent(false);
       setAudienceMode('whole_platform');
       setSelectedOrgIds([]);
@@ -128,6 +131,38 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
             value={emailSubject}
             onChange={(e) => setEmailSubject(e.target.value)}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Type</Label>
+          <RadioGroup
+            value={notificationType}
+            onValueChange={(v) => setNotificationType(v as 'platform' | 'announcement')}
+            className="flex gap-6"
+          >
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="platform" id="type-platform" data-testid="type-platform" />
+              <div>
+                <Label htmlFor="type-platform" className="cursor-pointer">
+                  Platform
+                </Label>
+                <p className="text-xs text-muted-foreground">Maintenance, outages, RCAs</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem
+                value="announcement"
+                id="type-announcement"
+                data-testid="type-announcement"
+              />
+              <div>
+                <Label htmlFor="type-announcement" className="cursor-pointer">
+                  Announcement
+                </Label>
+                <p className="text-xs text-muted-foreground">Product news, new features</p>
+              </div>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">

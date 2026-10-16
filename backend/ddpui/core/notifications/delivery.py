@@ -10,6 +10,7 @@ from ddpui.core.notifications.notifications_functions import (
     SentToEnum,
     NotificationDataSchema,
 )
+from ddpui.schemas.notifications_api_schemas import NotificationType
 from ddpui.utils.discord import send_discord_notification
 
 logger = CustomLogger("ddpui")
@@ -25,7 +26,11 @@ def notify_org_managers(org: Org, message: str, email_subject: str):
         return
     error, response = create_notification(
         NotificationDataSchema(
-            author="Dalgo", message=message, email_subject=email_subject, recipients=recipients
+            author="Dalgo",
+            message=message,
+            email_subject=email_subject,
+            recipients=recipients,
+            notification_type=NotificationType.PIPELINE,
         )
     )
     if error:
