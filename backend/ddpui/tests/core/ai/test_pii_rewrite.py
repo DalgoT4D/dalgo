@@ -264,7 +264,9 @@ def test_bigquery_mixed_case_columns_resolve_and_hash():
     assert out.count("TO_HEX(MD5(") == 1
 
 
-@pytest.mark.parametrize("column", ["School_State", "School Name", "विद्यालय_नाम", "STATE", "phone"])
+@pytest.mark.parametrize(
+    "column", ["School_State", "School Name", "विद्यालय_नाम", "STATE", "phone"]
+)
 def test_column_key_matches_the_card_key_on_both_warehouses(column):
     # lookup_column_values checks ticks with column_key; it must produce exactly
     # the key the card offered, or a ticked column runs unhashed
