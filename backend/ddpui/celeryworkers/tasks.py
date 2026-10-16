@@ -23,6 +23,7 @@ from ddpui.core.webhooks.webhook_functions import (
     do_handle_prefect_webhook,
     get_org_from_flow_run,
 )
+from ddpui.core.notifications import notifications_functions
 from ddpui.core.notifications.delivery import notify_org_managers
 from ddpui.core.notifications.triggers.schema_change import notify_schema_change
 
@@ -1245,13 +1246,8 @@ def purge_old_notifications() -> None:
 
     NotificationRecipient rows are removed via CASCADE on the Notification FK.
     """
-    import os
-    from ddpui.core.notifications.notifications_functions import (
-        purge_old_notifications as _purge,
-    )
-
     retention_days = int(os.getenv("NOTIFICATION_RETENTION_DAYS", "30"))
-    deleted = _purge(retention_days)
+    deleted = notifications_functions.purge_old_notifications(retention_days)
     logger.info("purge_old_notifications: deleted=%d retention_days=%d", deleted, retention_days)
 
 

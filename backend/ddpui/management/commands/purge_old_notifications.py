@@ -5,10 +5,13 @@ Actual deletion is handled by notifications_functions.purge_old_notifications.
 """
 
 import os
+from datetime import timedelta
 
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 from ddpui.core.notifications.notifications_functions import purge_old_notifications
+from ddpui.models.notifications import Notification
 from ddpui.utils.custom_logger import CustomLogger
 
 logger = CustomLogger("ddpui")
@@ -35,10 +38,6 @@ class Command(BaseCommand):
         retention_days = options.get("days") or int(os.getenv("NOTIFICATION_RETENTION_DAYS", "30"))
 
         if dry_run:
-            from django.utils import timezone
-            from datetime import timedelta
-            from ddpui.models.notifications import Notification
-
             cutoff = timezone.now() - timedelta(days=retention_days)
             count = Notification.objects.filter(timestamp__lt=cutoff).count()
             self.stdout.write(

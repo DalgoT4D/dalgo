@@ -1,7 +1,8 @@
 from typing import Tuple, Optional, Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timedelta
 from celery.result import AsyncResult
 from django.core.paginator import Paginator
+from django.utils import timezone as django_timezone
 from ddpui.models.notifications import (
     Notification,
     NotificationRecipient,
@@ -482,9 +483,6 @@ def purge_old_notifications(retention_days: int) -> int:
     NotificationRecipient rows are removed via CASCADE on the Notification FK.
     Returns the number of Notification rows deleted.
     """
-    from django.utils import timezone
-    from datetime import timedelta
-
-    cutoff = timezone.now() - timedelta(days=retention_days)
+    cutoff = django_timezone.now() - timedelta(days=retention_days)
     deleted, _ = Notification.objects.filter(timestamp__lt=cutoff).delete()
     return deleted
