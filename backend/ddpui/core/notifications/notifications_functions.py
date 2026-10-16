@@ -474,3 +474,17 @@ def mark_all_notifications_as_read(
         return None, {"success": True, "updated_count": updated_count}
     except Exception as e:
         return str(e), None
+
+
+def purge_old_notifications(retention_days: int) -> int:
+    """Delete Notification rows older than retention_days.
+
+    NotificationRecipient rows are removed via CASCADE on the Notification FK.
+    Returns the number of Notification rows deleted.
+    """
+    from django.utils import timezone
+    from datetime import timedelta
+
+    cutoff = timezone.now() - timedelta(days=retention_days)
+    deleted, _ = Notification.objects.filter(timestamp__lt=cutoff).delete()
+    return deleted
