@@ -11,7 +11,7 @@ Two ideas run through this page:
 - A **source** is a system where your data already lives — KoboToolbox, Google Sheets, CommCare, Avni, Zoho, and many others. Adding a source saves the access details for that system.
 - A **connection** is a sync between one source and your warehouse. It decides *which* tables, sheets, or forms get copied over, and how often. One source can have several connections.
 
-Your **warehouse** — the single database everything is copied into — is set up once in [Settings → Warehouse](../../settings/warehouse.md). The name of the warehouse in use is shown next to the **Ingest** heading; select it to open its settings.
+Your **warehouse** — the single database everything is copied into — is set up once in [Settings → Data](../../settings/data.md). The name of the warehouse in use is shown next to the **Ingest** heading; select it to open its settings.
 
 ## Reading the page
 
@@ -117,4 +117,4 @@ If tables or columns change in your source, Dalgo notices during the next sync.
 
 ---
 
-**Next:** [Warehouse](../../settings/warehouse.md) · [Transform](../transform/index.md) · [Orchestrate](../orchestrate.md)
+**Next:** [Settings → Data](../../settings/data.md) · [Transform](../transform/index.md) · [Orchestrate](../orchestrate.md)
