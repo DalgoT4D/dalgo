@@ -241,6 +241,7 @@ def get_notification_history(
             "urgent": notification.urgent,
             "scheduled_time": notification.scheduled_time,
             "sent_time": notification.sent_time,
+            "notification_type": notification.notification_type,
         }
         for notification in paginated_notifications
     ]

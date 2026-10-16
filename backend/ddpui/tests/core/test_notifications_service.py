@@ -24,7 +24,11 @@ from ddpui.core.notifications.notifications_functions import (
     get_unread_notifications_count,
     mark_all_notifications_as_read,
 )
-from ddpui.schemas.notifications_api_schemas import SentToEnum, NotificationDataSchema
+from ddpui.schemas.notifications_api_schemas import (
+    SentToEnum,
+    NotificationDataSchema,
+    NotificationType,
+)
 from ddpui.tests.api_tests.test_user_org_api import mock_request, seed_db
 
 from django.contrib.auth.models import User
@@ -637,3 +641,226 @@ def test_mark_all_notifications_as_read_user_not_exist():
     assert error is None  # Function doesn't check if user exists, just updates matching records
     assert result["success"] is True
     assert result["updated_count"] == 0
+
+
+# ===========================================================================
+# Notification categorization — notification_type field
+# ===========================================================================
+
+
+def test_create_notification_persists_notification_type(orguser):
+    """notification_type on NotificationDataSchema lands on the Notification row"""
+    error, result = create_notification(
+        NotificationDataSchema(
+            author="test_author",
+            message="pipeline job failed",
+            email_subject="Pipeline failure",
+            recipients=[orguser.id],
+            notification_type=NotificationType.PIPELINE,
+        )
+    )
+    assert error is None
+    notification = Notification.objects.get(id=result["res"]["notification_id"])
+    assert notification.notification_type == NotificationType.PIPELINE.value
+    notification.delete()
+
+
+def test_create_notification_type_defaults_to_none(orguser):
+    """omitting notification_type leaves the field NULL -- existing callers unaffected"""
+    error, result = create_notification(
+        NotificationDataSchema(
+            author="test_author",
+            message="some message",
+            email_subject="subject",
+            recipients=[orguser.id],
+        )
+    )
+    assert error is None
+    notification = Notification.objects.get(id=result["res"]["notification_id"])
+    assert notification.notification_type is None
+    notification.delete()
+
+
+def test_fetch_user_notifications_v1_returns_notification_type_in_response(orguser):
+    """notification_type is included in every item of the v1 response"""
+    notification = Notification.objects.create(
+        author="test_author",
+        message="pipeline failed",
+        urgent=False,
+        sent_time=datetime.now(),
+        notification_type=NotificationType.PIPELINE.value,
+    )
+    NotificationRecipient.objects.create(notification=notification, recipient=orguser)
+
+    error, result = fetch_user_notifications_v1(orguser, 1, 10)
+
+    assert error is None
+    item = next(n for n in result["res"] if n["id"] == notification.id)
+    assert item["notification_type"] == NotificationType.PIPELINE.value
+
+    notification.delete()
+
+
+def test_fetch_user_notifications_v1_filters_by_single_type(orguser):
+    """passing notification_types=['pipeline'] returns only pipeline notifications"""
+    pipeline_notif = Notification.objects.create(
+        author="test_author",
+        message="pipeline failed",
+        urgent=False,
+        sent_time=datetime.now(),
+        notification_type=NotificationType.PIPELINE.value,
+    )
+    sharing_notif = Notification.objects.create(
+        author="test_author",
+        message="dashboard shared",
+        urgent=False,
+        sent_time=datetime.now(),
+        notification_type=NotificationType.SHARING.value,
+    )
+    NotificationRecipient.objects.create(notification=pipeline_notif, recipient=orguser)
+    NotificationRecipient.objects.create(notification=sharing_notif, recipient=orguser)
+
+    error, result = fetch_user_notifications_v1(
+        orguser, 1, 10, notification_types=[NotificationType.PIPELINE.value]
+    )
+
+    ids = {n["id"] for n in result["res"]}
+    assert error is None
+    assert pipeline_notif.id in ids
+    assert sharing_notif.id not in ids
+
+    pipeline_notif.delete()
+    sharing_notif.delete()
+
+
+def test_fetch_user_notifications_v1_filters_by_multiple_types(orguser):
+    """passing notification_types=[…] returns notifications of any of those types"""
+    pipeline_notif = Notification.objects.create(
+        author="test_author",
+        message="pipeline failed",
+        urgent=False,
+        sent_time=datetime.now(),
+        notification_type=NotificationType.PIPELINE.value,
+    )
+    sharing_notif = Notification.objects.create(
+        author="test_author",
+        message="dashboard shared",
+        urgent=False,
+        sent_time=datetime.now(),
+        notification_type=NotificationType.SHARING.value,
+    )
+    platform_notif = Notification.objects.create(
+        author="test_author",
+        message="maintenance tonight",
+        urgent=False,
+        sent_time=datetime.now(),
+        notification_type=NotificationType.PLATFORM.value,
+    )
+    NotificationRecipient.objects.create(notification=pipeline_notif, recipient=orguser)
+    NotificationRecipient.objects.create(notification=sharing_notif, recipient=orguser)
+    NotificationRecipient.objects.create(notification=platform_notif, recipient=orguser)
+
+    error, result = fetch_user_notifications_v1(
+        orguser,
+        1,
+        10,
+        notification_types=[NotificationType.PIPELINE.value, NotificationType.SHARING.value],
+    )
+
+    ids = {n["id"] for n in result["res"]}
+    assert error is None
+    assert pipeline_notif.id in ids
+    assert sharing_notif.id in ids
+    assert platform_notif.id not in ids
+
+    pipeline_notif.delete()
+    sharing_notif.delete()
+    platform_notif.delete()
+
+
+def test_fetch_user_notifications_v1_no_type_filter_returns_all_types(orguser):
+    """omitting notification_types returns notifications of every type (no filter applied)"""
+    pipeline_notif = Notification.objects.create(
+        author="test_author",
+        message="pipeline failed",
+        urgent=False,
+        sent_time=datetime.now(),
+        notification_type=NotificationType.PIPELINE.value,
+    )
+    sharing_notif = Notification.objects.create(
+        author="test_author",
+        message="dashboard shared",
+        urgent=False,
+        sent_time=datetime.now(),
+        notification_type=NotificationType.SHARING.value,
+    )
+    untyped_notif = Notification.objects.create(
+        author="test_author",
+        message="legacy notification with no type",
+        urgent=False,
+        sent_time=datetime.now(),
+    )
+    NotificationRecipient.objects.create(notification=pipeline_notif, recipient=orguser)
+    NotificationRecipient.objects.create(notification=sharing_notif, recipient=orguser)
+    NotificationRecipient.objects.create(notification=untyped_notif, recipient=orguser)
+
+    error, result = fetch_user_notifications_v1(orguser, 1, 10)
+
+    ids = {n["id"] for n in result["res"]}
+    assert error is None
+    assert pipeline_notif.id in ids
+    assert sharing_notif.id in ids
+    assert untyped_notif.id in ids
+
+    pipeline_notif.delete()
+    sharing_notif.delete()
+    untyped_notif.delete()
+
+
+def test_fetch_user_notifications_v1_excludes_announcements_flag(orguser):
+    """exclude_announcements=True removes announcement-type notifications from the list"""
+    announcement = Notification.objects.create(
+        author="test_author",
+        message="new feature announcement",
+        urgent=False,
+        sent_time=datetime.now(),
+        notification_type=NotificationType.ANNOUNCEMENT.value,
+    )
+    platform_notif = Notification.objects.create(
+        author="test_author",
+        message="scheduled maintenance",
+        urgent=False,
+        sent_time=datetime.now(),
+        notification_type=NotificationType.PLATFORM.value,
+    )
+    NotificationRecipient.objects.create(notification=announcement, recipient=orguser)
+    NotificationRecipient.objects.create(notification=platform_notif, recipient=orguser)
+
+    error, result = fetch_user_notifications_v1(orguser, 1, 10, exclude_announcements=True)
+
+    ids = {n["id"] for n in result["res"]}
+    assert error is None
+    assert announcement.id not in ids
+    assert platform_notif.id in ids
+
+    announcement.delete()
+    platform_notif.delete()
+
+
+def test_get_notification_history_includes_notification_type(orguser):
+    """get_notification_history includes notification_type in each history item"""
+    notification = Notification.objects.create(
+        author="test_author",
+        message="pipeline failed",
+        urgent=False,
+        notification_type=NotificationType.PIPELINE.value,
+    )
+
+    error, result = get_notification_history(1, 10)
+
+    assert error is None
+    item = next((n for n in result["res"] if n["id"] == notification.id), None)
+    assert item is not None
+    assert item["notification_type"] == NotificationType.PIPELINE.value
+
+    notification.delete()

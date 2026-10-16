@@ -29,7 +29,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   announcement: 'Announcement',
 };
 
-// Types that appear in the personal Notifications tab (excludes announcements)
+// All types a user can receive and filter in the personal Notifications tab
 export const PERSONAL_NOTIFICATION_TYPES: NotificationType[] = [
   'pipeline',
   'sharing',
