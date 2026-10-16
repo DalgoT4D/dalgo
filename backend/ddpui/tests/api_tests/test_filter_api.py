@@ -229,37 +229,6 @@ class TestGetFilterPreviewNarrowing:
             )
         assert excinfo.value.status_code == 400
 
-    def test_narrowed_query_falls_back_to_full_list_on_error(self, orguser, seed_db):
-        """If a constraint's column was renamed/removed, the narrowed query errors --
-        retry unnarrowed rather than breaking the child (spec: dependent-filters)."""
-        mock_results = [{"value": "Ernakulam", "count": 4}, {"value": "Pune", "count": 2}]
-
-        with patch("ddpui.api.filter_api.OrgWarehouse.objects") as mock_ow, patch(
-            "ddpui.services.dashboard_service.execute_query"
-        ) as mock_exec, patch("ddpui.api.filter_api.get_warehouse_client") as mock_wc:
-            mock_ow.filter.return_value.first.return_value = MagicMock(wtype="postgres")
-            mock_wc.return_value = MagicMock()
-            mock_exec.side_effect = [Exception("column state does not exist"), mock_results]
-
-            request = mock_request(orguser)
-            response = get_filter_preview(
-                request,
-                schema_name="public",
-                table_name="schools",
-                column_name="district",
-                filter_type="value",
-                constraints='[{"column": "state", "operator": "in", "value": ["Kerala"]}]',
-            )
-
-            # Full, unnarrowed list came back -- the child didn't break.
-            assert len(response.options) == 2
-            assert mock_exec.call_count == 2
-            # First attempt was narrowed (2 clauses); the retry has only the NOT NULL clause.
-            first_query_builder = mock_exec.call_args_list[0][0][1]
-            retry_query_builder = mock_exec.call_args_list[1][0][1]
-            assert len(first_query_builder.where_clauses) == 2
-            assert len(retry_query_builder.where_clauses) == 1
-
     def test_error_without_constraints_still_raises(self, orguser, seed_db):
         """An independent filter's query failure is a real error -- no fallback to swallow it"""
         with patch("ddpui.api.filter_api.OrgWarehouse.objects") as mock_ow, patch(

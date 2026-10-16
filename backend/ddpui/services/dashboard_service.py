@@ -1308,45 +1308,27 @@ def get_value_filter_options_with_fallback(
     constraints: Optional[List[Dict[str, Any]]] = None,
     search: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
-    """Distinct values + counts for a dropdown filter, narrowed by any active constraints.
-    Falls back to the unnarrowed list if the narrowed query fails.
+    """Distinct values + counts for a dropdown filter, optionally narrowed by constraints and/or a search term."""
 
-    `search` matches case-insensitively in the warehouse, so values past `limit` stay
-    reachable. It applies to the fallback too — a constraint failure shouldn't widen it.
-    """
     search_term = (search or "").strip()
 
-    def _build(with_constraints: bool) -> AggQueryBuilder:
-        qb = AggQueryBuilder()
-        qb.add_column(column(column_name).label("value"))
-        qb.add_aggregate_column(None, "count", alias="count")
-        qb.fetch_from(table_name, schema_name)
-        qb.where_clause(column(column_name).isnot(None))
-        if with_constraints:
-            apply_chart_filters(qb, constraints or [])
-        if search_term:
-            # Case-insensitive "contains" match; works on Postgres and BigQuery.
-            qb.where_clause(
-                func.lower(cast(column(column_name), String)).contains(
-                    search_term.lower(), autoescape=True
-                )
+    qb = AggQueryBuilder()
+    qb.add_column(column(column_name).label("value"))
+    qb.add_aggregate_column(None, "count", alias="count")
+    qb.fetch_from(table_name, schema_name)
+    qb.where_clause(column(column_name).isnot(None))
+    apply_chart_filters(qb, constraints or [])
+    if search_term:
+        # Case-insensitive "contains" match; works on Postgres and BigQuery.
+        qb.where_clause(
+            func.lower(cast(column(column_name), String)).contains(
+                search_term.lower(), autoescape=True
             )
-        qb.group_cols_by(column_name)
-        qb.order_cols_by([("count", "desc"), ("value", "asc")])
-        qb.limit_rows(limit)
-        return qb
-
-    try:
-        return execute_query(warehouse_client, _build(True))
-    except Exception as narrow_err:
-        if not constraints:
-            raise
-        constraint_columns = [c.get("column") for c in constraints]
-        logger.warning(
-            f"Narrowed filter preview failed for columns={constraint_columns}, "
-            f"falling back to unnarrowed list ({type(narrow_err).__name__})"
         )
-        return execute_query(warehouse_client, _build(False))
+    qb.group_cols_by(column_name)
+    qb.order_cols_by([("count", "desc"), ("value", "asc")])
+    qb.limit_rows(limit)
+    return execute_query(warehouse_client, qb)
 
 
 def delete_dashboard_safely(dashboard_id: int, orguser: OrgUser) -> tuple[bool, str]:
