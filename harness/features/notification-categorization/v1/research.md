@@ -1,8 +1,8 @@
-# Notifications Rehaul — Research
+# Notification Categorization — Research
 
 ## What this file covers
 
-Net-new findings for the notifications rehaul (v1). Does not duplicate anything
+Net-new findings for the notification categorization (v1). Does not duplicate anything
 already in `landmarks.md` (which does not exist yet for this codebase).
 
 ---

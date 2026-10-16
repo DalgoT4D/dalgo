@@ -1,7 +1,7 @@
-# Notifications Rehaul — Implementation Plan v1
+# Notification Categorization — Implementation Plan v1
 
 **Spec:** no formal spec — feature described in conversation (2026-10-16)
-**Research:** `harness/features/notifications-rehaul/v1/research.md`
+**Research:** `harness/features/notification-categorization/v1/research.md`
 **Services affected:** `backend/` (Django), `webapp/` (Next.js)
 
 ---
