@@ -61,16 +61,10 @@ PATTERNS = [
         ),
         NotificationType.PIPELINE,
     ),
-    # SCHEMA_CHANGE — celery task messages vary; catch common keywords
+    # SCHEMA_CHANGE — tasks.py detect_schema_changes_for_org messages
     (
         re.compile(
-            r"(schema.?change"
-            r"|breaking change"
-            r"|new column"
-            r"|column removed"
-            r"|column renamed"
-            r"|airbyte.*schema"
-            r"|schema.*airbyte)",
+            r"(schema.?change" r"|breaking change)",
             re.IGNORECASE,
         ),
         NotificationType.SCHEMA_CHANGE,
