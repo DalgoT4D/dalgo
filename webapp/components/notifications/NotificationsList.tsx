@@ -69,8 +69,8 @@ export function NotificationsList({
         <div className="flex-1 overflow-auto px-6 pt-4">
           <div className="bg-white rounded-lg border shadow-sm">
             <div className="p-4 space-y-3">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="flex items-center gap-4 py-4">
+              {Array.from({ length: 8 }, (_, i) => `skeleton-${i}`).map((key) => (
+                <div key={key} className="flex items-center gap-4 py-4">
                   <Skeleton className="h-4 w-4 rounded" />
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-full" />
@@ -175,8 +175,6 @@ export function NotificationsList({
                 <TableRow>
                   <TableHead>Select</TableHead>
                   <TableHead>Message</TableHead>
-                  <TableHead>Urgent</TableHead>
-                  <TableHead>Expand</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

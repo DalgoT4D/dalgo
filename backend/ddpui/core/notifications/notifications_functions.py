@@ -17,7 +17,11 @@ from ddpui.utils.custom_logger import CustomLogger
 from ddpui.utils.discord import send_discord_notification
 from ddpui.utils.awsses import send_html_message
 from ddpui.core.notifications.templates import render_notification_email
-from ddpui.schemas.notifications_api_schemas import SentToEnum, NotificationDataSchema
+from ddpui.schemas.notifications_api_schemas import (
+    SentToEnum,
+    NotificationDataSchema,
+    NotificationType,
+)
 from ddpui.celeryworkers.moretasks import schedule_notification_task
 
 logger = CustomLogger("notifications")
@@ -167,6 +171,7 @@ def create_notification(
         target_org_ids=notification_data.target_org_ids,
         send_in_app=notification_data.send_in_app,
         send_email=notification_data.send_email,
+        notification_type=notification_data.notification_type,
     )
 
     if not notification:
@@ -319,20 +324,35 @@ def fetch_user_notifications(
 
 
 def fetch_user_notifications_v1(
-    orguser: OrgUser, page: int, limit: int, read_status: int = None
+    orguser: OrgUser,
+    page: int,
+    limit: int,
+    read_status: int = None,
+    notification_types: Optional[list] = None,
+    exclude_announcements: bool = False,
 ) -> Tuple[Optional[None], Dict[str, Any]]:
     """returns all notifications for a specific user"""
 
+    filters: Dict[str, Any] = {
+        "recipient": orguser,
+        "notification__sent_time__isnull": False,
+        "notification__send_in_app": True,
+    }
+    if read_status is not None:
+        filters["read_status"] = read_status == 1
+    if notification_types:
+        filters["notification__notification_type__in"] = notification_types
+
     notifications = (
-        NotificationRecipient.objects.filter(
-            recipient=orguser,
-            notification__sent_time__isnull=False,
-            notification__send_in_app=True,
-            **({"read_status": read_status == 1} if read_status is not None else {}),
-        )
+        NotificationRecipient.objects.filter(**filters)
         .select_related("notification")
         .order_by("-notification__timestamp")
     )
+
+    if exclude_announcements:
+        notifications = notifications.exclude(
+            notification__notification_type=NotificationType.ANNOUNCEMENT
+        )
 
     paginator = Paginator(notifications, limit)
     paginated_notifications = paginator.get_page(page)
@@ -351,6 +371,7 @@ def fetch_user_notifications_v1(
                 "scheduled_time": notification.scheduled_time,
                 "sent_time": notification.sent_time,
                 "read_status": recipient.read_status,
+                "notification_type": notification.notification_type,
             }
         )
 

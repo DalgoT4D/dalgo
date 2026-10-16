@@ -18,6 +18,9 @@ class Notification(models.Model):
     target_org_ids = models.JSONField(null=True, blank=True)
     send_in_app = models.BooleanField(default=True)
     send_email = models.BooleanField(default=True)
+    # nullable so existing rows are unaffected; new rows always have a type.
+    # no choices= so adding/removing types never requires a migration.
+    notification_type = models.CharField(max_length=20, null=True, blank=True)
 
 
 class NotificationRecipient(models.Model):
