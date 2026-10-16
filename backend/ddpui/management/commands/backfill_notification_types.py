@@ -50,10 +50,13 @@ PATTERNS = [
         ),
         NotificationType.ACCESS,
     ),
-    # PIPELINE — delivery.py notify_org_managers (pipeline failure alerts)
+    # PIPELINE — delivery.py notify_org_managers (pipeline failure alerts).
+    # "A job has failed" comes from webhook_functions._build_failure_message_for_org_users
+    # when no pipeline/task name is available — it doesn't contain "pipeline" or "prefect",
+    # so it needs its own pattern branch.
     (
         re.compile(
-            r"(Pipeline Failure" r"|pipeline.*fail" r"|flow.?run" r"|prefect)",
+            r"(Pipeline Failure" r"|pipeline.*fail" r"|a job has failed" r"|flow.?run" r"|prefect)",
             re.IGNORECASE,
         ),
         NotificationType.PIPELINE,
