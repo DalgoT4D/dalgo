@@ -224,6 +224,26 @@ def test_get_current_userv2_has_user(authuser, org_with_workspace, org_without_w
         assert response[0].has_seen_resource_sharing_notice is True
 
 
+def test_get_current_userv2_reports_each_orgs_own_warehouse_type(
+    authuser, org_with_workspace, org_without_workspace
+):
+    """every row carried the warehouse type of the org the request came from, so a
+    user in a postgres org and a bigquery org saw postgres for both"""
+    OrgWarehouse.objects.create(org=org_with_workspace, wtype="postgres")
+    OrgWarehouse.objects.create(org=org_without_workspace, wtype="bigquery")
+    role = Role.objects.filter(slug=ACCOUNT_MANAGER_ROLE).first()
+    requesting = OrgUser.objects.create(user=authuser, org=org_with_workspace, new_role=role)
+    OrgUser.objects.create(user=authuser, org=org_without_workspace, new_role=role)
+
+    response = get_current_user_v2(mock_request(requesting))
+
+    wtypes = {row.org.slug: row.wtype for row in response}
+    assert wtypes == {
+        org_with_workspace.slug: "postgres",
+        org_without_workspace.slug: "bigquery",
+    }
+
+
 def test_get_current_userv2_returns_the_plan_window(authuser, org_with_workspace):
     """the org plan's start/end dates ride along on currentuserv2
 
