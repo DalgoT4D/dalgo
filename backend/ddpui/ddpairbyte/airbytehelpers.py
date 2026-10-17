@@ -874,7 +874,9 @@ def update_destination(org: Org, destination_id: str, payload: AirbyteDestinatio
             airbyte_creds = json.loads(payload.config["credentials_json"])
 
         airbyte_creds["dataset_location"] = payload.config["dataset_location"]
-        airbyte_creds["transformation_priority"] = payload.config["transformation_priority"]
+        # newer destination-bigquery specs dropped transformation_priority
+        if "transformation_priority" in payload.config:
+            airbyte_creds["transformation_priority"] = payload.config["transformation_priority"]
 
         if warehouse.bq_location != payload.config["dataset_location"]:
             warehouse.bq_location = payload.config["dataset_location"]
@@ -909,7 +911,11 @@ def create_warehouse(org: Org, payload: OrgWarehouseSchema) -> OrgWarehouse:
         credentials_json = json.loads(payload.airbyteConfig["credentials_json"])
         airbyte_creds = credentials_json
         airbyte_creds["dataset_location"] = payload.airbyteConfig["dataset_location"]
-        airbyte_creds["transformation_priority"] = payload.airbyteConfig["transformation_priority"]
+        # newer destination-bigquery specs dropped transformation_priority
+        if "transformation_priority" in payload.airbyteConfig:
+            airbyte_creds["transformation_priority"] = payload.airbyteConfig[
+                "transformation_priority"
+            ]
     else:  # postgres
         airbyte_creds = payload.airbyteConfig
 
