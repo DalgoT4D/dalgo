@@ -117,6 +117,10 @@ export interface FilterOption {
   count?: number;
 }
 
+export interface ValueFilterPreviewResponse {
+  options?: FilterOption[];
+}
+
 export interface NumericalFilterStats {
   min_value: number;
   max_value: number;

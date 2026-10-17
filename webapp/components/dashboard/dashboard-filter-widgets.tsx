@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
@@ -11,12 +11,17 @@ import type {
   ValueFilterConfig,
   NumericalFilterConfig,
   FilterOption,
+  ValueFilterPreviewResponse,
 } from '@/types/dashboard-filters';
 import { DashboardFilterType, NumericalFilterUIMode } from '@/types/dashboard-filters';
 import { DateTimeFilterWidget } from './datetime-filter-widget';
 import { buildFilterPreviewUrl } from '@/lib/dashboard-filter-utils';
 import useSWR from 'swr';
 import { apiGet } from '@/lib/api';
+import { useDebounce } from '@/hooks/useDebounce';
+import { FILTER_SEARCH_DEBOUNCE_MS } from '@/constants/dashboard-filters';
+import { trackEvent } from '@/lib/analytics';
+import { ANALYTICS_EVENTS } from '@/constants/analytics';
 
 interface FilterWidgetProps {
   filter: DashboardFilterConfig;
@@ -64,16 +69,25 @@ function ValueFilterWidget({
   // current value -- used below to gate the auto-drop effect.
   const isNarrowed = !!(groupNarrowingConstraintsJson && groupNarrowingConstraintsJson !== '[]');
 
-  const apiUrl = buildFilterPreviewUrl({
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm.trim(), FILTER_SEARCH_DEBOUNCE_MS);
+
+  const previewUrlParams = {
     schemaName: filter.schema_name,
     tableName: filter.table_name,
     columnName: filter.column_name,
-    filterType: 'value',
+    filterType: 'value' as const,
     isPublicMode,
     publicToken,
     isReportMode,
     constraintsJson: groupNarrowingConstraintsJson,
-  });
+  };
+
+  const apiUrl = buildFilterPreviewUrl(previewUrlParams);
+  // Carries the same constraints, so searched values respect any active narrowing.
+  const searchUrl = debouncedSearch
+    ? buildFilterPreviewUrl({ ...previewUrlParams, search: debouncedSearch })
+    : null;
 
   // Custom fetcher for public mode with better error handling
   const fetcher = isPublicMode
@@ -107,7 +121,22 @@ function ValueFilterWidget({
     data: filterOptions,
     error: filterOptionsError,
     isLoading: filterOptionsLoading,
-  } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
+  } = useSWR<ValueFilterPreviewResponse>(apiUrl, fetcher, { revalidateOnFocus: false });
+
+  // Finds values the base page was truncated past. keepPreviousData avoids blinking the
+  // dropdown empty between keystrokes.
+  const {
+    data: searchedData,
+    error: searchError,
+    isLoading: searchLoading,
+  } = useSWR<ValueFilterPreviewResponse>(searchUrl, fetcher, {
+    revalidateOnFocus: false,
+    keepPreviousData: true,
+  });
+
+  // keepPreviousData replays the last result once the key goes null, so clearing the box
+  // would otherwise leave that search's rows merged in.
+  const searchedOptions = debouncedSearch ? searchedData?.options : undefined;
 
   // Ensure settings exists with default values
   if (!valueFilter.settings) {
@@ -127,6 +156,49 @@ function ValueFilterWidget({
     [availableOptions]
   );
 
+  // A value picked from a search isn't in the base page, so its option is remembered —
+  // otherwise its chip and label vanish once the term changes.
+  const seenOptions = useRef(new Map<string, FilterOption>()).current;
+  useEffect(() => {
+    (searchedOptions || []).forEach((opt) => seenOptions.set(opt.value, opt));
+  }, [searchedOptions, seenOptions]);
+
+  const searchedComboboxItems = useMemo(() => {
+    const current = searchedOptions || [];
+    const covered = new Set([...current, ...availableOptions].map((opt) => opt.value));
+    const keptSelected = selectedValues
+      .filter((value) => !covered.has(value))
+      .map((value) => seenOptions.get(value))
+      .filter((opt): opt is FilterOption => Boolean(opt));
+    return [...current, ...keptSelected].map((opt) => ({ value: opt.value, label: opt.label }));
+  }, [searchedOptions, availableOptions, selectedValues, seenOptions]);
+
+  const searchProps = {
+    onSearchChange: setSearchTerm,
+    extraItems: searchedComboboxItems,
+    // Covers the debounce gap too, else the dropdown reads "no results" mid-typing.
+    searching:
+      Boolean(searchTerm.trim()) && (searchTerm.trim() !== debouncedSearch || searchLoading),
+  };
+
+  const trackedSearchRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!debouncedSearch || searchLoading || searchError) return;
+    if (trackedSearchRef.current === debouncedSearch) return;
+    trackedSearchRef.current = debouncedSearch;
+
+    const loaded = new Set(availableOptions.map((opt) => opt.value));
+    const newValues = (searchedOptions || []).filter((opt) => !loaded.has(opt.value));
+    if (newValues.length === 0) return;
+
+    const term = debouncedSearch.toLowerCase();
+    trackEvent(ANALYTICS_EVENTS.DASHBOARD_FILTER_OPTIONS_SEARCHED, {
+      filter_type: DashboardFilterType.VALUE,
+      new_values_found: newValues.length,
+      had_local_matches: availableOptions.some((opt) => opt.label.toLowerCase().includes(term)),
+    });
+  }, [debouncedSearch, searchLoading, searchError, searchedOptions, availableOptions]);
+
   // Auto-drop: if this filter is currently narrowed by another dependent-group member,
   // and its own selection no longer appears in the narrowed list, clear it. Runs the same
   // way for every group member -- there's no designated "child" in the group model.
@@ -135,7 +207,11 @@ function ValueFilterWidget({
     if (filterOptionsLoading || filterOptionsError) return;
     if (selectedValues.length === 0) return;
 
-    const availableValues = new Set(availableOptions.map((opt: FilterOption) => opt.value));
+    // Searched options count as available — they were fetched under the same constraints,
+    // so a value found past the base page isn't invalid, just not on the first page.
+    const availableValues = new Set(
+      [...availableOptions, ...(searchedOptions || [])].map((opt: FilterOption) => opt.value)
+    );
     const stillValid = selectedValues.filter((v) => availableValues.has(v));
 
     if (stillValid.length !== selectedValues.length) {
@@ -266,6 +342,7 @@ function ValueFilterWidget({
             placeholder={isEditMode ? 'Select...' : 'Choose option...'}
             searchPlaceholder="Search..."
             compact={isEditMode}
+            {...searchProps}
           />
         ) : (
           <Combobox
@@ -279,6 +356,7 @@ function ValueFilterWidget({
             placeholder={isEditMode ? 'Select...' : 'Choose option...'}
             searchPlaceholder="Search..."
             compact={isEditMode}
+            {...searchProps}
           />
         )}
       </div>

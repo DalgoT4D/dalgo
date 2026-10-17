@@ -304,6 +304,8 @@ export interface FilterPreviewUrlParams {
   isReportMode?: boolean;
   /** Already-JSON-encoded GroupNarrowingConstraint[] for dependent-group narrowing. */
   constraintsJson?: string;
+  /** Matched case-insensitively in the warehouse. Value filters only. */
+  search?: string;
 }
 
 /** Authenticated, public-dashboard or public-report preview URL. Null = no column bound. */
@@ -316,6 +318,7 @@ export function buildFilterPreviewUrl({
   publicToken,
   isReportMode = false,
   constraintsJson,
+  search,
 }: FilterPreviewUrlParams): string | null {
   if (!schemaName || !tableName || !columnName) return null;
 
@@ -337,6 +340,9 @@ export function buildFilterPreviewUrl({
   if (constraintsJson && constraintsJson !== '[]') {
     params.set('constraints', constraintsJson);
   }
+
+  const trimmedSearch = search?.trim();
+  if (trimmedSearch) params.set('search', trimmedSearch);
 
   return `${basePath}?${params.toString()}`;
 }
