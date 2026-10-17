@@ -8,6 +8,7 @@ contributor needs a new Celery setting, add it as `app.conf.X = ...` below.
 import os
 
 from celery import Celery
+from celery.signals import worker_process_init
 
 from ddpui.utils.redis_db import RedisDB
 
@@ -50,6 +51,15 @@ app.conf.task_routes = {
 # ── Worker behaviour ──────────────────────────────────────────────────────
 # Fair task distribution — workers don't hoard tasks they can't run yet.
 app.conf.worker_prefetch_multiplier = 1
+
+
+@worker_process_init.connect
+def _drop_inherited_db_pool(**_kwargs):
+    """Forked children must not reuse the parent's pooled postgres sockets.
+    clear() rather than dispose(): dispose would close the sockets the parent still owns."""
+    from dj_db_conn_pool.core import pool_container
+
+    pool_container.clear()
 
 
 # ── Observability ─────────────────────────────────────────────────────────

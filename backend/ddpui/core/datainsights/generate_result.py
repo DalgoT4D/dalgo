@@ -343,24 +343,30 @@ class GenerateResult:
 
         run_query = False
 
-        current_lock = redis.hget(hash, key)
-        if cls.is_query_locked(current_lock, check_expiry=True):
-            # poll for the lock till it releases
+        # check-and-set under the same redis lock release_query_lock uses, so two
+        # requests (threads or worker processes) can't both see it free and both run
+        with redis.lock(f"{hash}-{key}", timeout=15):
+            current_lock = redis.hget(hash, key)
+            is_locked = cls.is_query_locked(current_lock, check_expiry=True)
+            if not is_locked:
+                # create a new lock
+                logger.info("creating a new lock the query")
+                payload = {
+                    "status": GenerateResult.RESULT_STATUS_FETCHING,
+                    "expire_at": str(datetime.now().isoformat()),
+                }
+                redis.hset(hash, key, json.dumps(payload))
+
+                run_query = True
+
+        if is_locked:
+            # poll for the lock till it releases, outside the redis lock so
+            # release_query_lock can take it
             # expiry is longer so we dont wait till then
             while cls.is_query_locked(current_lock):
                 logger.info(f"Polling query id : {key}")
                 time.sleep(1)
                 current_lock = redis.hget(hash, key)
-        else:
-            # create a new lock
-            logger.info("creating a new lock the query")
-            payload = {
-                "status": GenerateResult.RESULT_STATUS_FETCHING,
-                "expire_at": str(datetime.now().isoformat()),
-            }
-            redis.hset(hash, key, json.dumps(payload))
-
-            run_query = True
 
         return run_query
 
