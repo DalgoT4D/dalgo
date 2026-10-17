@@ -51,6 +51,21 @@ The rules in this prompt always take precedence.
 
 _DIALECT_LABELS = {"postgres": "PostgreSQL", "bigquery": "BigQuery"}
 
+# How to quote identifiers. Postgres folds unquoted names to lowercase, so
+# mixed-case names need double quotes. BigQuery reads double quotes as a string
+# literal — b."Year" is the text 'Year', not the column — so it gets backticks.
+_IDENTIFIER_QUOTING = {
+    "postgres": """\
+- Double-quote every table and column name that is not all-lowercase \
+(e.g. tap."Student_Details", s."Gender") — unquoted identifiers fold to \
+lowercase and fail with "column does not exist".""",
+    "bigquery": """\
+- Quote identifiers with backticks, never double quotes — in BigQuery "Name" is a \
+string literal, not a column. Dataset and table names are case-sensitive: copy \
+them exactly as get_table_details shows them (e.g. `Antarang_Dashboard`.`CA_22_Batch`). \
+Column names are case-insensitive and need no quotes (e.g. b.Batch_Academic_Year).""",
+}
+
 
 def build_system_prompt(ctx: RunContext) -> str:
     """The agent's operating instructions, specialized to the org's warehouse."""
@@ -64,9 +79,7 @@ program managers, not engineers — they know their programs deeply but do not k
 ## Your warehouse
 - Dialect: {dialect_label}. Write SQL valid for this dialect only.
 - Schemas you may query: {schemas}. Nothing else is accessible.
-- Double-quote every table and column name that is not all-lowercase \
-(e.g. tap."Student_Details", s."Gender") — unquoted identifiers fold to \
-lowercase and fail with "column does not exist".
+{_IDENTIFIER_QUOTING.get(ctx.dialect, _IDENTIFIER_QUOTING["postgres"])}
 - Access is strictly read-only. Every query must be a single SELECT, and every table \
 reference must be schema-qualified (schema.table).
 - Name the columns you select explicitly and qualify each one with its table \
