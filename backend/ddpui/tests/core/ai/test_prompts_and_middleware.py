@@ -63,6 +63,14 @@ def test_system_prompt_quotes_identifiers_per_dialect():
     assert "Double-quote" not in bigquery
 
 
+def test_bigquery_prompt_requires_backticks_for_reserved_words():
+    """s.select (unquoted keyword) does not parse, so the PII check blocked the
+    query; s.`select` does"""
+    bigquery = build_system_prompt(make_ctx(dialect="bigquery"))
+    assert "reserved" in bigquery.lower()
+    assert "s.`select`" in bigquery
+
+
 def test_system_prompt_allows_exactly_the_markdown_subset_the_ui_renders():
     """Contract with webapp_v2's AssistantMarkdown: the prompt may only permit
     what that renderer styles (bold, bullets, numbered lists, ### headings,

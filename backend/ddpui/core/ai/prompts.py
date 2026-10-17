@@ -63,7 +63,10 @@ lowercase and fail with "column does not exist".""",
 - Quote identifiers with backticks, never double quotes — in BigQuery "Name" is a \
 string literal, not a column. Dataset and table names are case-sensitive: copy \
 them exactly as get_table_details shows them (e.g. `Antarang_Dashboard`.`CA_22_Batch`). \
-Column names are case-insensitive and need no quotes (e.g. b.Batch_Academic_Year).""",
+Column names are case-insensitive; a plain name needs no quotes (e.g. b.Batch_Academic_Year), \
+but always backtick a column that is a SQL reserved word or starts with a digit \
+(e.g. s.`select`, s.`order`, s.`group`, s.`2024_year`). Backticks are always safe, \
+so use them when unsure.""",
 }
 
 
