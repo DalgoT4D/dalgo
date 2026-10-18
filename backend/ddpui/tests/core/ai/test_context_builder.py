@@ -63,6 +63,42 @@ def test_system_schemas_are_never_offered():
     assert derive_allowed_schemas(warehouse, "postgres") == ["raw_x"]
 
 
+class SqlCapturingWarehouse(SchemaWarehouse):
+    def __init__(self, schemas):
+        super().__init__(schemas)
+        self.sql = None
+
+    def execute(self, sql):
+        self.sql = sql
+        return super().execute(sql)
+
+
+def test_bigquery_lists_datasets_from_the_warehouse_region():
+    """An unqualified INFORMATION_SCHEMA.SCHEMATA only answers for one region, so
+    an asia-south1 warehouse saw none of its own datasets."""
+    warehouse = SqlCapturingWarehouse(["staging", "prod"])
+    assert derive_allowed_schemas(warehouse, "bigquery", "asia-south1") == ["prod", "staging"]
+    assert "`region-asia-south1`.INFORMATION_SCHEMA.SCHEMATA" in warehouse.sql
+
+
+def test_bigquery_multi_region_location_is_lowercased():
+    warehouse = SqlCapturingWarehouse(["staging"])
+    derive_allowed_schemas(warehouse, "bigquery", "US")
+    assert "`region-us`.INFORMATION_SCHEMA.SCHEMATA" in warehouse.sql
+
+
+def test_bigquery_without_location_keeps_the_unqualified_query():
+    warehouse = SqlCapturingWarehouse(["staging"])
+    derive_allowed_schemas(warehouse, "bigquery", None)
+    assert "region-" not in warehouse.sql
+
+
+def test_bigquery_location_is_never_interpolated_unvalidated():
+    warehouse = SqlCapturingWarehouse(["staging"])
+    with pytest.raises(ValueError):
+        derive_allowed_schemas(warehouse, "bigquery", "us`; DROP")
+
+
 # ── Context building (DB) ───────────────────────────────────────────────────
 
 
