@@ -8,11 +8,11 @@ sidebar_position: 4
 
 Dalgo supports **BigQuery** and **PostgreSQL**. Every organisation has one warehouse, and it has to exist before you can sync any data — so this is usually the first thing you set up.
 
-The warehouse lives in **Settings** because it's organisation-wide infrastructure rather than part of any one sync. The [Ingest](../data/ingest/index.md) page shows which warehouse is in use next to its heading, and that link brings you here.
+The warehouse lives in **Settings → Data** because it's organisation-wide infrastructure rather than part of any one sync. The [Ingest](../data/ingest/index.md) page shows which warehouse is in use next to its heading, and that link brings you here.
 
 ## Viewing your warehouse
 
-Select **Settings** in the left menu, then select **Warehouse**.
+Select **Settings** in the left menu, select **Data**, then select the **Warehouse** tab.
 
 ![Settings — Warehouse](/img/settings/settings_warehouse.png)
 

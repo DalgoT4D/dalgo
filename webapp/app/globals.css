@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -202,15 +202,15 @@
 
 /* Space-making visual feedback */
 @keyframes spaceMakingPulse {
-  0% { 
+  0% {
     opacity: 0.6;
     transform: translate(-50%, -50%) scale(1);
   }
-  50% { 
+  50% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1.1);
   }
-  100% { 
+  100% {
     opacity: 0.6;
     transform: translate(-50%, -50%) scale(1);
   }
@@ -227,7 +227,6 @@
   opacity: 0.95;
   box-shadow: 0 1px 4px rgba(59, 130, 246, 0.15);
 }
-
 
 /* Dragged component highlighting - Subtle */
 .react-grid-item.space-making-active {
@@ -263,7 +262,7 @@
 
 /* Legend overflow handling - truncate long text */
 .dashboard-item .echarts-legend,
-.dashboard-item [class*="legend"] {
+.dashboard-item [class*='legend'] {
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -276,7 +275,7 @@
 }
 
 /* Small chart container optimizations */
-.react-grid-item[style*="width"] .dashboard-item {
+.react-grid-item[style*='width'] .dashboard-item {
   min-width: 0; /* Allow flex shrinking */
 }
 
@@ -290,7 +289,6 @@
 .dashboard-builder .dashboard-item::before {
   display: none; /* Completely remove hover border */
 }
-
 
 /* Invisible resize zones - Apache Superset style */
 .dashboard-builder .react-grid-item > .react-resizable-handle {
@@ -379,9 +377,6 @@
   height: 10px !important;
 }
 
-
-
-
 .dashboard-item > * {
   flex: 1;
   min-height: 0;
@@ -397,7 +392,7 @@
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  
+
   .react-grid-item {
     /* Ensure items are properly sized on mobile */
     font-size: 14px;
@@ -406,18 +401,18 @@
     max-width: 100% !important;
     overflow: hidden !important;
   }
-  
+
   .dashboard-item {
     box-sizing: border-box !important;
     max-width: 100% !important;
     overflow: hidden !important;
   }
-  
+
   .dashboard-item .drag-handle {
     /* Make drag handle more accessible on mobile */
     padding: 8px !important;
   }
-  
+
   /* Adjust chart containers for mobile */
   .dashboard-item canvas,
   .dashboard-item svg {
@@ -426,7 +421,7 @@
     height: auto !important;
     box-sizing: border-box !important;
   }
-  
+
   /* Ensure text content is readable */
   .dashboard-item p,
   .dashboard-item span,
@@ -436,12 +431,12 @@
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  
+
   /* Adjust padding for mobile - Compact design */
   .dashboard-item .p-2 {
     padding: 6px !important;
   }
-  
+
   /* Mobile specific grid fixes */
   @media (max-width: 480px) {
     .react-grid-layout {
@@ -451,7 +446,7 @@
       max-width: 100% !important;
       overflow-x: hidden !important;
     }
-    
+
     .react-grid-item {
       /* Ensure full width on mobile and prevent overflow */
       width: 100% !important;
@@ -463,19 +458,19 @@
       margin-bottom: 8px !important;
       box-sizing: border-box !important;
     }
-    
+
     .dashboard-item {
       width: 100% !important;
       max-width: 100% !important;
       box-sizing: border-box !important;
       overflow: hidden !important;
     }
-    
+
     .dashboard-item .text-xs,
     .dashboard-item .text-sm {
       font-size: 12px !important;
     }
-    
+
     /* Force all chart containers to respect mobile boundaries */
     .dashboard-item canvas,
     .dashboard-item svg {
@@ -492,7 +487,6 @@
     font-size: 15px;
   }
 }
-
 
 /* Filter element responsive styles */
 .filter-element {
@@ -529,7 +523,7 @@
   .dashboard-header-title {
     font-size: 1.25rem !important; /* text-xl */
   }
-  
+
   .dashboard-header-description {
     font-size: 0.875rem !important; /* text-sm */
     line-height: 1.25rem !important;
@@ -540,12 +534,12 @@
   .dashboard-header-title {
     font-size: 1.125rem !important; /* text-lg */
   }
-  
+
   .dashboard-header-description {
     font-size: 0.75rem !important; /* text-xs */
     line-height: 1rem !important;
   }
-  
+
   /* Enable line clamping for mobile descriptions */
   .line-clamp-2 {
     display: -webkit-box;
@@ -553,13 +547,13 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  
+
   /* Scrollable button rows on mobile */
   .mobile-action-row {
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-  
+
   .mobile-action-row::-webkit-scrollbar {
     display: none;
   }
@@ -604,7 +598,14 @@
 
 /* Apply Anek Latin font globally */
 * {
-  font-family: var(--font-anek-latin), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family:
+    var(--font-anek-latin),
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif !important;
 }
 
 .font-roboto-mono {
@@ -670,7 +671,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #00897B;
+  --primary: #00897b;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -679,7 +680,7 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --failed: #C15E5E;
+  --failed: #c15e5e;
   --warning: #df8e14;
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
@@ -715,7 +716,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #00897B;
+  --primary: #00897b;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -724,7 +725,7 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --failed: #C15E5E;
+  --failed: #c15e5e;
   --warning: #df8e14;
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -835,15 +836,15 @@
 
 .dashboard-item.magnetic-hover {
   transform: scale(1.02);
-  box-shadow: 0 8px 25px -5px rgb(0 0 0 / 0.1), 0 4px 10px -6px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 8px 25px -5px rgb(0 0 0 / 0.1),
+    0 4px 10px -6px rgb(0 0 0 / 0.1);
 }
 
 .dashboard-item > div {
   flex: 1;
   min-height: 0;
 }
-
-
 
 /* Ensure charts resize smoothly */
 .dashboard-item canvas,
@@ -964,7 +965,6 @@
   background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMyIgaGVpZ2h0PSI2IiB2aWV3Qm94PSIwIDAgMyA2IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIGZpbGw9IiM0MzQzNDMiPjxjaXJjbGUgY3g9IjEuNSIgY3k9IjEiIHI9IjEiLz48Y2lyY2xlIGN4PSIxLjUiIGN5PSIzIiByPSIxIi8+PGNpcmNsZSBjeD0iMS41IiBjeT0iNSIgcj0iMSIvPjwvZz48L3N2Zz4=');
 }
 
-
 /* Invisible resize handles - Apache Superset style */
 .dashboard-builder .react-grid-item > .react-resizable-handle {
   opacity: 0 !important;
@@ -997,7 +997,9 @@
 /* Edit mode enhancements */
 .dashboard-builder .react-grid-item {
   /* Ensure smooth transitions for all interactions */
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 /* Improve drag smoothness */
@@ -1025,12 +1027,10 @@
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2) !important;
 }
 
-
 /* Ensure proper scaling for all chart content */
 .dashboard-item {
   contain: layout size style;
 }
-
 
 /* Responsive dashboard canvas */
 .dashboard-canvas-responsive {

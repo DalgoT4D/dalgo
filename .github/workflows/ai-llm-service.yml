@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - 'ai-llm-service/**'
-      - 'docker/Dockerfile.ai-llm-service'
   pull_request:
     branches: [main]
     paths:

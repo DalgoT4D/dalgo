@@ -192,6 +192,26 @@ def test_lookup_column_values_hashes_a_ticked_column():
     assert "abc123" in out
 
 
+def test_lookup_column_values_hashes_a_mixed_case_bigquery_column_ticked_on_the_card():
+    # BigQuery columns are case-insensitive, so the card offers the column's key
+    # lowercased; the tool gets the catalog's real casing and must still match it
+    warehouse = FakeWarehouse(rows=[{"value": "abc123", "occurrences": 4}])
+    warehouse.columns = [{"name": "School_State", "data_type": "STRING"}]
+    warehouse.catalog_rows = [{"table_name": "Students", "approx_rows": 10}]
+    runtime = make_runtime(warehouse, dialect="bigquery")
+    runtime.context.pii_columns = {"prod.Students.school_state"}
+
+    lookup_column_values.func(
+        schema_name="prod",
+        table_name="Students",
+        column_name="School_State",
+        search_value="Maharashtra",
+        runtime=runtime,
+    )
+
+    assert "TO_HEX(MD5(" in warehouse.executed[-1]
+
+
 def test_lookup_column_values_without_ticks_is_unhashed():
     warehouse = FakeWarehouse(rows=[{"value": "Pune", "occurrences": 4}])
     warehouse.catalog_rows = [{"table_name": "surveys", "approx_rows": 10}]

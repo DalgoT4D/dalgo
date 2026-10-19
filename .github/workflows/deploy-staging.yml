@@ -139,10 +139,68 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
   # ─────────────────────────────────────────────────────────────────────────
+  # Gate: all CI checks on the deploy ref must be green before we build
+  # ─────────────────────────────────────────────────────────────────────────
+  ci-gate:
+    needs: plan
+    if: needs.plan.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all CI checks passed on deploy ref
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOY_REF: ${{ needs.plan.outputs.deploy_ref }}
+        run: |
+          set -euo pipefail
+
+          MAX_WAIT=900   # 15 minutes
+          INTERVAL=30
+          WAITED=0
+
+          while true; do
+            RUNS=$(gh api "repos/${{ github.repository }}/commits/$DEPLOY_REF/check-runs" \
+              --paginate --jq '.check_runs[]' \
+              | jq -s '[
+                  .[] | select(.name | startswith("checks"))
+                ] | group_by(.name) | map(sort_by(.started_at) | last)')
+
+            COUNT=$(echo "$RUNS" | jq 'length')
+            if [ "$COUNT" -eq 0 ]; then
+              echo "No CI check runs found for $DEPLOY_REF — proceeding."
+              exit 0
+            fi
+
+            IN_PROGRESS=$(echo "$RUNS" | jq '[.[] | select(.status != "completed")] | length')
+            if [ "$IN_PROGRESS" -gt 0 ]; then
+              if [ "$WAITED" -ge "$MAX_WAIT" ]; then
+                echo "❌ Timed out after ${MAX_WAIT}s waiting for CI checks to complete."
+                exit 1
+              fi
+              echo "⏳ ${IN_PROGRESS} check(s) still running — waiting ${INTERVAL}s... (${WAITED}s elapsed)"
+              sleep $INTERVAL
+              WAITED=$((WAITED + INTERVAL))
+              continue
+            fi
+
+            echo "CI check runs for $DEPLOY_REF:"
+            echo "$RUNS" | jq -r '.[] | "  \(.name): \(.status) / \(.conclusion // "—")"'
+
+            FAILED=$(echo "$RUNS" | jq \
+              '[.[] | select(.conclusion != "success" and .conclusion != "skipped" and .conclusion != "neutral")] | length')
+            if [ "$FAILED" -gt 0 ]; then
+              echo "❌ Some checks failed — fix them before deploying to staging."
+              exit 1
+            fi
+
+            echo "✅ All CI checks passed."
+            break
+          done
+
+  # ─────────────────────────────────────────────────────────────────────────
   # Build + push all service images in parallel
   # ─────────────────────────────────────────────────────────────────────────
   build:
-    needs: plan
+    needs: [plan, ci-gate]
     if: needs.plan.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     strategy:
@@ -190,7 +248,7 @@ jobs:
   # Build + push webapp (separate job — needs NEXT_PUBLIC_* build args)
   # ─────────────────────────────────────────────────────────────────────────
   build-webapp:
-    needs: plan
+    needs: [plan, ci-gate]
     if: needs.plan.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     environment: staging
@@ -252,8 +310,23 @@ jobs:
           ref: main
 
       - id: compute
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+
+          # If the PR has no migration files, there's nothing to roll back.
+          NEW_MIGRATIONS=$(gh pr view "${{ needs.plan.outputs.previous_pr }}" \
+            --repo "${{ github.repository }}" \
+            --json files --jq '.files[].path' \
+            | grep -E 'migrations/[0-9]{4}_.*\.py$' || true)
+
+          if [[ -z "$NEW_MIGRATIONS" ]]; then
+            echo "PR #${{ needs.plan.outputs.previous_pr }} has no migrations — skipping rollback."
+            echo 'targets={}' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           declare -A TARGETS
           # Walk every migrations/ dir under backend/ddpui
           while IFS= read -r mig_dir; do

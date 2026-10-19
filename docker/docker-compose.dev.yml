@@ -24,6 +24,7 @@ x-backend-base: &backend-base
     LLM_SERVICE_API_URL: http://ai-llm-service:7001
     DEV_SECRETS_DIR: /secrets
     USE_AWS_SECRETS_MANAGER: "False"
+    UV_FROZEN: "1"
   volumes:
     - ../backend:/app
     - backend_uv_cache:/home/dalgouser/.cache/uv
@@ -43,6 +44,7 @@ x-ai-llm-base: &ai-llm-base
     CELERY_BROKER_URL: redis://redis-llm:6379/0
     CELERY_RESULT_BACKEND: redis://redis-llm:6379/0
     CELERY_BROKER: redis://redis-llm:6379/0
+    UV_FROZEN: "1"
   volumes:
     - ../ai-llm-service:/app
     - ai_llm_uv_cache:/root/.cache/uv
@@ -97,6 +99,7 @@ services:
     # Only container-networking vars live here. All app config → prefect-proxy/.env.
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
+      UV_FROZEN: "1"
     ports:
       - "${PROXY_HOST_PORT:-8080}:8080"
     depends_on:
