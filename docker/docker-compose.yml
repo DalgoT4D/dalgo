@@ -94,6 +94,13 @@ services:
     depends_on:
       - backend
 
+  # free-trial clone (signups) + hourly expired-trial teardown — see task_routes in ddpui/celery.py
+  celery-trial-worker:
+    <<: *backend
+    command: uv run celery -A ddpui worker -n trial_clone -Q trial_clone --autoscale=4,1
+    depends_on:
+      - backend
+
   celery-beat:
     <<: *backend
     command: uv run celery -A ddpui beat --scheduler redbeat.RedBeatScheduler
