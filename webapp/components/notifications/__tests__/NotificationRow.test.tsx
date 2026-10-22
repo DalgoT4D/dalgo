@@ -41,21 +41,21 @@ describe('NotificationRow', () => {
     expect(messageEl).not.toBeInTheDocument();
   });
 
-  it('shows expand chevron for long messages', () => {
+  it('shows "See more" link for long messages when collapsed', () => {
     const longNotification = createMockNotification({ message: longMessage });
-    const { container } = renderRow({ notification: longNotification });
-    // ChevronDown is rendered as an svg inside a span when truncatable
-    const row = container.querySelector(`[data-testid="notification-row-${longNotification.id}"]`);
-    expect(row).toBeInTheDocument();
-    // Lucide renders the icon; verify the span wrapper is there
-    const chevronSpan = container.querySelector('.ml-auto');
-    expect(chevronSpan).toBeInTheDocument();
+    renderRow({ notification: longNotification });
+    expect(screen.getByText('See more')).toBeInTheDocument();
   });
 
-  it('does not show expand chevron for short messages', () => {
-    const { container } = renderRow();
-    const chevronSpan = container.querySelector('.ml-auto');
-    expect(chevronSpan).not.toBeInTheDocument();
+  it('shows "See less" link for long messages when expanded', () => {
+    const longNotification = createMockNotification({ message: longMessage });
+    renderRow({ notification: longNotification, isExpanded: true });
+    expect(screen.getByText('See less')).toBeInTheDocument();
+  });
+
+  it('does not show "See more" for short messages', () => {
+    renderRow();
+    expect(screen.queryByText('See more')).not.toBeInTheDocument();
   });
 
   it('calls onToggleExpand when the row is clicked', () => {

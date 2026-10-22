@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { trackEvent, trackFeatureView } from '@/lib/analytics';
-import { ANALYTICS_EVENTS, FEATURES } from '@/constants/analytics';
+import { trackFeatureView } from '@/lib/analytics';
+import { FEATURES } from '@/constants/analytics';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { NotificationsList } from '@/components/notifications/NotificationsList';
 import { NotificationPreferencesDialog } from '@/components/notifications/NotificationPreferencesDialog';
 import { NotificationTypeFilter } from '@/components/notifications/NotificationTypeFilter';
-import { useConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import {
   useNotifications,
   useNotificationActions,
@@ -37,8 +36,7 @@ export default function NotificationsPage() {
     notification_types: activeTypeFilters.length > 0 ? activeTypeFilters : undefined,
   });
   const { notifications, totalCount, mutate, isLoading } = useNotifications(filters);
-  const { markAsRead, markAllAsRead } = useNotificationActions();
-  const { confirm, DialogComponent: ConfirmDialog } = useConfirmationDialog();
+  const { markAsRead } = useNotificationActions();
 
   // Reset selection and page when tab or type filter changes
   useEffect(() => {
@@ -71,38 +69,17 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    const confirmed = await confirm({
-      title: 'Mark all as read',
-      description: `Are you sure you want to mark all ${unreadCount} notifications as read?`,
-      confirmText: 'Mark all as read',
-      cancelText: 'Cancel',
-      type: 'info',
-    });
-    if (!confirmed) return;
-
-    const success = await markAllAsRead();
-    if (success) {
-      trackEvent(ANALYTICS_EVENTS.NOTIFICATIONS_ALL_READ);
-      await mutate();
-      await mutateUnreadCount();
-      setSelectedIds([]);
-    }
-  };
-
   const handleTabChange = (value: string) => {
     setActiveTab(value as NotificationTab);
     trackFeatureView(FEATURES.NOTIFICATIONS, { tab: value });
   };
 
-  const hasSelection = selectedIds.length > 0;
-
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="flex-shrink-0 border-b bg-background">
-        <div className="flex items-center justify-between mb-6 p-6 pb-0">
-          <div>
+        <div className="mb-6 p-6 pb-0">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold">Notifications</h1>
               {unreadCount > 0 && (
@@ -114,47 +91,16 @@ export default function NotificationsPage() {
                 </Badge>
               )}
             </div>
-            <p className="text-muted-foreground mt-1">View and manage your notifications</p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            {unreadCount > 0 && (
-              <Button
-                variant="primary"
-                onClick={handleMarkAllAsRead}
-                disabled={isLoading}
-                data-testid="mark-all-as-read-btn"
-              >
-                MARK ALL AS READ
-              </Button>
-            )}
-            <Button
-              variant="primary"
-              onClick={handleMarkAsRead}
-              disabled={!hasSelection || isLoading || activeTab === 'read'}
-              className="disabled:opacity-50"
-              data-testid="mark-as-read-btn"
-            >
-              MARK AS READ
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleMarkAsUnread}
-              disabled={!hasSelection || isLoading || activeTab === 'unread'}
-            >
-              MARK AS UNREAD
-            </Button>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowPreferences(true)}
-                  className="h-9 w-9 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                  className="h-11 w-11 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
                   aria-label="Manage notification preferences"
                 >
-                  <Settings className="h-5 w-5" />
+                  <Settings className="h-7 w-7" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="bg-gray-900 text-white border-gray-700">
@@ -162,10 +108,11 @@ export default function NotificationsPage() {
               </TooltipContent>
             </Tooltip>
           </div>
+          <p className="text-muted-foreground mt-1">View and manage your notifications</p>
         </div>
 
         {/* Read/unread tabs + type filter */}
-        <div className="px-6 flex items-center gap-4">
+        <div className="px-6 flex items-center justify-between">
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="bg-transparent p-0 h-auto gap-4">
               {NOTIFICATION_TABS.map((tab) => (
@@ -175,8 +122,6 @@ export default function NotificationsPage() {
               ))}
             </TabsList>
           </Tabs>
-
-          <div className="h-4 w-px bg-border" />
 
           <NotificationTypeFilter selected={activeTypeFilters} onChange={setActiveTypeFilters} />
         </div>
@@ -190,6 +135,8 @@ export default function NotificationsPage() {
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
           onClearSelection={() => setSelectedIds([])}
+          onMarkAsRead={handleMarkAsRead}
+          onMarkAsUnread={handleMarkAsUnread}
           page={page}
           pageSize={pageSize}
           onPageChange={(p) => {
@@ -205,7 +152,6 @@ export default function NotificationsPage() {
       </div>
 
       <NotificationPreferencesDialog open={showPreferences} onOpenChange={setShowPreferences} />
-      <ConfirmDialog />
     </div>
   );
 }

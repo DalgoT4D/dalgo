@@ -90,30 +90,22 @@ describe('Notifications Page Integration', () => {
     expect(screen.getByRole('tab', { name: 'Unread' })).toBeInTheDocument();
   });
 
-  it('renders action buttons in header', () => {
+  it('hides mark as read/unread buttons when no selection', () => {
     render(<NotificationsPage />);
 
-    expect(screen.getByRole('button', { name: /mark all as read/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^mark as read$/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /mark as unread/i })).toBeInTheDocument();
+    expect(screen.queryByTestId('mark-as-read-btn')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mark-as-unread-btn')).not.toBeInTheDocument();
   });
 
-  it('disables mark as read/unread buttons when no selection', () => {
-    render(<NotificationsPage />);
-
-    expect(screen.getByRole('button', { name: /^mark as read$/i })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /mark as unread/i })).toBeDisabled();
-  });
-
-  it('enables mark as read/unread buttons when items selected', async () => {
+  it('shows mark as read/unread buttons in bulk action bar when items selected', async () => {
     render(<NotificationsPage />);
 
     const checkboxes = screen.getAllByRole('checkbox');
     fireEvent.click(checkboxes[1]);
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /^mark as read$/i })).not.toBeDisabled();
-      expect(screen.getByRole('button', { name: /mark as unread/i })).not.toBeDisabled();
+      expect(screen.getByTestId('mark-as-read-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('mark-as-unread-btn')).toBeInTheDocument();
     });
   });
 
@@ -123,30 +115,11 @@ describe('Notifications Page Integration', () => {
     const checkboxes = screen.getAllByRole('checkbox');
     fireEvent.click(checkboxes[1]);
 
-    const markAsReadButton = screen.getByRole('button', { name: /^mark as read$/i });
+    const markAsReadButton = screen.getByTestId('mark-as-read-btn');
     fireEvent.click(markAsReadButton);
 
     await waitFor(() => {
       expect(mocks.mockMarkAsRead).toHaveBeenCalledWith([1], true);
-      expect(mocks.mutate).toHaveBeenCalled();
-    });
-  });
-
-  it('marks all as read', async () => {
-    render(<NotificationsPage />);
-
-    const markAllButton = screen.getByRole('button', { name: /mark all as read/i });
-    fireEvent.click(markAllButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Are you sure you want to mark all/)).toBeInTheDocument();
-    });
-
-    const confirmButton = screen.getByRole('button', { name: /MARK ALL AS READ/i });
-    fireEvent.click(confirmButton);
-
-    await waitFor(() => {
-      expect(mocks.mockMarkAllAsRead).toHaveBeenCalled();
       expect(mocks.mutate).toHaveBeenCalled();
     });
   });
@@ -237,12 +210,12 @@ describe('Notifications Page Integration', () => {
     expect(link).toHaveAttribute('target', '_blank');
   });
 
-  it('shows mark all as read button only when there are unread notifications', () => {
+  it('shows unread count badge when there are unread notifications', () => {
     render(<NotificationsPage />);
-    expect(screen.getByRole('button', { name: /mark all as read/i })).toBeInTheDocument();
+    expect(screen.getByTestId('unread-count-badge')).toBeInTheDocument();
   });
 
-  it('hides mark all as read when no unread notifications', () => {
+  it('hides unread count badge when no unread notifications', () => {
     (notificationHooks.useUnreadCount as jest.Mock).mockReturnValue({
       unreadCount: 0,
       isLoading: false,
@@ -251,7 +224,7 @@ describe('Notifications Page Integration', () => {
     });
 
     render(<NotificationsPage />);
-    expect(screen.queryByRole('button', { name: /mark all as read/i })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('unread-count-badge')).not.toBeInTheDocument();
   });
 
   it('switches between tabs', async () => {

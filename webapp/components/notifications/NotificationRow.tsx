@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from 'date-fns';
-import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TableCell, TableRow } from '@/components/ui/table';
 import type { Notification } from '@/types/notifications';
@@ -53,12 +53,18 @@ export function NotificationRow({
       <TableCell className="w-full py-4 pr-6 align-top whitespace-normal">
         <p
           className={cn(
-            'leading-relaxed text-sm break-words whitespace-pre-wrap min-h-[2.5rem]',
-            !isExpanded && 'line-clamp-2',
+            'leading-relaxed text-sm break-words min-h-[2.5rem]',
+            !isExpanded && isTruncatable ? 'line-clamp-2' : 'whitespace-pre-wrap',
             isRead ? 'text-gray-500 font-normal' : 'text-gray-800 font-medium'
           )}
         >
           {renderMessageWithLinks(notification.message)}
+          {isTruncatable && !isExpanded && (
+            <span className="text-teal-600 font-medium ml-1 whitespace-nowrap">See more</span>
+          )}
+          {isTruncatable && isExpanded && (
+            <span className="text-teal-600 font-medium ml-1 whitespace-nowrap">See less</span>
+          )}
         </p>
         <div className="flex items-center gap-2 mt-2">
           <span className={cn('text-sm', isRead ? 'text-gray-400' : 'text-gray-600')}>
@@ -66,11 +72,12 @@ export function NotificationRow({
           </span>
           <NotificationTypeBadge type={notification.notification_type} />
           {notification.urgent && (
-            <AlertCircle className="h-4 w-4 text-red-500 shrink-0" aria-label="Urgent" />
-          )}
-          {isTruncatable && (
-            <span className="ml-auto text-gray-400">
-              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            <span
+              aria-label="Urgent"
+              className="inline-flex items-center gap-1 text-xs text-red-500 border border-red-200 bg-red-50 rounded-full px-2 py-0.5"
+            >
+              <AlertCircle className="h-3 w-3 shrink-0" />
+              Urgent
             </span>
           )}
         </div>

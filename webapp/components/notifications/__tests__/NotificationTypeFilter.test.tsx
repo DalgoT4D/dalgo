@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NotificationTypeFilter } from '../NotificationTypeFilter';
 import type { NotificationType } from '@/types/notifications';
-import { PERSONAL_NOTIFICATION_TYPES } from '@/constants/notifications';
+import { NOTIFICATION_TYPE_GROUPS } from '@/constants/notifications';
 
 function renderFilter(
   selected: NotificationType[] = [],
@@ -22,73 +22,67 @@ describe('NotificationTypeFilter', () => {
     expect(screen.getByTestId('type-filter-trigger')).toHaveTextContent('All types');
   });
 
-  it('shows the type name when exactly one type is selected', () => {
+  it('shows the group name when a group is selected', () => {
+    renderFilter(['pipeline', 'schema_change']);
+    expect(screen.getByTestId('type-filter-trigger')).toHaveTextContent('Data & pipeline');
+  });
+
+  it('shows "All types" for partial/custom selections not matching any group', () => {
     renderFilter(['pipeline']);
-    expect(screen.getByTestId('type-filter-trigger')).toHaveTextContent('Pipeline');
-  });
-
-  it('shows "{N} types" when multiple types are selected', () => {
-    renderFilter(['pipeline', 'sharing', 'access']);
-    expect(screen.getByTestId('type-filter-trigger')).toHaveTextContent('3 types');
-  });
-
-  // ── Clear button ───────────────────────────────────────────────────────────
-
-  it('does not show the clear button when nothing is selected', () => {
-    renderFilter([]);
-    expect(screen.queryByTestId('type-filter-clear')).not.toBeInTheDocument();
-  });
-
-  it('shows the clear button when at least one type is selected', () => {
-    renderFilter(['pipeline']);
-    expect(screen.getByTestId('type-filter-clear')).toBeInTheDocument();
-  });
-
-  it('calls onChange([]) when the clear button is clicked', () => {
-    const onChange = jest.fn();
-    renderFilter(['pipeline'], onChange);
-    fireEvent.click(screen.getByTestId('type-filter-clear'));
-    expect(onChange).toHaveBeenCalledWith([]);
+    expect(screen.getByTestId('type-filter-trigger')).toHaveTextContent('All types');
   });
 
   // ── Popover content ────────────────────────────────────────────────────────
 
-  it('lists all personal notification types in the popover', () => {
+  it('shows "All types" option with checkmark when nothing selected', () => {
     renderFilter([]);
     openPopover();
-    for (const type of PERSONAL_NOTIFICATION_TYPES) {
-      // Each type row has a Checkbox + label text; the label text is the human-readable name
-      expect(screen.getByText(new RegExp(type.replace('_', ' '), 'i'))).toBeInTheDocument();
+    expect(screen.getByTestId('type-filter-all')).toBeInTheDocument();
+    expect(screen.getByTestId('type-filter-all')).toHaveTextContent('All types');
+  });
+
+  it('lists all group options in the popover', () => {
+    renderFilter([]);
+    openPopover();
+    for (const group of NOTIFICATION_TYPE_GROUPS) {
+      expect(screen.getByText(group.label)).toBeInTheDocument();
+      expect(screen.getByText(group.subtitle)).toBeInTheDocument();
     }
   });
 
-  it('adds a type to the selection when it is clicked', () => {
+  it('calls onChange with group types when a group is clicked', () => {
     const onChange = jest.fn();
     renderFilter([], onChange);
     openPopover();
 
-    // Click the "Pipeline" row
-    fireEvent.click(screen.getByText('Pipeline'));
-    expect(onChange).toHaveBeenCalledWith(['pipeline']);
+    fireEvent.click(screen.getByTestId('type-filter-group-data-pipeline'));
+    expect(onChange).toHaveBeenCalledWith(['pipeline', 'schema_change']);
   });
 
-  it('removes a type from the selection when a selected type is clicked again', () => {
+  it('calls onChange([]) when "All types" is clicked', () => {
     const onChange = jest.fn();
-    // Use 2 selected so the trigger shows "2 types" (not "Pipeline"), avoiding
-    // duplicate text matches when the popover is open.
-    renderFilter(['pipeline', 'sharing'], onChange);
+    renderFilter(['pipeline', 'schema_change'], onChange);
     openPopover();
 
-    fireEvent.click(screen.getAllByText('Pipeline')[0]);
-    expect(onChange).toHaveBeenCalledWith(['sharing']);
+    fireEvent.click(screen.getByTestId('type-filter-all'));
+    expect(onChange).toHaveBeenCalledWith([]);
   });
 
-  it('appends to existing selection when a new type is clicked', () => {
+  it('switches group when a different group is clicked', () => {
     const onChange = jest.fn();
-    renderFilter(['sharing'], onChange);
+    renderFilter(['pipeline', 'schema_change'], onChange);
     openPopover();
 
-    fireEvent.click(screen.getByText('Pipeline'));
-    expect(onChange).toHaveBeenCalledWith(['sharing', 'pipeline']);
+    fireEvent.click(screen.getByTestId('type-filter-group-collaboration'));
+    expect(onChange).toHaveBeenCalledWith(['sharing', 'access', 'mention']);
+  });
+
+  it('calls onChange with platform group types', () => {
+    const onChange = jest.fn();
+    renderFilter([], onChange);
+    openPopover();
+
+    fireEvent.click(screen.getByTestId('type-filter-group-platform'));
+    expect(onChange).toHaveBeenCalledWith(['platform', 'announcement']);
   });
 });

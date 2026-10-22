@@ -39,3 +39,25 @@ export const PERSONAL_NOTIFICATION_TYPES: NotificationType[] = [
   'platform',
   'announcement',
 ];
+
+export const NOTIFICATION_TYPE_GROUPS: Array<{
+  label: string;
+  subtitle: string;
+  types: NotificationType[];
+}> = [
+  {
+    label: 'Data & pipeline',
+    subtitle: 'Pipeline, Schema change',
+    types: ['pipeline', 'schema_change'],
+  },
+  {
+    label: 'Collaboration',
+    subtitle: 'Sharing, Access, Mention',
+    types: ['sharing', 'access', 'mention'],
+  },
+  {
+    label: 'Platform',
+    subtitle: 'Platform, Announcement',
+    types: ['platform', 'announcement'],
+  },
+];

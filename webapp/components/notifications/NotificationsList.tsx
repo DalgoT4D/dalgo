@@ -15,6 +15,8 @@ interface NotificationsListProps {
   selectedIds: number[];
   onSelectionChange: (ids: number[]) => void;
   onClearSelection: () => void;
+  onMarkAsRead: () => void;
+  onMarkAsUnread: () => void;
   page: number;
   pageSize: number;
   onPageChange: (page: number) => void;
@@ -28,6 +30,8 @@ export function NotificationsList({
   selectedIds,
   onSelectionChange,
   onClearSelection,
+  onMarkAsRead,
+  onMarkAsUnread,
   page,
   pageSize,
   onPageChange,
@@ -132,8 +136,8 @@ export function NotificationsList({
       {/* Table Container */}
       <div className="flex-1 overflow-hidden px-6 pt-4">
         <div className="h-full flex flex-col bg-white rounded-lg border shadow-sm">
-          {/* Header Bar */}
-          <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b">
+          {/* Bulk Action Bar */}
+          <div className="flex items-center justify-between px-4 py-3 border-b">
             <div className="flex items-center gap-3">
               <Checkbox
                 data-testid="select-all-checkbox"
@@ -142,24 +146,38 @@ export function NotificationsList({
                 aria-label="Select all notifications"
                 className="border-gray-800 data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 data-[state=indeterminate]:bg-gray-600 data-[state=indeterminate]:border-gray-600"
               />
-              <span className="text-sm text-gray-700 font-medium">
-                Select all
-                <span className="text-gray-500 mx-2">|</span>
+              <span className="text-sm font-medium text-gray-600">
+                {hasSelection ? `${selectedIds.length} selected` : 'Select all'}
+              </span>
+              <span className="text-gray-300">|</span>
+              <span className="text-sm font-medium text-gray-600">
                 Showing {notifications.length} of {totalCount} notifications
               </span>
             </div>
+
             {hasSelection && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-blue-900">
-                  {selectedIds.length} selected
-                </span>
+              <div className="flex items-center gap-3 text-sm">
+                <button
+                  data-testid="mark-as-read-btn"
+                  onClick={onMarkAsRead}
+                  className="text-teal-600 hover:text-teal-700 font-medium cursor-pointer"
+                >
+                  Mark as read
+                </button>
+                <button
+                  data-testid="mark-as-unread-btn"
+                  onClick={onMarkAsUnread}
+                  className="text-gray-600 hover:text-gray-800 font-medium cursor-pointer"
+                >
+                  Mark as unread
+                </button>
                 <button
                   data-testid="clear-selection-btn"
                   onClick={onClearSelection}
-                  className="p-1 hover:bg-blue-100 rounded cursor-pointer"
+                  className="p-1 hover:bg-gray-100 rounded cursor-pointer"
                   aria-label="Clear selection"
                 >
-                  <X className="h-4 w-4 text-blue-600" />
+                  <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
                 </button>
               </div>
             )}
