@@ -266,6 +266,7 @@ def get_filter_preview(
     constraints: Optional[
         str
     ] = None,  # JSON list of {column, operator, value}; narrows this filter
+    search: Optional[str] = None,  # value filters only
 ):
     """Get preview data for a filter (values, numerical stats, or date range)"""
     orguser = request.orguser
@@ -287,6 +288,7 @@ def get_filter_preview(
                 column_name,
                 limit,
                 constraints=parsed_constraints,
+                search=search,
             )
 
             options = [

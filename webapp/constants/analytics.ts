@@ -202,6 +202,9 @@ export const ANALYTICS_EVENTS = {
   // Carries counts and filter TYPES only. Never the selected values, column, table or
   // schema names — those are warehouse data (see the PII rule).
   DASHBOARD_FILTER_APPLIED: 'dashboard:filter_applied',
+  // Fires only when a search found values beyond the loaded page — i.e. the option limit
+  // was too low. Counts and booleans only; never the term, column, table or schema.
+  DASHBOARD_FILTER_OPTIONS_SEARCHED: 'dashboard:filter_options_searched',
   DASHBOARD_TEXT_ELEMENT_ADDED: 'dashboard:text_element_added',
   // All four fire from the builder's tab handlers, not from TabBar — that component has
   // no dashboardId, and the handlers are the choke point every tab control funnels through.

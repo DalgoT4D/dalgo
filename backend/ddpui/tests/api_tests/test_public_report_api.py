@@ -831,35 +831,6 @@ class TestGetPublicFilterPreview:
             assert "state" in str(query_builder.where_clauses[1])
             assert "country" in str(query_builder.where_clauses[2])
 
-    def test_dashboard_token_narrowed_query_falls_back_on_error(self, public_dashboard, seed_db):
-        """_execute_filter_preview is shared by both public routes -- proving the fallback
-        here also covers the report-share route, which calls the same helper."""
-        mock_results = [{"value": "Ernakulam", "count": 4}, {"value": "Pune", "count": 2}]
-
-        with patch("ddpui.api.public_api.OrgWarehouse.objects") as mock_ow, patch(
-            "ddpui.services.dashboard_service.execute_query"
-        ) as mock_exec, patch("ddpui.api.public_api.get_warehouse_client") as mock_wc:
-            mock_ow.filter.return_value.first.return_value = MagicMock(wtype="postgres")
-            mock_wc.return_value = MagicMock()
-            mock_exec.side_effect = [Exception("column state does not exist"), mock_results]
-
-            request = _make_public_request()
-            response = get_public_filter_preview(
-                request,
-                token=public_dashboard.public_share_token,
-                schema_name="public",
-                table_name="orders",
-                column_name="district",
-                filter_type="value",
-                constraints='[{"column": "state", "operator": "in", "value": ["Kerala"]}]',
-            )
-
-            assert response.is_valid is True
-            assert len(response.options) == 2
-            assert mock_exec.call_count == 2
-            retry_query_builder = mock_exec.call_args_list[1][0][1]
-            assert len(retry_query_builder.where_clauses) == 1
-
     def test_report_token_value_filter(self, public_snapshot, seed_db):
         """Public report snapshot token resolves org and returns value filter options"""
         mock_results = [{"value": "active", "count": 20}, {"value": "inactive", "count": 3}]

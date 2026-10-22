@@ -4,3 +4,5 @@ export const EMPTY_DEPENDENT_GROUP_FILTER_IDS: number[] = [];
 
 // Backend caps at the same number, most frequent first.
 export const FILTER_OPTIONS_LIMIT = 100;
+
+export const FILTER_SEARCH_DEBOUNCE_MS = 300;

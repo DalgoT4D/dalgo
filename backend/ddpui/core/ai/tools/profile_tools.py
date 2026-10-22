@@ -3,6 +3,7 @@
 from langchain.tools import ToolRuntime, tool
 
 from ddpui.core.ai.agent.run_context import RunContext
+from ddpui.core.ai.guards import pii_rewrite
 from ddpui.core.ai.tools import catalog, rendering
 from ddpui.core.ai.tools.registry import register_tool
 
@@ -45,7 +46,7 @@ def lookup_column_values(
     qualified = catalog.qualified(ctx.dialect, schema_name, table_name)
     quoted_col = f"`{column_name}`" if ctx.dialect == "bigquery" else f'"{column_name}"'
 
-    if f"{schema_name}.{table_name}.{column_name}" in ctx.pii_columns:
+    if pii_rewrite.column_key(ctx.dialect, schema_name, table_name, column_name) in ctx.pii_columns:
         quoted_col = (
             f"TO_HEX(MD5(CAST({quoted_col} AS STRING)))"
             if ctx.dialect == "bigquery"

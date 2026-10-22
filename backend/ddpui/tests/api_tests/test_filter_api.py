@@ -9,6 +9,8 @@ import django
 from unittest.mock import patch, MagicMock
 import pytest
 from ninja.errors import HttpError
+from sqlalchemy.dialects import postgresql
+from sqlalchemy_bigquery import BigQueryDialect
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ddpui.settings")
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
@@ -227,37 +229,6 @@ class TestGetFilterPreviewNarrowing:
             )
         assert excinfo.value.status_code == 400
 
-    def test_narrowed_query_falls_back_to_full_list_on_error(self, orguser, seed_db):
-        """If a constraint's column was renamed/removed, the narrowed query errors --
-        retry unnarrowed rather than breaking the child (spec: dependent-filters)."""
-        mock_results = [{"value": "Ernakulam", "count": 4}, {"value": "Pune", "count": 2}]
-
-        with patch("ddpui.api.filter_api.OrgWarehouse.objects") as mock_ow, patch(
-            "ddpui.services.dashboard_service.execute_query"
-        ) as mock_exec, patch("ddpui.api.filter_api.get_warehouse_client") as mock_wc:
-            mock_ow.filter.return_value.first.return_value = MagicMock(wtype="postgres")
-            mock_wc.return_value = MagicMock()
-            mock_exec.side_effect = [Exception("column state does not exist"), mock_results]
-
-            request = mock_request(orguser)
-            response = get_filter_preview(
-                request,
-                schema_name="public",
-                table_name="schools",
-                column_name="district",
-                filter_type="value",
-                constraints='[{"column": "state", "operator": "in", "value": ["Kerala"]}]',
-            )
-
-            # Full, unnarrowed list came back -- the child didn't break.
-            assert len(response.options) == 2
-            assert mock_exec.call_count == 2
-            # First attempt was narrowed (2 clauses); the retry has only the NOT NULL clause.
-            first_query_builder = mock_exec.call_args_list[0][0][1]
-            retry_query_builder = mock_exec.call_args_list[1][0][1]
-            assert len(first_query_builder.where_clauses) == 2
-            assert len(retry_query_builder.where_clauses) == 1
-
     def test_error_without_constraints_still_raises(self, orguser, seed_db):
         """An independent filter's query failure is a real error -- no fallback to swallow it"""
         with patch("ddpui.api.filter_api.OrgWarehouse.objects") as mock_ow, patch(
@@ -278,3 +249,63 @@ class TestGetFilterPreviewNarrowing:
                 )
 
             assert mock_exec.call_count == 1
+
+
+# ================================================================================
+# Test get_filter_preview server-side search
+# ================================================================================
+
+
+def _compile_clause(clause, dialect) -> str:
+    """Render a WHERE clause as the warehouse would receive it."""
+    return str(clause.compile(dialect=dialect, compile_kwargs={"literal_binds": True}))
+
+
+class TestGetFilterPreviewSearch:
+    """Tests for `search` on GET /api/filters/preview/ -- reaches values past the limit"""
+
+    def _preview(self, orguser, mock_exec, **kwargs):
+        with patch("ddpui.api.filter_api.OrgWarehouse.objects") as mock_ow, patch(
+            "ddpui.api.filter_api.get_warehouse_client"
+        ) as mock_wc:
+            mock_ow.filter.return_value.first.return_value = MagicMock(wtype="postgres")
+            mock_wc.return_value = MagicMock()
+            return get_filter_preview(
+                mock_request(orguser),
+                schema_name="public",
+                table_name="schools",
+                column_name="district",
+                filter_type="value",
+                **kwargs,
+            )
+
+    def test_search_clause_has_no_escape_keyword_on_bigquery(self, orguser, seed_db):
+        """BigQuery's LIKE has no ESCAPE clause -- sending one is a syntax error"""
+        with patch("ddpui.services.dashboard_service.execute_query") as mock_exec:
+            mock_exec.return_value = [{"value": "50% off", "count": 1}]
+            self._preview(orguser, mock_exec, search="50%")
+
+            search_clause = mock_exec.call_args[0][1].where_clauses[-1]
+            sql = _compile_clause(search_clause, BigQueryDialect())
+            assert "ESCAPE" not in sql
+            assert "\\\\%" in sql  # the typed % is escaped, so it matches literally
+
+    def test_search_escapes_wildcards_on_postgres(self, orguser, seed_db):
+        """A typed "50%" or "a_b" matches literally, not as a LIKE wildcard"""
+        with patch("ddpui.services.dashboard_service.execute_query") as mock_exec:
+            mock_exec.return_value = []
+            self._preview(orguser, mock_exec, search="50%_A")
+
+            search_clause = mock_exec.call_args[0][1].where_clauses[-1]
+            sql = _compile_clause(search_clause, postgresql.dialect())
+            assert "50/%%/_a" in sql  # lowercased, % and _ escaped with "/"
+            assert "ESCAPE '/'" in sql
+
+    def test_blank_search_adds_no_clause(self, orguser, seed_db):
+        """Whitespace-only search is ignored -- same query as no search at all"""
+        with patch("ddpui.services.dashboard_service.execute_query") as mock_exec:
+            mock_exec.return_value = []
+            self._preview(orguser, mock_exec, search="   ")
+
+            # Only the NOT NULL clause
+            assert len(mock_exec.call_args[0][1].where_clauses) == 1

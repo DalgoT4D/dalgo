@@ -328,6 +328,7 @@ def _execute_filter_preview(
     filter_type: str,
     limit: int,
     constraints: Optional[List[Dict[str, Any]]] = None,  # narrows this filter
+    search: Optional[str] = None,  # value filters only
 ):
     """Shared logic for executing a filter preview query against the warehouse.
 
@@ -343,6 +344,7 @@ def _execute_filter_preview(
             column_name,
             limit,
             constraints=constraints,
+            search=search,
         )
         options = [
             AuthFilterOptionResponse(
@@ -426,6 +428,7 @@ def get_public_filter_preview(
     filter_type: str,
     limit: int = 100,
     constraints: Optional[str] = None,  # JSON list of {column, operator, value}
+    search: Optional[str] = None,  # value filters only
 ):
     """Get public filter preview for a dashboard token"""
     dashboard = _resolve_public_dashboard(token)
@@ -450,6 +453,7 @@ def get_public_filter_preview(
             filter_type,
             limit,
             parse_narrowing_constraints(constraints),
+            search,
         )
 
     except ValueError as e:
@@ -472,6 +476,7 @@ def get_public_report_filter_preview(
     filter_type: str,
     limit: int = 100,
     constraints: Optional[str] = None,  # JSON list of {column, operator, value}
+    search: Optional[str] = None,  # value filters only
 ):
     """Get public filter preview for a report snapshot token"""
     try:
@@ -497,6 +502,7 @@ def get_public_report_filter_preview(
             filter_type,
             limit,
             parse_narrowing_constraints(constraints),
+            search,
         )
 
     except ValueError as e:

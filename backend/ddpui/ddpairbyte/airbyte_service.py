@@ -363,9 +363,9 @@ def update_source(source_id: str, name: str, config: dict, sourcedef_id: str) ->
             "connectionConfiguration": config,
             "sourceDefinitionId": sourcedef_id,
         },
-        # airbyte re-validates the config against the connector before saving — same 60s the
-        # check_connection calls use, not abreq's 30s default
-        timeout=60,
+        # airbyte re-validates the config against the connector before saving, which can be
+        # slow for some connectors — so well above abreq's 30s default
+        timeout=120,
     )
     if "sourceId" not in res:
         error_message = "Failed to update source: " + res.get("message", json.dumps(res))
@@ -398,7 +398,7 @@ def check_source_connection(workspace_id: str, data: AirbyteSourceCreate) -> dic
             "connectionConfiguration": data.config,
             "workspaceId": workspace_id,
         },
-        timeout=60,
+        timeout=120,
     )
     if "jobInfo" not in res or res.get("status") == "failed":
         error_message = "Failed to check the source connection: " + res.get(
@@ -418,7 +418,7 @@ def check_source_connection_for_update(source_id: str, data: AirbyteSourceUpdate
             "connectionConfiguration": data.config,
             "name": data.name,
         },
-        timeout=60,
+        timeout=120,
     )
     if "jobInfo" not in res or res.get("status") == "failed":
         error_message = "Failed to check the source connection: " + res.get(

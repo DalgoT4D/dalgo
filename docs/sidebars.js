@@ -141,7 +141,12 @@ const sidebars = {
       items: [
         'settings/branding',
         'settings/access',
-        'settings/warehouse',
+        {
+          type: 'category',
+          label: 'Data',
+          link: { type: 'doc', id: 'settings/data' },
+          items: ['settings/warehouse'],
+        },
       ],
     },
 
