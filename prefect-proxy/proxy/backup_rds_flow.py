@@ -11,6 +11,7 @@ import psycopg2
 import pytz
 from prefect import flow, task
 from prefect.blocks.system import Secret
+from prefect.logging import get_run_logger
 
 
 def _load_secret(block_name: str) -> dict:
@@ -22,6 +23,8 @@ def _load_secret(block_name: str) -> dict:
 
 @task
 def backup_rds(rds_secret_block: str, aws_secret_block: str, retention_days: int):
+    logger = get_run_logger()
+
     rds = _load_secret(rds_secret_block)
     aws = _load_secret(aws_secret_block)
 
@@ -34,6 +37,7 @@ def backup_rds(rds_secret_block: str, aws_secret_block: str, retention_days: int
     aws_access_key = aws["AWS_ACCESS_KEY"]
     aws_secret_key = aws["AWS_SECRET_KEY"]
 
+    logger.info("Connecting to database host: %s", pg_host)
     conn = psycopg2.connect(
         dbname="postgres",
         user=pg_user,
@@ -51,6 +55,7 @@ def backup_rds(rds_secret_block: str, aws_secret_block: str, retention_days: int
     databases = [row[0] for row in cursor.fetchall()]
     cursor.close()
     conn.close()
+    logger.info("Found %d database(s) to back up: %s", len(databases), databases)
 
     s3_client = boto3.client(
         "s3",
@@ -70,11 +75,12 @@ def backup_rds(rds_secret_block: str, aws_secret_block: str, retention_days: int
                 f'pg_dump "host={pg_host} user={pg_user} dbname={db} sslmode=require"'
                 f" | gzip > {backup_path}"
             )
-            print(f"Backing up {db}")
+            logger.info("Backing up %s", db)
             subprocess.run(dump_cmd, shell=True, check=True, env={"PGPASSWORD": pg_password})
             s3_client.upload_file(backup_path, s3_bucket, s3_key)
+            logger.info("Uploaded %s to s3://%s/%s", db, s3_bucket, s3_key)
 
-    print("Backups done. Cleaning up old backups...")
+    logger.info("Backups done. Cleaning up old backups...")
 
     expiration_date = (
         datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=retention_days)
@@ -84,10 +90,10 @@ def backup_rds(rds_secret_block: str, aws_secret_block: str, retention_days: int
     for obj in response.get("Contents", []):
         obj_date = obj["Key"].split("_")[-1].replace(".sql.gz", "")
         if obj_date < expiration_date:
-            print(f"Deleting {obj['Key']}")
+            logger.info("Deleting expired backup: %s", obj["Key"])
             s3_client.delete_object(Bucket=s3_bucket, Key=obj["Key"])
 
-    print("Backup process completed.")
+    logger.info("Backup process completed.")
 
 
 @flow

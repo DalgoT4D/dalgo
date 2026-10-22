@@ -11,7 +11,6 @@ ENV CLIENTDBT_ROOT=${CLIENTDBT_ROOT}
 # (GitRepository pull step in service.py).
 RUN apt-get update && apt-get install -y \
     git \
-    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Install all runtime deps from prefect-proxy's pyproject.toml + uv.lock. Single

@@ -3,8 +3,6 @@
 import json
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from proxy.backup_rds_flow import _load_secret, backup_rds
 
 
@@ -69,12 +67,13 @@ def _setup_mocks(mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, da
     return mock_s3
 
 
+@patch("proxy.backup_rds_flow.get_run_logger")
 @patch("proxy.backup_rds_flow.subprocess.run")
 @patch("proxy.backup_rds_flow.boto3")
 @patch("proxy.backup_rds_flow.psycopg2")
 @patch("proxy.backup_rds_flow.Secret")
 def test_backup_rds_backs_up_all_databases(
-    mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess
+    mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, mock_logger
 ):
     databases = ["app_db", "analytics_db"]
     mock_s3 = _setup_mocks(mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, databases)
@@ -86,12 +85,13 @@ def test_backup_rds_backs_up_all_databases(
     assert mock_s3.upload_file.call_count == 2
 
 
+@patch("proxy.backup_rds_flow.get_run_logger")
 @patch("proxy.backup_rds_flow.subprocess.run")
 @patch("proxy.backup_rds_flow.boto3")
 @patch("proxy.backup_rds_flow.psycopg2")
 @patch("proxy.backup_rds_flow.Secret")
 def test_backup_rds_deletes_expired_objects(
-    mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess
+    mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, mock_logger
 ):
     mock_s3 = _setup_mocks(mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, ["app_db"])
     mock_s3.list_objects_v2.return_value = {
@@ -106,12 +106,13 @@ def test_backup_rds_deletes_expired_objects(
     assert mock_s3.delete_object.call_count == 2
 
 
+@patch("proxy.backup_rds_flow.get_run_logger")
 @patch("proxy.backup_rds_flow.subprocess.run")
 @patch("proxy.backup_rds_flow.boto3")
 @patch("proxy.backup_rds_flow.psycopg2")
 @patch("proxy.backup_rds_flow.Secret")
 def test_backup_rds_skips_recent_objects(
-    mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess
+    mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, mock_logger
 ):
     mock_s3 = _setup_mocks(mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, ["app_db"])
     mock_s3.list_objects_v2.return_value = {
@@ -125,11 +126,14 @@ def test_backup_rds_skips_recent_objects(
     mock_s3.delete_object.assert_not_called()
 
 
+@patch("proxy.backup_rds_flow.get_run_logger")
 @patch("proxy.backup_rds_flow.subprocess.run")
 @patch("proxy.backup_rds_flow.boto3")
 @patch("proxy.backup_rds_flow.psycopg2")
 @patch("proxy.backup_rds_flow.Secret")
-def test_backup_rds_no_databases(mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess):
+def test_backup_rds_no_databases(
+    mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, mock_logger
+):
     mock_s3 = _setup_mocks(mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, [])
     mock_s3.list_objects_v2.return_value = {}
 
