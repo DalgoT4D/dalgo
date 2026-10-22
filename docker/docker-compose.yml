@@ -162,16 +162,6 @@ services:
     restart: unless-stopped
 
 
-  prefect-worker-dailybackup:
-    image: ${REGISTRY:-}dalgo-prefect-proxy:${PROXY_IMAGE_TAG:-latest}
-    container_name: prefect-worker-dailybackup
-    command: uv run prefect worker start --pool dailybackup
-    env_file: ../prefect-proxy/.env
-    environment:
-      PREFECT_API_URL: http://prefect-server:4200/api
-    depends_on:
-      - prefect-server
-    restart: unless-stopped
 
   # ── Frontend ───────────────────────────────────────────────────────────────
   webapp:
