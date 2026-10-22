@@ -71,9 +71,7 @@ def backup_rds(rds_secret_block: str, aws_secret_block: str, retention_days: int
                 f" | gzip > {backup_path}"
             )
             print(f"Backing up {db}")
-            env = os.environ.copy()
-            env["PGPASSWORD"] = pg_password
-            subprocess.run(dump_cmd, shell=True, check=True, env=env)
+            subprocess.run(dump_cmd, shell=True, check=True, env={"PGPASSWORD": pg_password})
             s3_client.upload_file(backup_path, s3_bucket, s3_key)
 
     print("Backups done. Cleaning up old backups...")
