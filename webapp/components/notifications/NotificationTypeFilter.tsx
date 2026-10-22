@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Filter } from 'lucide-react';
+import { Check, ChevronDown, ListFilter } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { NOTIFICATION_TYPE_GROUPS } from '@/constants/notifications';
@@ -40,8 +40,9 @@ export function NotificationTypeFilter({ selected, onChange }: NotificationTypeF
             hasSelection ? 'text-teal-600' : 'text-gray-500 hover:text-gray-700'
           )}
         >
-          <Filter className="h-3.5 w-3.5 shrink-0" />
+          <ListFilter className="h-4 w-4 shrink-0" />
           <span>{triggerLabel(selected)}</span>
+          <ChevronDown className="h-3.5 w-3.5 shrink-0" />
         </button>
       </PopoverTrigger>
 
