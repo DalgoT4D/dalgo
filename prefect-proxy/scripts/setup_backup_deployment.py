@@ -15,22 +15,21 @@ Usage:
 """
 
 import argparse
-import asyncio
 import os
 
-from prefect import Flow
+from prefect import flow
 from prefect.runner.storage import GitRepository
 
 PREFECT_PROXY_GIT_BRANCH = os.getenv("PREFECT_PROXY_GIT_BRANCH", "main")
 
 
-async def create_deployment(args):
+def create_deployment(args):
     source = GitRepository(
         url="https://github.com/DalgoT4D/dalgo.git",
         branch=PREFECT_PROXY_GIT_BRANCH,
         directories=["prefect-proxy"],
     )
-    deployment_id = await Flow.from_source(
+    deployment_id = flow.from_source(
         source=source,
         entrypoint="prefect-proxy/proxy/backup_rds_flow.py:backup_rds_flow",
     ).deploy(
@@ -60,7 +59,7 @@ def main():
     parser.add_argument("--cron", default="0 8 * * *", help="Cron schedule (default: 8am IST daily)")
     args = parser.parse_args()
 
-    asyncio.run(create_deployment(args))
+    create_deployment(args)
 
 
 if __name__ == "__main__":
