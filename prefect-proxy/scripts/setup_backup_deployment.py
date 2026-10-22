@@ -18,9 +18,8 @@ import argparse
 import asyncio
 import os
 
+from prefect import Flow
 from prefect.runner.storage import GitRepository
-
-from proxy.backup_rds_flow import backup_rds_flow
 
 PREFECT_PROXY_GIT_BRANCH = os.getenv("PREFECT_PROXY_GIT_BRANCH", "main")
 
@@ -31,7 +30,7 @@ async def create_deployment(args):
         branch=PREFECT_PROXY_GIT_BRANCH,
         directories=["prefect-proxy"],
     )
-    deployment_id = await backup_rds_flow.from_source(
+    deployment_id = await Flow.from_source(
         source=source,
         entrypoint="prefect-proxy/proxy/backup_rds_flow.py:backup_rds_flow",
     ).deploy(
