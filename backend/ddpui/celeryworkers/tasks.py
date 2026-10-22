@@ -23,6 +23,7 @@ from ddpui.core.webhooks.webhook_functions import (
     do_handle_prefect_webhook,
     get_org_from_flow_run,
 )
+from ddpui.core.notifications import notifications_functions
 from ddpui.core.notifications.delivery import notify_org_managers
 from ddpui.core.notifications.triggers.schema_change import notify_schema_change
 
@@ -1239,6 +1240,17 @@ def clear_stuck_locks():
     return processed_count
 
 
+@app.task(name="maintenance.purge_old_notifications")
+def purge_old_notifications() -> None:
+    """Delete notifications older than NOTIFICATION_RETENTION_DAYS (default: 30).
+
+    NotificationRecipient rows are removed via CASCADE on the Notification FK.
+    """
+    retention_days = int(os.getenv("NOTIFICATION_RETENTION_DAYS", "30"))
+    deleted = notifications_functions.purge_old_notifications(retention_days)
+    logger.info("purge_old_notifications: deleted=%d retention_days=%d", deleted, retention_days)
+
+
 @app.task(name="maintenance.purge_old_audit_logs")
 def purge_old_audit_logs() -> int:
     """Purge audit log entries older than AUDIT_LOG_RETENTION_DAYS.
@@ -1342,4 +1354,11 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
         crontab(minute=0, hour=2, day_of_month=1),
         purge_old_audit_logs.s(),
         name="purge old audit logs",
+    )
+
+    # purge old notifications; nightly at 3am
+    sender.add_periodic_task(
+        crontab(minute=0, hour=3),
+        purge_old_notifications.s(),
+        name="purge old notifications",
     )

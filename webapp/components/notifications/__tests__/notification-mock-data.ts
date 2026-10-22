@@ -15,6 +15,7 @@ export const createMockNotification = (overrides: Partial<Notification> = {}): N
   message: 'Test notification message',
   read_status: false,
   timestamp: new Date().toISOString(),
+  notification_type: null,
   ...overrides,
 });
 

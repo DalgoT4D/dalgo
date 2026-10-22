@@ -1,3 +1,12 @@
+export type NotificationType =
+  | 'sharing'
+  | 'access'
+  | 'mention'
+  | 'schema_change'
+  | 'pipeline'
+  | 'platform'
+  | 'announcement';
+
 // Core notification interface
 export interface Notification {
   id: number;
@@ -6,6 +15,7 @@ export interface Notification {
   message: string;
   read_status: boolean;
   timestamp: string; // ISO 8601 format from backend
+  notification_type: NotificationType | null; // null for notifications created before this field was added
 }
 
 // API response for paginated notifications
@@ -59,11 +69,13 @@ export interface MarkAsReadPayload {
 // Tab types
 export type NotificationTab = 'all' | 'read' | 'unread';
 
-import { ReadStatus } from '@/constants/notifications';
+import type { ReadStatus } from '@/constants/notifications';
 
 // Filter parameters
 export interface NotificationFilters {
   limit: number;
   page: number;
   read_status?: ReadStatus; // undefined = all
+  notification_types?: NotificationType[]; // filter to one or more categories (multi-select)
+  exclude_announcements?: boolean; // true for the Notifications tab (excludes announcement type)
 }

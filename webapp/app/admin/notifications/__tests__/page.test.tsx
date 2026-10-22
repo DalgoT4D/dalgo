@@ -155,6 +155,7 @@ describe('NotificationsPage composer', () => {
         superset_clients: false,
         send_in_app: true,
         send_email: true,
+        notification_type: 'platform',
       })
     );
     await waitFor(() => expect(mockMutateHistory).toHaveBeenCalled());
