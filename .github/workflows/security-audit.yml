@@ -46,7 +46,6 @@ jobs:
           direct_prompt: ${{ steps.vars.outputs.prompt }}
 
       - name: Collect findings
-        if: always()
         run: |
           mkdir -p /tmp/audit-findings
           # Explicit output dir (from prompt instruction)
@@ -55,11 +54,9 @@ jobs:
           [ -d ~/security-audit-skill ] && cp -r ~/security-audit-skill/. /tmp/audit-findings/
 
       - name: Zip findings
-        if: always()
         run: zip -r /tmp/security-audit-findings.zip /tmp/audit-findings/ || true
 
       - name: Email findings via SES
-        if: always()
         env:
           SES_ACCESS_KEY_ID: ${{ secrets.SES_ACCESS_KEY_ID }}
           SES_SECRET_ACCESS_KEY: ${{ secrets.SES_SECRET_ACCESS_KEY }}
