@@ -38,6 +38,7 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
   const [audienceMode, setAudienceMode] = useState<AudienceMode>('whole_platform');
   const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
   const [supersetClients, setSupersetClients] = useState(false);
+  const [adminsOnly, setAdminsOnly] = useState(false);
   const [sendInApp, setSendInApp] = useState(true);
   const [sendEmail, setSendEmail] = useState(true);
   const [previewCount, setPreviewCount] = useState<number | null>(null);
@@ -57,7 +58,7 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
     }
     let cancelled = false;
     setPreviewCount(null);
-    previewRecipients(orgIds, supersetClients)
+    previewRecipients(orgIds, supersetClients, adminsOnly)
       .then((preview) => {
         if (!cancelled) setPreviewCount(preview.recipient_count);
       })
@@ -68,7 +69,7 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audienceMode, orgIdsKey, supersetClients]);
+  }, [audienceMode, orgIdsKey, supersetClients, adminsOnly]);
 
   const audienceReady = audienceMode === 'whole_platform' || selectedOrgIds.length > 0;
   const canSend =
@@ -94,6 +95,7 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
         urgent,
         org_ids: orgIds,
         superset_clients: supersetClients,
+        admins_only: adminsOnly,
         send_in_app: sendInApp,
         send_email: sendEmail,
         notification_type: notificationType,
@@ -109,6 +111,7 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
       setAudienceMode('whole_platform');
       setSelectedOrgIds([]);
       setSupersetClients(false);
+      setAdminsOnly(false);
       onSent();
     } catch {
       // toast already surfaced by the hook
@@ -194,7 +197,7 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
                 id="audience-whole-platform"
                 data-testid="audience-whole-platform"
               />
-              <Label htmlFor="audience-whole-platform">Whole platform</Label>
+              <Label htmlFor="audience-whole-platform">All organizations</Label>
             </div>
             <div className="flex items-center gap-2">
               <RadioGroupItem value="orgs" id="audience-orgs" data-testid="audience-orgs" />
@@ -228,6 +231,17 @@ export function BroadcastComposer({ onSent }: BroadcastComposerProps) {
               />
               <Label htmlFor="broadcast-superset-clients">
                 Superset clients only (organizations with Visualization URL configured)
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="broadcast-admins-only"
+                data-testid="broadcast-admins-only"
+                checked={adminsOnly}
+                onCheckedChange={(checked) => setAdminsOnly(checked === true)}
+              />
+              <Label htmlFor="broadcast-admins-only">
+                Admins only (users with the Admin or Super Admin role)
               </Label>
             </div>
           </div>

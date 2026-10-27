@@ -91,7 +91,7 @@ export function BroadcastHistory({
                       <TableCell>
                         {notification.target_org_names && notification.target_org_names.length > 0
                           ? notification.target_org_names.join(', ')
-                          : 'Whole platform'}
+                          : 'All organizations'}
                       </TableCell>
                       <TableCell>
                         {[

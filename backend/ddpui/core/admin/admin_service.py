@@ -9,7 +9,11 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 
 from ddpui.auth import ADMIN_ROLE
-from ddpui.core.admin.exceptions import AdminOrgCreateError, AdminOrgDeleteError
+from ddpui.core.admin.exceptions import (
+    AdminOrgCreateError,
+    AdminOrgDeleteError,
+    AdminOrgUpdateError,
+)
 from ddpui.models.org import Org, OrgWarehouse
 from ddpui.models.role_based_access import Role
 from ddpui.models.org_user import (
@@ -18,7 +22,7 @@ from ddpui.models.org_user import (
     NewInvitationSchema,
     DeleteOrgUserPayload,
 )
-from ddpui.models.org_plans import OrgPlans
+from ddpui.models.org_plans import OrgPlans, OrgPlanType
 from ddpui.models.tasks import OrgTask, OrgDataFlowv1
 from ddpui.models.dashboard import Dashboard
 from ddpui.models.visualization import Chart
@@ -29,6 +33,7 @@ from ddpui.schemas.admin_schema import (
     AdminUpdateOrgSchema,
     AdminFeatureFlagCatalogItem,
     AdminCreateNotificationSchema,
+    AdminNotificationAudienceSchema,
     AdminNotificationSchema,
     AdminNotificationHistoryResponse,
     OrgDeletionImpactSchema,
@@ -165,9 +170,40 @@ def create_org(payload: AdminCreateOrgSchema, inviter: OrgUser) -> Org:
     return org
 
 
+def _apply_trial_date_rules(org_plans: OrgPlans, payload: AdminUpdateOrgSchema) -> None:
+    """A trial's end date drives its auto-delete, so it may only move later; its start is fixed."""
+    stays_trial = (payload.base_plan or org_plans.base_plan) == OrgPlanType.FREE_TRIAL.value
+    if org_plans.base_plan != OrgPlanType.FREE_TRIAL.value or not stays_trial:
+        return
+
+    if payload.end_date and org_plans.end_date:
+        if payload.end_date.date() < org_plans.end_date.date():
+            raise AdminOrgUpdateError("A trial's end date can only be extended, not moved earlier")
+        # the form sends whole days: same day = unchanged, so keep the stored time
+        if payload.end_date.date() == org_plans.end_date.date():
+            payload.end_date = None
+
+    if payload.start_date and org_plans.start_date:
+        if payload.start_date.date() != org_plans.start_date.date():
+            raise AdminOrgUpdateError("A trial's start date cannot be changed")
+        payload.start_date = None
+
+
 def update_org(org: Org, payload: AdminUpdateOrgSchema) -> Org:
     """Partial-update name/viz_url/base_plan. slug is locked post-create (used in URLs
     and the Airbyte workspace); only non-None fields are changed."""
+    org_plans = OrgPlans.objects.filter(org=org).first()
+    # trials only come from the trial signup; switching other orgs in breaks trial emails/auto-delete
+    is_trial = bool(org_plans) and org_plans.base_plan == OrgPlanType.FREE_TRIAL.value
+    if payload.base_plan == OrgPlanType.FREE_TRIAL.value and not is_trial:
+        raise AdminOrgUpdateError(
+            "An organization can't be switched to Free Trial; trials are created through the "
+            "trial signup"
+        )
+    if org_plans:
+        # validate before touching anything, so a rejected date leaves the org unchanged
+        _apply_trial_date_rules(org_plans, payload)
+
     if payload.name is not None:
         org.name = payload.name
     if payload.viz_url is not None:
@@ -186,7 +222,6 @@ def update_org(org: Org, payload: AdminUpdateOrgSchema) -> Org:
         if v is not None
     }
     if org_plans_fields:
-        org_plans = OrgPlans.objects.filter(org=org).first()
         if org_plans:
             for field, value in org_plans_fields.items():
                 setattr(org_plans, field, value)
@@ -361,22 +396,26 @@ def clear_org_flag(org: Org, flag_name: str) -> Optional[bool]:
 # --------------------------------------------------------------------------- #
 
 
-def _resolve_recipient_ids(
-    org_ids: Optional[List[int]], superset_clients: bool = False
-) -> List[int]:
+def _resolve_recipient_ids(audience: AdminNotificationAudienceSchema) -> List[int]:
     """Merge recipients across a whole-platform or multi-org audience into one
     list -- never a per-org breakdown. A bogus org_id resolves to no slug and
-    contributes nothing, rather than erroring (plan.md §4.3, §5)."""
-    if org_ids:
-        org_slugs = list(Org.objects.filter(id__in=org_ids).values_list("slug", flat=True))
+    contributes nothing, rather than erroring (plan.md §4.3, §5). admins_only keeps
+    admins and super-admins (get_recipients' manager_or_above)."""
+    if audience.org_ids:
+        org_slugs = list(Org.objects.filter(id__in=audience.org_ids).values_list("slug", flat=True))
         if not org_slugs:
             return []
         error, recipient_ids = get_recipients(
-            SentToEnum.ALL_ORG_USERS, None, None, False, superset_clients, org_slugs=org_slugs
+            SentToEnum.ALL_ORG_USERS,
+            None,
+            None,
+            audience.admins_only,
+            audience.superset_clients,
+            org_slugs=org_slugs,
         )
     else:
         error, recipient_ids = get_recipients(
-            SentToEnum.ALL_USERS, None, None, False, superset_clients
+            SentToEnum.ALL_USERS, None, None, audience.admins_only, audience.superset_clients
         )
 
     if error:
@@ -384,11 +423,9 @@ def _resolve_recipient_ids(
     return recipient_ids
 
 
-def preview_notification_recipients(
-    org_ids: Optional[List[int]], superset_clients: bool = False
-) -> int:
+def preview_notification_recipients(audience: AdminNotificationAudienceSchema) -> int:
     """One combined recipient count across the whole chosen audience."""
-    return len(_resolve_recipient_ids(org_ids, superset_clients))
+    return len(_resolve_recipient_ids(audience))
 
 
 def create_admin_notification(
@@ -403,7 +440,7 @@ def create_admin_notification(
         # persisting a Notification + a NotificationRecipient row per recipient.
         return "Select at least one channel: in-app or email", None
 
-    recipient_ids = _resolve_recipient_ids(payload.org_ids, payload.superset_clients)
+    recipient_ids = _resolve_recipient_ids(payload)
     if not recipient_ids:
         return "No recipients found for the given audience", None
 

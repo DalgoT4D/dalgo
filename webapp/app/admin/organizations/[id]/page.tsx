@@ -24,8 +24,8 @@ import { DeleteOrgDialog } from '@/components/admin/DeleteOrgDialog';
 import { trackEvent, trackFeatureView } from '@/lib/analytics';
 import { ANALYTICS_EVENTS, FEATURES } from '@/constants/analytics';
 import { isValidVizUrl, VIZ_URL_ERROR } from '@/components/admin/utils';
-
-const BASE_PLANS = ['Free Trial', 'Dalgo', 'Internal'];
+import { BASE_PLANS, DALGO_PLAN_NAME } from '@/components/admin/constants';
+import { FREE_TRIAL_PLAN_NAME } from '@/constants/trial';
 
 function Fact({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -64,6 +64,12 @@ interface OrgEditFormProps {
 }
 
 function OrgEditForm({ org, form, errors, saving, onChange, onSave, onCancel }: OrgEditFormProps) {
+  // an existing trial's end date drives its auto-delete: start is fixed, end only moves later
+  const isExistingTrial = org.base_plan === FREE_TRIAL_PLAN_NAME;
+  // trials only come from the trial signup, so only an existing trial keeps Free Trial on offer
+  const planOptions = isExistingTrial
+    ? BASE_PLANS
+    : BASE_PLANS.filter((plan) => plan !== FREE_TRIAL_PLAN_NAME);
   return (
     <div className="space-y-5">
       <div className="space-y-2">
@@ -86,11 +92,11 @@ function OrgEditForm({ org, form, errors, saving, onChange, onSave, onCancel }: 
       <div className="space-y-2">
         <Label htmlFor="edit-base-plan">Plan</Label>
         <Select value={form.basePlan} onValueChange={(v) => onChange({ basePlan: v })}>
-          <SelectTrigger id="edit-base-plan">
+          <SelectTrigger id="edit-base-plan" data-testid="edit-base-plan-select">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {BASE_PLANS.map((plan) => (
+            {planOptions.map((plan) => (
               <SelectItem key={plan} value={plan}>
                 {plan}
               </SelectItem>
@@ -113,7 +119,7 @@ function OrgEditForm({ org, form, errors, saving, onChange, onSave, onCancel }: 
           </SelectContent>
         </Select>
       </div>
-      {form.basePlan === 'Free Trial' && (
+      {form.basePlan === FREE_TRIAL_PLAN_NAME && (
         <>
           <div className="space-y-2">
             <Label htmlFor="edit-start-date">Start Date</Label>
@@ -123,6 +129,8 @@ function OrgEditForm({ org, form, errors, saving, onChange, onSave, onCancel }: 
               value={form.startDate}
               onChange={(e) => onChange({ startDate: e.target.value })}
               className={errors.startDate ? 'border-destructive' : ''}
+              disabled={isExistingTrial}
+              data-testid="edit-start-date-input"
             />
             {errors.startDate && <p className="text-sm text-destructive">{errors.startDate}</p>}
           </div>
@@ -134,7 +142,14 @@ function OrgEditForm({ org, form, errors, saving, onChange, onSave, onCancel }: 
               value={form.endDate}
               onChange={(e) => onChange({ endDate: e.target.value })}
               className={errors.endDate ? 'border-destructive' : ''}
+              min={isExistingTrial ? toDateInput(org.end_date) : undefined}
+              data-testid="edit-end-date-input"
             />
+            {isExistingTrial && (
+              <p className="text-xs text-muted-foreground">
+                A trial&apos;s end date can only be extended.
+              </p>
+            )}
             {errors.endDate && <p className="text-sm text-destructive">{errors.endDate}</p>}
           </div>
         </>
@@ -192,7 +207,7 @@ function OrgReadView({ org }: { org: AdminOrg }) {
       <Fact label="Billing Frequency">{org.subscription_duration ?? '—'}</Fact>
       <Fact label="Superset Included">{org.superset_included ? 'Yes' : 'No'}</Fact>
       {org.superset_included && <Fact label="Visualization URL">{org.viz_url ?? '—'}</Fact>}
-      {org.base_plan === 'Free Trial' && (
+      {org.base_plan === FREE_TRIAL_PLAN_NAME && (
         <>
           <Fact label="Start Date">{org.start_date ? org.start_date.slice(0, 10) : '—'}</Fact>
           <Fact label="End Date">{org.end_date ? org.end_date.slice(0, 10) : '—'}</Fact>
@@ -203,15 +218,20 @@ function OrgReadView({ org }: { org: AdminOrg }) {
   );
 }
 
+// "YYYY-MM-DD" for a date input; these strings compare correctly as plain text
+function toDateInput(iso: string | null): string {
+  return iso ? iso.slice(0, 10) : '';
+}
+
 function orgToForm(org: AdminOrg): OrgFormState {
   return {
     name: org.name,
     vizUrl: org.viz_url ?? '',
-    basePlan: org.base_plan ?? 'Free Trial',
+    basePlan: org.base_plan ?? DALGO_PLAN_NAME,
     supersetIncluded: org.superset_included ? 'true' : 'false',
     subscriptionDuration: org.subscription_duration ?? 'Monthly',
-    startDate: org.start_date ? org.start_date.slice(0, 10) : '',
-    endDate: org.end_date ? org.end_date.slice(0, 10) : '',
+    startDate: toDateInput(org.start_date),
+    endDate: toDateInput(org.end_date),
   };
 }
 
@@ -261,10 +281,13 @@ export default function AdminOrganizationDetailPage() {
     const nextErrors: OrgFormErrors = {};
     if (!trimmedName) nextErrors.name = 'Name is required';
     if (trimmedVizUrl && !isValidVizUrl(trimmedVizUrl)) nextErrors.vizUrl = VIZ_URL_ERROR;
-    if (form.basePlan === 'Free Trial' && !form.startDate)
+    if (form.basePlan === FREE_TRIAL_PLAN_NAME && !form.startDate)
       nextErrors.startDate = 'Start date is required for trial accounts';
-    if (form.basePlan === 'Free Trial' && !form.endDate)
+    if (form.basePlan === FREE_TRIAL_PLAN_NAME && !form.endDate)
       nextErrors.endDate = 'End date is required for trial accounts';
+    const currentEnd = toDateInput(org.end_date);
+    if (org.base_plan === FREE_TRIAL_PLAN_NAME && currentEnd && form.endDate < currentEnd)
+      nextErrors.endDate = 'A trial’s end date can only be extended';
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
