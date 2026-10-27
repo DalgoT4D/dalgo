@@ -1,0 +1,74 @@
+name: Security Audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Space-separated directories to audit (e.g. 'backend/ webapp/'). Defaults to backend, webapp, docker, prefect-proxy."
+        required: false
+        default: "backend/ webapp/ docker/ prefect-proxy/"
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install security-audit skill
+        run: |
+          mkdir -p ~/.claude/skills
+          git clone --depth=1 https://github.com/cloudflare/security-audit-skill /tmp/security-audit-skill
+          cp -r /tmp/security-audit-skill/skills/security-audit ~/.claude/skills/
+
+      - name: Build prompt
+        id: vars
+        run: |
+          SCOPE="${{ github.event.inputs.scope }}"
+          echo "prompt=Do a full security audit of these directories: ${SCOPE}. Save all findings artifacts (architecture.md, coverage-ledger.json, findings.json, REPORT.md, FINDINGS-DETAIL.md) to ~/security-audit-output/." >> "$GITHUB_OUTPUT"
+
+      - name: Run security audit
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: ${{ steps.vars.outputs.prompt }}
+
+      - name: Collect findings
+        if: always()
+        run: |
+          mkdir -p /tmp/audit-findings
+          # Explicit output dir (from prompt instruction)
+          [ -d ~/security-audit-output ] && cp -r ~/security-audit-output/. /tmp/audit-findings/
+          # Skill default output dir (fallback if Claude ignored the prompt)
+          [ -d ~/security-audit-skill ] && cp -r ~/security-audit-skill/. /tmp/audit-findings/
+
+      - name: Zip findings
+        if: always()
+        run: zip -r /tmp/security-audit-findings.zip /tmp/audit-findings/ || true
+
+      - name: Email findings
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ vars.MAIL_SERVER }}
+          server_port: ${{ vars.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          to: ${{ vars.SECURITY_AUDIT_MAIL_TO }}
+          from: Dalgo Security Audit <${{ vars.MAIL_FROM }}>
+          subject: "Security Audit Report — ${{ github.repository }} @ ${{ github.ref_name }}"
+          body: |
+            Security audit completed for ${{ github.repository }}.
+
+            Branch: ${{ github.ref_name }}
+            Scope: ${{ github.event.inputs.scope }}
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Findings are attached as a zip. See REPORT.md for the summary and FINDINGS-DETAIL.md for full details.
+          attachments: /tmp/security-audit-findings.zip
