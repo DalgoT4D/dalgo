@@ -53,8 +53,9 @@ class UpdateReadStatusSchema(Schema):
 class UpdateReadStatusSchemav1(Schema):
     """Schema for updating the read status of a notification."""
 
-    notification_ids: list[int]
+    notification_ids: list[int] = []
     read_status: bool
+    select_all: bool = False
 
 
 class NotificationDataSchema(Schema):

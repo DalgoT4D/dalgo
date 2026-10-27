@@ -43,7 +43,6 @@ describe('Notifications Page Integration', () => {
 
     (notificationHooks.useNotificationActions as jest.Mock).mockReturnValue({
       markAsRead: mocks.mockMarkAsRead,
-      markAllAsRead: mocks.mockMarkAllAsRead,
     });
 
     (notificationHooks.useUserPreferences as jest.Mock).mockReturnValue({
@@ -119,7 +118,7 @@ describe('Notifications Page Integration', () => {
     fireEvent.click(markAsReadButton);
 
     await waitFor(() => {
-      expect(mocks.mockMarkAsRead).toHaveBeenCalledWith([1], true);
+      expect(mocks.mockMarkAsRead).toHaveBeenCalledWith([1], true, false);
       expect(mocks.mutate).toHaveBeenCalled();
     });
   });
