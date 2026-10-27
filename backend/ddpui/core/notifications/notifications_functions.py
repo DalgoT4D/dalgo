@@ -403,14 +403,14 @@ def mark_notification_as_read_or_unread(
 
 
 def mark_notifications_as_read_or_unread(
-    orguser_id: int, notification_ids: int, read_status: bool
+    orguser_id: int, notification_ids: list, read_status: bool, select_all: bool = False
 ) -> Tuple[Optional[str], Optional[Dict[str, Any]]]:
-    """bulk update  of the read status of a recipient for notifications"""
+    """bulk update of the read status of a recipient for notifications"""
     try:
-        NotificationRecipient.objects.filter(
-            recipient__id=orguser_id,
-            notification__id__in=notification_ids,
-        ).update(read_status=read_status)
+        qs = NotificationRecipient.objects.filter(recipient__id=orguser_id)
+        if not select_all:
+            qs = qs.filter(notification__id__in=notification_ids)
+        qs.update(read_status=read_status)
         return None, {"success": True, "message": "Notifications updated successfully"}
     except NotificationRecipient.DoesNotExist:
         return "Something went wrong updating the notifications", None

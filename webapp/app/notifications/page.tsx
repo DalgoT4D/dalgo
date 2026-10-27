@@ -28,6 +28,7 @@ export default function NotificationsPage() {
   const [activeTypeFilters, setActiveTypeFilters] = useState<NotificationType[]>([]);
   const [showPreferences, setShowPreferences] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isSelectAllMode, setIsSelectAllMode] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
@@ -41,6 +42,7 @@ export default function NotificationsPage() {
   // Reset selection and page when tab or type filter changes
   useEffect(() => {
     setSelectedIds([]);
+    setIsSelectAllMode(false);
     setPage(1);
   }, [activeTab, activeTypeFilters]);
 
@@ -50,22 +52,24 @@ export default function NotificationsPage() {
   }, [pageSize]);
 
   const handleMarkAsRead = async () => {
-    if (selectedIds.length === 0) return;
-    const success = await markAsRead(selectedIds, true);
+    if (!isSelectAllMode && selectedIds.length === 0) return;
+    const success = await markAsRead(selectedIds, true, isSelectAllMode);
     if (success) {
       await mutate();
       await mutateUnreadCount();
       setSelectedIds([]);
+      setIsSelectAllMode(false);
     }
   };
 
   const handleMarkAsUnread = async () => {
-    if (selectedIds.length === 0) return;
-    const success = await markAsRead(selectedIds, false);
+    if (!isSelectAllMode && selectedIds.length === 0) return;
+    const success = await markAsRead(selectedIds, false, isSelectAllMode);
     if (success) {
       await mutate();
       await mutateUnreadCount();
       setSelectedIds([]);
+      setIsSelectAllMode(false);
     }
   };
 
@@ -134,7 +138,10 @@ export default function NotificationsPage() {
           totalCount={totalCount}
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
-          onClearSelection={() => setSelectedIds([])}
+          onClearSelection={() => {
+            setSelectedIds([]);
+            setIsSelectAllMode(false);
+          }}
           onMarkAsRead={handleMarkAsRead}
           onMarkAsUnread={handleMarkAsUnread}
           page={page}
@@ -142,12 +149,16 @@ export default function NotificationsPage() {
           onPageChange={(p) => {
             setPage(p);
             setSelectedIds([]);
+            setIsSelectAllMode(false);
           }}
           onPageSizeChange={(s) => {
             setPageSize(s);
             setSelectedIds([]);
+            setIsSelectAllMode(false);
           }}
           isLoading={isLoading}
+          isSelectAllMode={isSelectAllMode}
+          onSelectAllPages={() => setIsSelectAllMode(true)}
         />
       </div>
 

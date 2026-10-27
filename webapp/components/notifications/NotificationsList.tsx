@@ -22,6 +22,8 @@ interface NotificationsListProps {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   isLoading?: boolean;
+  isSelectAllMode?: boolean;
+  onSelectAllPages?: () => void;
 }
 
 export function NotificationsList({
@@ -37,20 +39,31 @@ export function NotificationsList({
   onPageChange,
   onPageSizeChange,
   isLoading = false,
+  isSelectAllMode = false,
+  onSelectAllPages,
 }: NotificationsListProps) {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
   const currentPageIds = new Set(notifications.map((n) => n.id));
   const selectedOnPage = selectedIds.filter((id) => currentPageIds.has(id));
-  const allSelected = notifications.length > 0 && selectedOnPage.length === notifications.length;
-  const someSelected = selectedOnPage.length > 0 && selectedOnPage.length < notifications.length;
+  const allOnPageSelected =
+    notifications.length > 0 && selectedOnPage.length === notifications.length;
+  const allSelected = isSelectAllMode || allOnPageSelected;
+  const someSelected =
+    !isSelectAllMode && selectedOnPage.length > 0 && selectedOnPage.length < notifications.length;
+  const showSelectAllPagesLink =
+    allOnPageSelected && !isSelectAllMode && totalCount > notifications.length && onSelectAllPages;
 
   const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      onSelectionChange(notifications.map((n) => n.id));
-    } else {
-      onSelectionChange([]);
+    if (!checked) {
+      if (isSelectAllMode) {
+        onClearSelection();
+      } else {
+        onSelectionChange([]);
+      }
+      return;
     }
+    onSelectionChange(notifications.map((n) => n.id));
   };
 
   const handleSelectRow = (id: number, checked: boolean) => {
@@ -65,7 +78,7 @@ export function NotificationsList({
     setExpandedRow(expandedRow === id ? null : id);
   };
 
-  const hasSelection = selectedIds.length > 0;
+  const hasSelection = isSelectAllMode || selectedIds.length > 0;
 
   if (isLoading) {
     return (
@@ -146,13 +159,32 @@ export function NotificationsList({
                 aria-label="Select all notifications"
                 className="border-gray-800 data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 data-[state=indeterminate]:bg-gray-600 data-[state=indeterminate]:border-gray-600"
               />
-              <span className="text-sm font-medium text-gray-600">
-                {hasSelection ? `${selectedIds.length} selected` : 'Select all'}
-              </span>
-              <span className="text-gray-300">|</span>
-              <span className="text-sm font-medium text-gray-600">
-                Showing {notifications.length} of {totalCount} notifications
-              </span>
+              {isSelectAllMode ? (
+                <span className="text-sm font-medium text-gray-600">All {totalCount} selected</span>
+              ) : hasSelection ? (
+                <>
+                  <span className="text-sm font-medium text-gray-600">
+                    {selectedIds.length} selected
+                  </span>
+                  {showSelectAllPagesLink && (
+                    <button
+                      data-testid="select-all-pages-btn"
+                      onClick={onSelectAllPages}
+                      className="text-sm font-medium text-teal-600 hover:text-teal-700 cursor-pointer"
+                    >
+                      Select all {totalCount} across all pages
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="text-sm font-medium text-gray-600">Select all</span>
+                  <span className="text-gray-300">|</span>
+                  <span className="text-sm font-medium text-gray-600">
+                    Showing {notifications.length} of {totalCount} notifications
+                  </span>
+                </>
+              )}
             </div>
 
             {hasSelection && (

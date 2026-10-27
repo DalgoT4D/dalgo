@@ -57,13 +57,11 @@ export const createMockMutate = () => jest.fn();
 
 export const createMockNotificationHooks = (mutate = jest.fn()) => {
   const mockMarkAsRead = jest.fn().mockResolvedValue(true);
-  const mockMarkAllAsRead = jest.fn().mockResolvedValue(true);
   const mockUpdateUserPreferences = jest.fn().mockResolvedValue(true);
 
   return {
     mutate,
     mockMarkAsRead,
-    mockMarkAllAsRead,
     mockUpdateUserPreferences,
   };
 };

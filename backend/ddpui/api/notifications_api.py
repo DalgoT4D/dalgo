@@ -105,11 +105,12 @@ def get_user_notifications_v1(
 @notification_router.put("/v1")
 def mark_as_read_v1(request, payload: UpdateReadStatusSchemav1):
     """
-    Bulk update of read status of notifications
+    Bulk update of read status of notifications.
+    Pass select_all=true to update all notifications regardless of notification_ids.
     """
     orguser: OrgUser = request.orguser
     error, result = notifications_functions.mark_notifications_as_read_or_unread(
-        orguser.id, payload.notification_ids, payload.read_status
+        orguser.id, payload.notification_ids, payload.read_status, payload.select_all
     )
     if error is not None:
         raise HttpError(400, error)

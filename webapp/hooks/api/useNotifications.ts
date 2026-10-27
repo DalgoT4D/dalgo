@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import { toast } from 'sonner';
 import { apiGet, apiPut } from '@/lib/api';
-import {
+import type {
   NotificationsResponse,
   UnreadCountResponse,
   UserPreferencesResponse,
@@ -91,11 +91,12 @@ export function useOrgPreferences() {
  * Hook for notification actions (mark as read/unread, mark all as read)
  */
 export function useNotificationActions() {
-  const markAsRead = async (notificationIds: number[], readStatus: boolean) => {
+  const markAsRead = async (notificationIds: number[], readStatus: boolean, selectAll = false) => {
     try {
       await apiPut('/api/notifications/v1', {
         notification_ids: notificationIds,
         read_status: readStatus,
+        select_all: selectAll,
       });
       toast.success(readStatus ? 'Marked as read' : 'Marked as unread');
       return true;
@@ -108,20 +109,7 @@ export function useNotificationActions() {
     }
   };
 
-  const markAllAsRead = async () => {
-    try {
-      await apiPut('/api/notifications/mark_all_as_read', {});
-      toast.success('All notifications marked as read');
-      return true;
-    } catch (error) {
-      console.error('Failed to mark all as read:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to mark all as read';
-      toast.error(errorMessage);
-      return false;
-    }
-  };
-
-  return { markAsRead, markAllAsRead };
+  return { markAsRead };
 }
 
 /**
