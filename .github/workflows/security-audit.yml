@@ -37,7 +37,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          prompt: ${{ steps.vars.outputs.prompt }}
+          direct_prompt: ${{ steps.vars.outputs.prompt }}
 
       - name: Collect findings
         if: always()
