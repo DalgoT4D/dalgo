@@ -43,15 +43,22 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           mode: agent
           model: ${{ github.event.inputs.model }}
+          allowed_tools: "Bash,Edit,MultiEdit,Glob,Grep,LS,Read,Write"
           direct_prompt: ${{ steps.vars.outputs.prompt }}
 
       - name: Collect findings
         run: |
           mkdir -p /tmp/audit-findings
-          # Explicit output dir (from prompt instruction)
-          [ -d ~/security-audit-output ] && cp -r ~/security-audit-output/. /tmp/audit-findings/
-          # Skill default output dir (fallback if Claude ignored the prompt)
-          [ -d ~/security-audit-skill ] && cp -r ~/security-audit-skill/. /tmp/audit-findings/
+          if [ -d ~/security-audit-output ]; then
+            cp -r ~/security-audit-output/. /tmp/audit-findings/
+          fi
+          if [ -d ~/security-audit-skill ]; then
+            cp -r ~/security-audit-skill/. /tmp/audit-findings/
+          fi
+          if [ -z "$(ls -A /tmp/audit-findings)" ]; then
+            echo "No findings collected — audit produced no output."
+            exit 1
+          fi
 
       - name: Zip findings
         run: zip -r /tmp/security-audit-findings.zip /tmp/audit-findings/ || true
