@@ -7,6 +7,10 @@ on:
         description: "Space-separated directories to audit (e.g. 'backend/ webapp/'). Defaults to backend, webapp, docker, prefect-proxy."
         required: false
         default: "backend/ webapp/ docker/ prefect-proxy/"
+      model:
+        description: "Claude model to use for the audit."
+        required: false
+        default: "claude-sonnet-4-6"
 
 jobs:
   security-audit:
@@ -38,7 +42,7 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           mode: agent
-          model: claude-sonnet-4-6
+          model: ${{ github.event.inputs.model }}
           direct_prompt: ${{ steps.vars.outputs.prompt }}
 
       - name: Collect findings
