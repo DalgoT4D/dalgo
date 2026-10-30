@@ -43,7 +43,13 @@ RUN groupadd --gid 1000 dalgouser && \
 COPY --from=builder --chown=dalgouser:dalgouser /opt/venv /opt/venv
 COPY --from=builder --chown=dalgouser:dalgouser /app /app
 
+# Install Chromium system deps (requires root; playwright knows the exact list)
+RUN /opt/venv/bin/playwright install-deps chromium
+
 USER dalgouser
+
+# Download Chromium browser binary into dalgouser's home dir
+RUN /opt/venv/bin/playwright install chromium
 
 WORKDIR /app
 
