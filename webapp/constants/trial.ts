@@ -144,6 +144,8 @@ export const TRIAL_HARD_TIMEOUT_SECONDS = 420;
 
 // Public backend endpoints (unauthenticated — via apiPublicPost/apiPublicGet)
 export const TRIAL_SIGNUP_PATH = '/api/v1/public/trial/signup';
+// Trial signup returns 409 when an account with this email already exists.
+export const TRIAL_ACCOUNT_EXISTS_STATUS = 409;
 export const TRIAL_ACTIVATE_PATH = '/api/v1/public/trial/activate';
 // Pre-flight password check for the activate form. Runs Django's AUTH_PASSWORD_VALIDATORS and
 // nothing else — stateless, token-free, creates no account. Exists because one of those

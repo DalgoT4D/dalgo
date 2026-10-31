@@ -39,7 +39,11 @@ from ddpui.schemas.admin_schema import (
     AdminNotificationHistoryResponse,
 )
 from ddpui.core.admin import admin_service
-from ddpui.core.admin.exceptions import AdminOrgCreateError, AdminOrgDeleteError
+from ddpui.core.admin.exceptions import (
+    AdminOrgCreateError,
+    AdminOrgDeleteError,
+    AdminOrgUpdateError,
+)
 from ddpui.utils.custom_logger import CustomLogger
 
 logger = CustomLogger("ddpui")
@@ -117,7 +121,10 @@ def get_admin_org(request, org_id: int):
 def put_admin_org(request, org_id: int, payload: AdminUpdateOrgSchema):
     """Edit an org's name / viz_url / base_plan. slug is never touched (locked)."""
     org = _get_org_or_404(org_id)
-    org = admin_service.update_org(org, payload)
+    try:
+        org = admin_service.update_org(org, payload)
+    except AdminOrgUpdateError as err:
+        raise HttpError(400, err.message) from err
     return _admin_org_response(org)
 
 
@@ -342,9 +349,7 @@ ADMIN_NOTIFICATION_HISTORY_PAGE_SIZE = 10
 def post_admin_notification_preview(request, payload: AdminNotificationAudienceSchema):
     """One combined recipient count across the whole chosen audience -- never the
     recipient list itself, and never a per-org breakdown."""
-    recipient_count = admin_service.preview_notification_recipients(
-        payload.org_ids, payload.superset_clients
-    )
+    recipient_count = admin_service.preview_notification_recipients(payload)
     return AdminNotificationPreviewResponseSchema(recipient_count=recipient_count)
 
 

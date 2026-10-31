@@ -1,32 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import Link from 'next/link';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { TrialSplitCard } from '@/app/free-trial/_components/TrialSplitCard';
 import { TrialCenteredCard } from '@/app/free-trial/_components/TrialCenteredCard';
 import { TrialMarketingPanel } from '@/app/free-trial/_components/TrialMarketingPanel';
 import { TrialBrandHeader } from '@/app/free-trial/_components/TrialBrandHeader';
-import { TrialField } from '@/app/free-trial/_components/TrialField';
 import { TRIAL_MARKETING_PANELS } from '@/app/free-trial/_lib/constants';
-import { apiPublicPost } from '@/lib/api';
+import { TrialSignupFields } from '@/components/trial/TrialSignupFields';
+import { sendTrialSignup } from '@/hooks/api/useTrialSignups';
 import { toastError, toastInfo } from '@/lib/toast';
 import { trackEvent, trackFeatureView } from '@/lib/analytics';
 import { ANALYTICS_EVENTS, FEATURES } from '@/constants/analytics';
-import { TRIAL_SIGNUP_PATH, WORK_FUNCTION_OPTIONS } from '@/constants/trial';
+import { TRIAL_ACCOUNT_EXISTS_STATUS } from '@/constants/trial';
 import type { TrialSignupRequest } from '@/types/trial';
-
-// Backend returns 409 when an account with this email already exists.
-const HTTP_STATUS_CONFLICT = 409;
 
 export default function FreeTrialPage() {
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
@@ -42,7 +31,7 @@ export default function FreeTrialPage() {
 
   const onSubmit = async (data: TrialSignupRequest) => {
     try {
-      await apiPublicPost(TRIAL_SIGNUP_PATH, data);
+      await sendTrialSignup(data);
       trackEvent(ANALYTICS_EVENTS.TRIAL_SIGNUP_SUBMITTED);
       // The confirmation screen is local state, not a route, so feature:viewed won't
       // fire for it on its own — see rules/analytics.md on tab-like screens.
@@ -50,7 +39,7 @@ export default function FreeTrialPage() {
       setSubmittedEmail(data.email);
     } catch (error) {
       const message = error instanceof Error ? error.message : '';
-      if (message.includes(String(HTTP_STATUS_CONFLICT))) {
+      if (message.includes(String(TRIAL_ACCOUNT_EXISTS_STATUS))) {
         setAccountExists(true);
         toastInfo.generic('An account with this email already exists.');
       } else {
@@ -70,7 +59,7 @@ export default function FreeTrialPage() {
     if (resending) return;
     setResending(true);
     try {
-      await apiPublicPost(TRIAL_SIGNUP_PATH, getValues());
+      await sendTrialSignup(getValues());
       trackEvent(ANALYTICS_EVENTS.TRIAL_LINK_RESENT);
       toastInfo.generic(`Verification link re-sent to ${submittedEmail}.`);
     } catch (error) {
@@ -148,64 +137,7 @@ export default function FreeTrialPage() {
           </div>
         )}
 
-        <div className="space-y-5">
-          <TrialField id="email" label="Email ID" error={errors.email?.message}>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="e.g. name@example.org"
-              aria-invalid={!!errors.email}
-              data-testid="trial-signup-email-input"
-              {...register('email', {
-                required: 'Required field',
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Invalid email. Please check again',
-                },
-              })}
-            />
-          </TrialField>
-
-          <TrialField id="role" label="Function" error={errors.role?.message}>
-            <Controller
-              name="role"
-              control={control}
-              rules={{ required: 'Required field' }}
-              render={({ field }) => (
-                <Select value={field.value || ''} onValueChange={field.onChange}>
-                  <SelectTrigger
-                    id="role"
-                    className="w-full"
-                    aria-invalid={!!errors.role}
-                    data-testid="trial-signup-role-input"
-                  >
-                    <SelectValue placeholder="eg. Data and Technology" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {WORK_FUNCTION_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </TrialField>
-
-          <TrialField id="org_name" label="Organization Name" error={errors.org_name?.message}>
-            <Input
-              id="org_name"
-              type="text"
-              autoComplete="organization"
-              placeholder="eg. ABC foundation"
-              aria-invalid={!!errors.org_name}
-              data-testid="trial-signup-org-name-input"
-              {...register('org_name', { required: 'Required field' })}
-            />
-          </TrialField>
-        </div>
+        <TrialSignupFields register={register} control={control} errors={errors} />
 
         <Button
           type="submit"
