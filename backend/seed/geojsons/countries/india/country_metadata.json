@@ -152,6 +152,16 @@
       "layer": "layer1"
     },
     {
+      "id": 54,
+      "name": "Gujarat",
+      "type": "state",
+      "parent_id": 1,
+      "country_code": "IND",
+      "region_code": "GJ",
+      "display_name": "Gujarat",
+      "layer": "layer1"
+    },
+    {
       "id": 32,
       "name": "Haryana",
       "type": "state",
