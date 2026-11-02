@@ -12,7 +12,7 @@ from ddpui.core.notifications.notifications_functions import create_notification
 from ddpui.core.notifications.templates import render_mention_email
 from ddpui.models.org_user import OrgUser
 from ddpui.models.userpreferences import UserPreferences
-from ddpui.schemas.notifications_api_schemas import NotificationDataSchema
+from ddpui.schemas.notifications_api_schemas import NotificationDataSchema, NotificationType
 from ddpui.utils.awsses import send_html_message
 from ddpui.utils.custom_logger import CustomLogger
 
@@ -51,6 +51,7 @@ def notify_mentioned(
                     scheduled_time=None,
                     recipients=[mentioned_user.id],
                     skip_email=True,
+                    notification_type=NotificationType.MENTION,
                 )
             )
         except Exception as err:

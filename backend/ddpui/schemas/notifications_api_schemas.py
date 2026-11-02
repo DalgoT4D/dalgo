@@ -5,6 +5,18 @@ from enum import Enum
 from ninja import Schema
 
 
+class NotificationType(str, Enum):
+    """Category tag for a notification. Stored as a plain CharField — no migration needed to extend."""
+
+    SHARING = "sharing"
+    ACCESS = "access"
+    MENTION = "mention"
+    SCHEMA_CHANGE = "schema_change"
+    PIPELINE = "pipeline"
+    PLATFORM = "platform"
+    ANNOUNCEMENT = "announcement"
+
+
 class SentToEnum(str, Enum):
     """
     Schema for sent_to field in create notification
@@ -41,8 +53,9 @@ class UpdateReadStatusSchema(Schema):
 class UpdateReadStatusSchemav1(Schema):
     """Schema for updating the read status of a notification."""
 
-    notification_ids: list[int]
+    notification_ids: list[int] = []
     read_status: bool
+    select_all: bool = False
 
 
 class NotificationDataSchema(Schema):
@@ -64,3 +77,4 @@ class NotificationDataSchema(Schema):
     target_org_ids: Optional[List[int]] = None
     send_in_app: Optional[bool] = True
     send_email: Optional[bool] = True
+    notification_type: Optional[NotificationType] = None

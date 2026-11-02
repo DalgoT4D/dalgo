@@ -33,7 +33,11 @@ from ddpui.schemas.admin_schema import (
     AdminNotificationHistoryResponse,
     OrgDeletionImpactSchema,
 )
-from ddpui.schemas.notifications_api_schemas import SentToEnum, NotificationDataSchema
+from ddpui.schemas.notifications_api_schemas import (
+    SentToEnum,
+    NotificationDataSchema,
+    NotificationType,
+)
 from ddpui.core import orgfunctions, orguserfunctions
 from ddpui.core.notifications.notifications_functions import get_recipients, create_notification
 from ddpui.ddpairbyte import airbyte_service
@@ -413,6 +417,7 @@ def create_admin_notification(
         target_org_ids=payload.org_ids,
         send_in_app=payload.send_in_app,
         send_email=payload.send_email,
+        notification_type=payload.notification_type,
     )
     error, result = create_notification(notification_data)
     if error:

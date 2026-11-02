@@ -109,12 +109,18 @@ def get_current_user_v2(request, org_slug: str = None):
     orguser: OrgUser = request.orguser
     user: User = request.orguser.user
     org: Org = orguser.org
-    # warehouse
-    warehouse = OrgWarehouse.objects.filter(org=org).first()
     curr_orgusers = OrgUser.objects.filter(user=user)
 
     if org_slug:
         curr_orgusers = curr_orgusers.filter(org__slug=org_slug)
+
+    # one row per org the user belongs to, so each row needs its own org's warehouse
+    # type — not the type of whichever org the request happened to come from
+    wtype_by_org = dict(
+        OrgWarehouse.objects.filter(org__in=curr_orgusers.values("org")).values_list(
+            "org_id", "wtype"
+        )
+    )
 
     org_preferences = OrgPreferences.objects.filter(org=org).first()
     if org_preferences is None:
@@ -165,7 +171,7 @@ def get_current_user_v2(request, org_slug: str = None):
                 org=curr_orguser.org,
                 active=user.is_active,
                 new_role_slug=curr_orguser.new_role.slug,
-                wtype=warehouse.wtype if warehouse else None,
+                wtype=wtype_by_org.get(curr_orguser.org_id),
                 permissions=row_permissions,
                 is_demo=(
                     curr_orguser.org.base_plan() == OrgType.DEMO if curr_orguser.org else False

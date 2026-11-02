@@ -15,6 +15,7 @@ export const createMockNotification = (overrides: Partial<Notification> = {}): N
   message: 'Test notification message',
   read_status: false,
   timestamp: new Date().toISOString(),
+  notification_type: null,
   ...overrides,
 });
 
@@ -56,13 +57,11 @@ export const createMockMutate = () => jest.fn();
 
 export const createMockNotificationHooks = (mutate = jest.fn()) => {
   const mockMarkAsRead = jest.fn().mockResolvedValue(true);
-  const mockMarkAllAsRead = jest.fn().mockResolvedValue(true);
   const mockUpdateUserPreferences = jest.fn().mockResolvedValue(true);
 
   return {
     mutate,
     mockMarkAsRead,
-    mockMarkAllAsRead,
     mockUpdateUserPreferences,
   };
 };

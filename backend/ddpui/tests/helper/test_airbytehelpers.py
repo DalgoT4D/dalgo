@@ -863,6 +863,47 @@ def test_update_destination_bigquery_config(
 )
 @patch(
     "ddpui.utils.secretsmanager.retrieve_warehouse_credentials",
+    mock_retrieve_warehouse_credentials=Mock(),
+)
+@patch(
+    "ddpui.utils.secretsmanager.update_warehouse_credentials",
+    mock_update_warehouse_credentials=Mock(),
+)
+@patch(
+    "ddpui.ddpairbyte.airbytehelpers.create_or_update_dbt_profile_secret_blk",
+    mock_create_or_update_dbt_profile_secret_blk=Mock(),
+)
+def test_update_destination_bigquery_config_without_transformation_priority(
+    mock_create_or_update_dbt_profile_secret_blk: Mock,
+    mock_update_warehouse_credentials: Mock,
+    mock_retrieve_warehouse_credentials: Mock,
+    mock_update_destination: Mock,
+):
+    """destination-bigquery 3.x dropped transformation_priority from its spec"""
+    org = Org.objects.create(name="org", slug="org")
+    warehouse = OrgWarehouse.objects.create(org=org, wtype="bigquery", name="name")
+    mock_update_destination.return_value = {"destinationId": "DESTINATION_ID"}
+    mock_retrieve_warehouse_credentials.return_value = {}
+    mock_create_or_update_dbt_profile_secret_blk.return_value = ((Mock(), Mock()), None)
+
+    payload = AirbyteDestinationUpdate(
+        name="name",
+        destinationDefId="destinationDefId",
+        config={"credentials_json": '{"key": "value"}', "dataset_location": "LOCATION"},
+    )
+    update_destination(org, "destination_id", payload)
+
+    mock_update_warehouse_credentials.assert_called_once_with(
+        warehouse, {"key": "value", "dataset_location": "LOCATION"}
+    )
+
+
+@patch(
+    "ddpui.ddpairbyte.airbyte_service.update_destination",
+    mock_update_destination=Mock(),
+)
+@patch(
+    "ddpui.utils.secretsmanager.retrieve_warehouse_credentials",
     mock_retrieve=Mock(),
 )
 @patch(

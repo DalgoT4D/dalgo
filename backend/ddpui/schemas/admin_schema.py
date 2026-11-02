@@ -12,6 +12,7 @@ from typing import List, Optional
 
 from ninja import Schema
 from pydantic import HttpUrl
+from ddpui.schemas.notifications_api_schemas import NotificationType
 
 from ddpui.models.org import Org
 from ddpui.models.org_plans import OrgPlanType
@@ -247,6 +248,7 @@ class AdminCreateNotificationSchema(AdminNotificationAudienceSchema):
     urgent: bool = False
     send_in_app: bool = True
     send_email: bool = True
+    notification_type: NotificationType = NotificationType.PLATFORM
 
 
 class AdminNotificationSchema(Schema):

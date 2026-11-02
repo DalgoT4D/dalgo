@@ -27,6 +27,8 @@ describe('NotificationsList', () => {
     selectedIds: [] as number[],
     onSelectionChange: jest.fn(),
     onClearSelection: jest.fn(),
+    onMarkAsRead: jest.fn(),
+    onMarkAsUnread: jest.fn(),
     page: 1,
     pageSize: 10,
     onPageChange: jest.fn(),
@@ -45,10 +47,16 @@ describe('NotificationsList', () => {
     expect(screen.getByText('Third notification')).toBeInTheDocument();
   });
 
-  it('displays correct notification count in header', () => {
+  it('shows notification count when nothing is selected', () => {
     render(<NotificationsList {...defaultProps} />);
 
     expect(screen.getByText(/Showing 3 of 3 notifications/)).toBeInTheDocument();
+  });
+
+  it('shows selection count when items are selected', () => {
+    render(<NotificationsList {...defaultProps} selectedIds={[1, 2]} />);
+
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
   });
 
   it('shows empty state when no notifications', () => {
@@ -118,6 +126,38 @@ describe('NotificationsList', () => {
     fireEvent.click(firstNotificationCheckbox);
 
     expect(onSelectionChange).toHaveBeenCalledWith([2]);
+  });
+
+  it('shows Mark as read and Mark as unread buttons when items are selected', () => {
+    render(<NotificationsList {...defaultProps} selectedIds={[1]} />);
+
+    expect(screen.getByTestId('mark-as-read-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('mark-as-unread-btn')).toBeInTheDocument();
+  });
+
+  it('calls onMarkAsRead when Mark as read is clicked', () => {
+    const onMarkAsRead = jest.fn();
+    render(<NotificationsList {...defaultProps} selectedIds={[1]} onMarkAsRead={onMarkAsRead} />);
+
+    fireEvent.click(screen.getByTestId('mark-as-read-btn'));
+    expect(onMarkAsRead).toHaveBeenCalled();
+  });
+
+  it('calls onMarkAsUnread when Mark as unread is clicked', () => {
+    const onMarkAsUnread = jest.fn();
+    render(
+      <NotificationsList {...defaultProps} selectedIds={[1]} onMarkAsUnread={onMarkAsUnread} />
+    );
+
+    fireEvent.click(screen.getByTestId('mark-as-unread-btn'));
+    expect(onMarkAsUnread).toHaveBeenCalled();
+  });
+
+  it('does not show action buttons when nothing is selected', () => {
+    render(<NotificationsList {...defaultProps} />);
+
+    expect(screen.queryByTestId('mark-as-read-btn')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mark-as-unread-btn')).not.toBeInTheDocument();
   });
 
   it('handles pagination controls', () => {

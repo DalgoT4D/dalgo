@@ -11,7 +11,7 @@ Delivery goes through ``create_notification`` (in-app row + email + org Discord)
 from ddpui.core.notifications.notifications_functions import create_notification
 from ddpui.models.org import Org
 from ddpui.models.org_user import OrgUser
-from ddpui.schemas.notifications_api_schemas import NotificationDataSchema
+from ddpui.schemas.notifications_api_schemas import NotificationDataSchema, NotificationType
 from ddpui.utils.custom_logger import CustomLogger
 
 
@@ -36,6 +36,7 @@ def notify_schema_change(org: Org, message: str, email_subject: str) -> None:
             message=message,
             email_subject=email_subject,
             recipients=recipient_ids,
+            notification_type=NotificationType.SCHEMA_CHANGE,
         )
     )
     if error:

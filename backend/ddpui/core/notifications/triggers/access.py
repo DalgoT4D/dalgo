@@ -20,7 +20,7 @@ from ddpui.auth import ADMIN_ROLE
 from ddpui.core.notifications.notifications_functions import create_notification
 from ddpui.models.org_user import OrgUser
 from ddpui.models.resource_share import AccessRequest, AccessRequestStatus
-from ddpui.schemas.notifications_api_schemas import NotificationDataSchema
+from ddpui.schemas.notifications_api_schemas import NotificationDataSchema, NotificationType
 from ddpui.utils.custom_logger import CustomLogger
 
 
@@ -109,6 +109,7 @@ def notify_owner_of_new_request(req: AccessRequest, resource, rtype: str) -> Non
                 urgent=False,
                 recipients=list(recipients),
                 cta_label="Share",
+                notification_type=NotificationType.ACCESS,
             )
         )
     except Exception as err:  # notification failure never blocks the API call
@@ -145,6 +146,7 @@ def notify_requester_of_response(
                 email_subject=subject,
                 urgent=False,
                 recipients=[req.requester_id],
+                notification_type=NotificationType.ACCESS,
             )
         )
     except Exception as err:

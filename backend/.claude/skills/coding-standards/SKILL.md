@@ -70,3 +70,34 @@ def send_reset_link(email: str) -> None:
 ```
 
 Only break this rule for a genuine circular import or an optional/slow dependency you don't want at module load — and comment why.
+
+## 4. String field enums: Python `enum`, not Django `TextChoices`
+
+Use a plain `CharField` on the model and a `str, Enum` in the schema layer. Never use `TextChoices` for application-level enums.
+
+```python
+# ✗ BAD — Django TextChoices bakes choices into migration files; adding a new value
+# requires running a migration even though the DB schema doesn't change.
+class NotificationType(models.TextChoices):
+    PIPELINE = "pipeline", "Pipeline"
+    SHARING  = "sharing",  "Sharing"
+
+class Notification(models.Model):
+    notification_type = models.CharField(choices=NotificationType.choices, max_length=20)
+```
+
+```python
+# ✓ GOOD — enum lives in the schema layer; model field has no choices= constraint.
+# New values are added without any migration.
+
+# schemas/notifications_api_schemas.py
+class NotificationType(str, Enum):
+    PIPELINE = "pipeline"
+    SHARING  = "sharing"
+
+# models/notifications.py
+class Notification(models.Model):
+    notification_type = models.CharField(max_length=20, null=True, blank=True)
+```
+
+Validate against the enum at the API boundary (Pydantic/Ninja does this automatically when the field type is `Optional[NotificationType]`). The DB stores a plain string.

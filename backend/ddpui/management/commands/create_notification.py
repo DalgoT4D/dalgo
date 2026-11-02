@@ -5,6 +5,7 @@ from ddpui.core.notifications import notifications_functions
 from ddpui.schemas.notifications_api_schemas import (
     SentToEnum,
     NotificationDataSchema,
+    NotificationType,
 )
 from ddpui.models.org import Org
 
@@ -114,6 +115,7 @@ class Command(BaseCommand):
             message=message,
             urgent=options.get("urgent", False),
             scheduled_time=scheduled_time,
+            notification_type=NotificationType.ANNOUNCEMENT,
         )
 
         if options["dry_run"]:

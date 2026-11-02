@@ -121,7 +121,7 @@ export function useAdminOrgs() {
 /** Fetch a single org's detail. Pass null to skip (e.g. before the id is known). */
 export function useAdminOrg(orgId: number | null) {
   const { data, error, isLoading, mutate } = useSWR<AdminOrg>(
-    orgId != null ? `/api/v1/admin/orgs/${orgId}` : null,
+    orgId !== null ? `/api/v1/admin/orgs/${orgId}` : null,
     apiGet
   );
 
@@ -237,7 +237,7 @@ export interface AdminInviteUserForm {
 /** List an org's members plus its pending invitations. */
 export function useAdminOrgUsers(orgId: number | null) {
   const { data, error, isLoading, mutate } = useSWR<AdminOrgUsers>(
-    orgId != null ? `/api/v1/admin/orgs/${orgId}/users` : null,
+    orgId !== null ? `/api/v1/admin/orgs/${orgId}/users` : null,
     apiGet
   );
 
@@ -314,7 +314,7 @@ export function useAdminFlagOrgs(flagName: string | null) {
 /** All flags for one org: global default merged with any org-specific override. */
 export function useAdminOrgFlags(orgId: number | null) {
   const { data, error, isLoading, mutate } = useSWR<Record<string, boolean>>(
-    orgId != null ? `/api/v1/admin/orgs/${orgId}/flags` : null,
+    orgId !== null ? `/api/v1/admin/orgs/${orgId}/flags` : null,
     apiGet
   );
 
@@ -440,6 +440,7 @@ export interface CreateAdminNotificationForm {
   superset_clients?: boolean;
   send_in_app?: boolean;
   send_email?: boolean;
+  notification_type: 'platform' | 'announcement';
 }
 
 /** One page of broadcast history. Same wire shape as the user-facing notification

@@ -20,7 +20,7 @@ from ddpui.core.notifications.notifications_functions import create_notification
 from ddpui.core.notifications.triggers.access import resource_title, resource_url
 from ddpui.models.org_user import OrgUser, OrgUserGroupMember
 from ddpui.models.resource_share import LEVEL_RANK, ResourceShare
-from ddpui.schemas.notifications_api_schemas import NotificationDataSchema
+from ddpui.schemas.notifications_api_schemas import NotificationDataSchema, NotificationType
 from ddpui.utils.custom_logger import CustomLogger
 
 
@@ -125,6 +125,7 @@ def notify_share_recipients(sender: OrgUser, rtype: str, resource, classified: d
                     email_subject=f"Shared with you: {title}",
                     urgent=False,
                     recipients=list(ids),
+                    notification_type=NotificationType.SHARING,
                 )
             )
         except Exception as err:
@@ -142,6 +143,7 @@ def notify_share_recipients(sender: OrgUser, rtype: str, resource, classified: d
                     email_subject=f"Access upgraded: {title}",
                     urgent=False,
                     recipients=list(ids),
+                    notification_type=NotificationType.SHARING,
                 )
             )
         except Exception as err:
@@ -203,6 +205,7 @@ def notify_row_level_change(
                 email_subject=subject,
                 urgent=False,
                 recipients=list(recipient_ids),
+                notification_type=NotificationType.SHARING,
             )
         )
     except Exception as err:

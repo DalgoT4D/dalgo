@@ -6,6 +6,8 @@ database_sync_to_async in async consumers), then pass the context into the run â
 tools never touch the database or trust an LLM-supplied org identifier.
 """
 
+import re
+
 from ddpui.core.ai.agent.run_context import RunContext
 from ddpui.models.chat_with_data import ChatWithDataOrgConfig
 from ddpui.models.org import OrgWarehouse
@@ -22,6 +24,10 @@ SYSTEM_SCHEMAS = {
 # Airbyte's internal and staging scratch schemas.
 SYSTEM_SCHEMA_PREFIXES = ("pg_", "_airbyte")
 
+# BigQuery locations are letters, digits and hyphens (US, EU, asia-south1); the
+# value is interpolated into SQL, so anything else is refused
+_BQ_LOCATION = re.compile(r"[A-Za-z0-9-]+")
+
 DEFAULT_MAX_RESULT_ROWS = 100
 DEFAULT_QUERY_TIMEOUT_S = 30
 
@@ -30,16 +36,29 @@ class ChatWithDataNotReady(Exception):
     """Raised when the org has no warehouse to chat with."""
 
 
-def derive_allowed_schemas(warehouse, dialect: str) -> list[str]:
+def derive_allowed_schemas(warehouse, dialect: str, bq_location: str | None = None) -> list[str]:
     """Default schema allowlist: every non-system schema in the warehouse.
 
     Deliberately NOT restricted to the org's dbt output schema (removed
     2026-09-10): real questions often live in staging/intermediate tables the
     dbt schema misses. The agent's prompt steers it to ask the user rather than
     comb every schema; an admin can still pin the list via
-    ChatWithDataOrgConfig.allowed_schemas."""
+    ChatWithDataOrgConfig.allowed_schemas.
+
+    BigQuery's INFORMATION_SCHEMA.SCHEMATA answers for a single region, so it is
+    qualified with the warehouse's dataset location â€” unqualified, an asia-south1
+    warehouse lists none of its own datasets. A query job also runs in one
+    location, so datasets elsewhere could not be queried anyway."""
     if dialect == "bigquery":
-        sql = "SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA"
+        if bq_location:
+            if not _BQ_LOCATION.fullmatch(bq_location):
+                raise ValueError(f"unexpected BigQuery location {bq_location!r}")
+            sql = (
+                f"SELECT schema_name FROM `region-{bq_location.lower()}`"
+                ".INFORMATION_SCHEMA.SCHEMATA"
+            )
+        else:
+            sql = "SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA"
     else:
         sql = "SELECT schema_name FROM information_schema.schemata"
     existing = {
@@ -68,7 +87,7 @@ def build_run_context(orguser: OrgUser) -> RunContext:
     if config and config.allowed_schemas:
         allowed_schemas = config.allowed_schemas
     else:
-        allowed_schemas = derive_allowed_schemas(warehouse, dialect)
+        allowed_schemas = derive_allowed_schemas(warehouse, dialect, org_warehouse.bq_location)
 
     return RunContext(
         org_id=org.id,

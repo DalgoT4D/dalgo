@@ -30,6 +30,8 @@ dependencies = [
   "python-dotenv",
   "requests",
   "sentry-sdk",
+  # daily backup
+  "boto3",
 ]
 
 [dependency-groups]
