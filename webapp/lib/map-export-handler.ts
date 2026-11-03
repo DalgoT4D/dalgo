@@ -38,7 +38,7 @@ async function fetchMapOverlayForExport(
             },
       ],
       filters: {}, // No drill-down filters for export
-      chart_filters: chart.extra_config.filters || [],
+      extra_config: { filters: chart.extra_config.filters || [] },
     };
 
     const { apiPost } = await import('@/lib/api');

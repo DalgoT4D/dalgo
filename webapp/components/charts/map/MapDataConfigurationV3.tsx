@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
+import { DebouncedInput } from '@/components/charts/debounced-input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +22,8 @@ import { DynamicLevelConfig } from './DynamicLevelConfig';
 import { useColumns, useChartDataPreview } from '@/hooks/api/useChart';
 import type { ChartBuilderFormData, ChartMetric } from '@/types/charts';
 import { generateAutoPrefilledConfig } from '@/lib/chartAutoPrefill';
-import { Combobox } from '@/components/ui/combobox';
+import { Combobox, highlightText } from '@/components/ui/combobox';
+import { TooltipLabel } from '@/components/charts/types/shared/TooltipLabel';
 
 // Column data type
 interface TableColumn {
@@ -132,11 +133,10 @@ const SearchableValueInput = React.memo(function SearchableValueInput({
     } else {
       // Fallback to text input for in/not_in when no column values
       return (
-        <Input
-          type="text"
+        <DebouncedInput
           placeholder="value1, value2, value3"
           value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
           disabled={disabled}
           className="h-8 flex-1"
         />
@@ -165,11 +165,10 @@ const SearchableValueInput = React.memo(function SearchableValueInput({
 
   // Fallback to regular input
   return (
-    <Input
-      type="text"
+    <DebouncedInput
       placeholder="Enter value"
       value={value || ''}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={onChange}
       disabled={disabled}
       className="h-8 flex-1"
     />
@@ -328,6 +327,11 @@ export function MapDataConfigurationV3({
                 placeholder="Column"
                 compact
                 className="flex-1"
+                renderItem={(item, _isSelected, searchQuery) => (
+                  <TooltipLabel label={item.label}>
+                    {highlightText(item.label, searchQuery)}
+                  </TooltipLabel>
+                )}
               />
 
               <Select
