@@ -745,6 +745,18 @@ def test_admin_change_role_in_org(platform_admin_request, akshara):
     assert response.new_role_slug == SUPER_ADMIN_ROLE
 
 
+def test_admin_change_own_role_in_selected_org(platform_admin_request):
+    """a platform admin can change their own role even in the org selected in the main app"""
+    me = platform_admin_request.orguser
+    payload = AdminChangeRoleSchema(role_uuid=_role(GUEST_ROLE).uuid)
+
+    response = put_admin_org_user_role(platform_admin_request, me.org.id, me.id, payload)
+
+    me.refresh_from_db()
+    assert me.new_role.slug == GUEST_ROLE
+    assert response.new_role_slug == GUEST_ROLE
+
+
 def test_admin_change_role_wrong_org_404(platform_admin_request, akshara, bhumi):
     """changing the role of an ouid that belongs to a DIFFERENT org is 404"""
     bhumi_member = _make_member(bhumi, "member@bhumi.org", GUEST_ROLE)
