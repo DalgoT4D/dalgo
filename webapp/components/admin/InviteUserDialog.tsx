@@ -19,8 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useRoles } from '@/hooks/api/useUserManagement';
-import { useAdminOrgUserActions } from '@/hooks/api/useAdminPortal';
+import { useAdminOrgUserActions, useAdminRoles } from '@/hooks/api/useAdminPortal';
 import { EMAIL_RE } from '@/components/admin/constants';
 import { trackEvent } from '@/lib/analytics';
 import { ANALYTICS_EVENTS } from '@/constants/analytics';
@@ -38,7 +37,7 @@ interface InviteUserDialogProps {
  * and a platform admin may pick ANY role — the backend skips the inviter cap.
  */
 export function InviteUserDialog({ open, onOpenChange, orgId, onSuccess }: InviteUserDialogProps) {
-  const { roles } = useRoles();
+  const { roles } = useAdminRoles(open);
   const { inviteUser } = useAdminOrgUserActions();
 
   const [isSubmitting, setIsSubmitting] = useState(false);

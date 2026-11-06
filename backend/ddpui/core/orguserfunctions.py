@@ -207,11 +207,12 @@ def delete_orguser_from_org(
     """
     orguser_to_delete = OrgUser.objects.filter(org=target_org, user__email=payload.email).first()
 
-    if requestor_orguser == orguser_to_delete:
-        return None, "user cannot delete themselves"
-
     if orguser_to_delete is None:
         return None, "user does not belong to the org"
+
+    # a platform admin may remove themselves from any org via the admin portal
+    if not is_platform_admin and requestor_orguser.user_id == orguser_to_delete.user_id:
+        return None, "user cannot delete themselves"
 
     if (
         not is_platform_admin
@@ -382,9 +383,12 @@ def change_orguser_role_in_org(
 
     request_email = toupdate_email.lower().strip()
     query = OrgUser.objects.filter(user__email__iexact=request_email, org=target_org)
-    # a requestor who is a member of target_org may not change their own role; a
-    # platform admin acting cross-org is not a member, so nothing to exclude.
-    if requestor_orguser is not None and requestor_orguser.org_id == target_org.id:
+    # an org member may not change their own role; a platform admin may, from any org
+    if (
+        not is_platform_admin
+        and requestor_orguser is not None
+        and requestor_orguser.org_id == target_org.id
+    ):
         query = query.exclude(user__email__iexact=requestor_orguser.user.email)
     orguser_to_be_assigned = query.first()
 

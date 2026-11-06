@@ -8,7 +8,7 @@ from typing import List, Optional, Tuple
 from django.core.paginator import Paginator
 from django.db.models import Count
 
-from ddpui.auth import ADMIN_ROLE
+from ddpui.auth import ADMIN_ROLE, SUPER_ADMIN_ROLE
 from ddpui.core.admin.exceptions import AdminOrgCreateError, AdminOrgDeleteError
 from ddpui.models.org import Org, OrgWarehouse
 from ddpui.models.role_based_access import Role
@@ -225,6 +225,11 @@ def delete_org(org: Org) -> None:
 # --------------------------------------------------------------------------- #
 # Org users + invitations
 # --------------------------------------------------------------------------- #
+
+
+def list_assignable_roles() -> List[Role]:
+    """Org-user roles, highest first; super-admin is never assignable from the portal."""
+    return list(Role.objects.exclude(slug=SUPER_ADMIN_ROLE).order_by("-level"))
 
 
 def invite_user(

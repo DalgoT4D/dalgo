@@ -2,6 +2,7 @@ import useSWR from 'swr';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/api';
 import { toastSuccess, toastError } from '@/lib/toast';
 import { DEFAULT_PAGE_SIZE } from '@/constants/notifications';
+import type { Role } from '@/types/user-management';
 
 export interface AdminStats {
   total_orgs: number;
@@ -232,6 +233,22 @@ export interface RemovalImpact {
 export interface AdminInviteUserForm {
   invited_email: string;
   invited_role_uuid: string;
+}
+
+/** Assignable org-user roles; not capped by the admin's role in the selected org. */
+export function useAdminRoles(enabled: boolean = true) {
+  const { data, error, isLoading } = useSWR<Role[]>(
+    enabled ? '/api/v1/admin/roles' : null,
+    apiGet,
+    { revalidateOnFocus: false }
+  );
+
+  return {
+    roles: data,
+    isLoading,
+    isError: error,
+    error,
+  };
 }
 
 /** List an org's members plus its pending invitations. */

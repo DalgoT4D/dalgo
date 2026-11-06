@@ -17,14 +17,13 @@ const mockTrackEvent = jest.fn();
 jest.mock('@/lib/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
 }));
-jest.mock('@/hooks/api/useUserManagement', () => ({
-  useRoles: () => ({ roles: [{ uuid: 'role-guest', name: 'Guest', slug: 'guest' }] }),
-}));
-
 const mockInvite = jest.fn().mockResolvedValue(undefined);
 
 beforeEach(() => {
   jest.clearAllMocks();
+  (useAdminPortal.useAdminRoles as jest.Mock).mockReturnValue({
+    roles: [{ uuid: 'role-guest', name: 'Guest', slug: 'guest' }],
+  });
   (useAdminPortal.useAdminOrgUserActions as jest.Mock).mockReturnValue({
     inviteUser: mockInvite,
     changeRole: jest.fn(),
