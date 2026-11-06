@@ -27,6 +27,7 @@ from ddpui.schemas.admin_schema import (
     AdminInvitationSchema,
     AdminOrgUsersResponse,
     AdminChangeRoleSchema,
+    AdminRoleSchema,
     RemovalImpactSchema,
     OrgDeletionImpactSchema,
     AdminFeatureFlagCatalogItem,
@@ -160,6 +161,14 @@ def _get_orguser_or_404(org: Org, orguser_id: int) -> OrgUser:
     if orguser is None:
         raise HttpError(404, "user not found in this org")
     return orguser
+
+
+@admin_router.get("/roles", response=List[AdminRoleSchema])
+@has_platform_admin_permission
+def get_admin_roles(request):
+    """Roles for the admin portal's invite / change-role dropdowns, not capped by the
+    admin's own role in the selected org (unlike /api/data/roles)."""
+    return admin_service.list_assignable_roles()
 
 
 @admin_router.get("/orgs/{org_id}/users", response=AdminOrgUsersResponse)

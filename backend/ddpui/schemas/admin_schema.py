@@ -173,6 +173,14 @@ class AdminChangeRoleSchema(Schema):
     role_uuid: uuid.UUID
 
 
+class AdminRoleSchema(Schema):
+    """a role a platform admin can assign to an org user"""
+
+    uuid: uuid.UUID
+    slug: str
+    name: str
+
+
 class RemovalImpactSchema(Schema):
     """
     how much content removing a user would move. Drives the confirm dialog's warning.

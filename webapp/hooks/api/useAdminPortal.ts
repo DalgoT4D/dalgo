@@ -234,6 +234,28 @@ export interface AdminInviteUserForm {
   invited_role_uuid: string;
 }
 
+export interface AdminRole {
+  uuid: string;
+  slug: string;
+  name: string;
+}
+
+/** Assignable org-user roles; not capped by the admin's role in the selected org. */
+export function useAdminRoles(enabled: boolean = true) {
+  const { data, error, isLoading } = useSWR<AdminRole[]>(
+    enabled ? '/api/v1/admin/roles' : null,
+    apiGet,
+    { revalidateOnFocus: false }
+  );
+
+  return {
+    roles: data,
+    isLoading,
+    isError: error,
+    error,
+  };
+}
+
 /** List an org's members plus its pending invitations. */
 export function useAdminOrgUsers(orgId: number | null) {
   const { data, error, isLoading, mutate } = useSWR<AdminOrgUsers>(

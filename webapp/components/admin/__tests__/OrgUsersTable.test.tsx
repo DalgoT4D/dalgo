@@ -11,10 +11,6 @@ import { OrgUsersTable } from '@/components/admin/OrgUsersTable';
 import * as useAdminPortal from '@/hooks/api/useAdminPortal';
 
 jest.mock('@/hooks/api/useAdminPortal');
-// the dialogs pull roles from useUserManagement; stub it so they render inertly
-jest.mock('@/hooks/api/useUserManagement', () => ({
-  useRoles: () => ({ roles: [{ uuid: 'r1', name: 'Guest', slug: 'guest' }] }),
-}));
 
 const ORG_ID = 42;
 
@@ -36,6 +32,10 @@ const mockCancel = jest.fn().mockResolvedValue(undefined);
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // the dialogs pull roles from useAdminRoles; stub it so they render inertly
+  (useAdminPortal.useAdminRoles as jest.Mock).mockReturnValue({
+    roles: [{ uuid: 'r1', name: 'Guest', slug: 'guest' }],
+  });
   (useAdminPortal.useAdminOrgUsers as jest.Mock).mockReturnValue({
     users,
     invitations,

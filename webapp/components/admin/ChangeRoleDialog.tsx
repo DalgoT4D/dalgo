@@ -18,8 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useRoles } from '@/hooks/api/useUserManagement';
-import { useAdminOrgUserActions, type AdminOrgUser } from '@/hooks/api/useAdminPortal';
+import {
+  useAdminOrgUserActions,
+  useAdminRoles,
+  type AdminOrgUser,
+} from '@/hooks/api/useAdminPortal';
 import { trackEvent } from '@/lib/analytics';
 import { ANALYTICS_EVENTS } from '@/constants/analytics';
 
@@ -42,7 +45,7 @@ export function ChangeRoleDialog({
   orgUser,
   onSuccess,
 }: ChangeRoleDialogProps) {
-  const { roles } = useRoles();
+  const { roles } = useAdminRoles(open);
   const { changeRole } = useAdminOrgUserActions();
 
   const [roleUuid, setRoleUuid] = useState('');

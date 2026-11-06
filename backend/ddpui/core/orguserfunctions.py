@@ -207,11 +207,12 @@ def delete_orguser_from_org(
     """
     orguser_to_delete = OrgUser.objects.filter(org=target_org, user__email=payload.email).first()
 
-    if requestor_orguser == orguser_to_delete:
-        return None, "user cannot delete themselves"
-
     if orguser_to_delete is None:
         return None, "user does not belong to the org"
+
+    # a platform admin may remove themselves from any org via the admin portal
+    if not is_platform_admin and requestor_orguser.user_id == orguser_to_delete.user_id:
+        return None, "user cannot delete themselves"
 
     if (
         not is_platform_admin
