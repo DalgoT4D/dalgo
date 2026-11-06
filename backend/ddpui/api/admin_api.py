@@ -168,7 +168,7 @@ def _get_orguser_or_404(org: Org, orguser_id: int) -> OrgUser:
 def get_admin_roles(request):
     """Roles for the admin portal's invite / change-role dropdowns, not capped by the
     admin's own role in the selected org (unlike /api/data/roles)."""
-    return admin_service.list_assignable_roles()
+    return [AdminRoleSchema.from_model(role) for role in admin_service.list_assignable_roles()]
 
 
 @admin_router.get("/orgs/{org_id}/users", response=AdminOrgUsersResponse)

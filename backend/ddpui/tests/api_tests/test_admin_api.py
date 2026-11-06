@@ -35,6 +35,7 @@ from ddpui.api.admin_api import (
     get_admin_org_delete_impact,
     delete_admin_org,
     get_admin_org_users,
+    get_admin_roles,
     post_admin_org_user_invite,
     put_admin_org_user_role,
     get_admin_org_user_removal_impact,
@@ -848,6 +849,26 @@ def test_admin_remove_user_reassigns_content(platform_admin_request, akshara):
     assert dash.created_by_id == admin_orguser.id
     assert chart.created_by_id == admin_orguser.id
     assert report.created_by_id == admin_orguser.id
+
+
+def test_admin_roles_not_capped_by_selected_org_role(platform_admin_request):
+    """a platform admin who is only a Member in the selected org still gets every org-user role"""
+    orguser = platform_admin_request.orguser
+    orguser.new_role = Role.objects.get(slug=GUEST_ROLE)
+    orguser.save()
+
+    slugs = [role.slug for role in get_admin_roles(platform_admin_request)]
+
+    assert slugs == ["admin", "analyst", "member"]
+
+
+def test_admin_can_remove_self_from_selected_org(platform_admin_request):
+    """a platform admin can remove themselves even from the org selected in the main app"""
+    me = platform_admin_request.orguser
+
+    delete_admin_org_user(platform_admin_request, me.org.id, me.id)
+
+    assert not OrgUser.objects.filter(id=me.id).exists()
 
 
 # ---- org-scoped cancel invite -------------------------------------------------

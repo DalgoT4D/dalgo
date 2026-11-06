@@ -17,6 +17,7 @@ from ddpui.schemas.notifications_api_schemas import NotificationType
 from ddpui.models.org import Org
 from ddpui.models.org_plans import OrgPlanType
 from ddpui.models.org_user import Invitation, OrgUser
+from ddpui.models.role_based_access import Role
 from ddpui.models.notifications import Notification
 from ddpui.schemas.org_schema import CreateOrgSchema
 
@@ -179,6 +180,11 @@ class AdminRoleSchema(Schema):
     uuid: uuid.UUID
     slug: str
     name: str
+
+    @classmethod
+    def from_model(cls, role: Role) -> "AdminRoleSchema":
+        """Build the response from a Role."""
+        return cls(uuid=role.uuid, slug=role.slug, name=role.name)
 
 
 class RemovalImpactSchema(Schema):
