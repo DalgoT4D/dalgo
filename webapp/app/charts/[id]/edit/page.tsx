@@ -803,7 +803,7 @@ function EditChartPageContent() {
           value_column: formData.aggregate_column,
           aggregate_function: formData.aggregate_function || (metric ? undefined : 'sum'),
           filters: filters,
-          chart_filters: [] as any[],
+          chart_filters: formData.filters || [],
           chart_id: chartId ? parseInt(String(chartId)) : undefined,
         }
       : null;
@@ -814,6 +814,7 @@ function EditChartPageContent() {
     formData.geographic_column,
     formData.aggregate_column,
     formData.aggregate_function,
+    formData.filters,
     formData.geographic_hierarchy,
     formData.district_column,
     drillDownPath,

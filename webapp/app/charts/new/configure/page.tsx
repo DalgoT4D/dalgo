@@ -709,7 +709,9 @@ function ConfigureChartPageContent() {
         !formData.dataOverlayPayload ||
         formData.geojsonPreviewPayload.geojsonId !== formData.selected_geojson_id ||
         formData.dataOverlayPayload.geographic_column !== formData.geographic_column ||
-        JSON.stringify(formData.dataOverlayPayload.metric || {}) !== JSON.stringify(metric || {});
+        JSON.stringify(formData.dataOverlayPayload.metric || {}) !== JSON.stringify(metric || {}) ||
+        JSON.stringify(formData.dataOverlayPayload.chart_filters || []) !==
+          JSON.stringify(formData.filters || []);
 
       if (needsUpdate) {
         const geojsonPayload = {

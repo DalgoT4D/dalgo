@@ -9,6 +9,7 @@ import type {
   ChartUpdate,
   ChartDataPayload,
   ChartDataResponse,
+  ChartFilter,
   ChartMetric,
   DataPreviewResponse,
 } from '@/types/charts';
@@ -400,12 +401,23 @@ export interface MapDataOverlayRawPayload {
   value_column?: string;
   aggregate_function?: string;
   filters?: Record<string, any>;
+  // Chart builder's Data Filters; sent to the backend as extra_config.filters.
+  chart_filters?: ChartFilter[];
   dashboard_filters?: Record<string, any>;
   extra_config?: {
     filters?: any[];
     pagination?: any;
     sort?: any[];
   };
+}
+
+// The backend only reads chart filters from extra_config.filters, so carry chart_filters there.
+function buildMapOverlayExtraConfig(payload: MapDataOverlayRawPayload) {
+  const extraConfig = payload.extra_config || {};
+  if (extraConfig.filters || !payload.chart_filters?.length) {
+    return extraConfig;
+  }
+  return { ...extraConfig, filters: payload.chart_filters };
 }
 
 // Builds the overlay payload for a Simple-mode metric (aggregation + column).
@@ -431,7 +443,7 @@ function buildSimpleMapOverlayPayload(payload: MapDataOverlayRawPayload, metric?
     ],
     filters: payload.filters || {},
     dashboard_filters: payload.dashboard_filters || {},
-    extra_config: payload.extra_config || {},
+    extra_config: buildMapOverlayExtraConfig(payload),
   };
 }
 
@@ -449,7 +461,7 @@ function buildCalculatedMapOverlayPayload(payload: MapDataOverlayRawPayload, met
     ],
     filters: payload.filters || {},
     dashboard_filters: payload.dashboard_filters || {},
-    extra_config: payload.extra_config || {},
+    extra_config: buildMapOverlayExtraConfig(payload),
   };
 }
 
