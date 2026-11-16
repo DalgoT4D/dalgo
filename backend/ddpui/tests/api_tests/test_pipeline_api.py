@@ -9,6 +9,7 @@ from pathlib import Path
 from django.apps import apps
 from django.core.management import call_command
 from ninja.errors import HttpError
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpprefect import prefect_service
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ddpui.settings")
@@ -1144,12 +1145,18 @@ def test_get_prefect_flow_runs_log_history_v1(
             "parameters": {"connection_id": "conn_id_2"},
         },
     ]
-    mock_get_connection.side_effect = lambda workspace_id, connection_id: {
+    mock_get_connection.side_effect = lambda workspace_id, connection_id, server: {
         "name": f"connection_name_{connection_id}"
     }
 
     # Call the function
     result = get_prefect_flow_runs_log_history_v1(request, "deployment_id", limit=2, offset=0)
+
+    # the org's region server is passed to every call
+    for call in mock_get_connection.call_args_list:
+        assert call.kwargs["server"] == RegionService.airbyte_server_for_org(
+            orguser_transform_tasks.org
+        )
 
     # Assertions
     assert len(result) == 2

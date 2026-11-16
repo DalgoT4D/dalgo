@@ -7,6 +7,7 @@ from django.core.management.base import BaseCommand
 
 from ddpui.models.org import Org, OrgWarehouse
 from ddpui.utils import secretsmanager
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpairbyte import airbyte_service
 
 
@@ -25,7 +26,9 @@ class Command(BaseCommand):
                 continue
             warehouse_secret = secretsmanager.retrieve_warehouse_credentials(warehouse)
             res = airbyte_service.abreq(
-                "destinations/get", {"destinationId": warehouse.airbyte_destination_id}
+                "destinations/get",
+                {"destinationId": warehouse.airbyte_destination_id},
+                server=RegionService.airbyte_server_for_org(org),
             )
             print(org.slug)
             if warehouse.wtype == "postgres":

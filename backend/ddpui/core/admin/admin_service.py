@@ -39,6 +39,7 @@ from ddpui.schemas.notifications_api_schemas import (
     NotificationType,
 )
 from ddpui.core import orgfunctions, orguserfunctions
+from ddpui.core.regions.region_service import RegionService
 from ddpui.core.notifications.notifications_functions import get_recipients, create_notification
 from ddpui.ddpairbyte import airbyte_service
 from ddpui.services.org_cleanup_service import OrgCleanupService, OrgCleanupServiceError
@@ -98,7 +99,9 @@ def _delete_orphaned_workspace(org: Org, reason: str) -> None:
     survives as an orphan and blocks recreating the org under the same slug.
     """
     try:
-        airbyte_service.delete_workspace(org.airbyte_workspace_id)
+        airbyte_service.delete_workspace(
+            org.airbyte_workspace_id, server=RegionService.airbyte_server_for_org(org)
+        )
     except Exception:
         logger.error(
             f"failed to delete orphaned airbyte workspace {org.airbyte_workspace_id} "

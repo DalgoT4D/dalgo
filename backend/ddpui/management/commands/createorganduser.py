@@ -36,6 +36,18 @@ class Command(BaseCommand):
             help="Role of the OrgUser; default is 'admin'",
             default="admin",
         )
+        parser.add_argument(
+            "--data-region",
+            type=str,
+            help="Data region code of a NEW org (see AVAILABLE_DATA_REGIONS); default 'in'",
+            default="in",
+        )
+        parser.add_argument(
+            "--country",
+            type=str,
+            help="ISO-3166 alpha-2 country of a NEW org; required outside the home region",
+            default=None,
+        )
 
     def handle(self, *args, **options):
         # ensure the Role exists
@@ -56,6 +68,8 @@ class Command(BaseCommand):
                     can_upgrade_plan=True,
                     superset_included=False,
                     subscription_duration="Monthly",
+                    data_region=options["data_region"],
+                    country=options["country"],
                 )
             )
             if error:

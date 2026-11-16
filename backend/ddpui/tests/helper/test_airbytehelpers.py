@@ -4,6 +4,7 @@ from datetime import datetime
 import pytz
 import pytest
 from ninja.errors import HttpError
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpairbyte.airbytehelpers import (
     add_custom_airbyte_connector,
     upgrade_custom_sources,
@@ -20,6 +21,7 @@ from ddpui.ddpairbyte.airbytehelpers import (
     schedule_update_connection_schema,
     fetch_and_update_airbyte_job_details,
     fetch_and_update_airbyte_jobs_for_all_connections,
+    get_warehouses,
     fetch_and_update_org_schema_changes,
 )
 from ddpui.ddpairbyte.schema import (
@@ -181,10 +183,13 @@ def airbyte_server_block(orguser):
 
 
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.create_custom_source_definition")
-def test_add_custom_airbyte_connector(mock_create_custom_source_definition: Mock):
+def test_add_custom_airbyte_connector(
+    mock_create_custom_source_definition: Mock, airbyte_server_af
+):
     """very simple test"""
-    add_custom_airbyte_connector("wsid", "cname", "cdr", "cdit", "cdurl")
+    add_custom_airbyte_connector("wsid", "cname", "cdr", "cdit", "cdurl", server=airbyte_server_af)
     mock_create_custom_source_definition.assert_called_once_with(
+        server=airbyte_server_af,
         workspace_id="wsid",
         name="cname",
         docker_repository="cdr",
@@ -204,6 +209,7 @@ def test_add_custom_airbyte_connector(mock_create_custom_source_definition: Mock
 def test_upgrade_custom_sources(
     mock_add_custom_airbyte_connector: Mock,
     mock_get_source_definitions: Mock,
+    airbyte_server_af,
 ):
     """tests upgrading one of the existing custom connectors"""
     mock_get_source_definitions.return_value = {
@@ -225,15 +231,25 @@ def test_upgrade_custom_sources(
             },
         ]
     }
-    upgrade_custom_sources("workspace_id")
+    upgrade_custom_sources("workspace_id", server=airbyte_server_af)
     mock_add_custom_airbyte_connector.assert_any_call(
-        "workspace_id", "KoboToolbox", "tech4dev/source-kobotoolbox", "0.3.0", ""
+        "workspace_id",
+        "KoboToolbox",
+        "tech4dev/source-kobotoolbox",
+        "0.3.0",
+        "",
+        server=airbyte_server_af,
     )
     mock_add_custom_airbyte_connector.assert_any_call(
-        "workspace_id", "Avni", "tech4dev/source-avni", "0.2.1", ""
+        "workspace_id", "Avni", "tech4dev/source-avni", "0.2.1", "", server=airbyte_server_af
     )
     mock_add_custom_airbyte_connector.assert_any_call(
-        "workspace_id", "CommCare T4D", "tech4dev/source-commcare", "0.3.0", ""
+        "workspace_id",
+        "CommCare T4D",
+        "tech4dev/source-commcare",
+        "0.3.0",
+        "",
+        server=airbyte_server_af,
     )
 
 
@@ -248,18 +264,29 @@ def test_upgrade_custom_sources(
 def test_upgrade_custom_sources_add(
     mock_add_custom_airbyte_connector: Mock,
     mock_get_source_definitions: Mock,
+    airbyte_server_af,
 ):
     """tests upgrading one of the existing custom connectors"""
     mock_get_source_definitions.return_value = {"sourceDefinitions": []}
-    upgrade_custom_sources("workspace_id")
+    upgrade_custom_sources("workspace_id", server=airbyte_server_af)
     mock_add_custom_airbyte_connector.assert_any_call(
-        "workspace_id", "KoboToolbox", "tech4dev/source-kobotoolbox", "0.3.0", ""
+        "workspace_id",
+        "KoboToolbox",
+        "tech4dev/source-kobotoolbox",
+        "0.3.0",
+        "",
+        server=airbyte_server_af,
     )
     mock_add_custom_airbyte_connector.assert_any_call(
-        "workspace_id", "Avni", "tech4dev/source-avni", "0.2.1", ""
+        "workspace_id", "Avni", "tech4dev/source-avni", "0.2.1", "", server=airbyte_server_af
     )
     mock_add_custom_airbyte_connector.assert_any_call(
-        "workspace_id", "CommCare T4D", "tech4dev/source-commcare", "0.3.0", ""
+        "workspace_id",
+        "CommCare T4D",
+        "tech4dev/source-commcare",
+        "0.3.0",
+        "",
+        server=airbyte_server_af,
     )
 
 
@@ -282,8 +309,8 @@ def test_setup_airbyte_workspace_fail_v1_noproxy(
     create_workspace: Mock,
 ):
     """failing test"""
-    org_save = Mock()
-    org = Mock(save=org_save)
+    org = Org(name="org", slug="org")
+    org.save = Mock()
     create_workspace.return_value = {
         "workspaceId": "wsid",
         "initialSetupComplete": False,
@@ -329,7 +356,9 @@ def test_setup_airbyte_workspace_v1_create_server_block(
     mock_create_airbyte_server_block.return_value = (1, "cleaned-block-name")
     setup_airbyte_workspace_v1("workspace_name", org)
     mock_get_airbyte_server_block_id.assert_called_once_with("org-airbyte-server")
-    mock_create_airbyte_server_block.assert_called_once_with("org-airbyte-server")
+    mock_create_airbyte_server_block.assert_called_once_with(
+        "org-airbyte-server", RegionService.airbyte_flow_server_for_org(org)
+    )
     assert OrgPrefectBlockv1.objects.filter(org=org, block_type=AIRBYTESERVER).count() == 1
     org.delete()
 
@@ -631,7 +660,11 @@ def test_create_connection(
 
     assert error is None
 
-    mock_create_connection.assert_called_once_with(org_with_workspace.airbyte_workspace_id, payload)
+    mock_create_connection.assert_called_once_with(
+        org_with_workspace.airbyte_workspace_id,
+        payload,
+        server=RegionService.airbyte_server_for_org(org_with_workspace),
+    )
 
     assert result["name"] == "test-connection"
     assert result["connectionId"] == "connection-id"
@@ -1062,7 +1095,9 @@ def test_delete_source(
 
     # check a successful deletion with no links to connections or dataflows
     delete_source(org, "source_id")
-    mock_delete_source.assert_called_once_with(org.airbyte_workspace_id, "source_id")
+    mock_delete_source.assert_called_once_with(
+        org.airbyte_workspace_id, "source_id", server=RegionService.airbyte_server_for_org(org)
+    )
 
 
 def test_schedule_update_connection_schema_no_serverblock(orguser):
@@ -1162,6 +1197,7 @@ def test_schedule_update_connection_schema_success(
 )
 def test_fetch_and_update_airbyte_job_details_creates_job(
     mock_get_job_info_without_logs,
+    airbyte_server_in,
 ):
     # Setup mock job info
     job_id = "123"
@@ -1190,7 +1226,7 @@ def test_fetch_and_update_airbyte_job_details_creates_job(
     mock_get_job_info_without_logs.return_value = job_info
 
     # Patch from_timestamp to just return the int for simplicity
-    result = fetch_and_update_airbyte_job_details(job_id)
+    result = fetch_and_update_airbyte_job_details(job_id, server=airbyte_server_in)
 
     # Check AirbyteJob is created
     job = AirbyteJob.objects.get(job_id=job_id)
@@ -1207,6 +1243,7 @@ def test_fetch_and_update_airbyte_job_details_creates_job(
 )
 def test_fetch_and_update_airbyte_job_details_updates_existing_job(
     mock_get_job_info_without_logs,
+    airbyte_server_in,
 ):
     # Create initial job
     job_id = "456"
@@ -1259,7 +1296,7 @@ def test_fetch_and_update_airbyte_job_details_updates_existing_job(
     mock_get_job_info_without_logs.return_value = job_info
 
     with patch("ddpui.ddpairbyte.airbytehelpers.from_timestamp", side_effect=lambda x: x):
-        result = fetch_and_update_airbyte_job_details(job_id)
+        result = fetch_and_update_airbyte_job_details(job_id, server=airbyte_server_in)
 
     job = AirbyteJob.objects.get(job_id=job_id)
     assert job.status == job_info["job"]["status"]
@@ -1274,6 +1311,7 @@ def test_fetch_and_update_airbyte_job_details_updates_existing_job(
 )
 def test_fetch_and_update_airbyte_job_details_no_attempts_raises(
     mock_get_job_info_without_logs,
+    airbyte_server_in,
 ):
     job_id = "789"
     job_info = {
@@ -1293,7 +1331,7 @@ def test_fetch_and_update_airbyte_job_details_no_attempts_raises(
     mock_get_job_info_without_logs.return_value = job_info
 
     with pytest.raises(Exception, match="No attempts found for job_id=789"):
-        fetch_and_update_airbyte_job_details(job_id)
+        fetch_and_update_airbyte_job_details(job_id, server=airbyte_server_in)
 
 
 @patch(
@@ -1302,6 +1340,7 @@ def test_fetch_and_update_airbyte_job_details_no_attempts_raises(
 )
 def test_fetch_and_update_airbyte_job_details_no_started_at_raises(
     mock_get_job_info_without_logs,
+    airbyte_server_in,
 ):
     job_id = "999"
     job_info = {
@@ -1323,7 +1362,7 @@ def test_fetch_and_update_airbyte_job_details_no_started_at_raises(
     mock_get_job_info_without_logs.return_value = job_info
 
     with pytest.raises(Exception, match="No startedAt found for job_id=999"):
-        fetch_and_update_airbyte_job_details(job_id)
+        fetch_and_update_airbyte_job_details(job_id, server=airbyte_server_in)
 
 
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.get_jobs_for_connection")
@@ -1344,7 +1383,9 @@ def test_fetch_and_update_airbyte_jobs_for_all_connections(
     fetch_and_update_airbyte_jobs_for_all_connections(org=org, last_n_days=1)
 
     mock_get_jobs_for_connection.assert_called_once()
-    mock_fetch_and_update_airbyte_job_details.assert_called_once_with("test_job_id")
+    mock_fetch_and_update_airbyte_job_details.assert_called_once_with(
+        "test_job_id", server=RegionService.airbyte_server_for_org(org)
+    )
 
 
 @patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.get_connection_catalog")
@@ -2090,3 +2131,136 @@ def test_update_destination_starred_ca_cert_resolved_from_curr_credentials(
     saved_creds = mock_update_warehouse_credentials.call_args[0][1]
     assert saved_creds["ssl_mode"]["ca_certificate"] == "real-cert"
     assert saved_creds["password"] == "real-password"
+
+
+# ================================================================================
+# multi-region: AirbyteJob identity is (job_id, config_id)
+# ================================================================================
+def _airbyte_job_info(job_id: int, config_id: str, status: str) -> dict:
+    return {
+        "job": {
+            "id": job_id,
+            "configType": "sync",
+            "configId": config_id,
+            "status": status,
+            "resetConfig": None,
+            "refreshConfig": None,
+            "streamAggregatedStats": {},
+            "aggregatedStats": {
+                "recordsEmitted": 1,
+                "bytesEmitted": 1,
+                "recordsCommitted": 1,
+                "bytesCommitted": 1,
+            },
+            "createdAt": 1700000000,
+        },
+        "attempts": [{"attempt": {"id": 1, "createdAt": 1700000000, "endedAt": 1700001000}}],
+    }
+
+
+@patch("ddpui.ddpairbyte.airbyte_service.get_job_info_without_logs")
+def test_fetch_job_details_same_job_id_two_regions(
+    mock_get_job_info_without_logs, airbyte_server_in, airbyte_server_af
+):
+    """job 1 in Mumbai and job 1 in Africa are two rows; neither overwrites the other"""
+    mock_get_job_info_without_logs.return_value = _airbyte_job_info(1, "conn-in", "succeeded")
+    fetch_and_update_airbyte_job_details("1", server=airbyte_server_in)
+    mock_get_job_info_without_logs.return_value = _airbyte_job_info(1, "conn-af", "failed")
+    fetch_and_update_airbyte_job_details("1", server=airbyte_server_af)
+
+    assert AirbyteJob.objects.filter(job_id=1).count() == 2
+    assert AirbyteJob.objects.get(job_id=1, config_id="conn-in").status == "succeeded"
+    assert AirbyteJob.objects.get(job_id=1, config_id="conn-af").status == "failed"
+    assert mock_get_job_info_without_logs.call_args_list[1].kwargs["server"] == airbyte_server_af
+
+
+@patch("ddpui.ddpairbyte.airbyte_service.get_job_info_without_logs")
+def test_fetch_job_details_upserts_running_to_succeeded(
+    mock_get_job_info_without_logs, airbyte_server_af
+):
+    mock_get_job_info_without_logs.return_value = _airbyte_job_info(7, "conn-af", "running")
+    fetch_and_update_airbyte_job_details("7", server=airbyte_server_af)
+    mock_get_job_info_without_logs.return_value = _airbyte_job_info(7, "conn-af", "succeeded")
+    fetch_and_update_airbyte_job_details("7", server=airbyte_server_af)
+
+    jobs = AirbyteJob.objects.filter(job_id=7, config_id="conn-af")
+    assert jobs.count() == 1
+    assert jobs.first().status == "succeeded"
+
+
+@patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.get_jobs_for_connection")
+@patch("ddpui.ddpairbyte.airbytehelpers.fetch_and_update_airbyte_job_details")
+def test_fetch_jobs_for_all_connections_uses_each_orgs_region(
+    mock_fetch_details, mock_get_jobs_for_connection, org_in, org_af, mock_region_secrets
+):
+    synctask = Task.objects.create(type=TaskType.AIRBYTE, slug="airbyte-sync", label="sync")
+    OrgTask.objects.create(org=org_in, task=synctask, connection_id="conn-in")
+    OrgTask.objects.create(org=org_af, task=synctask, connection_id="conn-af")
+
+    def jobs_for(connection_id, **kwargs):
+        return {"jobs": [{"job": {"id": f"job-{connection_id}"}}], "totalJobCount": 1}
+
+    mock_get_jobs_for_connection.side_effect = jobs_for
+
+    fetch_and_update_airbyte_jobs_for_all_connections(last_n_days=1)
+
+    regions = {
+        c.args[0]: c.kwargs["server"].aws_region
+        for c in mock_get_jobs_for_connection.call_args_list
+    }
+    assert regions == {"conn-in": "ap-south-1", "conn-af": "af-south-1"}
+    details = {c.args[0]: c.kwargs["server"].aws_region for c in mock_fetch_details.call_args_list}
+    assert details == {"job-conn-in": "ap-south-1", "job-conn-af": "af-south-1"}
+
+
+@patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.create_workspace")
+@patch("ddpui.ddpairbyte.airbytehelpers.prefect_service.get_airbyte_server_block_id")
+@patch("ddpui.ddpairbyte.airbytehelpers.prefect_service.create_airbyte_server_block")
+def test_setup_airbyte_workspace_v1_region_af(
+    mock_create_airbyte_server_block: Mock,
+    mock_get_airbyte_server_block_id: Mock,
+    mock_create_workspace: Mock,
+    org_af,
+    mock_region_secrets,
+):
+    """an Africa org's workspace is created in the Africa airbyte, its prefect block points at
+    the same Africa airbyte host as the backend"""
+    org_af.airbyte_workspace_id = None
+    org_af.save()
+    mock_create_workspace.return_value = {
+        "workspaceId": "ws-af-new",
+        "name": "org-af",
+        "initialSetupComplete": False,
+    }
+    mock_get_airbyte_server_block_id.return_value = None
+    mock_create_airbyte_server_block.return_value = ("block-id", "org-af-airbyte-server")
+
+    setup_airbyte_workspace_v1("org-af", org_af)
+
+    server = mock_create_workspace.call_args.kwargs["server"]
+    assert server.aws_region == "af-south-1"
+    assert server.base_url == "https://airbyte-af-staging-internal.dalgo.org:443/api/v1"
+    block_name, flow_server = mock_create_airbyte_server_block.call_args.args
+    assert block_name == "org-af-airbyte-server"
+    assert flow_server.server_host == "airbyte-af-staging-internal.dalgo.org"
+    assert flow_server.server_port == "443"
+    assert flow_server.use_ssl is True
+    org_af.refresh_from_db()
+    assert org_af.airbyte_workspace_id == "ws-af-new"
+
+
+@patch("ddpui.ddpairbyte.airbytehelpers.airbyte_service.get_destination")
+def test_get_warehouses_returns_region_airbyte_ui_url(
+    mock_get_destination, org_in, org_af, mock_region_secrets
+):
+    mock_get_destination.return_value = {"destinationId": "d"}
+    OrgWarehouse.objects.create(org=org_in, wtype="postgres", airbyte_destination_id="d-in")
+    OrgWarehouse.objects.create(org=org_af, wtype="postgres", airbyte_destination_id="d-af")
+
+    warehouses_in, _ = get_warehouses(org_in)
+    warehouses_af, _ = get_warehouses(org_af)
+
+    assert warehouses_in[0]["airbyte_ui_url"] == "https://airbyte-in.example.org"
+    # no airbyte_ui_url for af in settings -> None, the webapp omits the link
+    assert warehouses_af[0]["airbyte_ui_url"] is None
+    assert mock_get_destination.call_args.kwargs["server"].aws_region == "af-south-1"

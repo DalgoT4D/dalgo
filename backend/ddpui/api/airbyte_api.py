@@ -8,6 +8,7 @@ from ninja import Router
 
 from ddpui import settings
 from ddpui.ddpairbyte import airbyte_service
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpairbyte.schema import (
     AirbyteConnectionCreate,
     AirbyteConnectionCreateResponse,
@@ -62,7 +63,9 @@ def get_airbyte_source_definitions(request):
     if orguser.org.airbyte_workspace_id is None:
         raise HttpError(400, "create an airbyte workspace first")
 
-    res = airbyte_service.get_source_definitions(orguser.org.airbyte_workspace_id)
+    res = airbyte_service.get_source_definitions(
+        orguser.org.airbyte_workspace_id, server=RegionService.airbyte_server_for_org(orguser.org)
+    )
 
     # filter source definitions for demo account
     allowed_sources = os.getenv("DEMO_AIRBYTE_SOURCE_TYPES")
@@ -88,7 +91,9 @@ def get_airbyte_source_definition_specifications(request, sourcedef_id):
         raise HttpError(400, "create an airbyte workspace first")
 
     res = airbyte_service.get_source_definition_specification(
-        orguser.org.airbyte_workspace_id, sourcedef_id
+        orguser.org.airbyte_workspace_id,
+        sourcedef_id,
+        server=RegionService.airbyte_server_for_org(orguser.org),
     )
     logger.debug(res)
     return res["connectionSpecification"]
@@ -105,7 +110,9 @@ def post_airbyte_source(request, payload: AirbyteSourceCreate):
     if orguser.org.base_plan() == OrgType.DEMO:
         logger.info("Demo account user")
         source_def = airbyte_service.get_source_definition(
-            orguser.org.airbyte_workspace_id, payload.sourceDefId
+            orguser.org.airbyte_workspace_id,
+            payload.sourceDefId,
+            server=RegionService.airbyte_server_for_org(orguser.org),
         )
         # replace the payload config with the correct whitelisted source config
         whitelisted_config, error = airbytehelpers.get_demo_whitelisted_source_config(
@@ -122,6 +129,7 @@ def post_airbyte_source(request, payload: AirbyteSourceCreate):
         payload.name,
         payload.sourceDefId,
         payload.config,
+        server=RegionService.airbyte_server_for_org(orguser.org),
     )
     logger.info("created source having id " + source["sourceId"])
     create_audit_log(
@@ -249,7 +257,11 @@ def put_airbyte_source(request, source_id: str, payload: AirbyteSourceUpdate):
 
     if orguser.org.base_plan() == OrgType.DEMO:
         logger.info("Demo account user")
-        source = airbyte_service.get_source(orguser.org.airbyte_workspace_id, source_id)
+        source = airbyte_service.get_source(
+            orguser.org.airbyte_workspace_id,
+            source_id,
+            server=RegionService.airbyte_server_for_org(orguser.org),
+        )
 
         # replace the payload config with the correct whitelisted source config
         whitelisted_config, error = airbytehelpers.get_demo_whitelisted_source_config(
@@ -262,7 +274,11 @@ def put_airbyte_source(request, source_id: str, payload: AirbyteSourceUpdate):
         logger.info("whitelisted the source config for update")
 
     source = airbyte_service.update_source(
-        source_id, payload.name, payload.config, payload.sourceDefId
+        source_id,
+        payload.name,
+        payload.config,
+        payload.sourceDefId,
+        server=RegionService.airbyte_server_for_org(orguser.org),
     )
     logger.info("updated source having id " + source["sourceId"])
 
@@ -289,7 +305,9 @@ def post_airbyte_check_source(request, payload: AirbyteSourceCreate):
     if orguser.org.base_plan() == OrgType.DEMO:
         logger.info("Demo account user")
         source_def = airbyte_service.get_source_definition(
-            orguser.org.airbyte_workspace_id, payload.sourceDefId
+            orguser.org.airbyte_workspace_id,
+            payload.sourceDefId,
+            server=RegionService.airbyte_server_for_org(orguser.org),
         )
         # replace the payload config with the correct whitelisted source config
         whitelisted_config, error = airbytehelpers.get_demo_whitelisted_source_config(
@@ -301,7 +319,11 @@ def post_airbyte_check_source(request, payload: AirbyteSourceCreate):
         payload.config = whitelisted_config
         logger.info("whitelisted the source config")
 
-    response = airbyte_service.check_source_connection(orguser.org.airbyte_workspace_id, payload)
+    response = airbyte_service.check_source_connection(
+        orguser.org.airbyte_workspace_id,
+        payload,
+        server=RegionService.airbyte_server_for_org(orguser.org),
+    )
     return {
         "status": "succeeded" if response["jobInfo"]["succeeded"] else "failed",
         "logs": response["jobInfo"]["logs"]["logLines"],
@@ -320,7 +342,11 @@ def post_airbyte_check_source_for_update(
 
     if orguser.org.base_plan() == OrgType.DEMO:
         logger.info("Demo account user")
-        source = airbyte_service.get_source(orguser.org.airbyte_workspace_id, source_id)
+        source = airbyte_service.get_source(
+            orguser.org.airbyte_workspace_id,
+            source_id,
+            server=RegionService.airbyte_server_for_org(orguser.org),
+        )
 
         # replace the payload config with the correct whitelisted source config
         whitelisted_config, error = airbytehelpers.get_demo_whitelisted_source_config(
@@ -332,7 +358,9 @@ def post_airbyte_check_source_for_update(
         payload.config = whitelisted_config
         logger.info("whitelisted the source config for update")
 
-    response = airbyte_service.check_source_connection_for_update(source_id, payload)
+    response = airbyte_service.check_source_connection_for_update(
+        source_id, payload, server=RegionService.airbyte_server_for_org(orguser.org)
+    )
     return {
         "status": "succeeded" if response["jobInfo"]["succeeded"] else "failed",
         "logs": response["jobInfo"]["logs"]["logLines"],
@@ -347,7 +375,9 @@ def get_airbyte_sources(request):
     if orguser.org.airbyte_workspace_id is None:
         raise HttpError(400, "create an airbyte workspace first")
 
-    res = airbyte_service.get_sources(orguser.org.airbyte_workspace_id)["sources"]
+    res = airbyte_service.get_sources(
+        orguser.org.airbyte_workspace_id, server=RegionService.airbyte_server_for_org(orguser.org)
+    )["sources"]
     logger.debug(res)
     return res
 
@@ -360,7 +390,11 @@ def get_airbyte_source(request, source_id):
     if orguser.org.airbyte_workspace_id is None:
         raise HttpError(400, "create an airbyte workspace first")
 
-    res = airbyte_service.get_source(orguser.org.airbyte_workspace_id, source_id)
+    res = airbyte_service.get_source(
+        orguser.org.airbyte_workspace_id,
+        source_id,
+        server=RegionService.airbyte_server_for_org(orguser.org),
+    )
     logger.debug(res)
     return res
 
@@ -373,7 +407,11 @@ def get_airbyte_source_schema_catalog(request, source_id):
     if orguser.org.airbyte_workspace_id is None:
         raise HttpError(400, "create an airbyte workspace first")
 
-    res = airbyte_service.get_source_schema_catalog(orguser.org.airbyte_workspace_id, source_id)
+    res = airbyte_service.get_source_schema_catalog(
+        orguser.org.airbyte_workspace_id,
+        source_id,
+        server=RegionService.airbyte_server_for_org(orguser.org),
+    )
     logger.debug(res)
     return res
 
@@ -386,9 +424,9 @@ def get_airbyte_destination_definitions(request):
     if orguser.org.airbyte_workspace_id is None:
         raise HttpError(400, "create an airbyte workspace first")
 
-    res = airbyte_service.get_destination_definitions(orguser.org.airbyte_workspace_id)[
-        "destinationDefinitions"
-    ]
+    res = airbyte_service.get_destination_definitions(
+        orguser.org.airbyte_workspace_id, server=RegionService.airbyte_server_for_org(orguser.org)
+    )["destinationDefinitions"]
     allowed_destinations = os.getenv("AIRBYTE_DESTINATION_TYPES")
     if allowed_destinations:
         res = [destdef for destdef in res if destdef["name"] in allowed_destinations.split(",")]
@@ -408,7 +446,9 @@ def get_airbyte_destination_definition_specifications(request, destinationdef_id
         raise HttpError(400, "create an airbyte workspace first")
 
     res = airbyte_service.get_destination_definition_specification(
-        orguser.org.airbyte_workspace_id, destinationdef_id
+        orguser.org.airbyte_workspace_id,
+        destinationdef_id,
+        server=RegionService.airbyte_server_for_org(orguser.org),
     )["connectionSpecification"]
     logger.debug(res)
     return res
@@ -427,6 +467,7 @@ def post_airbyte_destination(request, payload: AirbyteDestinationCreate):
         payload.name,
         payload.destinationDefId,
         payload.config,
+        server=RegionService.airbyte_server_for_org(orguser.org),
     )
     logger.info("created destination having id " + destination["destinationId"])
     create_audit_log(
@@ -450,7 +491,9 @@ def post_airbyte_check_destination(request, payload: AirbyteDestinationCreate):
         raise HttpError(400, "create an airbyte workspace first")
 
     response = airbyte_service.check_destination_connection(
-        orguser.org.airbyte_workspace_id, payload
+        orguser.org.airbyte_workspace_id,
+        payload,
+        server=RegionService.airbyte_server_for_org(orguser.org),
     )
     return {
         "status": "succeeded" if response["jobInfo"]["succeeded"] else "failed",
@@ -468,7 +511,9 @@ def post_airbyte_check_destination_for_update(
     if orguser.org.airbyte_workspace_id is None:
         raise HttpError(400, "create an airbyte workspace first")
 
-    response = airbyte_service.check_destination_connection_for_update(destination_id, payload)
+    response = airbyte_service.check_destination_connection_for_update(
+        destination_id, payload, server=RegionService.airbyte_server_for_org(orguser.org)
+    )
     return {
         "status": "succeeded" if response["jobInfo"]["succeeded"] else "failed",
         "logs": response["jobInfo"]["logs"]["logLines"],
@@ -483,7 +528,9 @@ def get_airbyte_destinations(request):
     if orguser.org.airbyte_workspace_id is None:
         raise HttpError(400, "create an airbyte workspace first")
 
-    res = airbyte_service.get_destinations(orguser.org.airbyte_workspace_id)["destinations"]
+    res = airbyte_service.get_destinations(
+        orguser.org.airbyte_workspace_id, server=RegionService.airbyte_server_for_org(orguser.org)
+    )["destinations"]
     logger.debug(res)
     return res
 
@@ -496,7 +543,11 @@ def get_airbyte_destination(request, destination_id):
     if orguser.org.airbyte_workspace_id is None:
         raise HttpError(400, "create an airbyte workspace first")
 
-    res = airbyte_service.get_destination(orguser.org.airbyte_workspace_id, destination_id)
+    res = airbyte_service.get_destination(
+        orguser.org.airbyte_workspace_id,
+        destination_id,
+        server=RegionService.airbyte_server_for_org(orguser.org),
+    )
     logger.debug(res)
     return res
 
@@ -511,7 +562,9 @@ def get_airbyte_destination_specifications_for_destination(request, destination_
     if orguser.org.airbyte_workspace_id is None:
         raise HttpError(400, "create an airbyte workspace first")
 
-    res = airbyte_service.get_destination_definition_specification_for_destination(destination_id)
+    res = airbyte_service.get_destination_definition_specification_for_destination(
+        destination_id, server=RegionService.airbyte_server_for_org(orguser.org)
+    )
     logger.debug(res)
     return res
 
@@ -520,7 +573,9 @@ def get_airbyte_destination_specifications_for_destination(request, destination_
 @has_permission(["can_view_connection"])
 def get_job_status(request, job_id):
     """get the job info from airbyte"""
-    result = airbyte_service.get_job_info(job_id)
+    result = airbyte_service.get_job_info(
+        job_id, server=RegionService.airbyte_server_for_org(request.orguser.org)
+    )
     logs = result["attempts"][-1]["logs"]["logLines"]
     return {
         "status": result["job"]["status"],
@@ -532,7 +587,9 @@ def get_job_status(request, job_id):
 @has_permission(["can_view_connection"])
 def get_job_status_without_logs(request, job_id):
     """get the job info from airbyte"""
-    result = airbyte_service.get_job_info_without_logs(job_id)
+    result = airbyte_service.get_job_info_without_logs(
+        job_id, server=RegionService.airbyte_server_for_org(request.orguser.org)
+    )
     print(result)
     return {
         "status": result["job"]["status"],
@@ -554,7 +611,9 @@ def post_airbyte_workspace_v1(request, payload: AirbyteWorkspaceCreate):
     workspace = airbytehelpers.setup_airbyte_workspace_v1(payload.name, orguser.org)
     # add custom sources to this workspace
     add_custom_connectors_to_workspace.delay(
-        workspace.workspaceId, list(settings.AIRBYTE_CUSTOM_SOURCES.values())
+        workspace.workspaceId,
+        list(settings.AIRBYTE_CUSTOM_SOURCES.values()),
+        org_id=orguser.org.id,
     )
 
     return workspace
@@ -771,7 +830,11 @@ def delete_airbyte_source_v1(request, source_id):
 
     # Capture source name before deletion for audit log
     try:
-        source = airbyte_service.get_source(orguser.org.airbyte_workspace_id, source_id)
+        source = airbyte_service.get_source(
+            orguser.org.airbyte_workspace_id,
+            source_id,
+            server=RegionService.airbyte_server_for_org(orguser.org),
+        )
         source_name = source.get("name", source_id)
     except Exception:
         source_name = source_id
@@ -910,7 +973,9 @@ def get_job_logs(
 ):
     """get the log info from airbyte for a job attempt"""
     try:
-        log_lines = airbyte_service.get_logs_for_job(job_id, attempt_number)
+        log_lines = airbyte_service.get_logs_for_job(
+            job_id, attempt_number, server=RegionService.airbyte_server_for_org(request.orguser.org)
+        )
     except Exception as error:
         logger.exception(error)
         log_lines = ["An error occured while fetching logs!"]
@@ -931,5 +996,8 @@ def post_cancel_connection_job(
         raise HttpError(400, "create an airbyte workspace first")
 
     return airbyte_service.cancel_connection_job(
-        orguser.org.airbyte_workspace_id, connection_id, job_type
+        orguser.org.airbyte_workspace_id,
+        connection_id,
+        job_type,
+        server=RegionService.airbyte_server_for_org(orguser.org),
     )

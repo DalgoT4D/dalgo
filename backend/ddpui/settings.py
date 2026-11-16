@@ -17,6 +17,7 @@ import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.langgraph import LanggraphIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.scrubber import EventScrubber, DEFAULT_DENYLIST
 
 from datetime import timedelta
 
@@ -48,6 +49,14 @@ sentry_sdk.init(
     enable_logs=os.getenv("SENTRY_ENABLE_LOGS", "True") == "True",
     # More info - https://docs.sentry.io/platforms/python/data-management/data-collected/
     send_default_pii=os.getenv("SENTRY_SEND_DEFAULT_PII", "True") == "True",
+    # frame locals are sent with every exception (include_local_variables defaults to True), so
+    # scrub credential-bearing keys recursively; e.g. a parsed Airbyte region secret dict
+    event_scrubber=EventScrubber(
+        denylist=DEFAULT_DENYLIST + ["api_token", "secretstring", "secret_string", "headers"],
+        recursive=True,
+        # keep the current PII behaviour; this only adds the secret keys above
+        send_default_pii=os.getenv("SENTRY_SEND_DEFAULT_PII", "True") == "True",
+    ),
     # Environment
     environment=os.getenv("ENVIRONMENT", "staging"),
 )
@@ -263,6 +272,36 @@ AIRBYTE_CUSTOM_SOURCES = {
 }
 
 AIRBYTE_SOURCE_BLACKLIST = os.getenv("AIRBYTE_SOURCE_BLACKLIST", "").split(",")
+
+# ---- Data regions (multi-region Airbyte) ----
+# "staging" | "prod" - used only to build region secret names
+DATA_REGION_ENV = os.getenv("DATA_REGION_ENV", "staging")
+HOME_DATA_REGION = "in"
+HOME_AWS_REGION = "ap-south-1"
+
+# every region this codebase knows about; the airbyte connection details for each one
+# live in the Secrets Manager secret named here (stored in the home region's SM)
+AVAILABLE_DATA_REGIONS = {
+    "in": {
+        "label": "India (Mumbai)",
+        "aws_region": "ap-south-1",
+        "airbyte_secret_name": f"dalgoAirbyteRegion-{DATA_REGION_ENV}-in",
+        "prefect_work_pool": os.getenv("PREFECT_EKS_WORKER_POOL_NAME") or "default",
+        "airbyte_ui_url": os.getenv("AIRBYTE_URL_FOR_NOTIFICATIONS") or None,
+    },
+    "af": {
+        "label": "Africa (Cape Town)",
+        "aws_region": "af-south-1",
+        "airbyte_secret_name": f"dalgoAirbyteRegion-{DATA_REGION_ENV}-af",
+        # empty = orgs of this region cannot get a work pool (fails loudly, never Mumbai's)
+        "prefect_work_pool": os.getenv("PREFECT_AF_WORKER_POOL_NAME", ""),
+        "airbyte_ui_url": os.getenv("AIRBYTE_AF_URL_FOR_NOTIFICATIONS") or None,
+    },
+}
+# regions a superadmin may pick for NEW orgs in this deployment (kill switch per region)
+ENABLED_DATA_REGIONS = [
+    code.strip() for code in os.getenv("ENABLED_DATA_REGIONS", "in").split(",") if code.strip()
+]
 
 # Unified logging configuration
 # Console out level follows DEBUG env: DEBUG -> DEBUG, otherwise INFO

@@ -7,6 +7,7 @@ from django.core.management.base import BaseCommand, CommandParser
 from ddpui.models.tasks import DataflowOrgTask
 from ddpui.models.airbyte import SyncStats
 from ddpui.ddpairbyte.airbyte_service import get_jobs_for_connection, abreq
+from ddpui.core.regions.region_service import RegionService
 
 # from ddpui.ddpairbyte.airbytehelpers import get_job_info_for_connection
 
@@ -58,6 +59,7 @@ class Command(BaseCommand):
                     "orderByField": "createdAt",
                     "orderByMethod": "DESC",
                 },
+                server=RegionService.airbyte_server_for_org(org),
             )
 
             for job in response["jobs"]:

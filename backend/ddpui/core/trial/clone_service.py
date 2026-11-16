@@ -33,6 +33,7 @@ from ddpui.models.userpreferences import UserPreferences
 from ddpui.models.role_based_access import Role
 from ddpui.auth import ACCOUNT_MANAGER_ROLE
 from ddpui.ddpairbyte import airbyte_service
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpairbyte.airbytehelpers import create_warehouse
 from ddpui.ddpairbyte.airbytehelpers import create_connection as ab_create_connection
 from ddpui.ddpairbyte.schema import AirbyteConnectionCreate
@@ -136,6 +137,8 @@ def _step_org_and_user(run: CloneRun) -> None:
         superset_included=False,
         start_date=trial_start.isoformat(),
         end_date=(trial_start + timedelta(days=TRIAL_DURATION_DAYS)).isoformat(),
+        # trial orgs always live in the home data region
+        data_region=settings.HOME_DATA_REGION,
     )
     trial_org, err = create_organization(org_payload)
     if err:
@@ -242,7 +245,9 @@ def _step_warehouse(run: CloneRun) -> None:
 
     # reuse the template destination's definition id (not stored on OrgWarehouse)
     template_dest = airbyte_service.get_destination(
-        template.airbyte_workspace_id, template_wh.airbyte_destination_id
+        template.airbyte_workspace_id,
+        template_wh.airbyte_destination_id,
+        server=RegionService.airbyte_server_for_org(template),
     )
     dest_def_id = template_dest["destinationDefinitionId"]
 
@@ -326,6 +331,7 @@ def _remap_source_definition_id(run: CloneRun, template_defid: str, defs_cache: 
         return defs_cache["trial_by_repo"][repo]
 
     created_def = airbyte_service.create_custom_source_definition(
+        server=RegionService.airbyte_server_for_org(run.trial_org),
         workspace_id=run.trial_org.airbyte_workspace_id,
         name=template_def["name"],
         docker_repository=repo,
@@ -352,14 +358,21 @@ def _step_sources(run: CloneRun) -> None:
     """
     template_ws = run.template.airbyte_workspace_id
     trial_ws = run.trial_org.airbyte_workspace_id
-    template_sources = airbyte_service.get_sources(template_ws)["sources"]
+    # template reads go to the template org's airbyte, writes to the trial org's (both home today)
+    template_server = RegionService.airbyte_server_for_org(run.template)
+    trial_server = RegionService.airbyte_server_for_org(run.trial_org)
+    template_sources = airbyte_service.get_sources(template_ws, server=template_server)["sources"]
     names = [s["name"] for s in template_sources]
     missing = validate_template_source_configs(names)
     if missing:
         raise TrialCloneError(f"missing source config for template sources: {missing}")
 
-    template_defs = airbyte_service.get_source_definitions(template_ws)["sourceDefinitions"]
-    trial_defs = airbyte_service.get_source_definitions(trial_ws)["sourceDefinitions"]
+    template_defs = airbyte_service.get_source_definitions(template_ws, server=template_server)[
+        "sourceDefinitions"
+    ]
+    trial_defs = airbyte_service.get_source_definitions(trial_ws, server=trial_server)[
+        "sourceDefinitions"
+    ]
     defs_cache = {
         "trial_def_ids": {d["sourceDefinitionId"] for d in trial_defs},
         "trial_by_repo": {d["dockerRepository"]: d["sourceDefinitionId"] for d in trial_defs},
@@ -370,7 +383,9 @@ def _step_sources(run: CloneRun) -> None:
     for src in template_sources:
         config = load_template_source_config(src["name"])
         trial_defid = _remap_source_definition_id(run, src["sourceDefinitionId"], defs_cache)
-        created = airbyte_service.create_source(trial_ws, src["name"], trial_defid, config)
+        created = airbyte_service.create_source(
+            trial_ws, src["name"], trial_defid, config, server=trial_server
+        )
         source_map[src["sourceId"]] = created["sourceId"]
     run.manifest["source_map"] = source_map
 
@@ -430,15 +445,20 @@ def _step_connections(run: CloneRun) -> None:
     raw airbyte_service call) so OrgTasks/dataflows/ConnectionMeta get created too.
     """
     source_map = run.manifest.get("source_map", {})
-    template_conns = airbyte_service.get_webbackend_connections(run.template.airbyte_workspace_id)
+    template_conns = airbyte_service.get_webbackend_connections(
+        run.template.airbyte_workspace_id, server=RegionService.airbyte_server_for_org(run.template)
+    )
     trial_ws = run.trial_org.airbyte_workspace_id
+    trial_server = RegionService.airbyte_server_for_org(run.trial_org)
     connection_map: dict = {}
     for conn in template_conns:
         old_source_id = conn["source"]["sourceId"]
         new_source_id = source_map.get(old_source_id)
         if not new_source_id:
             raise TrialCloneError(f"no remapped source for template source {old_source_id}")
-        discovered = airbyte_service.get_source_schema_catalog(trial_ws, new_source_id)
+        discovered = airbyte_service.get_source_schema_catalog(
+            trial_ws, new_source_id, server=trial_server
+        )
         selected = _selected_stream_names(conn)
         payload = AirbyteConnectionCreate(
             name=conn["name"],
