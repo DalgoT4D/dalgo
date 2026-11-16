@@ -202,9 +202,9 @@ The row scope lives in a `ContextVar` (Python's per-request/per-task variable). 
 
 **Why it matters:** The spec says row access "never falls back to showing more". Treating any of these cases as "no filter" would show a Member every row.
 
-**D3 — Upload creates a draft; review and preview run on the draft; Save commits it.**
-**Example:** Consulting uploads ATECF's CSV. Dalgo stores it as a draft and shows the review. They preview Rahul and Sunita against the draft. Only when they press Save does the live list change.
-**Why it matters:** Spec §5 says blocking errors stop the save, and spec §6 says a first setup can't be saved until it has been previewed. Writing rows on upload would make an unreviewed list live immediately.
+**D3 — Each upload is stored as a draft upload; review and preview run on it; Save makes it the live one.**
+**Example:** Consulting uploads ATECF's CSV. Dalgo stores it as a draft upload with its rows and shows the review. They preview Rahul and Sunita against it. Only when they press Save does it become the live list Members are filtered by.
+**Why it matters:** Spec §5 says blocking errors stop the save, and spec §6 says a first setup can't be saved until it has been previewed. Writing the upload's rows straight into the live list would make an unreviewed list live immediately.
 
 **D4 — Clean values on upload, store the data's exact spelling.**
 **Example:** The CSV says `pune ` (lowercase, trailing space). The data has `Pune`. Dalgo stores `Pune`. At query time the comparison is a plain `district IN ('Pune')`, which can use an index.
@@ -219,7 +219,7 @@ The row scope lives in a `ContextVar` (Python's per-request/per-task variable). 
 **Why it matters:** The creator rule and group shares can both grant Edit today. A single cap covers every path. Deleting Edit shares instead would remove Members' only access to private dashboards shared with them.
 
 **D7 — No Redis cache for access-list rows.**
-**Example:** Rahul's rows are read with one indexed query on `(org, email)` — about a millisecond — once per request, only when a query touches a filtered table.
+**Example:** Rahul's rows are read with one indexed query on `(upload, email)` against the live upload — about a millisecond — once per request, only when a query touches a filtered table.
 **Why it matters:** Spec §3: changes "apply at once". A cache would have to be cleared for everyone on both the old and the new list on every save; if it missed someone removed from the list, they would keep their old scope until the cache expired.
 
 ---
@@ -228,60 +228,129 @@ The row scope lives in a `ContextVar` (Python's per-request/per-task variable). 
 
 ### 5.1 Models
 
-File: `ddpui/models/rls.py` (new). Two models, one migration. Both have an `org` FK (foreign key), so every org's setup and list live in the same tables, kept apart by `org`.
+File: `ddpui/models/rls.py` (new). Three models, one migration. Every org's setup and lists live in the same tables, kept apart by `org`.
+
+**The idea:** every CSV upload is stored as an **upload** with its rows. One upload per org is **live**: the list Members are filtered by. A newer upload that hasn't been saved yet is the **draft**. Save makes the draft live and deletes the previous live upload, so an org has at most two uploads.
 
 ```python
 class OrgRLSConfig(models.Model):
-    """The org's row-access setup, its pending upload and any broken scope columns."""
+    """Which upload is live for the org, and any broken scope columns."""
     org = models.OneToOneField(Org, on_delete=models.CASCADE, related_name="rls_config")
-
-    # Saved setup
-    scope_columns = models.JSONField(default=list)        # ["district", "taluka", "dam_id"]
-    # {"prod.silt_daily": ["district", "taluka"], ...} — filtered tables at the last save
-    filtered_tables = models.JSONField(default=dict)
-    first_saved_at = models.DateTimeField(null=True)      # null = first setup not done yet
-    saved_by = models.ForeignKey(OrgUser, null=True, on_delete=models.SET_NULL, related_name="+")
-
-    # Upload waiting for review, preview and save; null = no draft
-    # {"scope_columns": [...], "rows": [...], "review": {...},
-    #  "has_blocking_errors": false, "previewed": false, "uploaded_by": 12, "uploaded_at": "..."}
-    draft = models.JSONField(null=True)
-
+    # null = row access not set up yet; Members see everything
+    live_upload = models.ForeignKey(
+        "OrgAccessListUpload", null=True, on_delete=models.PROTECT, related_name="+"
+    )
     # Scope columns that vanished from a filtered table
     # {"prod.silt_daily": {"columns": ["district"], "emailed_at": "2026-12-08T09:12:00Z"}}
     missing_columns = models.JSONField(default=dict)
-
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class OrgAccessListUpload(models.Model):
+    """One uploaded access list: the live one, or a draft waiting for review, preview and save."""
+
+    class Status(models.TextChoices):
+        DRAFT = "draft"
+        LIVE = "live"
+
+    org = models.ForeignKey(Org, on_delete=models.CASCADE, related_name="access_list_uploads")
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
+    scope_columns = models.JSONField(default=list)     # ["district", "taluka", "dam_id"]: CSV header minus email
+    # {"prod.silt_daily": ["district", "taluka"], ...} — snapshot of filtered tables, taken on Save
+    filtered_tables = models.JSONField(default=dict)
+    # Result of the §5.5 checks, kept so the page shows it again without re-querying the warehouse
+    # {"errors": [...], "warnings": [...], "info": [...], "people": {...}, "tables": {...}, "counts": {...}}
+    review_result = models.JSONField(default=dict)
+    previewed = models.BooleanField(default=False)
+    uploaded_by = models.ForeignKey(OrgUser, null=True, on_delete=models.SET_NULL, related_name="+")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    saved_by = models.ForeignKey(OrgUser, null=True, on_delete=models.SET_NULL, related_name="+")
+    saved_at = models.DateTimeField(null=True)
+
+    @property
+    def has_blocking_errors(self):
+        return bool(self.review_result.get("errors"))
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["org"], condition=Q(status="draft"), name="one_draft_upload_per_org"),
+            models.UniqueConstraint(fields=["org"], condition=Q(status="live"), name="one_live_upload_per_org"),
+        ]
+
+
 class OrgAccessListRow(models.Model):
-    """One saved access-list row. Several rows per email add up."""
-    org = models.ForeignKey(Org, on_delete=models.CASCADE, related_name="access_list_rows")
+    """One row of an upload. Several rows per email add up."""
+    upload = models.ForeignKey(OrgAccessListUpload, on_delete=models.CASCADE, related_name="rows")
     email = models.EmailField()          # lowercased; not an FK — people can be listed before they're invited
     # "*" = every value, [] = none, ["Pune", "Nashik"] = those values (data's spelling)
     scope_values = models.JSONField()    # {"district": ["Solapur"], "taluka": ["Pandharpur"], "dam_id": "*"}
-    position = models.PositiveIntegerField()   # row order in the uploaded file, for the next download
 
     class Meta:
-        indexes = [models.Index(fields=["org", "email"])]
+        indexes = [models.Index(fields=["upload", "email"])]
 ```
 
-| Model              | Holds                                                                               | Rows per org                    |
-| ------------------ | ----------------------------------------------------------------------------------- | ------------------------------- |
-| `OrgRLSConfig`     | Saved setup, the pending upload (`draft`), broken scope columns (`missing_columns`) | 1 (created on the first upload) |
-| `OrgAccessListRow` | The saved access list, one CSV row each                                             | One per CSV row (~40 for ATECF) |
+Rows are inserted in CSV order, so ordering by `id` gives back the file's order for the next template download.
 
-**Why the access list has its own table:** it is read on every Member query, so it needs the `(org, email)` index. It also grows with the org, while everything else is one small record.
+**What each field holds**
 
-#### Rules for writing `OrgRLSConfig`
+`OrgRLSConfig`: one per org
 
-`OrgRLSConfig` holds three things that change at different times: Save changes the setup, upload changes `draft`, and a Member's query can add to `missing_columns`. Because they share one database row, two writes at the same moment could overwrite each other. These rules prevent that.
+| Field | Example | Why it's needed |
+| --- | --- | --- |
+| `live_upload` | Upload #1 | Tells every Member request which list to filter by. Empty means row access isn't set up, so Members see everything. |
+| `missing_columns` | `silt_daily` lost `district`, emailed 8 Dec | Members with values get no rows from that table. Admins are emailed once and the page shows a warning (spec §4 journey 6). |
 
-**Rule 1 — every write saves only the fields it changed.**
-**Example:** At 10:00:00 consulting presses Save, and Dalgo loads the row with `missing_columns = {}`. At 10:00:01 Rahul's query finds `district` gone from `silt_daily` and records it. At 10:00:02 Save writes back. If Save wrote the **whole** row, it would put back `missing_columns = {}`: the warning would vanish from the page and Admins would be emailed again on the next query.
-**How:** Save, upload and discard each lock the row (`select_for_update()` inside `transaction.atomic()`) and write with `save(update_fields=[...])`, listing only their own fields plus `updated_at`.
+`OrgAccessListUpload`: one per uploaded CSV, at most 2 per org
 
-**Rule 2 — "email only once" is checked while holding the row lock.**
+| Field | Example | Why it's needed |
+| --- | --- | --- |
+| `status` | `draft` or `live` | Members read only the live upload. Preview reads the draft. |
+| `scope_columns` | `district`, `taluka`, `dam_id` | The CSV headers minus `email`. Dalgo looks for these columns in every table. |
+| `filtered_tables` | `silt_daily`: district, taluka | Snapshot taken at Save. If `district` later vanishes from `silt_daily`, Dalgo blocks rows instead of showing everything. |
+| `review_result` | Errors, warnings, people groups, row counts | The page shows the latest review after a refresh (spec §5). Save checks errors on the server. "Everyone at once" reads the counts. |
+| `has_blocking_errors` | `true` if there are errors | Save stays off while true (spec §5). It is a property worked out from `review_result`, not a stored column. |
+| `previewed` | `true` after a preview | A first setup can't be saved until it has been previewed (spec §6). |
+| `uploaded_by`, `uploaded_at` | Abhishek, 20 Nov 09:50 | Shown on the page: "Uploaded by Abhishek". |
+| `saved_by`, `saved_at` | Abhishek, 20 Nov 10:05 | Shown on the page: "Last saved by Abhishek on 20 Nov". |
+
+`OrgAccessListRow`: one per CSV row
+
+| Field | Example | Why it's needed |
+| --- | --- | --- |
+| `upload` | Upload #1 | Which list this row belongs to. Deleting an upload deletes its rows. |
+| `email` | `rahul@mh.gov.in` | Whose access this is, stored lowercased. Not linked to a user, so people can be listed before they're invited. |
+| `scope_values` | district: Solapur, taluka: Pandharpur, dam_id: `*` | What this person can see. `*` means every value, blank means none, a list means those values. |
+
+**How many rows each model has**
+
+| Model                 | Holds                                                     | Rows per org                                     |
+| --------------------- | --------------------------------------------------------- | ------------------------------------------------ |
+| `OrgRLSConfig`        | Which upload is live; broken scope columns                | 1 (created on the first upload)                  |
+| `OrgAccessListUpload` | One uploaded list, with its review and preview state      | At most 2: the live one and a draft              |
+| `OrgAccessListRow`    | The people's rows of an upload, one per CSV row           | ~40 for ATECF (~80 while a draft exists)         |
+
+**Example:** ATECF over two uploads.
+
+| Moment                  | Uploads for ATECF                     | Rahul is filtered by           |
+| ----------------------- | ------------------------------------- | ------------------------------ |
+| First upload            | #1 draft                              | Nothing (row access not set up) |
+| Save                    | #1 live                               | #1: Pandharpur                 |
+| Re-upload (Rahul moves) | #1 live, #2 draft                     | #1: Pandharpur                 |
+| Save                    | #2 live (#1 and its rows deleted)     | #2: Mohol                      |
+
+**Why it matters:** Members only ever read the live upload's rows, so an unsaved list can't reach them. Rows are stored once, in one table and one format, and Save is a switch, not a copy. If history is ever needed, Save stops deleting the previous upload; nothing else changes.
+
+#### Rules for writing these models
+
+**Rule 1 — Upload, Save and Discard lock the org's `OrgRLSConfig` row first.**
+**Example:** Two consulting staff upload a list for ATECF at the same moment. Without the lock, both delete "the" draft and both create one, and the second fails on the one-draft constraint. With the lock, the second upload waits, then replaces the first draft.
+**How:** `select_for_update()` on `OrgRLSConfig` inside `transaction.atomic()`. The first upload creates the config row (`get_or_create`) before locking it.
+
+**Rule 2 — every write to `OrgRLSConfig` saves only the fields it changed.**
+**Example:** Save writes `live_upload` and the pruned `missing_columns`. `record_missing_columns()` writes only `missing_columns`. Neither puts back an old value of the other's field.
+**How:** `save(update_fields=[...])`, listing only its own fields plus `updated_at`.
+
+**Rule 3 — "email only once" is checked while holding the row lock.**
 **Example:** Rahul and Sunita load dashboards at the same moment and both see `district` missing from `silt_daily`. Without a lock, both read an empty `missing_columns` and two emails go out. With the lock, Rahul's request adds the entry and queues the email; Sunita's request waits, then sees the entry and does nothing.
 **How:** `rls_service.record_missing_columns(org, table_key, columns)`:
 
@@ -299,8 +368,10 @@ def record_missing_columns(org, table_key, columns):
 
 The lock is taken only the first time a problem is found. Afterwards, queries read `missing_columns` from the scope they already loaded, see the entry and skip, so dashboards don't slow down.
 
-**Rule 3 — Member requests don't load the draft.**
-Building a row scope reads the config with `.defer("draft")`. The draft (rows + review) is only needed by the Row access page and preview. Forgetting this changes nothing a person sees; it only makes every request slower.
+**Rule 4 — Preview, Save and Discard name the draft upload they act on.**
+**Example:** Abhishek uploads sheet A (upload #1) and Meera uploads sheet B a second later (upload #2 replaces #1). Abhishek's page still thinks his draft is #1. When he clicks Preview or Save, his request says `upload_id = 1`. #1 is no longer the org's draft, so Dalgo refuses with 409: "This upload was replaced by Meera's upload at 10:00. Reload to see it." After reloading he sees Meera's sheet, labelled "Draft uploaded by Meera".
+**Why it matters:** Without it, Abhishek would preview Meera's sheet thinking it's his, and could save a list he never reviewed.
+**How:** The upload, previewed, save and discard endpoints take `upload_id` (§5.15). The preview header carries it too (§5.6). Each checks `upload_id` is the org's current draft; if not, 409 with who replaced it and when.
 
 **A same-named column that means something else is fixed in dbt.**
 **Example:** `prod.applications` has a `state` column holding application status ("approved", "pending"). Dalgo filters it like any other `state` column, so Members see no rows from it. Review check 7 flags it; consulting renames the column in dbt (`application_status`) and the table stops being filtered.
@@ -317,15 +388,15 @@ class RowScope:
     unrestricted: bool                       # Admin / Analyst / super-admin
     scope_columns: tuple[str, ...]
     rows: tuple[dict, ...]                   # the person's rows; empty = not on the list
-    filtered_tables: dict[str, list[str]]    # snapshot from OrgRLSConfig
+    filtered_tables: dict[str, list[str]]    # snapshot from the upload the rows came from
     reported_missing: frozenset[str]         # tables already in OrgRLSConfig.missing_columns
 
 _current: ContextVar[Optional["LazyScope"]] = ContextVar("row_scope", default=None)
 ```
 
-- `set_for_request(orguser, preview_email, use_draft)` — called from `CustomJwtAuthMiddleware.authenticate()` right after `request.orguser` is set. Stores a `LazyScope`; nothing is read from the database until a query touches the warehouse.
-- `resolve_for_orguser(orguser)` — unrestricted if role is super-admin, admin or analyst, or the org has no saved row access (`first_saved_at` is null). Otherwise reads `OrgRLSConfig` with `.defer("draft")` and loads the Member's rows by lowercased email.
-- `resolve_for_email(org, email, use_draft)` — used by preview and alerts. Reads rows from `OrgRLSConfig.draft["rows"]` (preview of an unsaved upload) or from `OrgAccessListRow`. Treats the person as a Member.
+- `set_for_request(orguser, preview_email, draft_upload_id)` — called from `CustomJwtAuthMiddleware.authenticate()` right after `request.orguser` is set. Stores a `LazyScope`; nothing is read from the database until a query touches the warehouse.
+- `resolve_for_orguser(orguser)` — unrestricted if role is super-admin, admin or analyst, or the org has no saved row access (`live_upload` is null). Otherwise reads `OrgRLSConfig` with `select_related("live_upload")` and loads the Member's rows from the live upload by lowercased email.
+- `resolve_for_email(org, email, draft_upload_id=None)` — used by preview and alerts. With `draft_upload_id`, reads that draft upload's rows (preview of an unsaved list), after checking it is still the org's draft (§5.1 rule 4); otherwise reads the live upload's rows. Treats the person as a Member.
 - `use(scope)` — a context manager for Celery tasks and the PDF render.
 - `RowScopeResetMiddleware` — resets `_current` before and after each request.
 
@@ -390,7 +461,7 @@ Rules this code must keep (each has a unit test in §10):
 - Values go in through SQLAlchemy `in_()`, never string formatting (spec §7).
 - A row with `*` on every column the table has means "no filter" — it must **not** be dropped. Otherwise Sunil's "all of Pune" row would disappear on a table that only has `taluka`.
 - `coerce()` converts values to the column's type (integer columns get ints). A value that can't convert is dropped, so it matches nothing.
-- When `missing` is not empty and the table isn't in `scope.reported_missing`, `condition_for()` calls `record_missing_columns()` (§5.1 rule 2) so Admins are emailed once.
+- When `missing` is not empty and the table isn't in `scope.reported_missing`, `condition_for()` calls `record_missing_columns()` (§5.1 rule 3) so Admins are emailed once.
 
 **How `live_columns` is found:** `ddpui/core/rls/schema_cache.py`.
 
@@ -399,7 +470,7 @@ Rules this code must keep (each has a unit test in §10):
 - If the lookup fails, Members get `false()` for that table.
 - New warehouse client method: `get_schema_columns(db_schema) -> dict[str, dict[str, str]]` in `warehouse_interface.py`, `postgres.py` and `bigquery.py` (BigQuery uses the dataset's `INFORMATION_SCHEMA.COLUMNS`).
 
-**Executor note:** `charts_service.execute_query()` compiles with `literal_binds=True`, so SQLAlchemy renders bound values into the SQL text using the dialect's own escaping. That is the same path every existing dashboard filter uses. Switching the executor to server-side parameters is a wider change; see open question Q6.
+**Executor note:** `charts_service.execute_query()` compiles with `literal_binds=True`, so SQLAlchemy renders bound values into the SQL text using the dialect's own escaping. That is the same path every existing dashboard filter uses. Switching the executor to server-side parameters is a wider change and is not part of v1.
 
 ### 5.4 Upload: parse and clean
 
@@ -411,7 +482,12 @@ File: `ddpui/core/rls/access_list_service.py` (new).
 3. **Find filtered tables** from the schema cache: every `schema.table` that has at least one scope column.
 4. **Fetch real values** (D5): for each filtered table, one grouped count over the scope columns it has. Results are capped at 50,000 groups per table. Above that, Dalgo falls back to `SELECT DISTINCT` per column (also capped), and the "everyone at once" counts for that table show "too many to count". These run on the warehouse in a Celery task with progress, so a slow warehouse doesn't time out the upload request.
 5. **Clean values** (D4): match each value case- and space-insensitively against the real values for that column. Store the data's spelling. Unmatched values are kept as typed and flagged "value not found", with the closest match from `difflib.get_close_matches` ("Ahmednagar" → did you mean "Ahilyanagar"?).
-6. **Save as draft:** write `OrgRLSConfig.draft` (creating the config row on an org's first upload), replacing any earlier draft, with the review result from §5.5. Lock the row and write only `draft` (§5.1 rule 1).
+6. **Store as the draft upload** (§5.1 rule 1: config row locked), in one transaction:
+   - delete the org's existing draft upload, if any (its rows go with it);
+   - create `OrgAccessListUpload(status="draft")` with `scope_columns`, `review_result` (§5.5) and `uploaded_by`;
+   - `bulk_create` its rows in CSV order.
+
+   The live upload is not touched, so Members keep their current access until Save. A file too malformed to read (check 1) is still stored, with no rows, so the page can show the errors.
 
 ### 5.5 Review checks
 
@@ -431,7 +507,7 @@ All checks from spec §5. They run on upload only — no daily job. The Row acce
 | 10  | A value in the data no one is assigned                              | New district Jalna                                                            | Info                                                   | Real values minus all listed values                                                                                                                 |
 | 11  | Tables affected                                                     | `silt_daily: district, taluka`. `farmer_list`: not filtered (no scope column) | Info, shown before saving                              | Schema cache                                                                                                                                        |
 | 12  | Dashboards Members can open that use unfiltered tables              | Listed by dashboard                                                           | Warning                                                | Dashboards that are not private, or private but shared with a Member or a group containing one, whose charts/KPIs read a table with no scope column |
-| 13  | A scope column is missing from a table it filtered at the last save | `district` renamed in `silt_daily`                                            | Warning                                                | `OrgRLSConfig.filtered_tables` vs schema cache                                                                                                      |
+| 13  | A scope column is missing from a table it filtered at the last save | `district` renamed in `silt_daily`                                            | Warning                                                | Live upload's `filtered_tables` vs schema cache                                                                                                     |
 
 Also, from spec §4 journey 5: a saved row whose email is no longer a Dalgo user is shown as "no Dalgo user" (check 4 covers it).
 
@@ -457,15 +533,16 @@ Spec §6: pick a person and see any dashboard exactly as they would, including e
 
 **How it works**
 
-- The webapp's dashboard view takes `?previewAs=rahul@mh.gov.in&draft=1`. In preview mode, every data request carries two headers: `X-Row-Access-Preview: <email>` and `X-Row-Access-Draft: 1`.
-- `authenticate()` honours these headers **only** for super-admins, Admins and Analysts in an org with the flag on. For anyone else they are ignored. The scope becomes `resolve_for_email(org, email, use_draft)`.
+- The webapp's dashboard view takes `?previewAs=rahul@mh.gov.in&draft=<upload_id>`. In preview mode, every data request carries `X-Row-Access-Preview: <email>`, plus `X-Row-Access-Draft: <upload_id>` when previewing a draft.
+- `authenticate()` honours these headers **only** for super-admins, Admins and Analysts in an org with the flag on. For anyone else they are ignored. The scope becomes `resolve_for_email(org, email, draft_upload_id)`. If that upload is no longer the org's draft, the request gets 409 "replaced by …" (§5.1 rule 4).
+- **Which list preview uses:** the draft upload if there is one (what the person **will** see after Save), otherwise the live upload (what they see **now**). So preview works before and after Save (spec §6: "after that, preview is available anytime").
 - `GET /api/rls/preview/dashboards/{id}/?email=` answers "can this person open this dashboard?" using `access_control` for that person's `OrgUser` (role Member assumed if they aren't a user yet). If they can't, the page shows "Rahul can't open this dashboard" instead of charts.
-- A banner shows "Previewing as rahul@mh.gov.in · Draft list · Exit preview".
-- Starting a preview calls `POST /api/rls/draft/previewed/`, which sets `draft["previewed"] = True` (row locked, only `draft` written — §5.1 rule 1).
+- A banner shows which list is used: "Previewing as rahul@mh.gov.in · Unsaved upload · Exit preview", or "· Saved list ·".
+- Starting a preview of a draft calls `POST /api/rls/draft/{upload_id}/previewed/`, which sets `previewed = True` on the draft upload (`update_fields=["previewed"]`). Opening the "everyone at once" table counts too, so an org with no dashboards yet can still complete its first setup.
 
 **Example:** Before the first save, consulting picks Sunita in preview. On "Silt progress" every chart shows dam D-104 only; the District filter is locked to Beed; a national-totals chart shows national totals.
 
-**Everyone at once** (cut first if late): `GET /api/rls/preview/everyone/` returns one row per person on the list, built from the grouped counts in §5.4 — no extra warehouse queries.
+**Everyone at once** (cut first if late): `GET /api/rls/preview/everyone/` returns one row per person on the list (the draft upload, or the live one when there is no draft), built from the grouped counts saved in that upload's `review_result` (§5.4) — no extra warehouse queries.
 
 | email              | district   | taluka     | dam_id | silt_daily rows | dams rows | Status                    |
 | ------------------ | ---------- | ---------- | ------ | --------------- | --------- | ------------------------- |
@@ -477,15 +554,27 @@ Status values (spec §6): has access, no row, value not found.
 
 ### 5.7 Save
 
-`POST /api/rls/draft/save/` in one transaction, holding the `OrgRLSConfig` row lock (`select_for_update()`) from start to finish:
+`POST /api/rls/draft/{upload_id}/save/` in one transaction, holding the `OrgRLSConfig` row lock (`select_for_update()`) from start to finish:
 
-1. Refuse if there is no draft, or `draft["has_blocking_errors"]` is true.
-2. Refuse if this is the first setup (`first_saved_at` is null) and `draft["previewed"]` is false.
-3. Replace all `OrgAccessListRow` rows for the org with `draft["rows"]`.
-4. Set `scope_columns`, `filtered_tables` (snapshot of the current schema), `first_saved_at` if empty, `saved_by`.
+1. Refuse with 409 if `upload_id` is not the org's current draft (§5.1 rule 4). Refuse if it has blocking errors.
+2. Refuse if this is the first setup (`live_upload` is null) and the draft hasn't been previewed. Later saves don't need a preview (spec §6).
+3. On the draft: set `filtered_tables` (snapshot of the current schema), `saved_by`, `saved_at`.
+4. Point `config.live_upload` at the draft, delete the previous live upload (its rows go with it), then set the draft's `status` to `live`. Deleting first keeps the one-live-upload constraint true at every step.
 5. Remove `missing_columns` entries whose columns are back or are no longer scope columns. A table that breaks again later gets a fresh entry and a fresh email.
-6. Set `draft` to null.
-7. Write with `save(update_fields=[...])` naming only the fields above plus `updated_at` (§5.1 rule 1). Because the row is locked, a missing column found by a Member query during the save waits and is recorded after it, not lost.
+6. Write the config with `save(update_fields=["live_upload", "missing_columns", "updated_at"])` (§5.1 rule 2). Because the row is locked, a missing column found by a Member query during the save waits and is recorded after it, not lost.
+
+```python
+previous = config.live_upload
+config.live_upload = draft
+config.missing_columns = pruned
+config.save(update_fields=["live_upload", "missing_columns", "updated_at"])
+if previous:
+    previous.delete()
+draft.status = OrgAccessListUpload.Status.LIVE
+draft.save(update_fields=["status", "filtered_tables", "saved_by", "saved_at"])
+```
+
+**Discard** (`DELETE /api/rls/draft/{upload_id}/`): config row locked; 409 if `upload_id` is not the current draft, otherwise the draft upload is deleted with its rows. The live upload is untouched.
 
 Takes effect on the next request. There is nothing to invalidate (D7).
 
@@ -495,10 +584,34 @@ Takes effect on the next request. There is nothing to invalidate (D7).
 
 | Situation                  | Download contains                                                                                                                                                                                                          |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| First time (nothing saved) | Header `email` + the scope columns the Admin types in (`?columns=district,taluka,dam_id`, with autocomplete from warehouse column names). One row per current Member, scope cells blank. Admins and Analysts are left out. |
-| After a save               | The current saved list in its saved order, then a row for each Member not yet on it, scope cells blank.                                                                                                                    |
+| First time (nothing saved) | Header `email` + the scope columns the Admin picked on the page (`?columns=district,taluka,dam_id`). One row per current Member, scope cells blank. Admins and Analysts are left out. |
+| After a save               | The live upload's rows in their uploaded order (by `id`), then a row for each Member not yet on it, scope cells blank.                                                                                                      |
 
 Values are written back joined with `; `, and `*` as `*`. There are no reference-value rows; spec v3 doesn't ask for them, and they would break re-upload.
+
+**Picking the columns (first time).** The spec says the template has the scope columns but not how they're chosen; consulting agrees them with the org (spec §4 journey 1). The page has one search box with two kinds of results:
+
+- **Search a column:** typing `distr` lists matching columns, each with the tables that have it.
+- **Search a table:** typing `silt` lists matching tables; opening one lists its columns.
+
+```
+🔍 [ distr ]
+  ☐ district     — in 5 tables: silt_daily, dams, state_summary, farmer_list, visits
+  ☐ district_id  — in 1 table: geo_master
+
+🔍 [ silt ]
+  ▸ prod.silt_daily
+      ☐ district  (5 tables)   ☐ taluka  (3 tables)   ☐ date   ☐ silt_removed
+
+Template columns:  email · district ✕ · taluka ✕ · dam_id ✕     [Download template]
+```
+
+**The rule:** a ticked column filters **every** table that has it, not only the table it was found in (spec §2: "no table picking").
+**Example:** The Admin finds `district` under `silt_daily`. It also filters `dams`, `state_summary`, `farmer_list` and `visits`, so the page shows "in 5 tables" next to it.
+**Why it matters:** Without the table list, an Admin could think they are choosing which tables to filter.
+
+- Data comes from `GET /api/rls/columns/`: every table in the warehouse and its columns, from the schema cache (§5.3) — no new warehouse query. Loaded once; searching happens in the browser, so it stays fast on slow connections.
+- The picks only pre-fill the template. The Admin can still add or remove headers in the CSV; the **uploaded header** is what counts (§5.4 step 2).
 
 ### 5.9 Member route hardening: the table guard
 
@@ -550,7 +663,7 @@ alert's table filtered for this org?
         for each distinct scope:
           with row_scope.use(scope): compute value
           condition met? → render + deliver to that group only
-        Slack (if enabled) → evaluated as unrestricted (see Q3)
+        Slack (if enabled) → evaluated as unrestricted (see Q2)
         write one AlertLog per scope evaluated
 ```
 
@@ -566,10 +679,10 @@ alert's table filtered for this org?
 
 | Event                                                                      | Behaviour                                                                                                                                                                                                                              | Code                                                                                                                                                                                                                                         |
 | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| New table with a scope column                                              | Filtered on the next query (live column lookup). Shown on the Row access page as **newly filtered**.                                                                                                                                   | Page compares the schema cache with `OrgRLSConfig.filtered_tables`                                                                                                                                                                           |
+| New table with a scope column                                              | Filtered on the next query (live column lookup). Shown on the Row access page as **newly filtered**.                                                                                                                                   | Page compares the schema cache with the live upload's `filtered_tables`                                                                                                                                                                      |
 | New chart on a table with no scope column, on a dashboard Members can open | The builder (Admin/Analyst) sees a short, non-blocking note: "Members will see this table in full."                                                                                                                                    | `GET /api/rls/table-status/?schema=&table=` → `{filtered, scope_columns}`; shown in the chart builder and when adding a chart to a dashboard                                                                                                 |
 | New value in the data (a new dam)                                          | Visible only to people with `*` in that column                                                                                                                                                                                         | Falls out of §5.3                                                                                                                                                                                                                            |
-| Scope column renamed or dropped                                            | Members with `*` in that column: unaffected; the other columns keep working. Members with values: no data from that table, shown as "No data for your access, contact your admin". Admins emailed once per table; flagged on the page. | §5.3 `missing` handling. On the first query that sees it, `record_missing_columns()` adds an entry to `OrgRLSConfig.missing_columns` under the row lock and queues one email via Celery (§5.1 rule 2). The Row access page lists the entries |
+| Scope column renamed or dropped                                            | Members with `*` in that column: unaffected; the other columns keep working. Members with values: no data from that table, shown as "No data for your access, contact your admin". Admins emailed once per table; flagged on the page. | §5.3 `missing` handling. On the first query that sees it, `record_missing_columns()` adds an entry to `OrgRLSConfig.missing_columns` under the row lock and queues one email via Celery (§5.1 rule 3). The Row access page lists the entries |
 
 **Empty-state message.** When a Member's chart returns no rows **because of** row access, the chart shows "No data for your access, contact your admin" rather than a generic empty chart. The data response carries `row_access: "no_rows"` when the condition was `false()`. Where the condition was a real filter that simply matched nothing, the normal empty state shows.
 
@@ -585,13 +698,14 @@ Router: `ddpui/api/rls_api.py`, mounted at `/api/rls/`. New permission `can_mana
 
 | Method | Path                               | What it does                                                                                                                 |
 | ------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/status/`                         | Saved setup: scope columns, counts, filtered tables (incl. newly filtered), missing columns, latest review, `first_saved_at` |
+| GET    | `/status/`                         | Live upload: scope columns, counts, filtered tables (incl. newly filtered), saved by/at, `review_result`; missing columns      |
 | GET    | `/template/`                       | CSV download (§5.8)                                                                                                          |
-| POST   | `/draft/`                          | Upload CSV (multipart) → starts the review task, returns `task_id`                                                           |
-| GET    | `/draft/`                          | Current draft + review result                                                                                                |
-| DELETE | `/draft/`                          | Discard draft (sets `draft` to null, row locked)                                                                             |
-| POST   | `/draft/previewed/`                | Record that the draft has been previewed (§5.6)                                                                              |
-| POST   | `/draft/save/`                     | Commit (§5.7)                                                                                                                |
+| GET    | `/columns/`                        | Every warehouse table and its columns, from the schema cache, for the column search (§5.8)                                   |
+| POST   | `/draft/`                          | Upload CSV (multipart) → starts the review task, returns `task_id`; the task result gives the new `upload_id`                |
+| GET    | `/draft/`                          | Current draft upload: `upload_id`, uploaded by/at, `review_result`                                                           |
+| DELETE | `/draft/{upload_id}/`              | Discard: deletes the draft upload and its rows (§5.7). 409 if replaced                                                       |
+| POST   | `/draft/{upload_id}/previewed/`    | Record that the draft upload has been previewed (§5.6). 409 if replaced                                                      |
+| POST   | `/draft/{upload_id}/save/`         | Commit (§5.7). 409 if replaced                                                                                               |
 | GET    | `/preview/people/`                 | People on the draft/saved list, for the "Preview as" picker                                                                  |
 | GET    | `/preview/dashboards/{id}/?email=` | Can this person open this dashboard?                                                                                         |
 | GET    | `/preview/everyone/`               | "Everyone at once" table                                                                                                     |
@@ -638,7 +752,7 @@ This covers the creator rule, user grants, group grants and the floor in one pla
 - Data migration sets it to `view` for every org.
 - `webapp/components/settings/access/RolesTab.tsx`: the Members row becomes read-only: "View (fixed)".
 
-> **Spec gap to raise (Q2):** orgs whose Member floor is **No access** today will suddenly let Members see every non-private dashboard. The spec only says to tell orgs whose floor is _above_ View. Recommendation: tell both groups, and tell No-access orgs to mark sensitive dashboards Private before 3 Dec.
+> **Spec gap to raise:** orgs whose Member floor is **No access** today will suddenly let Members see every non-private dashboard. The spec only says to tell orgs whose floor is _above_ View. Recommendation: tell both groups, and tell No-access orgs to mark sensitive dashboards Private before 3 Dec.
 
 ### 6.4 Sharing
 
@@ -664,7 +778,7 @@ For each org:
 **Before release:** `--dry-run` produces the list of orgs to email:
 
 - floor above View (Edit), or
-- floor No access (see Q2), or
+- floor No access (see §6.3), or
 - Members own content.
 
 Spec §10: orgs are told before it ships. The access docs (`docs/`) are updated in the same release.
@@ -692,7 +806,7 @@ New components in `webapp/components/settings/access/row-access/`:
 | Component                  | Shows                                                                                                                                                    |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `RowAccessTab.tsx`         | Status: scope columns, people count, filtered tables (newly filtered marked), missing-column warnings, latest review. Buttons: Download template, Upload |
-| `TemplateDialog.tsx`       | First time only: type scope column names (autocomplete from warehouse columns)                                                                           |
+| `TemplateDialog.tsx`       | First time only: one search box for columns (shows the tables that have each) and tables (shows their columns); ticked columns go into the template       |
 | `UploadReview.tsx`         | The 5-step review (§5.5): What changes → Must fix → People → Worth a look → Preview, then save                                                           |
 | `PeopleGroups.tsx`         | Grouped counts; "not in Dalgo yet" rows have an **Invite** button                                                                                        |
 | `EveryonePreviewTable.tsx` | "Everyone at once" table (cut first if late)                                                                                                             |
@@ -702,8 +816,8 @@ Save stays disabled while there are blocking errors, and on first setup until a 
 ### 7.2 Preview mode
 
 - "Preview as" picker on the Row access page and on any dashboard (Admins/Analysts only).
-- Adds `?previewAs=<email>&draft=1` to the dashboard URL. An API client wrapper adds the two headers to every request while those params are present.
-- Banner: "Previewing as rahul@mh.gov.in · Draft list · Exit preview".
+- Adds `?previewAs=<email>&draft=<upload_id>` to the dashboard URL (no `draft` when previewing the saved list). On a 409 "replaced", the page shows who replaced the draft and a Reload button. An API client wrapper adds the two headers to every request while those params are present.
+- Banner: "Previewing as rahul@mh.gov.in · Unsaved upload · Exit preview" (or "Saved list" when there is no draft).
 - If the person can't open the dashboard, show that instead of charts.
 
 ### 7.3 Dashboard filters for Members
@@ -762,7 +876,7 @@ The two missing access checks (§5.10) exist today without row access, so they s
 - Preview headers are honoured only for super-admins, Admins and Analysts.
 - The PDF scope token is signed, short-lived (5 minutes) and only accepted together with the existing render secret.
 - The access list holds emails and scope values only. Emails are already in Dalgo; no new kind of PII (personally identifiable information).
-- Multi-tenancy: every row-access model has an `org` FK and every query filters by `request.orguser.org`.
+- Multi-tenancy: `OrgRLSConfig` and `OrgAccessListUpload` have an `org` FK, rows belong to an upload, and every query filters by `request.orguser.org`.
 
 **Performance targets**
 
@@ -784,9 +898,11 @@ The two missing access checks (§5.10) exist today without row access, so they s
 - `build_condition`: missing column → `*` holders unaffected, value holders get `false()`.
 - `build_condition`: table with no scope column → no filter.
 - Upload: cleaning (`pune ` → `Pune`), "did you mean", repeated emails allowed, blank vs `*`.
-- Save: blocked by errors; blocked before first preview; replaces rows atomically.
-- Save doesn't wipe a `missing_columns` entry recorded while the save was running (§5.1 rule 1).
-- Two calls to `record_missing_columns()` for the same table queue one email (§5.1 rule 2).
+- Upload while a live list exists: Members keep the live rows until Save; a second upload replaces the draft.
+- Preview, Save or Discard with a replaced `upload_id` → 409 naming who replaced it (§5.1 rule 4).
+- Save: blocked by errors; blocked before first preview; switches the live upload and deletes the previous one in one transaction.
+- Save doesn't wipe a `missing_columns` entry recorded while the save was running (§5.1 rule 2).
+- Two calls to `record_missing_columns()` for the same table queue one email (§5.1 rule 3).
 - Member cap: creator, user Edit grant and group Edit grant all return View for a Member.
 
 **Backend API — `ddpui/tests/api_tests/`**
@@ -831,7 +947,7 @@ The two missing access checks (§5.10) exist today without row access, so they s
 | Rows seen outside a person's scope                       | 0                    | Launch-gate tests per route + preview checks during ATECF testing |
 | ATECF's Admin updates the list without consulting's help | Yes, after handover  | Observed; support tickets                                         |
 | Weekly active Members at ATECF and Bhumi                 | Targets to set       | PostHog                                                           |
-| Orgs using row access                                    | 3 by end of Feb 2027 | `OrgRLSConfig.first_saved_at` set                                 |
+| Orgs using row access                                    | 3 by end of Feb 2027 | `OrgRLSConfig.live_upload` set                                    |
 
 **Events:** `row_access_list_uploaded` (rows, people), `row_access_list_saved`, `row_access_preview_used` (single / everyone), and a `row_access_filtered: true` property on dashboard and chart view events.
 
