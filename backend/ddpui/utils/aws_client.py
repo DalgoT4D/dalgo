@@ -18,6 +18,9 @@ class AWSClient:
     - s3: Uses S3_AWS_ACCESS_KEY_ID & S3_AWS_SECRET_ACCESS_KEY
     - ses: Uses SES_ACCESS_KEY_ID & SES_SECRET_ACCESS_KEY
 
+    If a service's key pair is not set, boto3's default credential chain is used
+    (EC2 instance profile, EKS pod identity / IRSA, ~/.aws, AWS_* env vars).
+
     Each service maintains its own boto3 session and client cache.
     """
 
@@ -91,18 +94,18 @@ class AWSClient:
         else:
             raise ValueError(f"Unsupported service: {service_name}")
 
-        if not access_key or not secret_key:
-            raise ValueError(
-                f"Missing {service_display} AWS credentials: {service_name.upper()}_ACCESS_KEY_ID and {service_name.upper()}_SECRET_ACCESS_KEY required"
+        if access_key and secret_key:
+            session = boto3.Session(
+                aws_access_key_id=access_key,
+                aws_secret_access_key=secret_key,
+                region_name=region,
             )
+            logger.info(f"Initialized boto session for {service_display} with static keys")
+            return session
 
-        session = boto3.Session(
-            aws_access_key_id=access_key,
-            aws_secret_access_key=secret_key,
-            region_name=region,
-        )
-
-        logger.debug(f"Initialized boto session for {service_display} in region {region}")
+        # No static keys: boto3's default chain finds the EC2 instance profile / EKS pod role
+        session = boto3.Session(region_name=region)
+        logger.info(f"Initialized boto session for {service_display} with default credential chain")
         return session
 
     @classmethod

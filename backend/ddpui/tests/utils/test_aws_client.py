@@ -115,24 +115,31 @@ class TestAWSClient:
         with pytest.raises(ValueError, match="Unsupported service: invalid2"):
             AWSClient.get_instance("invalid2")
 
-    @patch.dict(os.environ, {}, clear=True)
+    @pytest.mark.parametrize("service_name", ["secretsmanager", "s3", "ses"])
+    @patch.dict(os.environ, {"AWS_DEFAULT_REGION": "ap-south-1"}, clear=True)
     @patch("ddpui.utils.aws_client.boto3.Session")
-    def test_missing_secretsmanager_credentials(self, mock_session):
-        """Test error when Secrets Manager credentials are missing"""
-        with pytest.raises(ValueError, match="Missing Secrets Manager AWS credentials"):
-            AWSClient.get_instance("secretsmanager")
+    def test_missing_keys_falls_back_to_default_credential_chain(self, mock_session, service_name):
+        """No static keys -> session without explicit creds, so boto3 uses the instance/pod role"""
+        mock_boto_session = MagicMock()
+        mock_session.return_value = mock_boto_session
 
-    @patch.dict(os.environ, {}, clear=True)
-    def test_missing_s3_credentials(self):
-        """Test error when S3 credentials are missing"""
-        with pytest.raises(ValueError, match="Missing S3 AWS credentials"):
-            AWSClient.get_instance("s3")
+        client = AWSClient.get_instance(service_name)
 
-    @patch.dict(os.environ, {}, clear=True)
-    def test_missing_ses_credentials(self):
-        """Test error when SES credentials are missing"""
-        with pytest.raises(ValueError, match="Missing SES AWS credentials"):
-            AWSClient.get_instance("ses")
+        mock_session.assert_called_once_with(region_name="ap-south-1")
+        mock_boto_session.client.assert_called_once_with(service_name)
+        assert client == mock_boto_session.client.return_value
+
+    @patch.dict(
+        os.environ,
+        {"S3_AWS_ACCESS_KEY_ID": "test-s3-key", "AWS_DEFAULT_REGION": "ap-south-1"},
+        clear=True,
+    )
+    @patch("ddpui.utils.aws_client.boto3.Session")
+    def test_half_set_keys_falls_back_to_default_credential_chain(self, mock_session):
+        """Access key without secret is unusable, so it is ignored rather than passed half-set"""
+        AWSClient.get_instance("s3")
+
+        mock_session.assert_called_once_with(region_name="ap-south-1")
 
     @patch.dict(
         os.environ,
