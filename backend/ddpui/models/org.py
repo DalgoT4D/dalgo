@@ -1,6 +1,7 @@
 import os
 
 from enum import Enum
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -79,6 +80,19 @@ def get_default_queue_config():
     }
 
 
+def region_queue_config(workpool: str) -> dict:
+    """All four queues on one EKS pool. Used for orgs outside the home region."""
+    return {
+        key: {"name": name, "workpool": workpool, "is_workpool_eks": True}
+        for key, name in [
+            ("scheduled_pipeline_queue", SCHEDULED_PIPELINE_QUEUE),
+            ("connection_sync_queue", CONNECTION_SYNC_QUEUE),
+            ("transform_task_queue", MANUL_DBT_WORK_QUEUE),
+            ("edr_queue", EDR_WORK_QUEUE),
+        ]
+    }
+
+
 class OrgDbt(models.Model):
     """Docstring"""
 
@@ -149,6 +163,11 @@ class Org(models.Model):
         default=get_default_queue_config,
         help_text="Queue configuration for different task types (scheduled_pipeline_queue, connection_sync_queue, transform_task_queue, edr_queue)",
     )
+    region_config = models.JSONField(
+        null=True,
+        help_text="Data region of this org: {aws_region, country, airbyte_secret_name}. "
+        "Validated by OrgRegionConfig. NULL is treated as the home region (Mumbai).",
+    )
     logo_url = models.URLField(max_length=500, null=True, blank=True)
     logo_s3_key = models.CharField(max_length=500, null=True, blank=True)
     logo_filename = models.CharField(max_length=255, null=True, blank=True)
@@ -158,12 +177,36 @@ class Org(models.Model):
     def __str__(self) -> str:
         return f"Org[{self.slug}|{self.name}|{self.airbyte_workspace_id}]"
 
+    def _is_home_region(self) -> bool:
+        """from the row only (no Secrets Manager); NULL region_config means home region"""
+        aws_region = (self.region_config or {}).get("aws_region", settings.HOME_AWS_REGION)
+        return aws_region == settings.HOME_AWS_REGION
+
+    def _fallback_queue_config(self, stored: dict) -> dict:
+        """defaults for missing / partial queue config entries.
+        Home region: today's env-based default. Any other region: the region pool already
+        stored on this org - never a home-region (env) pool."""
+        if self._is_home_region():
+            return get_default_queue_config()
+        pools = [
+            value.get("workpool")
+            for value in stored.values()
+            if isinstance(value, dict) and value.get("workpool")
+        ]
+        if not pools:
+            raise ValueError(
+                f"org {self.slug}: non-home-region org has no workpool in queue_config"
+            )
+        return region_queue_config(pools[0])
+
     def get_queue_config(self) -> QueueConfigSchema:
         """Returns validated queue config with automatic defaults - supports both formats"""
         stored = self.queue_config or {}
 
-        # Get defaults from the function that uses environment variables
-        default_config = get_default_queue_config()
+        # home region: defaults from env vars; other regions: the org's region pool
+        default_config = self._fallback_queue_config(stored)
+        # region pools are always EKS; home region keeps the historical EC2 default
+        fallback_is_eks = not self._is_home_region()
 
         def get_queue_details(key: str) -> QueueDetailsSchema:
             if key not in stored:
@@ -186,7 +229,7 @@ class Org(models.Model):
                     workpool = default_data["workpool"]
 
                 # Get is_workpool_eks with default False
-                is_workpool_eks = queue_data.get("is_workpool_eks", False)
+                is_workpool_eks = queue_data.get("is_workpool_eks", fallback_is_eks)
 
                 return QueueDetailsSchema(
                     name=queue_data.get("name"), workpool=workpool, is_workpool_eks=is_workpool_eks
@@ -199,7 +242,7 @@ class Org(models.Model):
                 return QueueDetailsSchema(
                     name=queue_data,
                     workpool=workpool,
-                    is_workpool_eks=False,  # Legacy format defaults to EC2
+                    is_workpool_eks=fallback_is_eks,  # Legacy format defaults to EC2 at home
                 )
 
             # Fallback to defaults
@@ -207,7 +250,7 @@ class Org(models.Model):
             return QueueDetailsSchema(
                 name=default_data["name"],
                 workpool=default_data["workpool"],
-                is_workpool_eks=False,  # Default to EC2
+                is_workpool_eks=fallback_is_eks,  # Default to EC2 at home
             )
 
         return QueueConfigSchema(

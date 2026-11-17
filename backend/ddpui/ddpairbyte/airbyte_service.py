@@ -5,14 +5,15 @@ These functions do not access the Dalgo database
 """
 
 from typing import Dict, List
-import os
 import json
+import threading
 from datetime import datetime
 import pytz
 import requests
 from dotenv import load_dotenv
 from ninja.errors import HttpError
 from ddpui import settings
+from ddpui.core.regions import airbyte_credentials
 from ddpui.ddpairbyte import schema
 from ddpui.utils.custom_logger import CustomLogger
 from ddpui.utils.helpers import remove_nested_attribute, nice_bytes
@@ -22,6 +23,7 @@ from ddpui.ddpairbyte.schema import (
     AirbyteSourceUpdateCheckConnection,
     AirbyteDestinationUpdateCheckConnection,
 )
+from ddpui.schemas.data_region_schema import AirbyteServerConfig
 
 
 load_dotenv()
@@ -30,39 +32,59 @@ load_dotenv()
 logger = CustomLogger("airbyte")
 
 
-def abreq(endpoint, req=None, **kwargs):
-    """Request to the airbyte server"""
+_sessions: dict[str, requests.Session] = {}
+_sessions_lock = threading.Lock()
+
+
+def _session_for(server: AirbyteServerConfig) -> requests.Session:
+    """One requests.Session per region per process, so TLS/TCP connections are reused"""
+    with _sessions_lock:
+        if server.secret_name not in _sessions:
+            _sessions[server.secret_name] = requests.Session()
+        return _sessions[server.secret_name]
+
+
+def clear_sessions() -> None:
+    """Close and forget every per-region session (tests)"""
+    with _sessions_lock:
+        for session in _sessions.values():
+            session.close()
+        _sessions.clear()
+
+
+def _send(server: AirbyteServerConfig, method: str, endpoint: str, req, timeout):
+    """The only place the token is read; never log the headers"""
+    headers = {"Authorization": f"Basic {server.api_token.get_secret_value()}"}
+    try:
+        return _session_for(server).request(
+            method,
+            f"{server.base_url}/{endpoint}",
+            headers=headers,
+            json=req,
+            timeout=timeout,
+        )
+    except requests.exceptions.ConnectionError as conn_error:
+        logger.exception(conn_error)
+        raise HttpError(500, str(conn_error)) from conn_error
+
+
+def abreq(endpoint, req=None, *, server: AirbyteServerConfig, **kwargs):
+    """Request to the Airbyte server of one region"""
     method = kwargs.get("method", "POST")
     if method not in ["GET", "POST"]:
         raise HttpError(500, "method not supported")
 
-    abhost = os.getenv("AIRBYTE_SERVER_HOST")
-    abport = os.getenv("AIRBYTE_SERVER_PORT")
-    abver = os.getenv("AIRBYTE_SERVER_APIVER")
-    token = os.getenv("AIRBYTE_API_TOKEN")
-    use_ssl = os.getenv("AIRBYTE_USE_SSL", "false").lower() == "true"
-    protocol = "https" if use_ssl else "http"
+    logger.info("Making request to Airbyte server: %s region=%s", endpoint, server.aws_region)
+    res = _send(server, method, endpoint, req, kwargs.get("timeout", 30))
 
-    logger.info("Making request to Airbyte server: %s", endpoint)
-    try:
-        res = {}
-        if method == "POST":
-            res = requests.post(
-                f"{protocol}://{abhost}:{abport}/api/{abver}/{endpoint}",
-                headers={"Authorization": f"Basic {token}"},
-                json=req,
-                timeout=kwargs.get("timeout", 30),
-            )
-        elif method == "GET":
-            res = requests.get(
-                f"{protocol}://{abhost}:{abport}/api/{abver}/{endpoint}",
-                headers={"Authorization": f"Basic {token}"},
-                json=req,
-                timeout=kwargs.get("timeout", 30),
-            )
-    except requests.exceptions.ConnectionError as conn_error:
-        logger.exception(conn_error)
-        raise HttpError(500, str(conn_error)) from conn_error
+    if res.status_code == 401 and not kwargs.get("_retried"):
+        # the token may have been rotated: reload the region secret and retry once
+        logger.warning(
+            "Airbyte returned 401 for %s region=%s, retrying", endpoint, server.aws_region
+        )
+        airbyte_credentials.invalidate(server.secret_name)
+        fresh = airbyte_credentials.server_config(server.secret_name, server.aws_region)
+        return abreq(endpoint, req, server=fresh, _retried=True, **kwargs)
 
     try:
         result_obj = remove_nested_attribute(res.json(), "icon")
@@ -88,30 +110,30 @@ def abreq(endpoint, req=None, **kwargs):
     return {}
 
 
-def get_workspaces():
+def get_workspaces(*, server: AirbyteServerConfig):
     """Fetch all workspaces in airbyte server"""
     logger.info("Fetching workspaces from Airbyte server")
 
-    res = abreq("workspaces/list")
+    res = abreq("workspaces/list", server=server)
     if "workspaces" not in res:
         logger.error("No workspaces found")
         raise HttpError(404, "no workspaces found")
     return res
 
 
-def get_workspace(workspace_id: str) -> dict:
+def get_workspace(workspace_id: str, *, server: AirbyteServerConfig) -> dict:
     """Fetch a workspace from the airbyte server"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
 
-    res = abreq("workspaces/get", {"workspaceId": workspace_id})
+    res = abreq("workspaces/get", {"workspaceId": workspace_id}, server=server)
     if "workspaceId" not in res:
         logger.info("Workspace not found: %s", workspace_id)
         raise HttpError(404, "workspace not found")
     return res
 
 
-def set_workspace_name(workspace_id: str, name: str) -> dict:
+def set_workspace_name(workspace_id: str, name: str, *, server: AirbyteServerConfig) -> dict:
     """Set workspace name in the airbyte server"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "Workspace ID must be a string")
@@ -119,14 +141,16 @@ def set_workspace_name(workspace_id: str, name: str) -> dict:
     if not isinstance(name, str):
         raise HttpError(400, "Name must be a string")
 
-    res = abreq("workspaces/update_name", {"workspaceId": workspace_id, "name": name})
+    res = abreq(
+        "workspaces/update_name", {"workspaceId": workspace_id, "name": name}, server=server
+    )
     if "workspaceId" not in res:
         logger.info("Workspace not found: %s", workspace_id)
         raise HttpError(404, "workspace not found")
     return res
 
 
-def create_workspace(name: str) -> dict:
+def create_workspace(name: str, *, server: AirbyteServerConfig) -> dict:
     """Create a workspace in the airbyte server"""
     if not isinstance(name, str):
         raise HttpError(400, "Name must be a string")
@@ -134,6 +158,7 @@ def create_workspace(name: str) -> dict:
     res = abreq(
         "workspaces/create",
         {"name": name, "organizationId": "00000000-0000-0000-0000-000000000000"},
+        server=server,
     )
     if "workspaceId" not in res:
         logger.info("Workspace not created: %s", name)
@@ -141,13 +166,15 @@ def create_workspace(name: str) -> dict:
     return res
 
 
-def delete_workspace(workspace_id: str):
+def delete_workspace(workspace_id: str, *, server: AirbyteServerConfig):
     """Deletes an airbyte workspace"""
-    res = abreq("workspaces/delete", {"workspaceId": workspace_id})
+    res = abreq("workspaces/delete", {"workspaceId": workspace_id}, server=server)
     return res
 
 
-def get_source_definition(workspace_id: str, sourcedef_id: str) -> dict:
+def get_source_definition(
+    workspace_id: str, sourcedef_id: str, *, server: AirbyteServerConfig
+) -> dict:
     """Fetch source definition for an airbtye workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "Invalid workspace ID")
@@ -158,6 +185,7 @@ def get_source_definition(workspace_id: str, sourcedef_id: str) -> dict:
     res = abreq(
         "source_definitions/get_for_workspace",
         {"sourceDefinitionId": sourcedef_id, "workspaceId": workspace_id},
+        server=server,
     )
     if "sourceDefinitionId" not in res:
         error_message = (
@@ -169,12 +197,14 @@ def get_source_definition(workspace_id: str, sourcedef_id: str) -> dict:
     return res
 
 
-def get_source_definitions(workspace_id: str) -> List[Dict]:
+def get_source_definitions(workspace_id: str, *, server: AirbyteServerConfig) -> List[Dict]:
     """Fetch source definitions for an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "Invalid workspace ID")
 
-    res = abreq("source_definitions/list_for_workspace", {"workspaceId": workspace_id})
+    res = abreq(
+        "source_definitions/list_for_workspace", {"workspaceId": workspace_id}, server=server
+    )
     if "sourceDefinitions" not in res:
         error_message = f"Source definitions not found for workspace: {workspace_id}"
         logger.error(error_message)
@@ -194,7 +224,9 @@ def get_source_definitions(workspace_id: str) -> List[Dict]:
     return res
 
 
-def get_source_definition_specification(workspace_id: str, sourcedef_id: str) -> dict:
+def get_source_definition_specification(
+    workspace_id: str, sourcedef_id: str, *, server: AirbyteServerConfig
+) -> dict:
     """Fetch source definition specification for a source in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "Invalid workspace ID")
@@ -205,6 +237,7 @@ def get_source_definition_specification(workspace_id: str, sourcedef_id: str) ->
     res = abreq(
         "source_definition_specifications/get",
         {"sourceDefinitionId": sourcedef_id, "workspaceId": workspace_id},
+        server=server,
     )
 
     if "connectionSpecification" not in res:
@@ -230,6 +263,8 @@ def create_custom_source_definition(
     docker_repository: str,
     docker_image_tag: str,
     documentation_url: str,
+    *,
+    server: AirbyteServerConfig,
 ):
     """Create a custom source definition in Airbyte."""
     if not isinstance(workspace_id, str):
@@ -255,6 +290,7 @@ def create_custom_source_definition(
             },
         },
         timeout=100,
+        server=server,
     )
     if "sourceDefinitionId" not in res:
         error_message = f"Source definition not created: {name}"
@@ -263,14 +299,16 @@ def create_custom_source_definition(
     return res
 
 
-def get_sources(workspace_id: str) -> List[Dict]:
+def get_sources(workspace_id: str, *, server: AirbyteServerConfig) -> List[Dict]:
     """Fetch all sources in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "Invalid workspace ID")
 
     # TODO: move this to paginated apis
     res = abreq(
-        "sources/list", {"workspaceId": workspace_id, "pageSize": 100, "sortKey": "actorName_asc"}
+        "sources/list",
+        {"workspaceId": workspace_id, "pageSize": 100, "sortKey": "actorName_asc"},
+        server=server,
     )
     if "sources" not in res:
         logger.error("Sources not found for workspace: %s", workspace_id)
@@ -278,7 +316,7 @@ def get_sources(workspace_id: str) -> List[Dict]:
     return res
 
 
-def get_source(workspace_id: str, source_id: str) -> dict:
+def get_source(workspace_id: str, source_id: str, *, server: AirbyteServerConfig) -> dict:
     """Fetch a source in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "Invalid workspace ID")
@@ -286,14 +324,14 @@ def get_source(workspace_id: str, source_id: str) -> dict:
     if not isinstance(source_id, str):
         raise HttpError(400, "Invalid source ID")
 
-    res = abreq("sources/get", {"sourceId": source_id})
+    res = abreq("sources/get", {"sourceId": source_id}, server=server)
     if "sourceId" not in res:
         logger.error("Source not found: %s", source_id)
         raise HttpError(404, "source not found")
     return res
 
 
-def delete_source(workspace_id: str, source_id: str) -> dict:
+def delete_source(workspace_id: str, source_id: str, *, server: AirbyteServerConfig) -> dict:
     """Deletes a source in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "Invalid workspace ID")
@@ -301,11 +339,18 @@ def delete_source(workspace_id: str, source_id: str) -> dict:
     if not isinstance(source_id, str):
         raise HttpError(400, "Invalid source ID")
 
-    res = abreq("sources/delete", {"sourceId": source_id})
+    res = abreq("sources/delete", {"sourceId": source_id}, server=server)
     return res
 
 
-def create_source(workspace_id: str, name: str, sourcedef_id: str, config: dict) -> dict:
+def create_source(
+    workspace_id: str,
+    name: str,
+    sourcedef_id: str,
+    config: dict,
+    *,
+    server: AirbyteServerConfig,
+) -> dict:
     """Create source in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
@@ -319,6 +364,7 @@ def create_source(workspace_id: str, name: str, sourcedef_id: str, config: dict)
     res = abreq(
         "source_definition_specifications/get",
         {"sourceDefinitionId": sourcedef_id, "workspaceId": workspace_id},
+        server=server,
     )
     if "connectionSpecification" not in res:
         raise HttpError(500, "could not find spec for this source type")
@@ -336,6 +382,7 @@ def create_source(workspace_id: str, name: str, sourcedef_id: str, config: dict)
             "sourceDefinitionId": sourcedef_id,
             "connectionConfiguration": config,
         },
+        server=server,
     )
     if "sourceId" not in res:
         error_message = "Failed to create source: " + res.get("message", json.dumps(res))
@@ -344,7 +391,14 @@ def create_source(workspace_id: str, name: str, sourcedef_id: str, config: dict)
     return res
 
 
-def update_source(source_id: str, name: str, config: dict, sourcedef_id: str) -> dict:
+def update_source(
+    source_id: str,
+    name: str,
+    config: dict,
+    sourcedef_id: str,
+    *,
+    server: AirbyteServerConfig,
+) -> dict:
     """Update source in an airbyte workspace"""
     if not isinstance(source_id, str):
         raise HttpError(400, "source_id must be a string")
@@ -366,6 +420,7 @@ def update_source(source_id: str, name: str, config: dict, sourcedef_id: str) ->
         # airbyte re-validates the config against the connector before saving, which can be
         # slow for some connectors — so well above abreq's 30s default
         timeout=120,
+        server=server,
     )
     if "sourceId" not in res:
         error_message = "Failed to update source: " + res.get("message", json.dumps(res))
@@ -374,7 +429,9 @@ def update_source(source_id: str, name: str, config: dict, sourcedef_id: str) ->
     return res
 
 
-def check_source_connection(workspace_id: str, data: AirbyteSourceCreate) -> dict:
+def check_source_connection(
+    workspace_id: str, data: AirbyteSourceCreate, *, server: AirbyteServerConfig
+) -> dict:
     """Test a potential source's connection in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
@@ -382,6 +439,7 @@ def check_source_connection(workspace_id: str, data: AirbyteSourceCreate) -> dic
     res = abreq(
         "source_definition_specifications/get",
         {"sourceDefinitionId": data.sourceDefId, "workspaceId": workspace_id},
+        server=server,
     )
     if "connectionSpecification" not in res:
         raise HttpError(500, "could not find spec for this source type")
@@ -399,6 +457,7 @@ def check_source_connection(workspace_id: str, data: AirbyteSourceCreate) -> dic
             "workspaceId": workspace_id,
         },
         timeout=120,
+        server=server,
     )
     if "jobInfo" not in res or res.get("status") == "failed":
         error_message = "Failed to check the source connection: " + res.get(
@@ -409,7 +468,12 @@ def check_source_connection(workspace_id: str, data: AirbyteSourceCreate) -> dic
     return res
 
 
-def check_source_connection_for_update(source_id: str, data: AirbyteSourceUpdateCheckConnection):
+def check_source_connection_for_update(
+    source_id: str,
+    data: AirbyteSourceUpdateCheckConnection,
+    *,
+    server: AirbyteServerConfig,
+):
     """Test connection on a potential edit on source"""
     res = abreq(
         "sources/check_connection_for_update",
@@ -419,6 +483,7 @@ def check_source_connection_for_update(source_id: str, data: AirbyteSourceUpdate
             "name": data.name,
         },
         timeout=120,
+        server=server,
     )
     if "jobInfo" not in res or res.get("status") == "failed":
         error_message = "Failed to check the source connection: " + res.get(
@@ -431,7 +496,7 @@ def check_source_connection_for_update(source_id: str, data: AirbyteSourceUpdate
 
 
 def get_source_schema_catalog(
-    workspace_id: str, source_id: str
+    workspace_id: str, source_id: str, *, server: AirbyteServerConfig
 ) -> dict:  # pylint: disable=unused-argument
     """Fetch source schema catalog for a source in an airbyte workspace"""
     if not isinstance(workspace_id, str):
@@ -440,7 +505,10 @@ def get_source_schema_catalog(
         raise HttpError(400, "source_id must be a string")
 
     res = abreq(
-        "sources/discover_schema", {"sourceId": source_id, "disable_cache": True}, timeout=600
+        "sources/discover_schema",
+        {"sourceId": source_id, "disable_cache": True},
+        timeout=600,
+        server=server,
     )  # timeout of 10 mins
     # is it not possible that the job is long-running
     # and we need to check its status later?
@@ -477,19 +545,23 @@ def get_source_schema_catalog(
     return res
 
 
-def get_destination_definitions(workspace_id: str) -> dict:
+def get_destination_definitions(workspace_id: str, *, server: AirbyteServerConfig) -> dict:
     """Fetch destination definitions in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
 
-    res = abreq("destination_definitions/list_for_workspace", {"workspaceId": workspace_id})
+    res = abreq(
+        "destination_definitions/list_for_workspace", {"workspaceId": workspace_id}, server=server
+    )
     if "destinationDefinitions" not in res:
         logger.error("Destination definitions not found for workspace: %s", workspace_id)
         raise HttpError(404, "destination definitions not found")
     return res
 
 
-def get_destination_definition(workspace_id: str, destinationdef_id: str) -> dict:
+def get_destination_definition(
+    workspace_id: str, destinationdef_id: str, *, server: AirbyteServerConfig
+) -> dict:
     """get the destination definition"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
@@ -499,6 +571,7 @@ def get_destination_definition(workspace_id: str, destinationdef_id: str) -> dic
     res = abreq(
         "destination_definitions/get",
         {"destinationDefinitionId": destinationdef_id},
+        server=server,
     )
     if "destinationDefinitionId" not in res:
         logger.error("Destination definition not found for workspace: %s", workspace_id)
@@ -506,7 +579,9 @@ def get_destination_definition(workspace_id: str, destinationdef_id: str) -> dic
     return res
 
 
-def get_destination_definition_specification(workspace_id: str, destinationdef_id: str) -> dict:
+def get_destination_definition_specification(
+    workspace_id: str, destinationdef_id: str, *, server: AirbyteServerConfig
+) -> dict:
     """Fetch destination definition specification for a destination in a workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
@@ -516,6 +591,7 @@ def get_destination_definition_specification(workspace_id: str, destinationdef_i
     res = abreq(
         "destination_definition_specifications/get",
         {"destinationDefinitionId": destinationdef_id, "workspaceId": workspace_id},
+        server=server,
     )
     if "connectionSpecification" not in res:
         logger.error("Specification not found for destination definition: %s", destinationdef_id)
@@ -532,7 +608,9 @@ def get_destination_definition_specification(workspace_id: str, destinationdef_i
     return res
 
 
-def get_destination_definition_specification_for_destination(destination_id: str) -> dict:
+def get_destination_definition_specification_for_destination(
+    destination_id: str, *, server: AirbyteServerConfig
+) -> dict:
     """Fetch destination definition specification for a specific destination instance"""
     if not isinstance(destination_id, str):
         raise HttpError(400, "destination_id must be a string")
@@ -540,6 +618,7 @@ def get_destination_definition_specification_for_destination(destination_id: str
     res = abreq(
         "destination_definition_specifications/get_for_destination",
         {"destinationId": destination_id},
+        server=server,
     )
     if "connectionSpecification" not in res:
         logger.error("Specification not found for destination: %s", destination_id)
@@ -547,7 +626,7 @@ def get_destination_definition_specification_for_destination(destination_id: str
     return res
 
 
-def get_destinations(workspace_id: str) -> dict:
+def get_destinations(workspace_id: str, *, server: AirbyteServerConfig) -> dict:
     """Fetch all desintations in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
@@ -556,6 +635,7 @@ def get_destinations(workspace_id: str) -> dict:
     res = abreq(
         "destinations/list",
         {"workspaceId": workspace_id, "pageSize": 100, "sortKey": "actorName_asc"},
+        server=server,
     )
     if "destinations" not in res:
         logger.error("Destinations not found for workspace: %s", workspace_id)
@@ -563,14 +643,14 @@ def get_destinations(workspace_id: str) -> dict:
     return res
 
 
-def get_destination(workspace_id: str, destination_id: str) -> dict:
+def get_destination(workspace_id: str, destination_id: str, *, server: AirbyteServerConfig) -> dict:
     """Fetch a destination in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
     if not isinstance(destination_id, str):
         raise HttpError(400, "destination_id must be a string")
 
-    res = abreq("destinations/get", {"destinationId": destination_id})
+    res = abreq("destinations/get", {"destinationId": destination_id}, server=server)
     if "destinationId" not in res:
         logger.error("Destination not found: %s", destination_id)
         raise HttpError(404, "destination not found")
@@ -578,14 +658,24 @@ def get_destination(workspace_id: str, destination_id: str) -> dict:
 
 
 def delete_destination(
-    workspace_id: str, destination_id: str  # skipcq PYL-W0613
+    workspace_id: str,
+    destination_id: str,  # skipcq PYL-W0613
+    *,
+    server: AirbyteServerConfig,
 ) -> dict:  # pylint: disable=unused-argument
     """Fetch a destination in an airbyte workspace"""
-    res = abreq("destinations/delete", {"destinationId": destination_id})
+    res = abreq("destinations/delete", {"destinationId": destination_id}, server=server)
     return res
 
 
-def create_destination(workspace_id: str, name: str, destinationdef_id: str, config: dict) -> dict:
+def create_destination(
+    workspace_id: str,
+    name: str,
+    destinationdef_id: str,
+    config: dict,
+    *,
+    server: AirbyteServerConfig,
+) -> dict:
     """Create destination in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
@@ -605,6 +695,7 @@ def create_destination(workspace_id: str, name: str, destinationdef_id: str, con
             "connectionConfiguration": config,
         },
         timeout=120,
+        server=server,
     )
     if "destinationId" not in res:
         error_message = "Failed to create destination: " + res.get("message", json.dumps(res))
@@ -614,7 +705,12 @@ def create_destination(workspace_id: str, name: str, destinationdef_id: str, con
 
 
 def update_destination(
-    destination_id: str, name: str, config: dict, destinationdef_id: str
+    destination_id: str,
+    name: str,
+    config: dict,
+    destinationdef_id: str,
+    *,
+    server: AirbyteServerConfig,
 ) -> dict:
     """Update a destination in an airbyte workspace"""
     if not isinstance(destination_id, str):
@@ -635,6 +731,7 @@ def update_destination(
             "destinationDefinitionId": destinationdef_id,
         },
         timeout=120,
+        server=server,
     )
     if "destinationId" not in res:
         error_message = "Failed to update destination: " + res.get("message", json.dumps(res))
@@ -643,7 +740,9 @@ def update_destination(
     return res
 
 
-def check_destination_connection(workspace_id: str, data: AirbyteDestinationCreate) -> dict:
+def check_destination_connection(
+    workspace_id: str, data: AirbyteDestinationCreate, *, server: AirbyteServerConfig
+) -> dict:
     """Test a potential destination's connection in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
@@ -656,6 +755,7 @@ def check_destination_connection(workspace_id: str, data: AirbyteDestinationCrea
             "workspaceId": workspace_id,
         },
         timeout=120,
+        server=server,
     )
     if "jobInfo" not in res or res.get("status") == "failed":
         error_message = "Failed to connect to warehouse: " + res.get("message", json.dumps(res))
@@ -665,7 +765,10 @@ def check_destination_connection(workspace_id: str, data: AirbyteDestinationCrea
 
 
 def check_destination_connection_for_update(
-    destination_id: str, data: AirbyteDestinationUpdateCheckConnection
+    destination_id: str,
+    data: AirbyteDestinationUpdateCheckConnection,
+    *,
+    server: AirbyteServerConfig,
 ):
     """Test a potential destination's connection in an airbyte workspace"""
     if not isinstance(destination_id, str):
@@ -679,6 +782,7 @@ def check_destination_connection_for_update(
             "name": data.name,
         },
         timeout=120,
+        server=server,
     )
     if "jobInfo" not in res or res.get("status") == "failed":
         error_message = "Failed to connect to warehouse: " + res.get("message", json.dumps(res))
@@ -687,12 +791,12 @@ def check_destination_connection_for_update(
     return res
 
 
-def get_connections(workspace_id: str) -> dict:
+def get_connections(workspace_id: str, *, server: AirbyteServerConfig) -> dict:
     """Fetch all connections of an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
 
-    res = abreq("connections/list", {"workspaceId": workspace_id})
+    res = abreq("connections/list", {"workspaceId": workspace_id}, server=server)
     if "connections" not in res:
         error_message = f"connections not found for workspace: {workspace_id}"
         logger.error(error_message)
@@ -700,7 +804,7 @@ def get_connections(workspace_id: str) -> dict:
     return res
 
 
-def get_webbackend_connections(workspace_id: str) -> dict:
+def get_webbackend_connections(workspace_id: str, *, server: AirbyteServerConfig) -> dict:
     """Fetch all connections of an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
@@ -709,6 +813,7 @@ def get_webbackend_connections(workspace_id: str) -> dict:
     res = abreq(
         "web_backend/connections/list",
         {"workspaceId": workspace_id, "pageSize": 100, "sortKey": "connectionName_asc"},
+        server=server,
     )
     if "connections" not in res:
         error_message = f"connections not found for workspace: {workspace_id}"
@@ -717,12 +822,12 @@ def get_webbackend_connections(workspace_id: str) -> dict:
     return res["connections"]
 
 
-def get_connection(workspace_id: str, connection_id: str) -> dict:
+def get_connection(workspace_id: str, connection_id: str, *, server: AirbyteServerConfig) -> dict:
     """Fetch a connection of an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
 
-    res = abreq("web_backend/connections/get", {"connectionId": connection_id})
+    res = abreq("web_backend/connections/get", {"connectionId": connection_id}, server=server)
     if "connectionId" not in res:
         error_message = f"Connection not found: {connection_id}"
         logger.error(error_message)
@@ -733,6 +838,8 @@ def get_connection(workspace_id: str, connection_id: str) -> dict:
 def create_connection(
     workspace_id: str,
     connection_info: schema.AirbyteConnectionCreate,
+    *,
+    server: AirbyteServerConfig,
 ) -> dict:
     """Create a connection in an airbyte workspace"""
     if not isinstance(workspace_id, str):
@@ -842,7 +949,7 @@ def create_connection(
 
             payload["syncCatalog"]["streams"].append(schema_cat)
 
-    res = abreq("connections/create", payload)
+    res = abreq("connections/create", payload, server=server)
     if "connectionId" not in res:
         error_message = "Failed to create connection: " + res.get("message", json.dumps(res))
         logger.error("Failed to create connection: %s", error_message)
@@ -854,6 +961,8 @@ def update_connection(
     workspace_id: str,
     connection_info: schema.AirbyteConnectionUpdate,
     current_connection: dict,
+    *,
+    server: AirbyteServerConfig,
 ) -> dict:
     """Update a connection of an airbyte workspace"""
     if not isinstance(workspace_id, str):
@@ -953,7 +1062,7 @@ def update_connection(
 
             current_connection["syncCatalog"]["streams"].append(schema_cat)
 
-    res = abreq("connections/update", current_connection)
+    res = abreq("connections/update", current_connection, server=server)
     if "connectionId" not in res:
         error_message = "Failed to update connection: " + res.get("message", json.dumps(res))
         logger.error("Failed to update connection: %s", error_message)
@@ -961,45 +1070,47 @@ def update_connection(
     return res
 
 
-def delete_connection(workspace_id: str, connection_id: str) -> dict:
+def delete_connection(
+    workspace_id: str, connection_id: str, *, server: AirbyteServerConfig
+) -> dict:
     """Delete a connection of an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
     if not isinstance(connection_id, str):
         raise HttpError(400, "connection_id must be a string")
 
-    res = abreq("connections/delete", {"connectionId": connection_id})
+    res = abreq("connections/delete", {"connectionId": connection_id}, server=server)
     logger.info("Deleting connection: %s", connection_id)
     return res
 
 
-def sync_connection(workspace_id: str, connection_id: str) -> dict:
+def sync_connection(workspace_id: str, connection_id: str, *, server: AirbyteServerConfig) -> dict:
     """Sync a connection in an airbyte workspace"""
     if not isinstance(workspace_id, str):
         raise HttpError(400, "workspace_id must be a string")
     if not isinstance(connection_id, str):
         raise HttpError(400, "connection_id must be a string")
 
-    res = abreq("connections/sync", {"connectionId": connection_id})
+    res = abreq("connections/sync", {"connectionId": connection_id}, server=server)
     logger.info("Syncing connection: %s", connection_id)
     return res
 
 
-def get_job_info(job_id: str) -> dict:
+def get_job_info(job_id: str, *, server: AirbyteServerConfig) -> dict:
     """get debug info for an airbyte job"""
     if not isinstance(job_id, str):
         raise HttpError(400, "job_id must be a string")
 
-    res = abreq("jobs/get_debug_info", {"id": job_id})
+    res = abreq("jobs/get_debug_info", {"id": job_id}, server=server)
     return res
 
 
-def get_job_info_without_logs(job_id: str) -> dict:
+def get_job_info_without_logs(job_id: str, *, server: AirbyteServerConfig) -> dict:
     """get job info without logs for an airbyte job"""
     if not isinstance(job_id, str):
         raise HttpError(400, "job_id must be a string")
 
-    res = abreq("jobs/get_without_logs", {"id": job_id})
+    res = abreq("jobs/get_without_logs", {"id": job_id}, server=server)
     return res
 
 
@@ -1010,6 +1121,8 @@ def get_jobs_for_connection(
     job_types: list[str] | None = None,
     created_at_start: datetime = None,
     created_at_end: datetime = None,
+    *,
+    server: AirbyteServerConfig,
 ) -> int | None:
     """
     returns most recent job for a connection
@@ -1048,6 +1161,7 @@ def get_jobs_for_connection(
     result = abreq(
         "jobs/list",
         payload,
+        server=server,
     )
     return result
 
@@ -1082,7 +1196,9 @@ def parse_job_info(jobinfo: dict) -> dict:
     return retval
 
 
-def get_logs_for_job(job_id: int, attempt_number: int = 0) -> list[str]:
+def get_logs_for_job(
+    job_id: int, attempt_number: int = 0, *, server: AirbyteServerConfig
+) -> list[str]:
     """get logs for an airbyte job. do not make an API for this! returns an array of log messages in correct order"""
     if not isinstance(job_id, int):
         raise HttpError(400, "job_id must be an integer")
@@ -1090,6 +1206,7 @@ def get_logs_for_job(job_id: int, attempt_number: int = 0) -> list[str]:
     res = abreq(
         "attempt/get_for_job",
         {"jobId": job_id, "attemptNumber": attempt_number},
+        server=server,
     )
 
     # logType field is present in the newer version of airbyte (1.4.1)
@@ -1104,13 +1221,13 @@ def get_logs_for_job(job_id: int, attempt_number: int = 0) -> list[str]:
     return []
 
 
-def cancel_job(job_id: str) -> dict:
+def cancel_job(job_id: str, *, server: AirbyteServerConfig) -> dict:
     """cancel a job"""
-    res = abreq("jobs/cancel", {"id": job_id})
+    res = abreq("jobs/cancel", {"id": job_id}, server=server)
     return res
 
 
-def get_connection_catalog(connection_id: str, **kwargs) -> dict:
+def get_connection_catalog(connection_id: str, *, server: AirbyteServerConfig, **kwargs) -> dict:
     """get the catalog for a connection to check/refresh for schema changes"""
     if not isinstance(connection_id, str):
         raise HttpError(400, "connection_id must be a string")
@@ -1118,11 +1235,12 @@ def get_connection_catalog(connection_id: str, **kwargs) -> dict:
         "web_backend/connections/get",
         {"connectionId": connection_id, "withRefreshedCatalog": True},
         **kwargs,
+        server=server,
     )
     return res
 
 
-def apply_schema_change(connection_catalog: dict) -> dict:
+def apply_schema_change(connection_catalog: dict, *, server: AirbyteServerConfig) -> dict:
     """Accept schema changes by sending the refreshed syncCatalog back to Airbyte.
     Expects the response from get_connection_catalog(). skipReset=True (non-breaking only)."""
     connection_id = connection_catalog.get("connectionId")
@@ -1140,7 +1258,7 @@ def apply_schema_change(connection_catalog: dict) -> dict:
     if source_catalog_id:
         payload["sourceCatalogId"] = source_catalog_id
 
-    res = abreq("web_backend/connections/update", payload)
+    res = abreq("web_backend/connections/update", payload, server=server)
     if "connectionId" not in res:
         error_message = res.get("message", json.dumps(res))
         logger.error("Failed to apply schema change: %s", error_message)
@@ -1148,10 +1266,10 @@ def apply_schema_change(connection_catalog: dict) -> dict:
     return res
 
 
-def get_current_airbyte_version():
+def get_current_airbyte_version(*, server: AirbyteServerConfig):
     """Fetch airbyte version"""
 
-    res = abreq("instance_configuration", method="GET")
+    res = abreq("instance_configuration", method="GET", server=server)
     print(res, "AIRBYTE RESPONSE")
     if "version" not in res:
         logger.error("No version found")
@@ -1160,7 +1278,11 @@ def get_current_airbyte_version():
 
 
 def cancel_connection_job(
-    workspace_id: str, connection_id: str, job_type: str  # pylint: disable=unused-argument
+    workspace_id: str,
+    connection_id: str,
+    job_type: str,  # pylint: disable=unused-argument
+    *,
+    server: AirbyteServerConfig,
 ) -> dict:
     """
     cancel a connection job. job_type is one of the following:
@@ -1173,11 +1295,11 @@ def cancel_connection_job(
     - clear
     """
     cancelled = False
-    res = get_jobs_for_connection(connection_id, job_types=[job_type])
+    res = get_jobs_for_connection(connection_id, job_types=[job_type], server=server)
     for job in res["jobs"]:
         if job["job"]["status"] == "running":
             job_id = job["job"]["id"]
-            cancel_job(job_id)
+            cancel_job(job_id, server=server)
             logger.info("Cancelled job: %s", job_id)
             cancelled = True
             break

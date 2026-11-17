@@ -18,6 +18,8 @@ class OrgSchema(Schema):
     logo_url: Optional[str] = None
     logo_filename: Optional[str] = None
     created_at: Optional[datetime] = None
+    data_region: Optional[str] = None  # region code, e.g. "in", "af"
+    country: Optional[str] = None  # ISO-3166-1 alpha-2
 
 
 class CreateOrgSchema(Schema):
@@ -37,6 +39,9 @@ class CreateOrgSchema(Schema):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     website: Optional[HttpUrl] = None
+    # where the org's Airbyte runs; cannot be changed later. Defaults keep old clients working.
+    data_region: str = "in"
+    country: Optional[str] = None  # required when data_region is not the home region
 
 
 class CreateFreeTrialOrgSchema(CreateOrgSchema):

@@ -15,6 +15,7 @@ django.setup()
 
 from django.contrib.auth.models import User
 from ddpui import ddpprefect
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpprefect import DDP_WORK_QUEUE, MANUL_DBT_WORK_QUEUE
 from ddpui.api.airbyte_api import (
     delete_airbyte_connection_v1,
@@ -777,7 +778,10 @@ def test_put_airbyte_connection_v1(orguser_workspace):
     }
     payload.destinationId = warehouse.airbyte_destination_id
     update_connection_mock.assert_called_with(
-        request.orguser.org.airbyte_workspace_id, payload, connection
+        request.orguser.org.airbyte_workspace_id,
+        payload,
+        connection,
+        server=RegionService.airbyte_server_for_org(request.orguser.org),
     )
 
 

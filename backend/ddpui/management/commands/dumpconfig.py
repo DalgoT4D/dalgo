@@ -12,6 +12,7 @@ from django.core.management.base import BaseCommand
 from ddpui.models.org import Org, OrgWarehouse, OrgDataFlowv1
 from ddpui.utils.custom_logger import CustomLogger
 from ddpui.utils.secretsmanager import retrieve_warehouse_credentials
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpairbyte import airbyte_service
 
 logger = CustomLogger("ddpui")
@@ -50,17 +51,19 @@ class Command(BaseCommand):
         retval["airbyte_destination_id"] = warehouse.airbyte_destination_id
         retval["bq_location"] = warehouse.bq_location
         retval["credentials"] = retrieve_warehouse_credentials(warehouse)
+        server = RegionService.airbyte_server_for_org(org)
         retval["destination"] = airbyte_service.get_destination(
-            org.airbyte_workspace_id, warehouse.airbyte_destination_id
+            org.airbyte_workspace_id, warehouse.airbyte_destination_id, server=server
         )
         return retval
 
     def dump_sources(self, org: Org):
         """dumps all sources for an org"""
-        source_definitions = airbyte_service.get_source_definitions(org.airbyte_workspace_id)[
-            "sourceDefinitions"
-        ]
-        sources = airbyte_service.get_sources(org.airbyte_workspace_id)["sources"]
+        server = RegionService.airbyte_server_for_org(org)
+        source_definitions = airbyte_service.get_source_definitions(
+            org.airbyte_workspace_id, server=server
+        )["sourceDefinitions"]
+        sources = airbyte_service.get_sources(org.airbyte_workspace_id, server=server)["sources"]
         for source in sources:
             for sdef in source_definitions:
                 if sdef["sourceDefinitionId"] == source["sourceDefinitionId"]:
@@ -70,14 +73,17 @@ class Command(BaseCommand):
 
     def dump_connections(self, org: Org):
         """dumps airbyte connection info"""
-        connections = airbyte_service.get_connections(org.airbyte_workspace_id)["connections"]
+        server = RegionService.airbyte_server_for_org(org)
+        connections = airbyte_service.get_connections(org.airbyte_workspace_id, server=server)[
+            "connections"
+        ]
         formatted_connections = []
         for connection in connections:
             connection["destination"] = airbyte_service.get_destination(
-                org.airbyte_workspace_id, connection["destinationId"]
+                org.airbyte_workspace_id, connection["destinationId"], server=server
             )
             connection["source"] = airbyte_service.get_source(
-                org.airbyte_workspace_id, connection["sourceId"]
+                org.airbyte_workspace_id, connection["sourceId"], server=server
             )
             streams = connection["syncCatalog"]["streams"]
             formatted_streams = []

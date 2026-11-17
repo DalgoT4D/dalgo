@@ -1,8 +1,17 @@
 """Tests for the Prefect Service"""
 
+import os
 from uuid import uuid4
 from ddpui.ddpprefect import prefect_service, schema
+from ddpui.schemas.data_region_schema import AirbyteFlowServerConfig
 import pytest
+
+FLOW_SERVER = AirbyteFlowServerConfig(
+    server_host=os.getenv("AIRBYTE_SERVER_HOST", "localhost"),
+    server_port=os.getenv("AIRBYTE_SERVER_PORT", "8000"),
+    api_version=os.getenv("AIRBYTE_SERVER_APIVER", "v1"),
+    use_ssl=os.getenv("AIRBYTE_USE_SSL", "false").lower() == "true",
+)
 
 
 @pytest.mark.skip(reason="Skipping this test as airbyte integraion needs to be done")
@@ -14,7 +23,7 @@ class TestAirbyteServer:
         """creates a server block"""
         TestAirbyteServer.BLOCK_NAME = "test-" + str(uuid4())
         block_id, block_name = prefect_service.create_airbyte_server_block(
-            TestAirbyteServer.BLOCK_NAME
+            TestAirbyteServer.BLOCK_NAME, FLOW_SERVER
         )
         assert block_id is not None
         assert block_name is not None
@@ -44,7 +53,7 @@ class TestAirbyteConnection:
         TestAirbyteConnection.connection_block_name = "test-conn-" + str(uuid4())
         TestAirbyteConnection.connection_block_id = None
         TestAirbyteConnection.server_block_id = prefect_service.create_airbyte_server_block(
-            TestAirbyteConnection.server_block_name
+            TestAirbyteConnection.server_block_name, FLOW_SERVER
         )[0]
 
     @staticmethod

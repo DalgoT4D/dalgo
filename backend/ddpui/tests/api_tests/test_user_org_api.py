@@ -1562,10 +1562,67 @@ def test_post_organization_v1_creates_audit_log(
         "base_plan": "Free",
         "subscription_duration": "Yearly",
         "superset_included": False,
+        "data_region": "in",
+        "country": "IN",
     }
 
     # Cleanup
     Org.objects.filter(name="Brand New Org").delete()
+
+
+def _superadmin_request(orguser):
+    orguser.new_role = Role.objects.filter(slug=SUPER_ADMIN_ROLE).first()
+    orguser.save()
+    userattributes, _ = UserAttributes.objects.get_or_create(user=orguser.user)
+    userattributes.can_create_orgs = True
+    userattributes.save()
+    return mock_request(orguser)
+
+
+@patch("ddpui.api.user_org_api.create_audit_log")
+@patch("ddpui.core.orgfunctions.add_custom_connectors_to_workspace.delay")
+@patch(
+    "ddpui.core.orgfunctions.airbytehelpers.setup_airbyte_workspace_v1",
+    return_value=Mock(workspaceId="fake-workspace-id"),
+)
+def test_post_organization_v1_af_region(
+    mock_workspace, mock_delay, mock_audit_log, orguser, seed_db, mock_region_secrets
+):
+    request = _superadmin_request(orguser)
+    payload = CreateOrgSchema(
+        name="Residency Test ZA",
+        base_plan="Free",
+        can_upgrade_plan=False,
+        subscription_duration="Yearly",
+        superset_included=False,
+        data_region="af",
+        country="ZA",
+    )
+
+    response = post_organization_v1(request, payload)
+
+    assert response.data_region == "af"
+    assert response.country == "ZA"
+    org = Org.objects.get(name="Residency Test ZA")
+    assert org.region_config["aws_region"] == "af-south-1"
+    assert mock_audit_log.call_args[1]["resource_fields"]["data_region"] == "af"
+
+
+def test_post_organization_v1_disabled_region_is_400(orguser, seed_db, mock_region_secrets):
+    request = _superadmin_request(orguser)
+    payload = CreateOrgSchema(
+        name="Not Allowed Region",
+        base_plan="Free",
+        can_upgrade_plan=False,
+        subscription_duration="Yearly",
+        superset_included=False,
+        data_region="id",
+        country="ID",
+    )
+    with pytest.raises(HttpError) as excinfo:
+        post_organization_v1(request, payload)
+    assert excinfo.value.status_code == 400
+    assert not Org.objects.filter(name="Not Allowed Region").exists()
 
 
 # ================================================================================

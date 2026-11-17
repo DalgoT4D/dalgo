@@ -2,6 +2,7 @@
 import uuid
 import os
 import shutil
+from functools import cached_property
 from ninja.errors import HttpError
 
 from django.db import connection
@@ -16,6 +17,8 @@ from ddpui.models.llm import LlmSession
 from ddpui.models.metric import KPI, Metric
 
 from ddpui.ddpairbyte import airbyte_service
+from ddpui.core.regions.region_service import RegionService
+from ddpui.schemas.data_region_schema import AirbyteServerConfig
 from ddpui.ddpprefect import prefect_service
 
 from ddpui.ddpprefect import AIRBYTESERVER, DBTCLIPROFILE, SECRET
@@ -40,6 +43,11 @@ class OrgCleanupService:
     def __init__(self, org: Org, dry_run: bool = True):
         self.org = org
         self.dry_run = dry_run
+
+    @cached_property
+    def airbyte_server(self) -> AirbyteServerConfig:
+        """the org's region airbyte; resolved once, on first use"""
+        return RegionService.airbyte_server_for_org(self.org)
 
     def delete_orchestrate_pipelines(self):
         """
@@ -261,7 +269,9 @@ class OrgCleanupService:
                 try:
                     if not self.dry_run:
                         airbyte_service.delete_connection(
-                            self.org.airbyte_workspace_id, org_task.connection_id
+                            self.org.airbyte_workspace_id,
+                            org_task.connection_id,
+                            server=self.airbyte_server,
                         )
                         logger.info(f"deleted connection in Airbyte - {org_task.connection_id}")
                 except Exception:
@@ -307,7 +317,9 @@ class OrgCleanupService:
 
                 try:
                     airbyte_service.delete_destination(
-                        self.org.airbyte_workspace_id, warehouse.airbyte_destination_id
+                        self.org.airbyte_workspace_id,
+                        warehouse.airbyte_destination_id,
+                        server=self.airbyte_server,
                     )
                     logger.info(
                         f"deleted destination {warehouse.airbyte_destination_id} from airbyte"
@@ -332,24 +344,32 @@ class OrgCleanupService:
             )
             return
 
-        for source in airbyte_service.get_sources(self.org.airbyte_workspace_id)["sources"]:
+        for source in airbyte_service.get_sources(
+            self.org.airbyte_workspace_id, server=self.airbyte_server
+        )["sources"]:
             logger.info("will delete source in Airbyte " + source["sourceId"])
             if not self.dry_run:
                 try:
-                    airbyte_service.delete_source(self.org.airbyte_workspace_id, source["sourceId"])
+                    airbyte_service.delete_source(
+                        self.org.airbyte_workspace_id,
+                        source["sourceId"],
+                        server=self.airbyte_server,
+                    )
                     logger.info(f"deleted source in Airbyte - {source['sourceId']}")
                 except Exception as err:
                     logger.error("error deleting source in airbyte: %s", str(err))
                     pass
 
-        for destination in airbyte_service.get_destinations(self.org.airbyte_workspace_id)[
-            "destinations"
-        ]:
+        for destination in airbyte_service.get_destinations(
+            self.org.airbyte_workspace_id, server=self.airbyte_server
+        )["destinations"]:
             logger.info("will delete destination in Airbyte " + destination["destinationId"])
             if not self.dry_run:
                 try:
                     airbyte_service.delete_destination(
-                        self.org.airbyte_workspace_id, destination["destinationId"]
+                        self.org.airbyte_workspace_id,
+                        destination["destinationId"],
+                        server=self.airbyte_server,
                     )
                     logger.info(f"deleted destination in Airbyte - {destination['destinationId']}")
                 except Exception as err:
@@ -359,7 +379,9 @@ class OrgCleanupService:
         logger.info("will delete airbyte workspace %s", self.org.airbyte_workspace_id)
         if not self.dry_run:
             try:
-                airbyte_service.delete_workspace(self.org.airbyte_workspace_id)
+                airbyte_service.delete_workspace(
+                    self.org.airbyte_workspace_id, server=self.airbyte_server
+                )
                 logger.info(f"deleted airbyte workspace - {self.org.airbyte_workspace_id}")
             except Exception as err:
                 logger.error("error deleting airbyte workspace: %s", str(err))

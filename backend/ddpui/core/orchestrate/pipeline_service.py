@@ -20,6 +20,7 @@ from ddpui.ddpprefect.schema import (
 )
 from ddpui.schemas.org_task_schema import TaskParameters, ClearSelectedStreams
 from ddpui.ddpairbyte import airbyte_service
+from ddpui.core.regions.region_service import RegionService
 from ddpui.utils.constants import (
     TASK_AIRBYTESYNC,
     TASK_DBTCLEAN,
@@ -418,12 +419,13 @@ class PipelineService:
             logger.exception(error)
             raise PipelineServiceError("failed to get deployment from prefect-proxy") from error
 
+        server = RegionService.airbyte_server_for_org(org)
         connections = [
             {
                 "id": dataflow_orgtask.orgtask.connection_id,
                 "seq": dataflow_orgtask.seq,
                 "name": airbyte_service.get_connection(
-                    org.airbyte_workspace_id, dataflow_orgtask.orgtask.connection_id
+                    org.airbyte_workspace_id, dataflow_orgtask.orgtask.connection_id, server=server
                 )[
                     "name"
                 ],  # TODO: this call can be removed once the logic at frontend is updated

@@ -32,6 +32,7 @@ from ddpui.api.access_api import access_router
 from ddpui.api.alert_api import alert_router
 from ddpui.api.chat_with_data_api import chat_with_data_router
 from ddpui.api.admin_api import admin_router
+from ddpui.api.region_api import region_router
 
 src_api = NinjaAPI(
     urls_namespace="api",
@@ -114,6 +115,7 @@ kpi_router.tags = ["KPIs"]
 alert_router.tags = ["Alerts"]
 chat_with_data_router.tags = ["Chat with Data"]
 access_router.tags = ["Access"]
+region_router.tags = ["Regions"]
 
 # mount all the module routes
 src_api.add_router("/api/airbyte/", airbyte_router)
@@ -141,6 +143,7 @@ src_api.add_router("/api/alerts/", alert_router)
 src_api.add_router("/api/chat-with-data/", chat_with_data_router)
 src_api.add_router("/api/access/", access_router)
 src_api.add_router("/api/v1/admin/", admin_router)
+src_api.add_router("/api/v1/regions/", region_router)
 
 # Public API without authentication
 public_api = NinjaAPI(

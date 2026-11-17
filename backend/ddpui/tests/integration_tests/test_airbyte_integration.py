@@ -9,6 +9,18 @@ django.setup()
 
 from ddpui.tests.helper.test_airbyte_unit_schemas import *
 from ddpui.ddpairbyte.airbyte_service import *
+from ddpui.schemas.data_region_schema import AirbyteServerConfig
+
+# the (home region) airbyte these integration tests run against
+SERVER = AirbyteServerConfig(
+    secret_name="dalgoAirbyteRegion-integration-in",
+    aws_region="ap-south-1",
+    server_host=os.getenv("AIRBYTE_SERVER_HOST", "localhost"),
+    server_port=os.getenv("AIRBYTE_SERVER_PORT", "8000"),
+    api_version=os.getenv("AIRBYTE_SERVER_APIVER", "v1"),
+    use_ssl=os.getenv("AIRBYTE_USE_SSL", "false").lower() == "true",
+    api_token=os.getenv("AIRBYTE_API_TOKEN", ""),
+)
 
 
 @pytest.mark.skip(reason="Skipping this test as airbyte integraion needs to be done")
@@ -23,14 +35,14 @@ class TestDeleteSource:
             raise ValueError(f"Field do not match in the payload: {error.errors()}") from error
 
         try:
-            res = create_workspace(**payload)
+            res = create_workspace(**payload, server=SERVER)
             CreateWorkspaceTestResponse(**res)
             TestWorkspace.workspace_id = res["workspaceId"]
         except ValidationError as error:
             raise ValueError(f"Response validation failed: {error.errors()}") from error
 
     def test_a_create_source(self, test_workspace_id):  # skipcq: PYL-R0201
-        source_definitions = get_source_definitions(workspace_id=test_workspace_id)[
+        source_definitions = get_source_definitions(workspace_id=test_workspace_id, server=SERVER)[
             "sourceDefinitions"
         ]
         for source_definition in source_definitions:
@@ -54,7 +66,7 @@ class TestDeleteSource:
         except ValidationError as e:
             raise ValueError(f"Field do not match in payload: {e.errors()}")
         try:
-            res = create_source(**payload)
+            res = create_source(**payload, server=SERVER)
             CreateSourceTestResponse(**res)
             TestAirbyteSource.source_id = res["sourceId"]
             TestAirbyteSource.source_definition_id = res["sourceDefinitionId"]
@@ -78,7 +90,7 @@ class TestWorkspace:
             raise ValueError(f"Field do not match in the payload: {error.errors()}") from error
 
         try:
-            res = create_workspace(**payload)
+            res = create_workspace(**payload, server=SERVER)
             CreateWorkspaceTestResponse(**res)
             TestWorkspace.workspace_id = res["workspaceId"]
         except ValidationError as error:
@@ -87,7 +99,7 @@ class TestWorkspace:
     def test_get_workspace(self):  # skipcq: PYL-R0201
         """gets a workspace, checks airbyte response"""
         try:
-            res = get_workspace(workspace_id=TestWorkspace.workspace_id)
+            res = get_workspace(workspace_id=TestWorkspace.workspace_id, server=SERVER)
             GetWorkspaceTestResponse(**res)
         except ValidationError as error:
             raise ValueError(f"Response validation failed: {error.errors()}") from error
@@ -95,7 +107,7 @@ class TestWorkspace:
     def test_get_workspaces(self):  # skipcq: PYL-R0201
         """gets all workspaces, checks airbyte response"""
         try:
-            res = get_workspaces()
+            res = get_workspaces(server=SERVER)
             GetWorkspacesTestResponse(**res)
         except ValidationError as error:
             raise ValueError(f"Response validation failed: {error.errors()}") from error
@@ -105,7 +117,9 @@ class TestWorkspace:
         new_name = "test"
 
         try:
-            res = set_workspace_name(workspace_id=TestWorkspace.workspace_id, name=new_name)
+            res = set_workspace_name(
+                workspace_id=TestWorkspace.workspace_id, name=new_name, server=SERVER
+            )
             SetWorkspaceTestResponse(**res)
         except ValidationError as error:
             raise ValueError(f"Response validation failed: {error.errors()}") from error
@@ -132,7 +146,7 @@ class TestAirbyteSource:
 
     def test_source_connection(self, test_workspace_id):
         """tests connectivity to a source"""
-        source_definitions = get_source_definitions(workspace_id=test_workspace_id)[
+        source_definitions = get_source_definitions(workspace_id=test_workspace_id, server=SERVER)[
             "sourceDefinitions"
         ]
         for source_definition in source_definitions:
@@ -148,6 +162,7 @@ class TestAirbyteSource:
                     sourceDefId=TestAirbyteSource.source_definition_id,
                     config=self.source_config,
                 ),
+                server=SERVER,
             )
             CheckSourceConnectionTestResponse(**res)
         except ValidationError as error:
@@ -166,7 +181,7 @@ class TestAirbyteSource:
         except ValidationError as error:
             raise ValueError(f"Field do not match in payload: {error.errors()}") from error
         try:
-            res = create_source(**payload)
+            res = create_source(**payload, server=SERVER)
             CreateSourceTestResponse(**res)
             TestAirbyteSource.source_id = res["sourceId"]
         except ValidationError as error:
@@ -181,6 +196,7 @@ class TestAirbyteSource:
                     name="unused",
                     config=self.source_config,
                 ),
+                server=SERVER,
             )
             CheckSourceConnectionTestResponse(**res)
         except ValidationError as error:
@@ -189,7 +205,9 @@ class TestAirbyteSource:
     def test_get_definitions(self, test_workspace_id):  # skipcq: PYL-R0201
         """tests retrieval of source definitions"""
         try:
-            res = get_source_definitions(workspace_id=test_workspace_id)["sourceDefinitions"]
+            res = get_source_definitions(workspace_id=test_workspace_id, server=SERVER)[
+                "sourceDefinitions"
+            ]
             GetSourceDefinitionsTestResponse(root=res)
         except ValidationError as error:
             raise ValueError(f"Response validation failed: {error.errors()}") from error
@@ -197,7 +215,9 @@ class TestAirbyteSource:
     def test_get_source_schema_catalog(self, test_workspace_id):  # skipcq: PYL-R0201
         """fetches the schema catalog for a source"""
         try:
-            res = get_source_schema_catalog(test_workspace_id, TestAirbyteSource.source_id)
+            res = get_source_schema_catalog(
+                test_workspace_id, TestAirbyteSource.source_id, server=SERVER
+            )
             GetSourceSchemaCatalogTestResponse(catalog=res)
         except ValidationError as error:
             raise ValueError(f"Response validation failed: {error.errors()}") from error
@@ -205,7 +225,7 @@ class TestAirbyteSource:
     def test_fail_to_get_source_schema_catalog(self, test_workspace_id):  # skipcq: PYL-R0201
         """fetches the schema catalog for a source"""
         try:
-            get_source_schema_catalog(test_workspace_id, "not-a-source-id")
+            get_source_schema_catalog(test_workspace_id, "not-a-source-id", server=SERVER)
         except HttpError:
             pass
 
@@ -215,6 +235,7 @@ class TestAirbyteSource:
             res = get_source(
                 workspace_id=test_workspace_id,
                 source_id=TestAirbyteSource.source_id,
+                server=SERVER,
             )
             GetSourceTestResponse(**res)
         except ValidationError as error:
@@ -223,7 +244,7 @@ class TestAirbyteSource:
     def test_get_sources(self, test_workspace_id):  # skipcq: PYL-R0201
         """tests retrieval of all sources"""
         try:
-            res = get_sources(workspace_id=test_workspace_id)["sources"]
+            res = get_sources(workspace_id=test_workspace_id, server=SERVER)["sources"]
             GetSourcesTestResponse(sources=res)
         except ValidationError as error:
             raise ValueError(f"Response validation failed: {error.errors()}") from error
@@ -247,7 +268,7 @@ class TestAirbyteSource:
             raise ValueError(f"Field do not match in payload: {error.errors()}") from error
 
         try:
-            res = update_source(**payload)
+            res = update_source(**payload, server=SERVER)
             UpdateSourceTestResponse(**res)
         except ValidationError as error:
             raise ValueError(f"Response validation failed: {error.errors()}") from error
@@ -272,9 +293,9 @@ class TestAirbyteDestination:
     }
 
     def test_a_create_destination(self, test_workspace_id):  # skipcq: PYL-R0201
-        destination_definitions = get_destination_definitions(workspace_id=test_workspace_id)[
-            "destinationDefinitions"
-        ]
+        destination_definitions = get_destination_definitions(
+            workspace_id=test_workspace_id, server=SERVER
+        )["destinationDefinitions"]
         for destination_definition in destination_definitions:
             if destination_definition["name"] == "Postgres":
                 destination_definition_id = destination_definition["destinationDefinitionId"]
@@ -293,7 +314,7 @@ class TestAirbyteDestination:
             raise ValueError(f"Field do not match in payload: {error.errors()}") from error
 
         try:
-            res = create_destination(**payload)
+            res = create_destination(**payload, server=SERVER)
             CreateDestinationTestResponse(**res)
             TestAirbyteDestination.destination_id = res["destinationId"]
             TestAirbyteDestination.destination_definition_id = res["destinationDefinitionId"]
@@ -305,6 +326,7 @@ class TestAirbyteDestination:
             res = get_destination(
                 workspace_id=test_workspace_id,
                 destination_id=TestAirbyteDestination.destination_id,
+                server=SERVER,
             )
             GetDestinationTestResponse(**res)
         except ValidationError as error:
@@ -330,7 +352,7 @@ class TestAirbyteDestination:
             raise ValueError(f"Field do not match in payload: {error.errors()}") from error
 
         try:
-            res = update_destination(**payload)
+            res = update_destination(**payload, server=SERVER)
             UpdateDestinationTestResponse(**res)
         except ValidationError as error:
             raise ValueError(f"Field do not match in resposne: {error.errors()}") from error
@@ -345,6 +367,7 @@ class TestAirbyteDestination:
                     destinationDefId=TestAirbyteDestination.destination_definition_id,
                     config=TestAirbyteDestination.destination_config,
                 ),
+                server=SERVER,
             )
             CheckDestinationConnectionTestResponse(**res)
         except ValidationError as error:
@@ -358,6 +381,7 @@ class TestAirbyteDestination:
                     name="unused",
                     config=TestAirbyteDestination.destination_config,
                 ),
+                server=SERVER,
             )
             CheckDestinationConnectionTestResponse(**res)
         except ValidationError as error:
@@ -397,11 +421,11 @@ class TestConnection:
         )
 
         try:
-            res = create_connection(workspace_id, connection_info)
+            res = create_connection(workspace_id, connection_info, server=SERVER)
             CreateConnectionTestResponse(**res)
             TestConnection.connection_id = res["connectionId"]
             # check if the streams have been set in the connection
-            conn = get_connection(workspace_id, res["connectionId"])
+            conn = get_connection(workspace_id, res["connectionId"], server=SERVER)
             assert conn is not None
             assert "syncCatalog" in conn
             assert "streams" in conn["syncCatalog"]
@@ -421,7 +445,7 @@ class TestConnection:
         connection_id = TestConnection.connection_id
 
         try:
-            res = get_connection(workspace_id, connection_id)
+            res = get_connection(workspace_id, connection_id, server=SERVER)
             GetConnectionTestResponse(**res)
         except ValidationError as error:
             raise ValueError(f"Response validation failed: {error.errors()}") from error
@@ -430,7 +454,9 @@ class TestConnection:
         self, test_workspace_id, test_source_id, test_destination_id
     ):  # skipcq: PYL-R0201
         workspace_id = test_workspace_id
-        current_connection = get_connection(workspace_id, TestConnection.connection_id)
+        current_connection = get_connection(
+            workspace_id, TestConnection.connection_id, server=SERVER
+        )
         connection_info = schema.AirbyteConnectionUpdate(
             sourceId=test_source_id,
             destinationId=test_destination_id,
@@ -449,11 +475,13 @@ class TestConnection:
         )
 
         try:
-            res = update_connection(workspace_id, connection_info, current_connection)
+            res = update_connection(
+                workspace_id, connection_info, current_connection, server=SERVER
+            )
             UpdateConnectionTestResponse(**res)
 
             # check if the streams have been set in the connection
-            conn = get_connection(workspace_id, res["connectionId"])
+            conn = get_connection(workspace_id, res["connectionId"], server=SERVER)
             assert conn is not None
             assert "syncCatalog" in conn
             assert "streams" in conn["syncCatalog"]
@@ -473,7 +501,7 @@ class TestConnection:
         connection_id = TestConnection.connection_id
 
         try:
-            res = delete_connection(workspace_id, connection_id)
+            res = delete_connection(workspace_id, connection_id, server=SERVER)
             assert res == {}
         except ValidationError as error:
             raise ValueError(f"Response validation failed: {error.errors()}") from error

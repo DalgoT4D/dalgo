@@ -21,6 +21,7 @@ from ddpui.auth import has_permission
 from ddpui.models.org_user import OrgUser
 from ddpui.models.resource_share import LEVEL_RANK
 from ddpui.ddpairbyte import airbyte_service
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpprefect import (
     prefect_service,
 )
@@ -202,7 +203,9 @@ def get_tools_versions(request):
 
     versions = []
 
-    ver = airbyte_service.get_current_airbyte_version()
+    ver = airbyte_service.get_current_airbyte_version(
+        server=RegionService.airbyte_server_for_org(org)
+    )
     versions.append({"Airbyte": {"version": ver if ver else "Not available"}})
 
     # Prefect Version

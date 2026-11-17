@@ -6,6 +6,7 @@ import pytest
 from django.contrib.auth.models import User
 from django.test import override_settings
 from django.utils import timezone
+from ddpui.core.regions.region_service import RegionService
 from ddpui.models.org import Org, OrgDbt, OrgWarehouse, OrgPrefectBlockv1
 from ddpui.models.dbt_workflow import OrgDbtModel, OrgDbtModelType, OrgDbtOperation
 from ddpui.models.org_plans import OrgPlans, OrgPlanType
@@ -516,6 +517,8 @@ def test_step_org_and_user_creates_org_and_admin(mock_create_org, mock_create_pl
     assert user_attrs.email_verified is False
     assert run.trial_orguser is not None
     assert run.trial_orguser.id == orguser.id
+    # trial orgs always live in the home data region
+    assert mock_create_org.call_args.args[0].data_region == "in"
 
 
 @patch("ddpui.core.trial.clone_service.create_org_plan")
@@ -1053,7 +1056,7 @@ def test_step_sources_recreates_from_config(mock_ab, mock_load, mock_validate):
         ]
     }
     # def-pg is a public (grid) definition — same id exists in both workspaces, no remap
-    mock_ab.get_source_definitions.side_effect = lambda ws: {
+    mock_ab.get_source_definitions.side_effect = lambda ws, server: {
         "ws-t": {
             "sourceDefinitions": [
                 {
@@ -1076,7 +1079,11 @@ def test_step_sources_recreates_from_config(mock_ab, mock_load, mock_validate):
     run = CloneRun(template=template, trial_email="a@b.org", trial_org=trial_org)
     clone_service._step_sources(run)
     mock_ab.create_source.assert_called_once_with(
-        "ws-r", "PG", "def-pg", {"host": "h", "password": "real"}
+        "ws-r",
+        "PG",
+        "def-pg",
+        {"host": "h", "password": "real"},
+        server=RegionService.airbyte_server_for_org(trial_org),
     )
     mock_ab.create_custom_source_definition.assert_not_called()
     assert run.manifest["source_map"] == {"old-1": "new-1"}
@@ -1107,7 +1114,7 @@ def test_step_sources_remaps_custom_definitions(mock_ab, mock_load, mock_validat
             },
         ]
     }
-    mock_ab.get_source_definitions.side_effect = lambda ws: {
+    mock_ab.get_source_definitions.side_effect = lambda ws, server: {
         "ws-t": {
             "sourceDefinitions": [
                 {
@@ -1152,6 +1159,7 @@ def test_step_sources_remaps_custom_definitions(mock_ab, mock_load, mock_validat
         docker_repository="tech4dev/source-commcare",
         docker_image_tag="0.3.0",
         documentation_url="",
+        server=RegionService.airbyte_server_for_org(trial_org),
     )
     assert mock_ab.create_source.call_args_list[0].args == (
         "ws-r",
@@ -1253,7 +1261,9 @@ def test_step_connections_mirrors_template_stream_selection(mock_ab, mock_create
 
     clone_service._step_connections(run)
 
-    mock_ab.get_source_schema_catalog.assert_called_once_with("ws-r", "new-1")
+    mock_ab.get_source_schema_catalog.assert_called_once_with(
+        "ws-r", "new-1", server=RegionService.airbyte_server_for_org(trial_org)
+    )
     mock_create_conn.assert_called_once()
     args, _ = mock_create_conn.call_args
     assert args[0] == trial_org
