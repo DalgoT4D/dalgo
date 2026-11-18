@@ -9,6 +9,13 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 
 from ddpui.auth import ADMIN_ROLE, SUPER_ADMIN_ROLE
+from ddpui.utils.constants import (
+    INVALID_NEW_OWNER_ERROR,
+    LAST_ADMIN_ERROR,
+    NO_ORG_ADMIN_ERROR,
+    ORG_ADMIN_ROLES,
+    TECH4DEV_EMAIL_DOMAIN,
+)
 from ddpui.core.admin.exceptions import AdminOrgCreateError, AdminOrgDeleteError
 from ddpui.models.org import Org, OrgWarehouse
 from ddpui.models.role_based_access import Role
@@ -227,6 +234,25 @@ def delete_org(org: Org) -> None:
 # --------------------------------------------------------------------------- #
 
 
+def list_new_owner_options(org: Org, orguser: OrgUser) -> List[OrgUser]:
+    """The org's other admins outside Tech4Dev: who can take over a removed user's content."""
+    return list(
+        OrgUser.objects.filter(org=org, new_role__slug__in=ORG_ADMIN_ROLES)
+        .exclude(id=orguser.id)
+        .exclude(user__email__iendswith=TECH4DEV_EMAIL_DOMAIN)
+        .select_related("user", "new_role")
+    )
+
+
+def _is_last_org_admin(org: Org, orguser: OrgUser) -> bool:
+    """True if orguser is the org's only admin, not counting Tech4Dev staff."""
+    if orguser.new_role is None or orguser.new_role.slug not in ORG_ADMIN_ROLES:
+        return False
+    if orguser.user.email.lower().endswith(TECH4DEV_EMAIL_DOMAIN):
+        return False
+    return not list_new_owner_options(org, orguser)
+
+
 def list_assignable_roles() -> List[Role]:
     """Org-user roles, highest first; super-admin is never assignable from the portal."""
     return list(Role.objects.exclude(slug=SUPER_ADMIN_ROLE).order_by("-level"))
@@ -245,21 +271,37 @@ def change_orguser_role(
 ) -> Tuple[Optional[dict], Optional[str]]:
     """Change a user's role in the target org as a platform admin (skips the "can't
     assign higher than your own role" cap)."""
+    role_to_assign = Role.objects.filter(uuid=role_uuid).first()
+    if (
+        role_to_assign
+        and role_to_assign.slug not in ORG_ADMIN_ROLES
+        and _is_last_org_admin(org, orguser)
+    ):
+        return None, LAST_ADMIN_ERROR
     return orguserfunctions.change_orguser_role_in_org(
         org, requestor, orguser.user.email, role_uuid, is_platform_admin=True
     )
 
 
 def remove_orguser(
-    org: Org, requestor: OrgUser, orguser: OrgUser
+    org: Org, requestor: OrgUser, orguser: OrgUser, new_owner_id: int
 ) -> Tuple[Optional[object], Optional[str]]:
     """Remove a user from the target org as a platform admin. Their created content is
-    reassigned to the requestor, not deleted."""
+    reassigned to new_owner_id, an org admin outside Tech4Dev, not deleted."""
+    if _is_last_org_admin(org, orguser):
+        return None, LAST_ADMIN_ERROR
+    options = list_new_owner_options(org, orguser)
+    if not options:
+        return None, NO_ORG_ADMIN_ERROR
+    new_owner = next((option for option in options if option.id == new_owner_id), None)
+    if new_owner is None:
+        return None, INVALID_NEW_OWNER_ERROR
     return orguserfunctions.delete_orguser_from_org(
         org,
         requestor,
         DeleteOrgUserPayload(email=orguser.user.email),
         is_platform_admin=True,
+        new_owner=new_owner,
     )
 
 

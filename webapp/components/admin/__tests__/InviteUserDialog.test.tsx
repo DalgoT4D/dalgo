@@ -91,4 +91,16 @@ describe('Admin InviteUserDialog', () => {
     await waitFor(() => expect(mockInvite).toHaveBeenCalled());
     expect(mockTrackEvent).not.toHaveBeenCalled();
   });
+
+  it('shows an error and blocks submit when roles fail to load', () => {
+    (useAdminPortal.useAdminRoles as jest.Mock).mockReturnValue({
+      roles: undefined,
+      isLoading: false,
+      isError: new Error('boom'),
+    });
+    renderDialog();
+
+    expect(screen.getByTestId('admin-invite-roles-error')).toBeInTheDocument();
+    expect(screen.getByTestId('admin-invite-submit')).toBeDisabled();
+  });
 });

@@ -87,4 +87,24 @@ describe('Admin ChangeRoleDialog', () => {
     await waitFor(() => expect(mockChangeRole).toHaveBeenCalled());
     expect(mockTrackEvent).not.toHaveBeenCalled();
   });
+
+  it('shows an error and blocks save when roles fail to load', () => {
+    (useAdminPortal.useAdminRoles as jest.Mock).mockReturnValue({
+      roles: undefined,
+      isLoading: false,
+      isError: new Error('boom'),
+    });
+    render(
+      <ChangeRoleDialog
+        open
+        onOpenChange={jest.fn()}
+        orgId={42}
+        orgUser={orgUser}
+        onSuccess={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('admin-change-role-roles-error')).toBeInTheDocument();
+    expect(screen.getByTestId('admin-change-role-submit')).toBeDisabled();
+  });
 });

@@ -93,6 +93,7 @@ from ddpui.auth import (
     UNAUTHORIZED,
 )
 from ddpui.core.admin import admin_service
+from ddpui.utils.constants import INVALID_NEW_OWNER_ERROR, LAST_ADMIN_ERROR, NO_ORG_ADMIN_ERROR
 from ddpui.tests.api_tests.test_user_org_api import seed_db, mock_request
 
 pytestmark = pytest.mark.django_db
@@ -748,6 +749,7 @@ def test_admin_change_role_in_org(platform_admin_request, akshara):
 def test_admin_change_own_role_in_selected_org(platform_admin_request):
     """a platform admin can change their own role even in the org selected in the main app"""
     me = platform_admin_request.orguser
+    _make_member(me.org, "other-admin@example.com", ADMIN_ROLE)
     payload = AdminChangeRoleSchema(role_uuid=_role(GUEST_ROLE).uuid)
 
     response = put_admin_org_user_role(platform_admin_request, me.org.id, me.id, payload)
@@ -782,7 +784,9 @@ def test_admin_user_routes_refuse_an_orguser_from_another_org(
         lambda: get_admin_org_user_removal_impact(
             platform_admin_request, akshara.id, bhumi_member.id
         ),
-        lambda: delete_admin_org_user(platform_admin_request, akshara.id, bhumi_member.id),
+        lambda: delete_admin_org_user(
+            platform_admin_request, akshara.id, bhumi_member.id, bhumi_member.id
+        ),
     ):
         with pytest.raises(HttpError) as excinfo:
             call()
@@ -831,12 +835,10 @@ def test_admin_removal_impact_counts_are_accurate(platform_admin_request, akshar
 def test_admin_remove_user_reassigns_content(platform_admin_request, akshara):
     """
     removing the user hard-deletes the OrgUser but KEEPS their Dashboards/Charts/Reports,
-    reassigned to the admin who did the removal (upstream #c6b3d545), not orphaned.
-
-    Note the requestor here is a platform admin who is NOT a member of akshara, so this
-    also pins that the reassignment is scoped by the target org rather than by
-    requestor_orguser.org -- the content moves even across orgs.
+    reassigned to the org admin the platform admin picked (upstream #c6b3d545), not to
+    the platform admin, who is not a member of akshara.
     """
+    new_owner = _make_member(akshara, "owner@akshara.org", ADMIN_ROLE)
     priya = _make_member(akshara, "priya2@akshara.org", GUEST_ROLE)
     dash = Dashboard.objects.create(title="d", org=akshara, created_by=priya)
     chart = Chart.objects.create(
@@ -850,17 +852,16 @@ def test_admin_remove_user_reassigns_content(platform_admin_request, akshara):
     report = ReportSnapshot.objects.create(title="r", org=akshara, created_by=priya)
     priya_id = priya.id
 
-    delete_admin_org_user(platform_admin_request, akshara.id, priya.id)
+    delete_admin_org_user(platform_admin_request, akshara.id, priya.id, new_owner.id)
 
     assert not OrgUser.objects.filter(id=priya_id).exists()
-    # content is KEPT (not cascade-deleted) and now belongs to the removing admin
-    admin_orguser = platform_admin_request.orguser
+    # content is KEPT (not cascade-deleted) and now belongs to the chosen org admin
     dash.refresh_from_db()
     chart.refresh_from_db()
     report.refresh_from_db()
-    assert dash.created_by_id == admin_orguser.id
-    assert chart.created_by_id == admin_orguser.id
-    assert report.created_by_id == admin_orguser.id
+    assert dash.created_by_id == new_owner.id
+    assert chart.created_by_id == new_owner.id
+    assert report.created_by_id == new_owner.id
 
 
 def test_admin_roles_not_capped_by_selected_org_role(platform_admin_request):
@@ -877,10 +878,56 @@ def test_admin_roles_not_capped_by_selected_org_role(platform_admin_request):
 def test_admin_can_remove_self_from_selected_org(platform_admin_request):
     """a platform admin can remove themselves even from the org selected in the main app"""
     me = platform_admin_request.orguser
+    other_admin = _make_member(me.org, "other-admin@example.com", ADMIN_ROLE)
 
-    delete_admin_org_user(platform_admin_request, me.org.id, me.id)
+    delete_admin_org_user(platform_admin_request, me.org.id, me.id, other_admin.id)
 
     assert not OrgUser.objects.filter(id=me.id).exists()
+
+
+def test_admin_cannot_remove_last_org_admin(platform_admin_request, akshara):
+    """the org's only admin outside Tech4Dev can't be removed; a Tech4Dev admin doesn't count"""
+    ngo_admin = _make_member(akshara, "admin@akshara.org", ADMIN_ROLE)
+    staff = _make_member(akshara, "staff@projecttech4dev.org", ADMIN_ROLE)
+
+    with pytest.raises(HttpError) as excinfo:
+        delete_admin_org_user(platform_admin_request, akshara.id, ngo_admin.id, staff.id)
+
+    assert excinfo.value.status_code == 400
+    assert str(excinfo.value) == LAST_ADMIN_ERROR
+    assert OrgUser.objects.filter(id=ngo_admin.id).exists()
+
+
+def test_admin_cannot_demote_last_org_admin(platform_admin_request, akshara):
+    """the org's only admin outside Tech4Dev can't be moved to a non-admin role"""
+    ngo_admin = _make_member(akshara, "admin@akshara.org", ADMIN_ROLE)
+    payload = AdminChangeRoleSchema(role_uuid=_role(GUEST_ROLE).uuid)
+
+    with pytest.raises(HttpError) as excinfo:
+        put_admin_org_user_role(platform_admin_request, akshara.id, ngo_admin.id, payload)
+
+    assert excinfo.value.status_code == 400
+    assert str(excinfo.value) == LAST_ADMIN_ERROR
+    ngo_admin.refresh_from_db()
+    assert ngo_admin.new_role.slug == ADMIN_ROLE
+
+
+def test_admin_remove_needs_an_org_admin_as_new_owner(platform_admin_request, akshara):
+    """removal is blocked without an org admin outside Tech4Dev, and only one can take over"""
+    member = _make_member(akshara, "member@akshara.org", GUEST_ROLE)
+    staff = _make_member(akshara, "staff@projecttech4dev.org", ADMIN_ROLE)
+
+    with pytest.raises(HttpError) as excinfo:
+        delete_admin_org_user(platform_admin_request, akshara.id, member.id, staff.id)
+    assert str(excinfo.value) == NO_ORG_ADMIN_ERROR
+
+    _make_member(akshara, "admin@akshara.org", ADMIN_ROLE)
+    for bad_owner_id in (staff.id, member.id):
+        with pytest.raises(HttpError) as excinfo:
+            delete_admin_org_user(platform_admin_request, akshara.id, member.id, bad_owner_id)
+        assert str(excinfo.value) == INVALID_NEW_OWNER_ERROR
+
+    assert OrgUser.objects.filter(id=member.id).exists()
 
 
 # ---- org-scoped cancel invite -------------------------------------------------
@@ -962,8 +1009,8 @@ def test_week1_full_admin_lifecycle_flow(
       4. admin changes the user's role
       5. admin invites a 2nd user then cancels it; a DIFFERENT org's invite can't be
          cancelled through this org's path (404) — org-scoping holds inside the flow
-      6. admin removes the first user — orphan-impact count available first, then their
-         content is orphaned (created_by NULLed, kept), not cascade-deleted
+      6. admin removes the first user — impact count available first, then their
+         content is reassigned to the chosen org admin (kept), not cascade-deleted
     """
     admin_request = platform_admin_request
 
@@ -1072,20 +1119,22 @@ def test_week1_full_admin_lifecycle_flow(
     assert impact.charts_orphaned == 3
     assert impact.reports_orphaned == 1
 
+    # another org admin (outside Tech4Dev) to take over Priya's content
+    new_owner = _make_member(org1, "owner2@akshara.org", ADMIN_ROLE)
+
     priya_ou_id = priya_ou.id
-    delete_admin_org_user(admin_request, org1.id, priya_ou.id)
+    delete_admin_org_user(admin_request, org1.id, priya_ou.id, new_owner.id)
 
     assert not OrgUser.objects.filter(id=priya_ou_id).exists()  # removed from org1
-    # content is KEPT and transferred to the removing admin -- not cascade-deleted
-    remover_id = admin_request.orguser.id
+    # content is KEPT and transferred to the chosen org admin -- not cascade-deleted
     for dash in dashboards:
         dash.refresh_from_db()
-        assert dash.created_by_id == remover_id
+        assert dash.created_by_id == new_owner.id
     for chart in charts:
         chart.refresh_from_db()
-        assert chart.created_by_id == remover_id
+        assert chart.created_by_id == new_owner.id
     report.refresh_from_db()
-    assert report.created_by_id == remover_id
+    assert report.created_by_id == new_owner.id
     # the remove is org-scoped: Priya's Bhumi membership is untouched
     assert OrgUser.objects.filter(id=priya_ou2.id).exists()
 

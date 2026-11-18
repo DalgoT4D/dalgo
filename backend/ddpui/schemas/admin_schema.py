@@ -190,8 +190,8 @@ class AdminRoleSchema(Schema):
 class RemovalImpactSchema(Schema):
     """
     how much content removing a user would move. Drives the confirm dialog's warning.
-    Nothing is deleted: delete_orguser_from_org reassigns their Dashboards/Charts/
-    ReportSnapshots to the admin doing the removal (upstream #c6b3d545).
+    Nothing is deleted: their Dashboards/Charts/ReportSnapshots are reassigned to the
+    org admin picked from new_owner_options (upstream #c6b3d545).
 
     The `*_orphaned` field names predate that reassignment and are kept because the
     frontend RemoveUserDialog reads them; renaming them needs a coordinated change.
@@ -200,6 +200,8 @@ class RemovalImpactSchema(Schema):
     dashboards_orphaned: int
     charts_orphaned: int
     reports_orphaned: int
+    # org admins outside Tech4Dev who can take over the content; empty blocks removal
+    new_owner_options: List[AdminOrgUserSchema]
 
 
 # ── Feature flags tab (M3) ───────────────────────────────────────────────────

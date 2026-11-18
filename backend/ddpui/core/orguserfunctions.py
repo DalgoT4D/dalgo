@@ -189,6 +189,7 @@ def delete_orguser_from_org(
     target_org: Org,
     requestor_orguser: OrgUser,
     payload: DeleteOrgUserPayload,
+    new_owner: OrgUser,
     is_platform_admin: bool = False,
 ):
     """
@@ -200,10 +201,10 @@ def delete_orguser_from_org(
     skipped — a platform admin acting cross-org has no role in target_org to compare
     against. See features/admin-portal/plan.md §4.4.
 
-    NOTE: deleting the OrgUser REASSIGNS the content it created to requestor_orguser
-    rather than deleting or orphaning it (upstream #c6b3d545). Callers should still
-    surface the removal-impact count first (see the admin removal-impact endpoint,
-    plan.md §4.6 / research §5).
+    NOTE: deleting the OrgUser REASSIGNS the content it created to new_owner rather
+    than deleting or orphaning it (upstream #c6b3d545).
+    Callers should still surface the removal-impact count first (see the admin
+    removal-impact endpoint, plan.md §4.6 / research §5).
     """
     orguser_to_delete = OrgUser.objects.filter(org=target_org, user__email=payload.email).first()
 
@@ -220,13 +221,13 @@ def delete_orguser_from_org(
     ):
         return None, "cannot delete user having higher role"
 
-    # Reassign resources owned by the removed user to the admin doing the removal so
-    # nothing is left orphaned. Scoped to target_org, not requestor_orguser.org: a
-    # platform admin removing cross-org is not a member of the org being cleaned up.
+    # Reassign resources owned by the removed user to new_owner so nothing is left
+    # orphaned. Scoped to target_org, not requestor_orguser.org: a platform admin
+    # removing cross-org is not a member of the org being cleaned up.
     with transaction.atomic():
         for Model in (Dashboard, Chart, Metric, KPI, ReportSnapshot, Alert):
             Model.objects.filter(org=target_org, created_by=orguser_to_delete).update(
-                created_by=requestor_orguser
+                created_by=new_owner
             )
 
         # remove the pending invitations for this email in the target org
@@ -239,8 +240,10 @@ def delete_orguser_from_org(
 
 
 def delete_orguser_v1(requestor_orguser: OrgUser, payload: DeleteOrgUserPayload):
-    """delete another orguser in the requestor's own org (single-org wrapper)"""
-    return delete_orguser_from_org(requestor_orguser.org, requestor_orguser, payload)
+    """delete another orguser in the requestor's own org; their content goes to the requestor"""
+    return delete_orguser_from_org(
+        requestor_orguser.org, requestor_orguser, payload, new_owner=requestor_orguser
+    )
 
 
 def invite_user_to_org(

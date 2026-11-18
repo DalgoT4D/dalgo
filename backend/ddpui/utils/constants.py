@@ -107,3 +107,17 @@ IMAGE_CONTENT_TYPE_TO_EXT = {
     "image/webp": "webp",
     "image/svg+xml": "svg",
 }
+
+# Admin portal: Tech4Dev staff don't count as an org's own admin
+TECH4DEV_EMAIL_DOMAIN = "@projecttech4dev.org"
+ORG_ADMIN_ROLES = ("admin", "super-admin")
+LAST_ADMIN_ERROR = (
+    "An org must keep at least one admin outside Tech4Dev; make another user admin first"
+)
+NO_ORG_ADMIN_ERROR = (
+    "This org has no admin outside Tech4Dev to take over the user's content; "
+    "make someone admin first"
+)
+INVALID_NEW_OWNER_ERROR = (
+    "Choose an admin of this org (outside Tech4Dev) to take over the user's content"
+)
