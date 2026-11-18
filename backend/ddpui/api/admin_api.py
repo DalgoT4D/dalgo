@@ -27,6 +27,7 @@ from ddpui.schemas.admin_schema import (
     AdminInvitationSchema,
     AdminOrgUsersResponse,
     AdminChangeRoleSchema,
+    AdminRoleSchema,
     RemovalImpactSchema,
     OrgDeletionImpactSchema,
     AdminFeatureFlagCatalogItem,
@@ -162,6 +163,14 @@ def _get_orguser_or_404(org: Org, orguser_id: int) -> OrgUser:
     return orguser
 
 
+@admin_router.get("/roles", response=List[AdminRoleSchema])
+@has_platform_admin_permission
+def get_admin_roles(request):
+    """Roles for the admin portal's invite / change-role dropdowns, not capped by the
+    admin's own role in the selected org (unlike /api/data/roles)."""
+    return [AdminRoleSchema.from_model(role) for role in admin_service.list_assignable_roles()]
+
+
 @admin_router.get("/orgs/{org_id}/users", response=AdminOrgUsersResponse)
 @has_platform_admin_permission
 def get_admin_org_users(request, org_id: int):
@@ -234,19 +243,23 @@ def get_admin_org_user_removal_impact(request, org_id: int, orguser_id: int):
         dashboards_orphaned=dashboards_orphaned,
         charts_orphaned=charts_orphaned,
         reports_orphaned=reports_orphaned,
+        new_owner_options=[
+            AdminOrgUserSchema.from_model(option)
+            for option in admin_service.list_new_owner_options(org, orguser)
+        ],
     )
 
 
 @admin_router.delete("/orgs/{org_id}/users/{orguser_id}", response=AdminSuccessSchema)
 @has_platform_admin_permission
-def delete_admin_org_user(request, org_id: int, orguser_id: int):
-    """Remove a user from the org. Their created content is reassigned to the admin
-    doing the removal, not deleted. Callers should show the removal-impact warning
-    first."""
+def delete_admin_org_user(request, org_id: int, orguser_id: int, new_owner_id: int):
+    """Remove a user from the org. Their created content is reassigned to new_owner_id
+    (one of the removal-impact new_owner_options), not deleted. Callers should show the
+    removal-impact warning first."""
     org = _get_org_or_404(org_id)
     orguser = _get_orguser_or_404(org, orguser_id)
 
-    _, error = admin_service.remove_orguser(org, request.orguser, orguser)
+    _, error = admin_service.remove_orguser(org, request.orguser, orguser, new_owner_id)
     if error:
         raise HttpError(400, error)
 

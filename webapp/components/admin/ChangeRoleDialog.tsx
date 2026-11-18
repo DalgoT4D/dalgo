@@ -18,8 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useRoles } from '@/hooks/api/useUserManagement';
-import { useAdminOrgUserActions, type AdminOrgUser } from '@/hooks/api/useAdminPortal';
+import {
+  useAdminOrgUserActions,
+  useAdminRoles,
+  type AdminOrgUser,
+} from '@/hooks/api/useAdminPortal';
 import { trackEvent } from '@/lib/analytics';
 import { ANALYTICS_EVENTS } from '@/constants/analytics';
 
@@ -42,7 +45,7 @@ export function ChangeRoleDialog({
   orgUser,
   onSuccess,
 }: ChangeRoleDialogProps) {
-  const { roles } = useRoles();
+  const { roles, isLoading: rolesLoading, isError: rolesError } = useAdminRoles(open);
   const { changeRole } = useAdminOrgUserActions();
 
   const [roleUuid, setRoleUuid] = useState('');
@@ -91,9 +94,13 @@ export function ChangeRoleDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="admin-change-role">Role</Label>
-            <Select value={roleUuid} onValueChange={setRoleUuid}>
+            <Select
+              value={roleUuid}
+              onValueChange={setRoleUuid}
+              disabled={rolesLoading || !!rolesError}
+            >
               <SelectTrigger id="admin-change-role" data-testid="admin-change-role-select">
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder={rolesLoading ? 'Loading roles…' : 'Select a role'} />
               </SelectTrigger>
               <SelectContent>
                 {roles?.map((role) => (
@@ -103,6 +110,11 @@ export function ChangeRoleDialog({
                 ))}
               </SelectContent>
             </Select>
+            {rolesError && (
+              <p className="text-sm text-destructive" data-testid="admin-change-role-roles-error">
+                Couldn&apos;t load roles. Close and try again.
+              </p>
+            )}
           </div>
 
           <DialogFooter>

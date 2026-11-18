@@ -28,6 +28,13 @@ const orgUser = {
   new_role_slug: 'guest',
 };
 
+const newOwner = { orguser_id: 11, email: 'admin@akshara.org', new_role_slug: 'admin' };
+
+async function pickNewOwner() {
+  await userEvent.click(screen.getByTestId('admin-remove-new-owner-select'));
+  await userEvent.click(await screen.findByRole('option', { name: newOwner.email }));
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockRemoveUser.mockResolvedValue(undefined);
@@ -93,22 +100,40 @@ describe('RemoveUserDialog', () => {
     expect(mockRemoveUser).not.toHaveBeenCalled();
   });
 
-  it('allows removal only after the counts are shown, then calls removeUser', async () => {
+  it('allows removal only after the counts are shown and a new owner is picked', async () => {
     mockGetRemovalImpact.mockResolvedValue({
       dashboards_orphaned: 1,
       charts_orphaned: 0,
       reports_orphaned: 0,
+      new_owner_options: [newOwner],
     });
 
     renderDialog();
 
-    // wait until the impact summary is on screen — the gate is open
+    // wait until the impact summary is on screen; confirm still needs a new owner
     await waitFor(() => expect(screen.getByTestId('removal-impact-summary')).toBeInTheDocument());
     const confirm = screen.getByTestId('remove-user-confirm');
+    expect(confirm).toBeDisabled();
+
+    await pickNewOwner();
     expect(confirm).toBeEnabled();
 
     await userEvent.click(confirm);
-    expect(mockRemoveUser).toHaveBeenCalledWith(42, 7);
+    expect(mockRemoveUser).toHaveBeenCalledWith(42, 7, newOwner.orguser_id);
+  });
+
+  it('blocks removal when the org has no admin to take over the content', async () => {
+    mockGetRemovalImpact.mockResolvedValue({
+      dashboards_orphaned: 1,
+      charts_orphaned: 0,
+      reports_orphaned: 0,
+      new_owner_options: [],
+    });
+
+    renderDialog();
+
+    await waitFor(() => expect(screen.getByTestId('removal-no-new-owner')).toBeInTheDocument());
+    expect(screen.getByTestId('remove-user-confirm')).toBeDisabled();
   });
 
   it('reports the removal with the orphan counts and no email', async () => {
@@ -116,11 +141,13 @@ describe('RemoveUserDialog', () => {
       dashboards_orphaned: 1,
       charts_orphaned: 4,
       reports_orphaned: 0,
+      new_owner_options: [newOwner],
     });
 
     renderDialog();
 
     await waitFor(() => expect(screen.getByTestId('removal-impact-summary')).toBeInTheDocument());
+    await pickNewOwner();
     await userEvent.click(screen.getByTestId('remove-user-confirm'));
 
     await waitFor(() =>
@@ -138,12 +165,14 @@ describe('RemoveUserDialog', () => {
       dashboards_orphaned: 0,
       charts_orphaned: 0,
       reports_orphaned: 0,
+      new_owner_options: [newOwner],
     });
     mockRemoveUser.mockRejectedValueOnce(new Error('backend down'));
 
     renderDialog();
 
     await waitFor(() => expect(screen.getByTestId('removal-impact-summary')).toBeInTheDocument());
+    await pickNewOwner();
     await userEvent.click(screen.getByTestId('remove-user-confirm'));
 
     await waitFor(() => expect(mockRemoveUser).toHaveBeenCalled());
