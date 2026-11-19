@@ -36,6 +36,10 @@ import { CelebrationModal } from '@/components/onboarding/celebration-modal';
 import type { ChartDataPayload } from '@/types/charts';
 import { mergeTableColumnFormatting } from '@/lib/chart-payload-utils';
 import { resolveDrillDownGeoJSON } from '@/lib/map-drilldown-utils';
+import {
+  useAutoDrillSingleRegion,
+  isAutoDrillEnabled,
+} from '@/components/charts/map/useAutoDrillSingleRegion';
 import type * as echarts from 'echarts';
 import {
   getChartEditUrl,
@@ -752,6 +756,21 @@ export function ChartDetailClient({ chartId }: ChartDetailClientProps) {
       router,
     ]
   );
+
+  // Open directly at the child level when only one region has data (opt-in per chart)
+  const autoDrillInto = useCallback(
+    (regionName: string) => handleRegionClick(regionName, null),
+    [handleRegionClick]
+  );
+  useAutoDrillSingleRegion({
+    enabled:
+      chart?.chart_type === 'map' && isAutoDrillEnabled(chart?.extra_config?.geographic_hierarchy),
+    isAtBaseLevel: drillDownPath.length === 0,
+    canDrill: Boolean(regions?.length),
+    mapRows: mapDataOverlay?.data,
+    payloadKey: JSON.stringify(mapDataOverlayPayload),
+    drillInto: autoDrillInto,
+  });
 
   // Handle drill up to a specific level
   const handleDrillUp = (targetLevel: number) => {

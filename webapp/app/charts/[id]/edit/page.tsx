@@ -46,6 +46,10 @@ import { AlertCircle } from 'lucide-react';
 
 import { deepEqual } from '@/lib/form-utils';
 import { resolveDrillDownGeoJSON } from '@/lib/map-drilldown-utils';
+import {
+  useAutoDrillSingleRegion,
+  isAutoDrillEnabled,
+} from '@/components/charts/map/useAutoDrillSingleRegion';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { trackEvent, trackFeatureView } from '@/lib/analytics';
 import {
@@ -933,6 +937,20 @@ function EditChartPageContent() {
       drillDownPath,
     ]
   );
+
+  // Preview opens at district level when only one state has data (if enabled)
+  const autoDrillInto = useCallback(
+    (regionName: string) => handleRegionClick(regionName, null),
+    [handleRegionClick]
+  );
+  useAutoDrillSingleRegion({
+    enabled: formData.chart_type === 'map' && isAutoDrillEnabled(formData.geographic_hierarchy),
+    isAtBaseLevel: drillDownPath.length === 0,
+    canDrill: Boolean(states?.length),
+    mapRows: mapDataOverlay?.data,
+    payloadKey: JSON.stringify(activeDataOverlayPayload),
+    drillInto: autoDrillInto,
+  });
 
   // Handle drill-up to a specific level (consistent with view mode)
   const handleDrillUp = useCallback((targetLevel: number) => {
