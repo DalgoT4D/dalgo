@@ -1,26 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
-import { useWarehouse } from './useWarehouse';
+import type { WarehouseTable } from '@/types/explore';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/api';
 import type {
-  Chart,
   ChartCreate,
   ChartUpdate,
   ChartDataPayload,
-  ChartDataResponse,
   ChartFilter,
   ChartMetric,
-  DataPreviewResponse,
 } from '@/types/charts';
-import { DashboardFilter } from './useDashboards';
-import { ResolvedDashboardFilter } from '@/lib/dashboard-filter-utils';
 
 // Fetchers
 const chartsFetcher = (url: string) => apiGet(url);
 const chartFetcher = (url: string) => apiGet(url);
 const chartDataFetcher = ([url, data]: [string, ChartDataPayload]) => apiPost(url, data);
-const dataPreviewFetcher = ([url, data]: [string, ChartDataPayload]) => apiPost(url, data);
 
 // Mutations
 const createChart = (url: string, { arg }: { arg: ChartCreate }) => apiPost(url, arg);
@@ -90,7 +84,7 @@ export function useChartDataPreview(
   payload: ChartDataPayload | null,
   page: number = 1,
   pageSize: number = 50,
-  dashboardFilters: Record<string, any> = {},
+  dashboardFilters: Record<string, unknown> = {},
   snapshotId?: number | null,
   chartId?: number | null
 ) {
@@ -131,7 +125,7 @@ export function useChartDataPreview(
 // Chart data preview total rows hook — same live-vs-report split as useChartDataPreview.
 export function useChartDataPreviewTotalRows(
   payload: ChartDataPayload | null,
-  dashboardFilters: Record<string, any> = {},
+  dashboardFilters: Record<string, unknown> = {},
   snapshotId?: number | null,
   chartId?: number | null
 ) {
@@ -172,26 +166,30 @@ export function useSchemas() {
 }
 
 export function useTables(schema: string | null) {
-  return useSWR<any[]>(schema ? `/api/warehouse/tables/${schema}` : null, apiGet);
+  return useSWR<string[]>(schema ? `/api/warehouse/tables/${schema}` : null, apiGet);
 }
 
-// Hook to get all tables from all schemas using optimized sync_tables API
+// sync_tables returns 404 when the org has not set up a warehouse yet
+const NO_WAREHOUSE_STATUS = 404;
+
+// Hook to get all tables from all schemas using optimized sync_tables API.
+// Reads the warehouse directly — deliberately does NOT go through useWarehouse(),
+// which calls Airbyte and would hide the dataset list whenever Airbyte is down.
 export function useAllSchemaTables() {
   const {
-    data: warehouse,
-    isLoading: isWarehouseLoading,
-    isError: warehouseError,
-  } = useWarehouse();
-  const {
     data: syncTablesData,
-    isLoading: isTablesLoading,
-    error: tablesError,
-  } = useSWR(warehouse ? '/api/warehouse/sync_tables?fresh=1' : null, apiGet, {
-    dedupingInterval: 30000,
-    revalidateOnFocus: true,
-    revalidateOnReconnect: true,
-    revalidateOnMount: true,
-  });
+    isLoading,
+    error,
+  } = useSWR<WarehouseTable[], Error & { status?: number }>(
+    '/api/warehouse/sync_tables?fresh=1',
+    apiGet,
+    {
+      dedupingInterval: 30000,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      revalidateOnMount: true,
+    }
+  );
 
   // Transform sync_tables API response to match existing format exactly
   const allTables = React.useMemo(() => {
@@ -199,22 +197,25 @@ export function useAllSchemaTables() {
       return [];
     }
 
-    return syncTablesData.map((item: any) => ({
+    return syncTablesData.map((item) => ({
       schema_name: item.schema,
       table_name: item.name,
       full_name: `${item.schema}.${item.name}`, // Format: "schema.table"
     }));
   }, [syncTablesData]);
 
+  const noWarehouse = error?.status === NO_WAREHOUSE_STATUS;
+
   return {
     data: allTables,
-    isLoading: isWarehouseLoading || isTablesLoading,
-    error: warehouseError || tablesError,
-    noWarehouse: !isWarehouseLoading && !warehouseError && !warehouse,
+    isLoading,
+    error: noWarehouse ? undefined : error,
+    noWarehouse,
   };
 }
 
 export function useColumns(schema: string | null, table: string | null) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- callers read different column shapes (TableColumn variants, recommended_filter_type); needs a shared type first
   return useSWR<any[]>(
     schema && table ? `/api/warehouse/table_columns/${schema}/${table}` : null,
     apiGet
@@ -279,7 +280,7 @@ export interface GeoJSONDetail {
   id: number;
   name: string;
   display_name: string;
-  geojson_data: any;
+  geojson_data: unknown;
   properties_key: string;
 }
 
@@ -400,14 +401,14 @@ export interface MapDataOverlayRawPayload {
   // Legacy fields, used when `metric` isn't provided (charts saved before the metrics array existed).
   value_column?: string;
   aggregate_function?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   // Chart builder's Data Filters; sent to the backend as extra_config.filters.
   chart_filters?: ChartFilter[];
-  dashboard_filters?: Record<string, any>;
+  dashboard_filters?: Record<string, unknown>;
   extra_config?: {
-    filters?: any[];
-    pagination?: any;
-    sort?: any[];
+    filters?: ChartFilter[];
+    pagination?: Record<string, unknown>;
+    sort?: Record<string, unknown>[];
   };
 }
 
