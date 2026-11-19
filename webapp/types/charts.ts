@@ -74,6 +74,8 @@ export interface GeographicHierarchy {
   base_level: GeographicLevel;
   drill_down_levels: GeographicLevel[];
   max_depth?: number;
+  // Open the map drilled into the only region with data (e.g. one state → its districts)
+  auto_drill_single_region?: boolean;
 }
 
 // Region hierarchy from backend

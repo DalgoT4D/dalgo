@@ -207,7 +207,7 @@ def transform_data_for_map(
 
     for row in results:
         region_name = row.get(geographic_column)
-        value = row.get(agg_col_name, 0)
+        value = row.get(agg_col_name)
         if region_name:
             normalized_key = normalize_region_name(region_name)
             data_lookup_normalized[normalized_key] = value
@@ -228,15 +228,15 @@ def transform_data_for_map(
         # Normalize the GeoJSON region name for matching
         normalized_geojson_name = normalize_region_name(geojson_region_name)
 
-        # Look up value using normalized key
-        value = data_lookup_normalized.get(normalized_geojson_name, 0)
+        # None = region has no rows (drawn as "no data"); 0 = a real zero value
+        value = data_lookup_normalized.get(normalized_geojson_name)
 
         # Debug every region
         logger.info(
             f"Processing: '{geojson_region_name}' → normalized: '{normalized_geojson_name}' → value: {value}"
         )
 
-        if value > 0:
+        if value is not None:
             matched_count += 1
 
         # Use the original GeoJSON name for ECharts compatibility
@@ -244,7 +244,7 @@ def transform_data_for_map(
 
     logger.info(f"Matched {matched_count} out of {len(map_data)} regions")
 
-    values = [item["value"] for item in map_data if item["value"] > 0]
+    values = [item["value"] for item in map_data if item["value"] is not None]
     min_value = min(values) if values else 0
     max_value = max(values) if values else 100
 

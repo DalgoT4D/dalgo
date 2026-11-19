@@ -56,6 +56,10 @@ import {
 } from '@/lib/chart-formatting-utils';
 import { applyStackedBarLabels } from '@/lib/stacked-bar-utils';
 import { resolveDrillDownGeoJSON } from '@/lib/map-drilldown-utils';
+import {
+  useAutoDrillSingleRegion,
+  isAutoDrillEnabled,
+} from '@/components/charts/map/useAutoDrillSingleRegion';
 import { ChartTypes, type ChartDataPayload, type ChartDimension } from '@/types/charts';
 import * as echarts from 'echarts/core';
 import { BarChart, LineChart, PieChart, GaugeChart, ScatterChart, MapChart } from 'echarts/charts';
@@ -732,6 +736,18 @@ export function ChartElementV2({
     // No drill-down configuration found
     toast.info('No drill-down configuration found for this chart');
   };
+
+  // Open directly at the child level when only one region has data (opt-in per chart)
+  useAutoDrillSingleRegion({
+    enabled:
+      chart?.chart_type === ChartTypes.MAP &&
+      isAutoDrillEnabled(chart?.extra_config?.geographic_hierarchy),
+    isAtBaseLevel: drillDownPath.length === 0,
+    canDrill: Boolean(regions?.length),
+    mapRows: mapDataOverlay?.data,
+    payloadKey: JSON.stringify(mapDataOverlayPayload),
+    drillInto: (regionName) => handleRegionClick(regionName, null),
+  });
 
   // Handle drill up to a specific level
   const handleDrillUp = (targetLevel: number) => {
