@@ -11,7 +11,7 @@ def home_region_config() -> dict:
     home = settings.AVAILABLE_DATA_REGIONS[settings.HOME_DATA_REGION]
     return {
         "aws_region": home["aws_region"],
-        "country": "IN",
+        "country": "India",
         "airbyte_secret_name": home["airbyte_secret_name"],
     }
 

@@ -40,21 +40,21 @@ def test_null_region_config_is_home_with_warning(test_data_regions):
         cfg = RegionService.get_region_config(org)
     assert cfg.aws_region == "ap-south-1"
     assert cfg.airbyte_secret_name == TEST_SECRET_IN
-    assert cfg.country == "IN"
+    assert cfg.country == "India"
     mock_logger.warning.assert_called_once()
     assert RegionService.is_home_region(org) is True
 
 
 def test_build_region_config_af(test_data_regions):
-    cfg = RegionService.build_region_config("af", "za")
+    cfg = RegionService.build_region_config("af", "  South Africa ")
     assert cfg.aws_region == "af-south-1"
-    assert cfg.country == "ZA"
+    assert cfg.country == "South Africa"  # trimmed, case kept
     assert cfg.airbyte_secret_name == TEST_SECRET_AF
 
 
 def test_build_region_config_home_defaults_country(test_data_regions):
     cfg = RegionService.build_region_config("in", None)
-    assert cfg.country == "IN"
+    assert cfg.country == "India"
     assert cfg.aws_region == "ap-south-1"
 
 
@@ -70,14 +70,15 @@ def test_build_region_config_unknown_region(test_data_regions):
         RegionService.build_region_config("xx", "ZA")
 
 
-def test_build_region_config_missing_country(test_data_regions):
+@pytest.mark.parametrize("country", [None, "", "   "])
+def test_build_region_config_missing_country(country, test_data_regions):
     with pytest.raises(RegionValidationError):
-        RegionService.build_region_config("af", None)
+        RegionService.build_region_config("af", country)
 
 
 def test_build_region_config_bad_country(test_data_regions):
     with pytest.raises(RegionValidationError):
-        RegionService.build_region_config("af", "ZAF")
+        RegionService.build_region_config("af", "x" * 101)
 
 
 def test_list_selectable_regions(test_data_regions):

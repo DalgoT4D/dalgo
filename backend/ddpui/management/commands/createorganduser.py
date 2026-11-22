@@ -45,7 +45,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--country",
             type=str,
-            help="ISO-3166 alpha-2 country of a NEW org; required outside the home region",
+            help="Country of a NEW org, free text e.g. Nigeria; required outside the home region",
             default=None,
         )
 

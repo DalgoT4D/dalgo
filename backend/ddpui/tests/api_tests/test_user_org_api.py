@@ -1563,7 +1563,7 @@ def test_post_organization_v1_creates_audit_log(
         "subscription_duration": "Yearly",
         "superset_included": False,
         "data_region": "in",
-        "country": "IN",
+        "country": "India",
     }
 
     # Cleanup

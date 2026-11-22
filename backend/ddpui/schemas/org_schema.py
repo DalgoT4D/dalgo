@@ -19,7 +19,7 @@ class OrgSchema(Schema):
     logo_filename: Optional[str] = None
     created_at: Optional[datetime] = None
     data_region: Optional[str] = None  # region code, e.g. "in", "af"
-    country: Optional[str] = None  # ISO-3166-1 alpha-2
+    country: Optional[str] = None  # free text, e.g. "India"
 
 
 class CreateOrgSchema(Schema):

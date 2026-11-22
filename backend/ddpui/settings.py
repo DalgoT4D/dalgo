@@ -283,14 +283,15 @@ HOME_AWS_REGION = "ap-south-1"
 # live in the Secrets Manager secret named here (stored in the home region's SM)
 AVAILABLE_DATA_REGIONS = {
     "in": {
-        "label": "India (Mumbai)",
+        # shown as-is in the region dropdown, in the AWS console's style
+        "label": "Asia Pacific (Mumbai) ap-south-1",
         "aws_region": "ap-south-1",
         "airbyte_secret_name": f"dalgoAirbyteRegion-{DATA_REGION_ENV}-in",
         "prefect_work_pool": os.getenv("PREFECT_EKS_WORKER_POOL_NAME") or "default",
         "airbyte_ui_url": os.getenv("AIRBYTE_URL_FOR_NOTIFICATIONS") or None,
     },
     "af": {
-        "label": "Africa (Cape Town)",
+        "label": "Africa (Cape Town) af-south-1",
         "aws_region": "af-south-1",
         "airbyte_secret_name": f"dalgoAirbyteRegion-{DATA_REGION_ENV}-af",
         # empty = orgs of this region cannot get a work pool (fails loudly, never Mumbai's)

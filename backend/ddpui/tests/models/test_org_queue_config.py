@@ -382,7 +382,7 @@ AF_REGION_CONFIG = {
 }
 HOME_REGION_CONFIG = {
     "aws_region": "ap-south-1",
-    "country": "IN",
+    "country": "India",
     "airbyte_secret_name": "dalgoAirbyteRegion-test-in",
 }
 AF_POOL = "staging_af_eks_work_pool"

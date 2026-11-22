@@ -15,12 +15,15 @@ from ddpui.utils.custom_logger import CustomLogger
 
 logger = CustomLogger("ddpui.regions")
 
+# default country of a home-region (Mumbai) org when none is given
+HOME_COUNTRY = "India"
+
 
 class RegionService:
     """Resolves an org's data region (from the DB, never the JWT) to its Airbyte + Prefect config"""
 
     @staticmethod
-    def home_region_config(country: str = "IN") -> OrgRegionConfig:
+    def home_region_config(country: str = HOME_COUNTRY) -> OrgRegionConfig:
         """region_config of a home-region (Mumbai) org"""
         home = settings.AVAILABLE_DATA_REGIONS[settings.HOME_DATA_REGION]
         return OrgRegionConfig(
@@ -47,16 +50,17 @@ class RegionService:
         """region_config for a NEW org. Validates against the enabled regions."""
         if code not in settings.ENABLED_DATA_REGIONS or code not in settings.AVAILABLE_DATA_REGIONS:
             raise RegionValidationError(f"data region '{code}' is not available")
+        country = (country or "").strip()
         if code != settings.HOME_DATA_REGION and not country:
             raise RegionValidationError("country is required for this data region")
         spec = settings.AVAILABLE_DATA_REGIONS[code]
         try:
             return OrgRegionConfig(
                 aws_region=spec["aws_region"],
-                country=(country or "IN").upper(),
+                country=country or HOME_COUNTRY,
                 airbyte_secret_name=spec["airbyte_secret_name"],
             )
-        except ValueError as err:  # pydantic ValidationError, e.g. a 3-letter country
+        except ValueError as err:  # pydantic ValidationError, e.g. a too-long country
             raise RegionValidationError(f"invalid country '{country}'") from err
 
     @staticmethod

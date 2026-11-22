@@ -10,7 +10,8 @@ class OrgRegionConfig(Schema):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     aws_region: str = Field(pattern=r"^[a-z]{2}-[a-z]+-\d$")
-    country: str = Field(pattern=r"^[A-Z]{2}$")  # ISO-3166-1 alpha-2
+    # free text entered by a superadmin, e.g. "India", "Nigeria"; not a picklist on purpose
+    country: str = Field(min_length=1, max_length=100)
     airbyte_secret_name: str = Field(pattern=r"^dalgoAirbyteRegion-[a-z]+-[a-z]{2}$")
 
 

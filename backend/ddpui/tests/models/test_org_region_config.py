@@ -49,7 +49,7 @@ def test_backfill_fills_null_and_keeps_existing():
 
     expected = {
         "aws_region": "ap-south-1",
-        "country": "IN",
+        "country": "India",
         "airbyte_secret_name": "dalgoAirbyteRegion-staging-in",
     }
     org_null_1.refresh_from_db()
@@ -85,8 +85,8 @@ def test_org_region_config_valid():
     [
         {"aws_region": "south-africa"},
         {"aws_region": "AF-SOUTH-1"},
-        {"country": "za"},
-        {"country": "ZAF"},
+        {"country": ""},
+        {"country": "x" * 101},
         {"airbyte_secret_name": "warehouseCreds-staging-af"},
         {"airbyte_secret_name": "dalgoAirbyteRegion-staging-africa"},
         {"extra_key": "x"},

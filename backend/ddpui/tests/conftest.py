@@ -56,7 +56,7 @@ TEST_AF_POOL = "staging_af_eks_work_pool"
 
 REGION_CONFIG_IN = {
     "aws_region": "ap-south-1",
-    "country": "IN",
+    "country": "India",
     "airbyte_secret_name": TEST_SECRET_IN,
 }
 REGION_CONFIG_AF = {

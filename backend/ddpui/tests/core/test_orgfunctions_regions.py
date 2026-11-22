@@ -71,7 +71,7 @@ def test_create_org_af(
     mock_region_secrets, mock_airbyte_and_prefect, django_capture_on_commit_callbacks
 ):
     with django_capture_on_commit_callbacks(execute=True):
-        org, error = create_organization(_payload(data_region="af", country="za"))
+        org, error = create_organization(_payload(data_region="af", country="ZA"))
 
     assert error is None
     assert org.region_config == REGION_CONFIG_AF
@@ -103,7 +103,7 @@ def test_custom_connectors_enqueued_only_after_commit(
         ({"data_region": "af", "country": "ZA"}, ["in"], "not available"),
         ({"data_region": "xx", "country": "ZA"}, ["in", "af", "xx"], "not available"),
         ({"data_region": "af"}, ["in", "af"], "country is required"),
-        ({"data_region": "af", "country": "ZAF"}, ["in", "af"], "invalid country"),
+        ({"data_region": "af", "country": "x" * 101}, ["in", "af"], "invalid country"),
     ],
 )
 def test_create_org_bad_region_creates_nothing(
