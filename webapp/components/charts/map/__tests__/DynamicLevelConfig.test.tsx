@@ -338,6 +338,42 @@ describe('DynamicLevelConfig', () => {
   });
 
   /**
+   * The auto drill-down checkbox lives in MapCustomizations; the level config must keep the flag
+   */
+  describe('Auto Drill-Down Setting', () => {
+    const withDistrict = (autoDrill?: boolean) => ({
+      ...defaultFormData,
+      geographic_column: 'state',
+      geographic_hierarchy: {
+        country_code: 'IND',
+        base_level: { level: 0, column: 'state', region_type: 'state', label: 'State' },
+        drill_down_levels: [
+          { level: 1, column: 'district', region_type: 'district', label: 'District' },
+        ],
+        ...(autoDrill !== undefined && { auto_drill_single_region: autoDrill }),
+      },
+    });
+
+    it('keeps the setting when the district column changes', async () => {
+      const user = userEvent.setup();
+      render(<DynamicLevelConfig formData={withDistrict(true)} onChange={mockOnChange} />);
+
+      const districtColumnSelect = screen.getAllByRole('combobox')[2];
+      await user.click(districtColumnSelect);
+      await user.click(screen.getByRole('option', { name: /population/i }));
+
+      expect(mockOnChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          geographic_hierarchy: expect.objectContaining({
+            auto_drill_single_region: true,
+            drill_down_levels: [expect.objectContaining({ column: 'population' })],
+          }),
+        })
+      );
+    });
+  });
+
+  /**
    * Download Functionality
    */
   describe('Region Name Downloads', () => {

@@ -56,6 +56,10 @@ import {
 } from '@/lib/chart-formatting-utils';
 import { applyStackedBarLabels } from '@/lib/stacked-bar-utils';
 import { resolveDrillDownGeoJSON } from '@/lib/map-drilldown-utils';
+import {
+  useAutoDrillSingleRegion,
+  isAutoDrillEnabled,
+} from '@/components/charts/map/useAutoDrillSingleRegion';
 import { ChartTypes, type ChartDataPayload, type ChartDimension } from '@/types/charts';
 import * as echarts from 'echarts/core';
 import { BarChart, LineChart, PieChart, GaugeChart, ScatterChart, MapChart } from 'echarts/charts';
@@ -646,8 +650,6 @@ export function ChartElementV2({
           return;
         }
 
-        toast.success(`Drilling down to ${nextLevel.label.toLowerCase()} in ${regionName}`);
-
         // Create drill-down level for dynamic system
         const newLevel: DrillDownLevel = {
           level: currentLevel + 1,
@@ -668,7 +670,6 @@ export function ChartElementV2({
         return;
       } else {
         // No more levels available in dynamic system
-        toast.info('No further drill-down levels configured');
         return;
       }
     }
@@ -696,8 +697,6 @@ export function ChartElementV2({
       }
 
       if (nextGeographicColumn) {
-        toast.success(`Drilling down to ${levelName} in ${regionName}`);
-
         // Find the region ID for the clicked region (e.g., Karnataka)
         const selectedRegion = regions?.find(
           (region: any) => region.name === regionName || region.display_name === regionName
@@ -728,10 +727,19 @@ export function ChartElementV2({
         return;
       }
     }
-
-    // No drill-down configuration found
-    toast.info('No drill-down configuration found for this chart');
   };
+
+  // Open directly at the child level when only one region has data (opt-in per chart)
+  useAutoDrillSingleRegion({
+    enabled:
+      chart?.chart_type === ChartTypes.MAP &&
+      isAutoDrillEnabled(chart?.extra_config?.geographic_hierarchy),
+    isAtBaseLevel: drillDownPath.length === 0,
+    canDrill: Boolean(regions?.length),
+    mapRows: mapDataOverlay?.data,
+    payloadKey: JSON.stringify(mapDataOverlayPayload),
+    drillInto: (regionName) => handleRegionClick(regionName, null),
+  });
 
   // Handle drill up to a specific level
   const handleDrillUp = (targetLevel: number) => {

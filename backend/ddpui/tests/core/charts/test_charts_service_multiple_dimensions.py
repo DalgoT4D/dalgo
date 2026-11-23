@@ -475,6 +475,58 @@ class TestTransformDataForMap:
         assert out["available_metrics"][0]["display_name"] == "Total Count"
 
 
+class TestTransformDataForMapNoData:
+    """Regions with no rows must come back as None so the map can tell
+    "no data" apart from a real 0 (e.g. last month's enrollment = 0)."""
+
+    GEOJSON = {
+        "features": [
+            {"properties": {"name": "Kerala"}},
+            {"properties": {"name": "Tamil Nadu"}},
+            {"properties": {"name": "Goa"}},
+        ]
+    }
+    METRIC = ChartMetric(column="enrolled", aggregation="sum", alias="total")
+
+    def _transform(self, results):
+        return transform_data_for_map(results, self.GEOJSON, "state", None, {}, [self.METRIC], 0)
+
+    @staticmethod
+    def _values(out):
+        return {row["name"]: row["value"] for row in out["data"]}
+
+    def test_region_without_rows_is_none_and_real_zero_is_kept(self):
+        out = self._transform(
+            [{"state": "Kerala", "total": 0}, {"state": "Tamil Nadu", "total": 25}]
+        )
+
+        assert self._values(out) == {"Kerala": 0, "Tamil Nadu": 25, "Goa": None}
+        assert out["matched_regions"] == 2
+        assert out["total_regions"] == 3
+
+    def test_null_aggregate_is_treated_as_no_data(self):
+        # SUM over an all-NULL column returns NULL — must not crash
+        out = self._transform([{"state": "Kerala", "total": None}])
+
+        assert self._values(out)["Kerala"] is None
+        assert out["matched_regions"] == 0
+
+    def test_min_max_include_zero_and_negative_values(self):
+        out = self._transform(
+            [{"state": "Kerala", "total": -5}, {"state": "Tamil Nadu", "total": 0}]
+        )
+
+        assert out["min_value"] == -5
+        assert out["max_value"] == 0
+
+    def test_min_max_defaults_when_no_region_has_data(self):
+        out = self._transform([])
+
+        assert out["min_value"] == 0
+        assert out["max_value"] == 100
+        assert out["matched_regions"] == 0
+
+
 class TestExecuteMapDataOverlay:
     """execute_map_data_overlay must read query results back using the same
     alias build_multi_metric_query used to label the SQL column.

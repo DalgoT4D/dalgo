@@ -459,4 +459,65 @@ describe('MapCustomizations', () => {
       expect(screen.getByText('Data Handling')).toBeInTheDocument();
     });
   });
+
+  /**
+   * Auto zoom to the lowest level with data (stored on geographic_hierarchy)
+   */
+  describe('Auto Zoom To Lowest Level', () => {
+    const withDrillDown = (autoDrill?: boolean) => ({
+      ...defaultFormData,
+      geographic_hierarchy: {
+        country_code: 'IND',
+        base_level: { level: 0, column: 'state', region_type: 'state', label: 'State' },
+        drill_down_levels: [
+          { level: 1, column: 'district', region_type: 'district', label: 'District' },
+        ],
+        ...(autoDrill !== undefined && { auto_drill_single_region: autoDrill }),
+      },
+    });
+
+    it('hides the switch when there are no drill-down levels', () => {
+      render(
+        <MapCustomizations formData={defaultFormData} onFormDataChange={mockOnFormDataChange} />
+      );
+
+      expect(screen.queryByTestId('auto-drill-single-region-switch')).not.toBeInTheDocument();
+    });
+
+    it('shows the switch, off, in Interactive Features when drill-down is set', () => {
+      render(
+        <MapCustomizations formData={withDrillDown()} onFormDataChange={mockOnFormDataChange} />
+      );
+
+      const checkbox = screen.getByTestId('auto-drill-single-region-switch');
+      expect(checkbox).not.toBeChecked();
+      expect(screen.getByText('Auto Zoom')).toBeInTheDocument();
+    });
+
+    it('shows the switch on when the setting is on', () => {
+      render(
+        <MapCustomizations formData={withDrillDown(true)} onFormDataChange={mockOnFormDataChange} />
+      );
+
+      expect(screen.getByTestId('auto-drill-single-region-switch')).toBeChecked();
+    });
+
+    it('turns the setting on without touching the drill-down levels', async () => {
+      const user = userEvent.setup();
+      const formData = withDrillDown();
+      render(<MapCustomizations formData={formData} onFormDataChange={mockOnFormDataChange} />);
+
+      await user.click(screen.getByTestId('auto-drill-single-region-switch'));
+
+      expect(mockOnFormDataChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          customizations: formData.customizations,
+          geographic_hierarchy: {
+            ...formData.geographic_hierarchy,
+            auto_drill_single_region: true,
+          },
+        })
+      );
+    });
+  });
 });

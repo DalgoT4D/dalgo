@@ -193,6 +193,7 @@ export function DynamicLevelConfig({
         label: baseRegionType.charAt(0).toUpperCase() + baseRegionType.slice(1),
       },
       drill_down_levels: [...currentLevels],
+      auto_drill_single_region: formData.geographic_hierarchy?.auto_drill_single_region,
     };
 
     if (column === '') {
