@@ -21,6 +21,7 @@ interface MapCustomizationsProps {
 
 export function MapCustomizations({ formData, onFormDataChange }: MapCustomizationsProps) {
   const customizations = formData.customizations || {};
+  const hasDrillDownLevels = (formData.geographic_hierarchy?.drill_down_levels?.length ?? 0) > 0;
 
   const updateCustomization = (key: string, value: any) => {
     const newCustomizations = {
@@ -102,6 +103,35 @@ export function MapCustomizations({ formData, onFormDataChange }: MapCustomizati
               onCheckedChange={(checked) => updateCustomization('select', checked)}
             />
           </div>
+
+          {/* Stored on geographic_hierarchy (read by useAutoDrillSingleRegion), so only
+              offered once drill-down levels exist */}
+          {hasDrillDownLevels && (
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label htmlFor="auto-drill-single-region" className="text-sm font-medium">
+                  Auto Zoom
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Default view to the lowest level at which data is available
+                </p>
+              </div>
+              <Switch
+                id="auto-drill-single-region"
+                data-testid="auto-drill-single-region-switch"
+                checked={Boolean(formData.geographic_hierarchy.auto_drill_single_region)}
+                onCheckedChange={(checked) =>
+                  onFormDataChange({
+                    ...formData,
+                    geographic_hierarchy: {
+                      ...formData.geographic_hierarchy,
+                      auto_drill_single_region: checked,
+                    },
+                  })
+                }
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 

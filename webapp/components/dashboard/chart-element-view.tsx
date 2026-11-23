@@ -1016,8 +1016,6 @@ export function ChartElementView({
           return;
         }
 
-        toast.success(`Drilling down to ${nextLevel.label.toLowerCase()} in ${regionName}`);
-
         // Create drill-down level for dynamic system
         const newLevel: DrillDownLevel = {
           level: currentLevel + 1,
@@ -1038,7 +1036,6 @@ export function ChartElementView({
         return;
       } else {
         // No more levels available in dynamic system
-        toast.info('No further drill-down levels configured');
         return;
       }
     }
@@ -1066,8 +1063,6 @@ export function ChartElementView({
       }
 
       if (nextGeographicColumn) {
-        toast.success(`Drilling down to ${levelName} in ${regionName}`);
-
         // Create drill-down level for simplified system
         // Find the region ID for the clicked region (e.g., Karnataka)
         const selectedRegion = regions?.find(
@@ -1103,14 +1098,12 @@ export function ChartElementView({
         return;
       } else {
         // No more levels available in simplified system
-        toast.info('No further drill-down levels configured');
         return;
       }
     }
 
     // Fallback to legacy layers system
     if (!chart?.extra_config?.layers) {
-      toast.info('No further drill-down levels configured');
       return;
     }
 
@@ -1119,14 +1112,12 @@ export function ChartElementView({
 
     if (!nextLayer) {
       // No next layer configured
-      toast.info('No further drill-down levels configured');
       return;
     }
 
     // Validate drill-down is possible for the clicked region
     let nextGeojsonId = nextLayer.geojson_id;
     let regionSupported = true;
-    let validationMessage = '';
 
     // If this layer has specific regions configured, check if clicked region is supported
     if (nextLayer.selected_regions && nextLayer.selected_regions.length > 0) {
@@ -1136,7 +1127,6 @@ export function ChartElementView({
 
       if (!matchingRegion) {
         regionSupported = false;
-        validationMessage = `Drill-down not available for "${regionName}". This region is not configured for the next level.`;
       } else if (matchingRegion.geojson_id) {
         nextGeojsonId = matchingRegion.geojson_id;
       }
@@ -1145,12 +1135,10 @@ export function ChartElementView({
     // Validate that we have a valid geojson_id
     if (regionSupported && (!nextGeojsonId || nextGeojsonId === 0)) {
       regionSupported = false;
-      validationMessage = `Drill-down not available for "${regionName}". Geographic data is not configured for this region.`;
     }
 
-    // If region is not supported, show toast and exit
+    // If region is not supported, exit quietly (no drill-down toasts on dashboards)
     if (!regionSupported) {
-      toast.info(validationMessage);
       return;
     }
 

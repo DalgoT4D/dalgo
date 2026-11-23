@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -460,33 +459,6 @@ export function DynamicLevelConfig({
               </div>
             )}
           />
-
-          {currentLevels[0]?.column && formData.geographic_hierarchy && (
-            <div className="flex items-start gap-2 mt-3">
-              <Checkbox
-                id="auto-drill-single-region"
-                data-testid="auto-drill-single-region-checkbox"
-                checked={Boolean(formData.geographic_hierarchy.auto_drill_single_region)}
-                onCheckedChange={(checked) =>
-                  onChange({
-                    geographic_hierarchy: {
-                      ...formData.geographic_hierarchy!,
-                      auto_drill_single_region: checked === true,
-                    },
-                  })
-                }
-                disabled={disabled}
-              />
-              <div>
-                <Label htmlFor="auto-drill-single-region" className="text-sm font-normal">
-                  Open directly at district level when data has only one state
-                </Label>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  If filters leave only one state, the map opens on its districts.
-                </p>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>

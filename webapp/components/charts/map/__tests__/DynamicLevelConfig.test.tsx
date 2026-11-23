@@ -338,9 +338,9 @@ describe('DynamicLevelConfig', () => {
   });
 
   /**
-   * Auto drill-down when data has only one state
+   * The auto drill-down checkbox lives in MapCustomizations; the level config must keep the flag
    */
-  describe('Auto Drill-Down Toggle', () => {
+  describe('Auto Drill-Down Setting', () => {
     const withDistrict = (autoDrill?: boolean) => ({
       ...defaultFormData,
       geographic_column: 'state',
@@ -352,41 +352,6 @@ describe('DynamicLevelConfig', () => {
         ],
         ...(autoDrill !== undefined && { auto_drill_single_region: autoDrill }),
       },
-    });
-
-    it('hides the toggle when no district column is set', () => {
-      render(
-        <DynamicLevelConfig
-          formData={{ ...defaultFormData, geographic_column: 'state' }}
-          onChange={mockOnChange}
-        />
-      );
-
-      expect(screen.queryByTestId('auto-drill-single-region-checkbox')).not.toBeInTheDocument();
-    });
-
-    it('shows the toggle, unchecked, when a district column is set', () => {
-      render(<DynamicLevelConfig formData={withDistrict()} onChange={mockOnChange} />);
-
-      const checkbox = screen.getByTestId('auto-drill-single-region-checkbox');
-      expect(checkbox).toBeInTheDocument();
-      expect(checkbox).not.toBeChecked();
-      expect(
-        screen.getByText('Open directly at district level when data has only one state')
-      ).toBeInTheDocument();
-    });
-
-    it('turns the setting on when ticked', async () => {
-      const user = userEvent.setup();
-      render(<DynamicLevelConfig formData={withDistrict()} onChange={mockOnChange} />);
-
-      await user.click(screen.getByTestId('auto-drill-single-region-checkbox'));
-
-      expect(mockOnChange).toHaveBeenCalledWith(
-        expect.objectContaining({
-          geographic_hierarchy: expect.objectContaining({ auto_drill_single_region: true }),
-        })
-      );
     });
 
     it('keeps the setting when the district column changes', async () => {

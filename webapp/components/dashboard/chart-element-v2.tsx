@@ -650,8 +650,6 @@ export function ChartElementV2({
           return;
         }
 
-        toast.success(`Drilling down to ${nextLevel.label.toLowerCase()} in ${regionName}`);
-
         // Create drill-down level for dynamic system
         const newLevel: DrillDownLevel = {
           level: currentLevel + 1,
@@ -672,7 +670,6 @@ export function ChartElementV2({
         return;
       } else {
         // No more levels available in dynamic system
-        toast.info('No further drill-down levels configured');
         return;
       }
     }
@@ -700,8 +697,6 @@ export function ChartElementV2({
       }
 
       if (nextGeographicColumn) {
-        toast.success(`Drilling down to ${levelName} in ${regionName}`);
-
         // Find the region ID for the clicked region (e.g., Karnataka)
         const selectedRegion = regions?.find(
           (region: any) => region.name === regionName || region.display_name === regionName
@@ -732,9 +727,6 @@ export function ChartElementV2({
         return;
       }
     }
-
-    // No drill-down configuration found
-    toast.info('No drill-down configuration found for this chart');
   };
 
   // Open directly at the child level when only one region has data (opt-in per chart)
