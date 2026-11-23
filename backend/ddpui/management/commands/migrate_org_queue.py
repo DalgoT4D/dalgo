@@ -19,6 +19,7 @@ from ddpui.ddpprefect.schema import PrefectDataFlowUpdateSchema3
 from ddpui.utils.constants import TASK_GITPULL, TASK_GITCLONE
 from ddpui.utils.unified_logger import get_logger
 from ddpui.core.orchestrate.pipeline_service import PipelineService
+from ddpui.core.regions.region_service import RegionService
 from ddpui.core.orgdbt_manager import DbtProjectManager
 from ddpui.core.pipelinefunctions import (
     setup_git_pull_shell_task_config,
@@ -79,6 +80,12 @@ class Command(BaseCommand):
             action="store_true",
             help="Mark the workpool as EKS workpool (default: False)",
         )
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help="Allow a --new-workpool other than the region pool for an org outside the "
+            "home data region",
+        )
 
     def handle(self, *args, **options):
         org_slug: str = options["org_slug"]
@@ -103,6 +110,16 @@ class Command(BaseCommand):
             org: Org = Org.objects.get(slug=org_slug)
         except Org.DoesNotExist:
             raise CommandError(f"Organization with slug '{org_slug}' not found")
+
+        # an org outside the home region must stay on its region's pool: a home-region pool
+        # would run its syncs and dbt from Mumbai
+        if new_workpool and not options["force"] and not RegionService.is_home_region(org):
+            region_pool = RegionService.prefect_work_pool_for_org(org)
+            if new_workpool != region_pool:
+                raise CommandError(
+                    f"'{new_workpool}' is not the work pool of org {org_slug}'s data region "
+                    f"('{region_pool}'); pass --force to override"
+                )
 
         # Get current queue config to determine current workpool if new_workpool not provided
         current_queue_config = org.get_queue_config()

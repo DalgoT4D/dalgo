@@ -2,6 +2,8 @@ from uuid import uuid4
 from unittest.mock import Mock, patch
 import json
 
+import pytest
+
 from ddpui.models.org import OrgType
 from ddpui.models.tasks import TaskProgressStatus
 from ddpui.utils.singletaskprogress import SingleTaskProgress
@@ -12,6 +14,16 @@ from ddpui.websockets.airbyte_consumer import (
     DestinationCheckConnectionConsumer,
 )
 from ddpui.websockets.schemas import WebsocketResponse, WebsocketResponseStatus
+
+
+@pytest.fixture(autouse=True)
+def mock_region_server(airbyte_server_af):
+    """the consumers resolve the org's airbyte server; orgs here are Mocks"""
+    with patch(
+        "ddpui.websockets.airbyte_consumer.RegionService.airbyte_server_for_org",
+        return_value=airbyte_server_af,
+    ) as mock_server_for_org:
+        yield mock_server_for_org
 
 
 def test_websocket_receive_no_workspace():
@@ -114,6 +126,12 @@ def test_source_check_connection_update_success(mock_airbyte_service):
     consumer.websocket_receive(message)
 
     mock_airbyte_service.check_source_connection_for_update.assert_called_once()
+    assert (
+        mock_airbyte_service.check_source_connection_for_update.call_args.kwargs[
+            "server"
+        ].aws_region
+        == "af-south-1"
+    )
     consumer.respond.assert_called_once_with(
         WebsocketResponse(
             data={"status": "succeeded", "logs": ["log1", "log2"]},
@@ -325,6 +343,10 @@ def test_destination_check_connection_create_success(mock_airbyte_service):
     consumer.websocket_receive(message)
 
     mock_airbyte_service.check_destination_connection.assert_called_once()
+    assert (
+        mock_airbyte_service.check_destination_connection.call_args.kwargs["server"].aws_region
+        == "af-south-1"
+    )
     consumer.respond.assert_called_once_with(
         WebsocketResponse(
             data={"status": "succeeded", "logs": ["log1"]},

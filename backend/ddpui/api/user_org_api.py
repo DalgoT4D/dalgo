@@ -25,6 +25,7 @@ from ddpui.auth import (
 from ddpui.core import orgfunctions, orguserfunctions
 from ddpui.core.access.ownership import is_creator_or_admin
 from ddpui.core.audit_log_service import create_audit_log
+from ddpui.core.regions.region_service import RegionService
 from ddpui.models.audit_log import AuditLogResourceType, AuditLogAction
 from ddpui.models.org_user import (
     AcceptInvitationSchema,
@@ -1165,6 +1166,7 @@ def post_organization_v1(request, payload: CreateOrgSchema):
     org, error = orgfunctions.create_organization(payload)
     if error:
         raise HttpError(400, error)
+    region_config = RegionService.get_region_config(org)
 
     # create a new orguser if the org is already there
     orguserfunctions.ensure_orguser_for_org(orguser, org)
@@ -1185,11 +1187,19 @@ def post_organization_v1(request, payload: CreateOrgSchema):
             "base_plan": payload.base_plan,
             "subscription_duration": payload.subscription_duration,
             "superset_included": payload.superset_included,
+            "data_region": payload.data_region,
+            "country": region_config.country,
         },
     )
 
     logger.info(f"{orguser.user.email} created new org {org.name}")
-    return OrgSchema(name=org.name, airbyte_workspace_id=org.airbyte_workspace_id, slug=org.slug)
+    return OrgSchema(
+        name=org.name,
+        airbyte_workspace_id=org.airbyte_workspace_id,
+        slug=org.slug,
+        data_region=RegionService.region_code_for(region_config),
+        country=region_config.country,
+    )
 
 
 @user_org_router.delete("/v1/organizations/warehouses/")

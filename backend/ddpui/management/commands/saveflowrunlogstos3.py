@@ -1,9 +1,10 @@
 import json
 import boto3
 from django.core.management.base import BaseCommand
-from ddpui.models.org import OrgDataFlowv1
+from ddpui.models.org import Org, OrgDataFlowv1
 from ddpui.models.tasks import OrgTask
 from ddpui.ddpprefect import prefect_service
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpairbyte import airbyte_service
 from ddpui.models.tasks import Task
 
@@ -106,6 +107,7 @@ class Command(BaseCommand):
     def fetch_airbyte_logs(self, org: str, s3):
         """fetches airbyte logs for and org"""
         summ = []
+        server = RegionService.airbyte_server_for_org(Org.objects.get(slug=org))
         for dataflow in OrgTask.objects.filter(
             org__slug=org,
             task__slug="airbyte-sync",
@@ -114,7 +116,7 @@ class Command(BaseCommand):
             cnt_success = 0
             connection_id = dataflow.connection_id
             # get recent 100 sync for this connection
-            result = airbyte_service.get_jobs_for_connection(connection_id, 100, 0)
+            result = airbyte_service.get_jobs_for_connection(connection_id, 100, 0, server=server)
             if len(result["jobs"]) == 0:
                 continue
             for job in result["jobs"]:
@@ -130,7 +132,9 @@ class Command(BaseCommand):
                                 f"Found success logs for connection id : {connection_id} job_id : {job_id}"
                             )
                             status = self.SUCCESS_LOGS
-                            log_lines = airbyte_service.get_logs_for_job(job_id, attempt["id"])
+                            log_lines = airbyte_service.get_logs_for_job(
+                                job_id, attempt["id"], server=server
+                            )
                             break
                 elif jobinfo["status"] == "failed":
                     for attempt in attempts:
@@ -139,7 +143,9 @@ class Command(BaseCommand):
                                 f"Found failure logs for connection id : {connection_id} job_id : {job_id}"
                             )
                             status = self.FAILURE_LOGS
-                            log_lines = airbyte_service.get_logs_for_job(job_id, attempt["id"])
+                            log_lines = airbyte_service.get_logs_for_job(
+                                job_id, attempt["id"], server=server
+                            )
                             break
 
                 if len(log_lines) > 0 and status is not None:

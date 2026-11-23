@@ -6,6 +6,7 @@ from ddpui.models.tasks import OrgTask, DataflowOrgTask
 from ddpui.utils.custom_logger import CustomLogger
 from ddpui.core.orgtaskfunctions import delete_orgtask
 from ddpui.ddpairbyte import airbyte_service
+from ddpui.core.regions.region_service import RegionService
 from ninja.errors import HttpError
 
 logger = CustomLogger("airbyte")
@@ -39,7 +40,9 @@ def delete_org_connection(org: Org, connection_id: str):
 
     # delete airbyte connection
     logger.info("deleting airbyte connection %s", connection_id)
-    airbyte_service.delete_connection(org.airbyte_workspace_id, connection_id)
+    airbyte_service.delete_connection(
+        org.airbyte_workspace_id, connection_id, server=RegionService.airbyte_server_for_org(org)
+    )
 
     # delete pending schema changes
     ndeleted, _ = OrgSchemaChange.objects.filter(connection_id=connection_id).delete()

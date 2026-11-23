@@ -4,9 +4,12 @@ import os
 import uuid
 from urllib.parse import urlparse
 
+from django.db import transaction
 from django.utils.text import slugify
 
 from ddpui.ddpairbyte import airbytehelpers
+from ddpui.core.regions.exceptions import RegionConfigError, RegionValidationError
+from ddpui.core.regions.region_service import RegionService
 from ddpui.celeryworkers.tasks import add_custom_connectors_to_workspace
 from ddpui.utils.custom_logger import CustomLogger
 from ddpui import settings
@@ -150,24 +153,41 @@ def delete_logo(org: Org) -> None:
 
 
 def create_organization(payload: CreateOrgSchema):
-    """creates a new Org"""
+    """creates a new Org in the requested data region"""
     org = Org.objects.filter(name__iexact=payload.name).first()
     if org:
         return None, "client org with this name already exists"
+
+    # validate the region and read its secret BEFORE creating any row
+    try:
+        region_config = RegionService.build_region_config(payload.data_region, payload.country)
+        queue_config = RegionService.queue_config_for_new_org(region_config)
+        RegionService.airbyte_server_for_config(region_config)  # raises if the secret is unreadable
+    except RegionValidationError as err:
+        return None, err.message
+    except RegionConfigError as err:
+        logger.error(f"region {payload.data_region} is misconfigured: {err.message}")
+        return None, f"data region '{payload.data_region}' is not available right now"
 
     org = Org(
         name=payload.name,
         viz_url=str(payload.viz_url) if payload.viz_url else None,
         website=str(payload.website) if payload.website else None,
+        region_config=region_config.model_dump(),
+        queue_config=queue_config,
     )
     org.slug = slugify(org.name)[:20]
     org.save()
 
     try:
         workspace = airbytehelpers.setup_airbyte_workspace_v1(org.slug, org)
-        # add custom sources to this workspace
-        add_custom_connectors_to_workspace.delay(
-            workspace.workspaceId, list(settings.AIRBYTE_CUSTOM_SOURCES.values())
+        # add custom sources to this workspace, once the org row is committed
+        custom_sources = list(settings.AIRBYTE_CUSTOM_SOURCES.values())
+        org_id = org.id
+        transaction.on_commit(
+            lambda: add_custom_connectors_to_workspace.delay(
+                workspace.workspaceId, custom_sources, org_id=org_id
+            )
         )
 
     except Exception as err:

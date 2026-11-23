@@ -19,6 +19,8 @@ from django.db.models.functions import RowNumber
 from django.forms.models import model_to_dict
 
 from ddpui.ddpairbyte import airbyte_service
+from ddpui.core.regions.region_service import RegionService
+from ddpui.schemas.data_region_schema import AirbyteServerConfig
 from ddpui.ddpairbyte.schema import AirbyteWorkspace
 from ddpui.core.oauth import google_oauth_service
 from ddpui.core.oauth.google_oauth_provider import (
@@ -113,8 +115,9 @@ def create_oauth_source(orguser: OrgUser, payload: SourceGoogleOAuthCreate) -> d
     config = _build_oauth_source_config(
         orguser, payload.sourceName, payload.refresh_token_ref, payload.config
     )
+    server = RegionService.airbyte_server_for_org(orguser.org)
     source = airbyte_service.create_source(
-        orguser.org.airbyte_workspace_id, payload.name, payload.sourceDefId, config
+        orguser.org.airbyte_workspace_id, payload.name, payload.sourceDefId, config, server=server
     )
     logger.info("created oauth source having id %s", source["sourceId"])
     return {"sourceId": source["sourceId"]}
@@ -127,14 +130,17 @@ def update_oauth_source(orguser: OrgUser, source_id: str, payload: SourceGoogleO
     sources/update is not workspace-scoped, so without this guard a caller could overwrite a
     source in another org's workspace by passing its id."""
     workspace_id = orguser.org.airbyte_workspace_id
-    source = airbyte_service.get_source(workspace_id, source_id)
+    server = RegionService.airbyte_server_for_org(orguser.org)
+    source = airbyte_service.get_source(workspace_id, source_id, server=server)
     if source.get("workspaceId") != workspace_id:
         raise HttpError(404, "source not found")
 
     config = _build_oauth_source_config(
         orguser, payload.sourceName, payload.refresh_token_ref, payload.config
     )
-    source = airbyte_service.update_source(source_id, payload.name, config, payload.sourceDefId)
+    source = airbyte_service.update_source(
+        source_id, payload.name, config, payload.sourceDefId, server=server
+    )
     logger.info("updated oauth source having id %s", source["sourceId"])
     return {"sourceId": source["sourceId"]}
 
@@ -145,26 +151,29 @@ def add_custom_airbyte_connector(
     connector_docker_repository: str,
     connector_docker_image_tag: str,
     connector_documentation_url,
+    *,
+    server: AirbyteServerConfig,
 ) -> None:
-    """creates a custom source definition in airbyte"""
+    """creates a custom source definition in the airbyte of `server`'s region"""
     airbyte_service.create_custom_source_definition(
         workspace_id=workspace_id,
         name=connector_name,
         docker_repository=connector_docker_repository,
         docker_image_tag=connector_docker_image_tag,
         documentation_url=connector_documentation_url,
+        server=server,
     )
     logger.info(
         f"added custom source {connector_name} [{connector_docker_repository}:{connector_docker_image_tag}]"
     )
 
 
-def upgrade_custom_sources(workspace_id: str) -> None:
+def upgrade_custom_sources(workspace_id: str, *, server: AirbyteServerConfig) -> None:
     """
     compares the versions of the custom sources listed above with those in the airbyte workspace
     and upgrades if necessary
     """
-    source_definitions = airbyte_service.get_source_definitions(workspace_id)
+    source_definitions = airbyte_service.get_source_definitions(workspace_id, server=server)
 
     for custom_source, custom_source_info in settings.AIRBYTE_CUSTOM_SOURCES.items():
         found_custom_source = False
@@ -189,6 +198,7 @@ def upgrade_custom_sources(workspace_id: str) -> None:
                         custom_source_info["docker_repository"],
                         custom_source_info["docker_image_tag"],
                         custom_source_info["documentation_url"],
+                        server=server,
                     )
                 else:
                     logger.info(
@@ -205,6 +215,7 @@ def upgrade_custom_sources(workspace_id: str) -> None:
                 custom_source_info["docker_repository"],
                 custom_source_info["docker_image_tag"],
                 custom_source_info["documentation_url"],
+                server=server,
             )
 
 
@@ -214,7 +225,8 @@ def setup_airbyte_workspace_v1(wsname: str, org: Org) -> AirbyteWorkspace:
     we don't need to update any existing server block because it does not hold
     the workspace id... only the connection details of the airbyte server
     """
-    workspace = airbyte_service.create_workspace(wsname)
+    server = RegionService.airbyte_server_for_org(org)
+    workspace = airbyte_service.create_workspace(wsname, server=server)
 
     org.airbyte_workspace_id = workspace["workspaceId"]
     org.save()
@@ -232,7 +244,9 @@ def setup_airbyte_workspace_v1(wsname: str, org: Org) -> AirbyteWorkspace:
         (
             airbyte_server_block_id,
             airbyte_server_block_cleaned_name,
-        ) = prefect_service.create_airbyte_server_block(block_name)
+        ) = prefect_service.create_airbyte_server_block(
+            block_name, RegionService.airbyte_flow_server_for_org(org)
+        )
         logger.info(f"Created Airbyte server block with ID {airbyte_server_block_id}")
 
     if not OrgPrefectBlockv1.objects.filter(org=org, block_type=AIRBYTESERVER).exists():
@@ -321,7 +335,10 @@ def create_connection(org: Org, payload: AirbyteConnectionCreate):
     if clear_task is None:
         return None, "clear task not supported"
 
-    airbyte_conn = airbyte_service.create_connection(org.airbyte_workspace_id, payload)
+    server = RegionService.airbyte_server_for_org(org)
+    airbyte_conn = airbyte_service.create_connection(
+        org.airbyte_workspace_id, payload, server=server
+    )
 
     try:
         with transaction.atomic():
@@ -374,7 +391,9 @@ def create_connection(org: Org, payload: AirbyteConnectionCreate):
     except Exception as err:
         # delete the airbyte connection; since the deployment didn't get created
         logger.info("deleting airbyte connection")
-        airbyte_service.delete_connection(org.airbyte_workspace_id, airbyte_conn["connectionId"])
+        airbyte_service.delete_connection(
+            org.airbyte_workspace_id, airbyte_conn["connectionId"], server=server
+        )
         logger.error(err)
         return None, "Couldn't create the connection, please try again"
 
@@ -475,7 +494,10 @@ def get_connections(org: Org) -> Tuple[List[AirbyteGetConnectionsResponse], None
 
     warehouse = OrgWarehouse.objects.filter(org=org).first()
 
-    airbyte_connections = airbyte_service.get_webbackend_connections(org.airbyte_workspace_id)
+    server = RegionService.airbyte_server_for_org(org)
+    airbyte_connections = airbyte_service.get_webbackend_connections(
+        org.airbyte_workspace_id, server=server
+    )
 
     res: list[dict] = []
     connections_to_clean_up: list[str] = []
@@ -635,7 +657,10 @@ def get_one_connection(org: Org, connection_id: str):
         return None, "connection not found"
 
     # fetch airbyte connection
-    airbyte_conn = airbyte_service.get_connection(org.airbyte_workspace_id, org_task.connection_id)
+    server = RegionService.airbyte_server_for_org(org)
+    airbyte_conn = airbyte_service.get_connection(
+        org.airbyte_workspace_id, org_task.connection_id, server=server
+    )
     if airbyte_conn["status"] == AIRBYTE_CONNECTION_DEPRECATED:
         delete_airbyte_connections.delay(
             f"delete-connections-{org.slug}", org.id, [org_task.connection_id]
@@ -712,7 +737,10 @@ def update_connection(org: Org, connection_id: str, payload: AirbyteConnectionUp
         return None, "must specify stream names"
 
     # fetch connection by id from airbyte
-    connection = airbyte_service.get_connection(org.airbyte_workspace_id, connection_id)
+    server = RegionService.airbyte_server_for_org(org)
+    connection = airbyte_service.get_connection(
+        org.airbyte_workspace_id, connection_id, server=server
+    )
     if connection["status"] == AIRBYTE_CONNECTION_DEPRECATED:
         delete_airbyte_connections.delay(f"delete-connections-{org.slug}", org.id, [connection_id])
         return None, "connection not found"
@@ -727,7 +755,9 @@ def update_connection(org: Org, connection_id: str, payload: AirbyteConnectionUp
     connection["skipReset"] = False
 
     # update the airbyte connection
-    res = airbyte_service.update_connection(org.airbyte_workspace_id, payload, connection)
+    res = airbyte_service.update_connection(
+        org.airbyte_workspace_id, payload, connection, server=server
+    )
 
     if payload.name:
         ConnectionMeta.objects.filter(connection_id=connection_id).update(
@@ -773,7 +803,8 @@ def get_job_info_for_connection(org: Org, connection_id: str):
     if org_task is None:
         return None, "connection not found"
 
-    result = airbyte_service.get_jobs_for_connection(connection_id)
+    server = RegionService.airbyte_server_for_org(org)
+    result = airbyte_service.get_jobs_for_connection(connection_id, server=server)
     if len(result["jobs"]) == 0:
         return {
             "status": "not found",
@@ -781,7 +812,7 @@ def get_job_info_for_connection(org: Org, connection_id: str):
 
     latest_job = result["jobs"][0]
     job_info = airbyte_service.parse_job_info(latest_job)
-    job_info["logs"] = airbyte_service.get_logs_for_job(job_info["job_id"])
+    job_info["logs"] = airbyte_service.get_logs_for_job(job_info["job_id"], server=server)
 
     return job_info, None
 
@@ -848,8 +879,9 @@ def get_sync_job_history_for_connection(
 
 def update_destination(org: Org, destination_id: str, payload: AirbyteDestinationUpdate) -> dict:
     """updates an airbyte destination and dbt cli profile if credentials changed"""
+    server = RegionService.airbyte_server_for_org(org)
     destination = airbyte_service.update_destination(
-        destination_id, payload.name, payload.config, payload.destinationDefId
+        destination_id, payload.name, payload.config, payload.destinationDefId, server=server
     )
     logger.info("updated destination having id " + destination["destinationId"])
     warehouse = OrgWarehouse.objects.filter(org=org).first()
@@ -898,11 +930,13 @@ def create_warehouse(org: Org, payload: OrgWarehouseSchema) -> OrgWarehouse:
     if payload.wtype not in ["postgres", "bigquery"]:
         raise ValueError(f"unknown warehouse type {payload.wtype}")
 
+    server = RegionService.airbyte_server_for_org(org)
     destination = airbyte_service.create_destination(
         org.airbyte_workspace_id,
         f"{payload.wtype}-warehouse",
         payload.destinationDefId,
         payload.airbyteConfig,
+        server=server,
     )
     logger.info("created destination having id " + destination["destinationId"])
 
@@ -920,7 +954,7 @@ def create_warehouse(org: Org, payload: OrgWarehouseSchema) -> OrgWarehouse:
         airbyte_creds = payload.airbyteConfig
 
     destination_definition = airbyte_service.get_destination_definition(
-        org.airbyte_workspace_id, payload.destinationDefId
+        org.airbyte_workspace_id, payload.destinationDefId, server=server
     )
 
     warehouse = OrgWarehouse(
@@ -945,16 +979,20 @@ def create_warehouse(org: Org, payload: OrgWarehouseSchema) -> OrgWarehouse:
 
 def get_warehouses(org: Org):
     """return list of warehouses for an Org"""
+    server = RegionService.airbyte_server_for_org(org)
+    # superadmin link to the org's region airbyte ui; None = no link (webapp falls back / omits)
+    airbyte_ui_url = RegionService.airbyte_ui_url_for_org(org)
     warehouses = [
         {
             "wtype": warehouse.wtype,
             # "credentials": warehouse.credentials,
             "name": warehouse.name,
             "airbyte_destination": airbyte_service.get_destination(
-                org.airbyte_workspace_id, warehouse.airbyte_destination_id
+                org.airbyte_workspace_id, warehouse.airbyte_destination_id, server=server
             ),
             "airbyte_docker_repository": warehouse.airbyte_docker_repository,
             "airbyte_docker_image_tag": warehouse.airbyte_docker_image_tag,
+            "airbyte_ui_url": airbyte_ui_url,
         }
         for warehouse in OrgWarehouse.objects.filter(org=org)
     ]
@@ -963,7 +1001,10 @@ def get_warehouses(org: Org):
 
 def delete_source(org: Org, source_id: str):
     """deletes an airbyte source and related connections"""
-    connections = airbyte_service.get_connections(org.airbyte_workspace_id)["connections"]
+    server = RegionService.airbyte_server_for_org(org)
+    connections = airbyte_service.get_connections(org.airbyte_workspace_id, server=server)[
+        "connections"
+    ]
     connections_of_source = [
         conn["connectionId"] for conn in connections if conn["sourceId"] == source_id
     ]
@@ -1005,7 +1046,7 @@ def delete_source(org: Org, source_id: str):
         org_task.delete()
 
     # delete the source from airbyte
-    airbyte_service.delete_source(org.airbyte_workspace_id, source_id)
+    airbyte_service.delete_source(org.airbyte_workspace_id, source_id, server=server)
     logger.info(f"deleted airbyte source {source_id}")
 
     return None, None
@@ -1017,11 +1058,13 @@ def fetch_and_update_org_schema_changes(org: Org, connection_id: str):
     auto_accept_error = None
     try:
         logger.info(f"Fetching schema change (catalog) for connection {org.slug}|{connection_id}")
+        server = RegionService.airbyte_server_for_org(org)
         connection_catalog = airbyte_service.get_connection_catalog(
             connection_id,
             timeout=get_integer_env_var(
                 "AIRBYTE_FETCH_CONNECTION_CATALOG_TIMEOUT_SECONDS", 300, logger
             ),
+            server=server,
         )
     except Exception as err:
         return (
@@ -1053,7 +1096,7 @@ def fetch_and_update_org_schema_changes(org: Org, connection_id: str):
                 ).exists()
             ):
                 try:
-                    airbyte_service.apply_schema_change(connection_catalog)
+                    airbyte_service.apply_schema_change(connection_catalog, server=server)
                     logger.info(
                         "Auto-accepted non-breaking schema change for %s|%s",
                         org.slug,
@@ -1195,9 +1238,10 @@ def schedule_update_connection_schema(
     return res
 
 
-def fetch_and_update_airbyte_job_details(job_id: str):
-    """Fetches the details of an Airbyte job and populates in our db."""
-    job_info = airbyte_service.get_job_info_without_logs(job_id)
+def fetch_and_update_airbyte_job_details(job_id: str, *, server: AirbyteServerConfig):
+    """Fetches the details of an Airbyte job (from the airbyte of `server`'s region)
+    and populates in our db."""
+    job_info = airbyte_service.get_job_info_without_logs(job_id, server=server)
 
     job_data: dict = job_info.get("job", {})
     attempts_data: list[dict] = job_info.get("attempts", [])
@@ -1242,9 +1286,11 @@ def fetch_and_update_airbyte_job_details(job_id: str):
         "attempts": attempts_data,
     }
 
-    # Create or update the AirbyteJob entry
+    # Create or update the AirbyteJob entry; job ids repeat across airbyte instances (regions),
+    # the connection id (config_id) does not
     airbyte_job, is_created = AirbyteJob.objects.update_or_create(
         job_id=job_fields["job_id"],
+        config_id=job_fields["config_id"],
         defaults=job_fields,
     )
 
@@ -1283,9 +1329,18 @@ def fetch_and_update_airbyte_jobs_for_all_connections(
     if connection_id:
         org_tasks = org_tasks.filter(connection_id=connection_id)
 
-    for orgtask_connection_id in org_tasks.values_list("connection_id", flat=True).distinct():
+    # connection ids live in one region's airbyte: resolve the server per org, once
+    servers: dict[int, AirbyteServerConfig] = {}
+    for orgtask_connection_id, orgtask_org_id in (
+        org_tasks.values_list("connection_id", "org_id").distinct().order_by()
+    ):
         try:
             logger.info("Syncing job history for connection %s", orgtask_connection_id)
+            if orgtask_org_id not in servers:
+                servers[orgtask_org_id] = RegionService.airbyte_server_for_org(
+                    Org.objects.get(id=orgtask_org_id)
+                )
+            server = servers[orgtask_org_id]
 
             offset = 0
             limit = 20
@@ -1299,6 +1354,7 @@ def fetch_and_update_airbyte_jobs_for_all_connections(
                     job_types=["sync", "reset_connection", "clear", "refresh"],
                     created_at_start=start_time,
                     created_at_end=end_time,
+                    server=server,
                 )
                 if len(jobs_dict.get("jobs", [])) == 0:
                     logger.info("No jobs found for connection %s", orgtask_connection_id)
@@ -1306,7 +1362,7 @@ def fetch_and_update_airbyte_jobs_for_all_connections(
 
                 for job in jobs_dict.get("jobs", []):
                     curr_job = job.get("job", {})
-                    fetch_and_update_airbyte_job_details(str(curr_job.get("id")))
+                    fetch_and_update_airbyte_job_details(str(curr_job.get("id")), server=server)
 
                 offset += limit
                 curr_itr_count = jobs_dict.get("totalJobCount", 0)

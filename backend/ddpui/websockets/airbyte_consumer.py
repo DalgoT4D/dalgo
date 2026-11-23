@@ -7,6 +7,7 @@ from ddpui.utils.custom_logger import CustomLogger
 from ddpui.utils.singletaskprogress import SingleTaskProgress
 from ddpui.websockets.schemas import WebsocketResponse, WebsocketResponseStatus
 from ddpui.ddpairbyte import airbyte_service, airbytehelpers
+from ddpui.core.regions.region_service import RegionService
 from ddpui.models.org import OrgType
 from ddpui.ddpairbyte.schema import (
     AirbyteSourceCreate,
@@ -35,10 +36,14 @@ class SourceCheckConnectionConsumer(BaseConsumer):
         else:
             payload = AirbyteSourceCreate(**payload)
 
+        server = RegionService.airbyte_server_for_org(self.orguser.org)
+
         if self.orguser.org.base_plan() == OrgType.DEMO:
             logger.info("Demo account user")
             source_def = airbyte_service.get_source_definition(
-                self.orguser.org.airbyte_workspace_id, payload.sourceDefId
+                self.orguser.org.airbyte_workspace_id,
+                payload.sourceDefId,
+                server=server,
             )
             # replace the payload config with the correct whitelisted source config
             whitelisted_config, error = airbytehelpers.get_demo_whitelisted_source_config(
@@ -59,10 +64,16 @@ class SourceCheckConnectionConsumer(BaseConsumer):
 
         try:
             if source_id:
-                response = airbyte_service.check_source_connection_for_update(source_id, payload)
+                response = airbyte_service.check_source_connection_for_update(
+                    source_id,
+                    payload,
+                    server=server,
+                )
             else:
                 response = airbyte_service.check_source_connection(
-                    self.orguser.org.airbyte_workspace_id, payload
+                    self.orguser.org.airbyte_workspace_id,
+                    payload,
+                    server=server,
                 )
         except Exception as error:
             self.respond(
@@ -101,14 +112,20 @@ class DestinationCheckConnectionConsumer(BaseConsumer):
         else:
             payload = AirbyteDestinationCreate(**payload)
 
+        server = RegionService.airbyte_server_for_org(self.orguser.org)
+
         try:
             if destination_id:
                 response = airbyte_service.check_destination_connection_for_update(
-                    destination_id, payload
+                    destination_id,
+                    payload,
+                    server=server,
                 )
             else:
                 response = airbyte_service.check_destination_connection(
-                    self.orguser.org.airbyte_workspace_id, payload
+                    self.orguser.org.airbyte_workspace_id,
+                    payload,
+                    server=server,
                 )
         except Exception as error:
             self.respond(
@@ -178,7 +195,9 @@ class SchemaCatalogConsumer(BaseConsumer):
         taskprogress.add(
             {"message": "started", "status": TaskProgressStatus.RUNNING, "result": None}
         )
-        get_schema_catalog_task.delay(task_key, str(orguser.org.airbyte_workspace_id), source_id)
+        get_schema_catalog_task.delay(
+            task_key, str(orguser.org.airbyte_workspace_id), source_id, org_id=orguser.org.id
+        )
         polling_celery(self, task_key)
 
 

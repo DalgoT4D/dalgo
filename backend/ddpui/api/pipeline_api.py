@@ -6,6 +6,7 @@ from ninja.errors import HttpError
 
 from ddpui.ddpprefect import prefect_service
 from ddpui.ddpairbyte import airbyte_service
+from ddpui.core.regions.region_service import RegionService
 
 from ddpui.models.org import OrgDataFlowv1, Org, ConnectionMeta
 from ddpui.models.org_user import OrgUser
@@ -385,6 +386,7 @@ def get_prefect_flow_runs_log_history_v1(request, deployment_id, limit: int = 0,
         deployment_id=deployment_id, limit=limit, offset=offset
     )
 
+    server = RegionService.airbyte_server_for_org(orguser.org)
     for flow_run in flow_runs:
         runs = prefect_service.get_flow_run_graphs(flow_run["id"])
         # attach connection name to each flow run
@@ -392,7 +394,7 @@ def get_prefect_flow_runs_log_history_v1(request, deployment_id, limit: int = 0,
             if "parameters" in run and run["kind"] == "flow-run":
                 connection_id = run["parameters"]["connection_id"]
                 connection = airbyte_service.get_connection(
-                    orguser.org.airbyte_workspace_id, connection_id
+                    orguser.org.airbyte_workspace_id, connection_id, server=server
                 )
                 run["parameters"]["connection_name"] = connection["name"]
 

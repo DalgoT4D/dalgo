@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from ddpui.models.org import OrgWarehouse
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpairbyte import airbyte_service
 
 import logging
@@ -24,6 +25,7 @@ class Command(BaseCommand):
                     destination = airbyte_service.get_destination(
                         org_warehouse.org.airbyte_workspace_id,
                         org_warehouse.airbyte_destination_id,
+                        server=RegionService.airbyte_server_for_org(org_warehouse.org),
                     )
                     org_warehouse.bq_location = (
                         destination["connectionConfiguration"]["dataset_location"]

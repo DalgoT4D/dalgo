@@ -12,6 +12,8 @@ from ddpui.core.notifications.notifications_functions import (
 )
 from ddpui.schemas.notifications_api_schemas import NotificationType
 from ddpui.utils.discord import send_discord_notification
+from ddpui.core.regions.exceptions import RegionConfigError
+from ddpui.core.regions.region_service import RegionService
 
 logger = CustomLogger("ddpui")
 
@@ -44,7 +46,12 @@ def notify_platform_admins(
 ):
     """send a notification to platform admins discord webhook"""
     prefect_url = os.getenv("PREFECT_URL_FOR_NOTIFICATIONS")
-    airbyte_url = os.getenv("AIRBYTE_URL_FOR_NOTIFICATIONS")
+    try:
+        airbyte_url = RegionService.airbyte_ui_url_for_org(org)
+    except RegionConfigError as err:
+        # the alert matters more than the link
+        logger.error(f"could not resolve the airbyte ui url for {org.slug}: {err.message}")
+        airbyte_url = None
     base_plan = org.base_plan()
 
     if not base_plan:
@@ -55,8 +62,10 @@ Organization: {org.slug}
 Failed step: {failed_step}
 State: {state}
 Base plan: {base_plan}\n
-Prefect flow run: {prefect_url}/flow-runs/flow-run/{flow_run_id}
-Airbyte workspace URL: {airbyte_url}/workspaces/{org.airbyte_workspace_id}"""
+Prefect flow run: {prefect_url}/flow-runs/flow-run/{flow_run_id}"""
+    # a region may have no airbyte ui reachable by support: then leave the link out
+    if airbyte_url:
+        message += f"\nAirbyte workspace URL: {airbyte_url}/workspaces/{org.airbyte_workspace_id}"
 
     if os.getenv("ADMIN_EMAIL"):
         send_text_message(

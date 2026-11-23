@@ -1,3 +1,4 @@
+import copy
 import os
 from datetime import datetime
 from pathlib import Path
@@ -416,19 +417,23 @@ def test_post_notification_v1_webhook_scheduled_pipeline(seed_master_tasks):
         )
 
 
-def test_notify_platform_admins():
+def test_notify_platform_admins(settings):
     """tests notify_platform_admins"""
+    regions = copy.deepcopy(settings.AVAILABLE_DATA_REGIONS)
+    regions[settings.HOME_DATA_REGION]["airbyte_ui_url"] = "airbyte-url-for-notifications"
+    settings.AVAILABLE_DATA_REGIONS = regions
     with patch(
         "ddpui.core.notifications.delivery.send_discord_notification"
     ) as mock_send_discord_notification, patch(
         "ddpui.core.notifications.delivery.send_text_message"
     ) as mock_send_text_message:
-        org = Mock(slug="orgslug", airbyte_workspace_id="airbyte_workspace_id")
+        # pre-multi-region org (NULL region_config): the home region's airbyte_ui_url
+        # (AIRBYTE_URL_FOR_NOTIFICATIONS) is used
+        org = Mock(slug="orgslug", airbyte_workspace_id="airbyte_workspace_id", region_config=None)
         org.base_plan = Mock(return_value="baseplan")
         os.environ["ADMIN_EMAIL"] = "adminemail"
         os.environ["ADMIN_DISCORD_WEBHOOK"] = "https://discord.com/api/webhooks/test"
         os.environ["PREFECT_URL_FOR_NOTIFICATIONS"] = "prefect-url-for-notifications"
-        os.environ["AIRBYTE_URL_FOR_NOTIFICATIONS"] = "airbyte-url-for-notifications"
         os.environ["SES_SENDER_EMAIL"] = "sender@example.com"
 
         message = """Pipeline Failure Alert
@@ -446,6 +451,40 @@ Airbyte workspace URL: airbyte-url-for-notifications/workspaces/airbyte_workspac
             "https://discord.com/api/webhooks/test", message
         )
         mock_send_text_message.assert_called_once()
+
+
+def _notify_message(org) -> str:
+    with patch(
+        "ddpui.core.notifications.delivery.send_discord_notification"
+    ) as mock_send_discord_notification, patch(
+        "ddpui.core.notifications.delivery.send_text_message"
+    ), patch.dict(
+        os.environ,
+        {"ADMIN_DISCORD_WEBHOOK": "https://discord.com/api/webhooks/test", "ADMIN_EMAIL": ""},
+    ):
+        notify_platform_admins(org, "flow-run-id", "FAILED", "Test Step")
+    return mock_send_discord_notification.call_args.args[1]
+
+
+def test_notify_platform_admins_uses_region_airbyte_url(org_in, mock_region_secrets):
+    message = _notify_message(org_in)
+    assert "Airbyte workspace URL: https://airbyte-in.example.org/workspaces/ws-in" in message
+
+
+def test_notify_platform_admins_omits_link_without_region_url(org_af, mock_region_secrets):
+    """the Africa region has no airbyte_ui_url in settings: no link at all"""
+    message = _notify_message(org_af)
+    assert "Airbyte workspace URL" not in message
+    assert message.endswith("flow-runs/flow-run/flow-run-id")
+
+
+def test_notify_platform_admins_unknown_region(org_af, test_data_regions):
+    """the org's region is not in AVAILABLE_DATA_REGIONS: the alert still goes out, no link"""
+    test_data_regions.AVAILABLE_DATA_REGIONS = {
+        "in": test_data_regions.AVAILABLE_DATA_REGIONS["in"]
+    }
+    message = _notify_message(org_af)
+    assert "Airbyte workspace URL" not in message
 
 
 def test_get_flow_run_times():

@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from ddpui.models.org import ConnectionMeta
 from ddpui.models.tasks import OrgTask
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpairbyte import airbyte_service
 
 
@@ -16,7 +17,9 @@ class Command(BaseCommand):
                 cm = ConnectionMeta(connection_id=orgtask.connection_id)
             if cm.connection_name is None:
                 airbyte_conn = airbyte_service.get_connection(
-                    orgtask.org.airbyte_workspace_id, orgtask.connection_id
+                    orgtask.org.airbyte_workspace_id,
+                    orgtask.connection_id,
+                    server=RegionService.airbyte_server_for_org(orgtask.org),
                 )
                 cm.connection_name = airbyte_conn["name"]
                 cm.save()

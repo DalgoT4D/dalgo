@@ -77,6 +77,8 @@ from ddpui.core.git_manager import GitManager, GitManagerError
 from ddpui.ddpdbt.dbthelpers import write_dbt_profiles_yml
 from ddpui.ddpdbt.schema import DbtProjectParams
 from ddpui.ddpairbyte import airbyte_service, airbytehelpers
+from ddpui.core.regions.region_service import RegionService
+from ddpui.core.regions.exceptions import RegionConfigError
 from ddpui.ddpprefect.prefect_service import (
     get_flow_run_graphs,
     prefect_get,
@@ -482,14 +484,16 @@ def get_connection_catalog_task(task_key, org_id, connection_id):
 
 
 @app.task()
-def get_schema_catalog_task(task_key, workspace_id, source_id):
+def get_schema_catalog_task(task_key, workspace_id, source_id, org_id: int | None = None):
     """Fetch a schema_catalog while creating a connection as a Celery task"""
     # the STP has to live longer than the task will take
     taskprogress = SingleTaskProgress(task_key, 600)
     taskprogress.add({"message": "started", "status": TaskProgressStatus.RUNNING, "result": None})
 
     try:
-        res = airbyte_service.get_source_schema_catalog(workspace_id, source_id)
+        res = airbyte_service.get_source_schema_catalog(
+            workspace_id, source_id, server=RegionService.airbyte_server_for_org_id(org_id)
+        )
         taskprogress.add(
             {
                 "message": "Fetched catalog data",
@@ -571,10 +575,13 @@ def sync_flow_runs_of_deployments(deployment_ids: list[str] = None, look_back_ho
 
 
 @app.task(bind=True)
-def add_custom_connectors_to_workspace(self, workspace_id, custom_sources: list[dict]):
+def add_custom_connectors_to_workspace(
+    self, workspace_id, custom_sources: list[dict], org_id: int | None = None
+):
     """
     This function will add custom sources to a workspace
     """
+    server = RegionService.airbyte_server_for_org_id(org_id)
     for source in custom_sources:
         airbyte_service.create_custom_source_definition(
             workspace_id=workspace_id,
@@ -582,6 +589,7 @@ def add_custom_connectors_to_workspace(self, workspace_id, custom_sources: list[
             docker_repository=source["docker_repository"],
             docker_image_tag=source["docker_image_tag"],
             documentation_url=source["documentation_url"],
+            server=server,
         )
         logger.info(
             f"added custom source {source['name']} [{source['docker_repository']}:{source['docker_image_tag']}]"
@@ -644,7 +652,9 @@ def summarize_logs(
     # validations
     if type == LogsSummarizationType.AIRBYTE_SYNC:
         try:
-            job_info = airbyte_service.get_job_info(str(job_id))
+            job_info = airbyte_service.get_job_info(
+                str(job_id), server=RegionService.airbyte_server_for_org(org)
+            )
 
             if job_info["job"]["configId"] != connection_id:
                 taskprogress.add(
@@ -736,7 +746,9 @@ def summarize_logs(
 
         elif type == LogsSummarizationType.AIRBYTE_SYNC:
             log_lines = airbyte_service.get_logs_for_job(
-                job_id=job_id, attempt_number=attempt_number
+                job_id=job_id,
+                attempt_number=attempt_number,
+                server=RegionService.airbyte_server_for_org(org),
             )
             logs_text = "\n".join(log_lines)
 
@@ -1095,7 +1107,6 @@ def check_for_long_running_flow_runs():
 
     email_body = ""
     prefect_url = os.getenv("PREFECT_URL_FOR_NOTIFICATIONS")
-    airbyte_url = os.getenv("AIRBYTE_URL_FOR_NOTIFICATIONS")
 
     for flow_run in flow_runs:
         logger.info(f"Found long running flow run {flow_run['id']} in prefect")
@@ -1121,8 +1132,16 @@ def check_for_long_running_flow_runs():
                 email_body += (
                     f"Org: {orgtask.org.slug} \n"  # might appear above as well, we don't care
                 )
-                connection_url = f"{airbyte_url}/workspaces/{orgtask.org.airbyte_workspace_id}/connections/{connection_id}"
-                email_body += f"Connection URL: {connection_url} \n"
+                try:
+                    airbyte_url = RegionService.airbyte_ui_url_for_org(orgtask.org)
+                except RegionConfigError as err:
+                    logger.error(f"no airbyte ui url for {orgtask.org.slug}: {err.message}")
+                    airbyte_url = None
+                if airbyte_url:
+                    connection_url = f"{airbyte_url}/workspaces/{orgtask.org.airbyte_workspace_id}/connections/{connection_id}"
+                    email_body += f"Connection URL: {connection_url} \n"
+                else:
+                    email_body += f"Connection ID: {connection_id} \n"
             else:
                 email_body += f"Connection ID: {connection_id} \n"
 
@@ -1140,7 +1159,11 @@ def check_for_long_running_flow_runs():
 def sync_single_airbyte_job_stats(self, job_id: int):
     """Syncs a single Airbyte job stats"""
     logger.info("Syncing details from airbyte for job %s", job_id)
-    airbytehelpers.fetch_and_update_airbyte_job_details(job_id)
+    # the airbyte webhook that triggers this task has no caller and only knows the home region;
+    # rows are keyed on (job_id, config_id) so it cannot overwrite another region's jobs
+    airbytehelpers.fetch_and_update_airbyte_job_details(
+        job_id, server=RegionService.home_airbyte_server()
+    )
 
 
 @app.task(bind=True)

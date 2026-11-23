@@ -13,6 +13,7 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 django.setup()
 
 from django.contrib.auth.models import User
+from ddpui.core.regions.region_service import RegionService
 from ddpui.models.org import Org, OrgWarehouse
 from ddpui.models.org_user import OrgUser
 from ddpui.api.airbyte_api import (
@@ -653,6 +654,7 @@ def test_post_source_oauth_create_success(seed_db, orguser_workspace, monkeypatc
                 "refresh_token": "rt-123",
             },
         },
+        server=RegionService.airbyte_server_for_org(orguser_workspace.org),
     )
     # ref is not consumed on redeem; it expires on its own short TTL
     assert f"airbyte_oauth_refresh_token_ref:{ref}" in fake_redis.store
@@ -698,6 +700,7 @@ def test_put_source_oauth_update_reauth(seed_db, orguser_workspace, monkeypatch)
             },
         },
         GSHEETS_DEF_ID,
+        server=RegionService.airbyte_server_for_org(orguser_workspace.org),
     )
 
 
@@ -970,6 +973,24 @@ def test_get_airbyte_sources_success(orguser_workspace):
     )
 
     assert len(result) == 3
+
+
+def test_get_airbyte_sources_uses_org_region(authuser, org_af, mock_region_secrets, seed_db):
+    """an Africa org's request only ever reaches the Africa Airbyte"""
+    orguser_af = OrgUser.objects.create(
+        user=authuser,
+        org=org_af,
+        new_role=Role.objects.filter(slug=ACCOUNT_MANAGER_ROLE).first(),
+    )
+    request = mock_request(orguser_af)
+    with patch(
+        "ddpui.ddpairbyte.airbyte_service.abreq", return_value={"sources": [1]}
+    ) as mock_abreq:
+        result = get_airbyte_sources(request)
+    assert result == [1]
+    servers = [call.kwargs["server"] for call in mock_abreq.call_args_list]
+    assert servers and all(server.aws_region == "af-south-1" for server in servers)
+    assert servers[0].base_url == "https://airbyte-af-staging-internal.dalgo.org:443/api/v1"
 
 
 # ================================================================================
@@ -1319,7 +1340,10 @@ def test_post_cancel_connection_job(orguser_workspace):
     ) as mock_cancel_connection_job:
         post_cancel_connection_job(request, "fake-connection-id", "sync")
         mock_cancel_connection_job.assert_called_once_with(
-            "FAKE-WORKSPACE-ID", "fake-connection-id", "sync"
+            "FAKE-WORKSPACE-ID",
+            "fake-connection-id",
+            "sync",
+            server=RegionService.airbyte_server_for_org(orguser_workspace.org),
         )
 
 

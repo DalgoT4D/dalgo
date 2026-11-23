@@ -35,9 +35,14 @@ class SyncStats(models.Model):
 
 
 class AirbyteJob(models.Model):
-    """model to track airbyte jobs"""
+    """model to track airbyte jobs.
 
-    job_id = models.BigIntegerField(primary_key=True, null=False)
+    Airbyte job ids are a per-Airbyte-instance sequence, so the same job_id can exist in two
+    data regions. A job is identified by (job_id, config_id): config_id is a connection uuid,
+    unique across Airbyte instances."""
+
+    id = models.BigAutoField(primary_key=True)
+    job_id = models.BigIntegerField()  # per-Airbyte-instance id, NOT globally unique
     job_type = models.CharField(
         max_length=20
     )  # check_connection_source┃check_connection_destination┃discover_schema┃get_spec┃sync┃reset_connection┃refresh┃clear
@@ -69,6 +74,13 @@ class AirbyteJob(models.Model):
     )  # when the job ended; can be null if we pull or sync an ongonig job
     created_at = models.DateTimeField()  # when the job was created in airbyte
     updated_at = models.DateTimeField(auto_now=True)  # when the django record was last updated
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["job_id", "config_id"], name="uniq_airbytejob_job_config"
+            )
+        ]
 
     def __str__(self) -> str:
         return f"AirbyteJob[Job ID: {self.job_id}|Job Type: {self.job_type}|Status: {self.status}]"

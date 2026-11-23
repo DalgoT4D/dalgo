@@ -14,6 +14,8 @@ pytestmark = pytest.mark.django_db
 
 from ddpui.models.flow_runs import PrefectFlowRun
 from ddpui.models.org import OrgDataFlowv1, Org
+from ddpui.core.regions.region_service import RegionService
+from ddpui.schemas.data_region_schema import AirbyteFlowServerConfig
 from ddpui.utils import timezone
 from ddpui.ddpprefect.prefect_service import (
     prefect_get,
@@ -234,33 +236,94 @@ def test_get_airbyte_server_block_id(mock_get: Mock):
     assert response == "the-block-id"
 
 
+AIRBYTE_ENV = {
+    "AIRBYTE_SERVER_HOST": "airbyte-mumbai-host",
+    "AIRBYTE_SERVER_PORT": "8000",
+    "AIRBYTE_SERVER_APIVER": "v1",
+    "AIRBYTE_API_TOKEN": "token",
+    "AIRBYTE_USE_SSL": "false",
+}
+
+
 @patch("ddpui.ddpprefect.prefect_service.prefect_post")
-def test_create_airbyte_server_block(mock_post: Mock):
+def test_create_airbyte_server_block_home_region_payload_unchanged(
+    mock_post: Mock, test_data_regions
+):
+    """for a Mumbai org the proxy receives exactly the payload it got before multi-region
+    (here: the region secret is unreadable, so the AIRBYTE_* env fallback is used)"""
     blockname = "theblockname"
     mock_post.return_value = {
         "block_id": "the-block-id",
         "cleaned_block_name": "theblockname",
     }
-    response = create_airbyte_server_block(blockname)
-    mock_post.assert_called_once_with(
-        "blocks/airbyte/server/",
-        {
-            "blockName": blockname,
-            "serverHost": os.getenv("AIRBYTE_SERVER_HOST"),
-            "serverPort": os.getenv("AIRBYTE_SERVER_PORT"),
-            "apiVersion": os.getenv("AIRBYTE_SERVER_APIVER"),
-            "useSSL": False,
-        },
-    )
+    org = Org(name="mumbai", slug="mumbai", region_config=None)
+    with patch.dict(os.environ, AIRBYTE_ENV), patch(
+        "ddpui.core.regions.airbyte_credentials.secretsmanager.get_client",
+        side_effect=Exception("no secret"),
+    ):
+        flow_server = RegionService.airbyte_flow_server_for_org(org)
+        response = create_airbyte_server_block(blockname, flow_server)
+
+        mock_post.assert_called_once_with(
+            "blocks/airbyte/server/",
+            {
+                "blockName": blockname,
+                "serverHost": os.getenv("AIRBYTE_SERVER_HOST"),
+                "serverPort": os.getenv("AIRBYTE_SERVER_PORT"),
+                "apiVersion": os.getenv("AIRBYTE_SERVER_APIVER"),
+                "useSSL": False,
+            },
+        )
     assert response == ("the-block-id", "theblockname")
 
 
+@patch("ddpui.ddpprefect.prefect_service.prefect_post")
+def test_create_airbyte_server_block_af_region(mock_post: Mock, org_af, mock_region_secrets):
+    """an Africa org's block uses the region secret's server_* host (same as the backend)"""
+    mock_post.return_value = {"block_id": "bid", "cleaned_block_name": "org-af-airbyte-server"}
+    create_airbyte_server_block(
+        "org-af-airbyte-server", RegionService.airbyte_flow_server_for_org(org_af)
+    )
+    mock_post.assert_called_once_with(
+        "blocks/airbyte/server/",
+        {
+            "blockName": "org-af-airbyte-server",
+            "serverHost": "airbyte-af-staging-internal.dalgo.org",
+            "serverPort": "443",
+            "apiVersion": "v1",
+            "useSSL": True,
+        },
+    )
+
+
 @patch("ddpui.ddpprefect.prefect_service.prefect_put")
-def test_update_airbyte_server_block(mock_put: Mock):
+def test_update_airbyte_server_block_sends_api_version(mock_put: Mock, org_af, mock_region_secrets):
+    mock_put.return_value = {"block_id": "bid", "cleaned_block_name": "blockname"}
+    response = update_airbyte_server_block(
+        "blockname", RegionService.airbyte_flow_server_for_org(org_af)
+    )
+    mock_put.assert_called_once_with(
+        "blocks/airbyte/server/",
+        {
+            "blockName": "blockname",
+            "serverHost": "airbyte-af-staging-internal.dalgo.org",
+            "serverPort": "443",
+            "apiVersion": "v1",
+            "useSSL": True,
+        },
+    )
+    assert response == ("bid", "blockname")
+
+
+@patch("ddpui.ddpprefect.prefect_service.prefect_put")
+def test_update_airbyte_server_block(mock_put: Mock, airbyte_server_in):
     """tests update_airbyte_server_block"""
     mock_put.side_effect = Exception("not implemented")
+    flow_server = AirbyteFlowServerConfig(
+        server_host="h", server_port="8000", api_version="v1", use_ssl=False
+    )
     with pytest.raises(Exception) as excinfo:
-        update_airbyte_server_block("blockname")
+        update_airbyte_server_block("blockname", flow_server)
     assert str(excinfo.value) == "not implemented"
 
 

@@ -85,7 +85,7 @@ def test_delete_warehouse_full_flow():
 
         # Assert airbyte connection deleted
         airbyte_service.delete_connection.assert_called_once_with(
-            org.airbyte_workspace_id, orgtask_sync.connection_id
+            org.airbyte_workspace_id, orgtask_sync.connection_id, server=service.airbyte_server
         )
         # Assert orgtask_sync deleted
         assert OrgTask.objects.filter(id=orgtask_sync.id).count() == 0
@@ -96,7 +96,9 @@ def test_delete_warehouse_full_flow():
         assert secretsmanager.delete_warehouse_credentials.call_count == 1
         # Assert airbyte destination deleted
         airbyte_service.delete_destination.assert_called_once_with(
-            org.airbyte_workspace_id, warehouse.airbyte_destination_id
+            org.airbyte_workspace_id,
+            warehouse.airbyte_destination_id,
+            server=service.airbyte_server,
         )
         # Assert warehouse deleted
         assert OrgWarehouse.objects.filter(id=warehouse.id).count() == 0

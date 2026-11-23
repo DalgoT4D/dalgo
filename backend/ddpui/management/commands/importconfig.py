@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from django.core.management.base import BaseCommand
 from ddpui.ddpairbyte.schema import AirbyteConnectionCreate, AirbyteSourceCreate
 from ddpui.schemas.org_warehouse_schema import OrgWarehouseSchema
+from ddpui.core.regions.region_service import RegionService
 from ddpui.ddpairbyte import airbyte_service
 from ddpui.utils.custom_logger import CustomLogger
 from testclient.testclient import TestClient
@@ -65,7 +66,10 @@ class Command(BaseCommand):
 
     def import_warehouse(self, ngoClient: TestClient, org: Org, config: dict):
         """creates a warehouse for an org from the json"""
-        existing_destination = airbyte_service.get_destinations(org.airbyte_workspace_id)
+        server = RegionService.airbyte_server_for_org(org)
+        existing_destination = airbyte_service.get_destinations(
+            org.airbyte_workspace_id, server=server
+        )
         if existing_destination.get("destinations") and existing_destination["destinations"]:
             logger.info("Warehouse already exists")
             return None, "warehouse already exists"
@@ -95,7 +99,8 @@ class Command(BaseCommand):
         name = config["name"]
         sourcedef_name = config["sourceName"]
 
-        source_definitions = airbyte_service.get_source_definitions(workspace_id)[
+        server = RegionService.airbyte_server_for_org(org)
+        source_definitions = airbyte_service.get_source_definitions(workspace_id, server=server)[
             "sourceDefinitions"
         ]
 
@@ -124,7 +129,8 @@ class Command(BaseCommand):
 
     def import_connections(self, ngoClient: TestClient, org: Org, config: dict):
         """Imports all connections for an org"""
-        sources = airbyte_service.get_sources(org.airbyte_workspace_id)["sources"]
+        server = RegionService.airbyte_server_for_org(org)
+        sources = airbyte_service.get_sources(org.airbyte_workspace_id, server=server)["sources"]
         source_name = config["source_name"]
         source = next((s for s in sources if s["name"] == source_name), None)
         if source is None:

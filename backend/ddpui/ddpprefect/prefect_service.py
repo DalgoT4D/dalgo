@@ -27,6 +27,7 @@ from ddpui.models.tasks import DataflowOrgTask, TaskLock
 from ddpui.models.org_user import OrgUser, Org
 from ddpui.models.org import OrgPrefectBlockv1, OrgDataFlowv1, QueueDetailsSchema
 from ddpui.models.flow_runs import PrefectFlowRun
+from ddpui.schemas.data_region_schema import AirbyteFlowServerConfig
 from ddpui.ddpprefect import (
     DDP_WORK_QUEUE,
     FLOW_RUN_COMPLETED_STATE_TYPE,
@@ -222,33 +223,29 @@ def get_airbyte_server_block(blockname) -> dict | None:
     return response
 
 
-def create_airbyte_server_block(blockname):
-    """Create airbyte server block in prefect"""
-    use_ssl = os.getenv("AIRBYTE_USE_SSL", "false").lower() == "true"
+def _airbyte_server_block_payload(blockname: str, flow_server: AirbyteFlowServerConfig) -> dict:
+    """payload for prefect-proxy's airbyte server block: the airbyte host as seen by flow pods"""
+    return {
+        "blockName": blockname,
+        "serverHost": flow_server.server_host,
+        "serverPort": flow_server.server_port,
+        "apiVersion": flow_server.api_version,
+        "useSSL": flow_server.use_ssl,
+    }
+
+
+def create_airbyte_server_block(blockname: str, flow_server: AirbyteFlowServerConfig):
+    """Create airbyte server block in prefect (flow-side host of the org's region)"""
     response = prefect_post(
-        "blocks/airbyte/server/",
-        {
-            "blockName": blockname,
-            "serverHost": os.getenv("AIRBYTE_SERVER_HOST"),
-            "serverPort": os.getenv("AIRBYTE_SERVER_PORT"),
-            "apiVersion": os.getenv("AIRBYTE_SERVER_APIVER"),
-            "useSSL": use_ssl,
-        },
+        "blocks/airbyte/server/", _airbyte_server_block_payload(blockname, flow_server)
     )
     return (response["block_id"], response["cleaned_block_name"])
 
 
-def update_airbyte_server_block(blockname):
-    """Create airbyte server block in prefect"""
-    use_ssl = os.getenv("AIRBYTE_USE_SSL", "false").lower() == "true"
+def update_airbyte_server_block(blockname: str, flow_server: AirbyteFlowServerConfig):
+    """Update airbyte server block in prefect (flow-side host of the org's region)"""
     response = prefect_put(
-        "blocks/airbyte/server/",
-        {
-            "blockName": blockname,
-            "serverHost": os.getenv("AIRBYTE_SERVER_HOST"),
-            "serverPort": os.getenv("AIRBYTE_SERVER_PORT"),
-            "useSSL": use_ssl,
-        },
+        "blocks/airbyte/server/", _airbyte_server_block_payload(blockname, flow_server)
     )
     return (response["block_id"], response["cleaned_block_name"])
 
