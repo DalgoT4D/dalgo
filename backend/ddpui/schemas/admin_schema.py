@@ -228,6 +228,7 @@ class AdminNotificationAudienceSchema(Schema):
 
     org_ids: Optional[List[int]] = None
     superset_clients: bool = False
+    admins_only: bool = False  # only admin and super-admin members
 
 
 class AdminNotificationPreviewResponseSchema(Schema):

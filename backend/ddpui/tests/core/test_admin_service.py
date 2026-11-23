@@ -23,10 +23,16 @@ from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from ddpui.core.admin import admin_service
+from ddpui.core.admin.exceptions import AdminOrgUpdateError
 from ddpui.models.org import Org
 from ddpui.models.org_plans import OrgPlans
 from ddpui.models.org_user import Invitation, OrgUser
-from ddpui.schemas.admin_schema import AdminUpdateOrgSchema, AdminCreateNotificationSchema
+from ddpui.models.role_based_access import Role
+from ddpui.schemas.admin_schema import (
+    AdminUpdateOrgSchema,
+    AdminCreateNotificationSchema,
+    AdminNotificationAudienceSchema,
+)
 from ddpui.utils.feature_flags import enable_feature_flag
 
 pytestmark = pytest.mark.django_db
@@ -65,6 +71,33 @@ def test_update_org_without_org_plans_row_does_not_raise():
 
     assert result.id == org.id
     assert not OrgPlans.objects.filter(org=org).exists()  # still none — silently skipped
+
+
+def test_update_org_only_extends_a_free_trial_end_date():
+    """Trial end date can move later, never earlier; the same day keeps the stored time."""
+    org = Org.objects.create(name="Trial Org", slug="trial-org-extend")
+    end = timezone.make_aware(timezone.datetime(2026, 11, 5, 10, 31))
+    OrgPlans.objects.create(org=org, base_plan="Free Trial", start_date=end, end_date=end)
+
+    with pytest.raises(AdminOrgUpdateError):
+        admin_service.update_org(org, AdminUpdateOrgSchema(end_date=timezone.datetime(2026, 11, 4)))
+
+    admin_service.update_org(org, AdminUpdateOrgSchema(end_date=timezone.datetime(2026, 11, 5)))
+    assert OrgPlans.objects.get(org=org).end_date == end
+
+    admin_service.update_org(org, AdminUpdateOrgSchema(end_date=timezone.datetime(2026, 11, 12)))
+    assert OrgPlans.objects.get(org=org).end_date.date().isoformat() == "2026-11-12"
+
+
+def test_update_org_cannot_switch_an_org_into_free_trial():
+    """Trials are only created by the trial signup, so other orgs can't be switched into one."""
+    org = Org.objects.create(name="Paying Org", slug="paying-org")
+    OrgPlans.objects.create(org=org, base_plan="Dalgo")
+
+    with pytest.raises(AdminOrgUpdateError):
+        admin_service.update_org(org, AdminUpdateOrgSchema(base_plan="Free Trial"))
+
+    assert OrgPlans.objects.get(org=org).base_plan == "Dalgo"
 
 
 # --------------------------------------------------------------------------- #
@@ -129,7 +162,7 @@ def test_preview_notification_recipients_whole_platform_counts_everyone():
     user = User.objects.create(username="wp@x.org", email="wp@x.org")
     OrgUser.objects.create(user=user, org=org)
 
-    count = admin_service.preview_notification_recipients(None)
+    count = admin_service.preview_notification_recipients(AdminNotificationAudienceSchema())
 
     assert count >= 1
 
@@ -141,15 +174,33 @@ def test_preview_notification_recipients_merges_multiple_orgs():
     OrgUser.objects.create(user=User.objects.create(username="a@x.org", email="a@x.org"), org=org_a)
     OrgUser.objects.create(user=User.objects.create(username="b@x.org", email="b@x.org"), org=org_b)
 
-    count = admin_service.preview_notification_recipients([org_a.id, org_b.id])
+    count = admin_service.preview_notification_recipients(
+        AdminNotificationAudienceSchema(org_ids=[org_a.id, org_b.id])
+    )
 
     assert count == 2
+
+
+def test_preview_notification_recipients_admins_only_counts_admins_and_super_admins():
+    """admins_only keeps admin and super-admin members, dropping analysts and members"""
+    org = Org.objects.create(name="Admins Org", slug="preview-admins-org")
+    for slug, level in [("super-admin", 5), ("admin", 4), ("analyst", 2), ("member", 1)]:
+        role, _ = Role.objects.get_or_create(slug=slug, defaults={"name": slug, "level": level})
+        user = User.objects.create(username=f"{slug}@admins.org", email=f"{slug}@admins.org")
+        OrgUser.objects.create(user=user, org=org, new_role=role)
+
+    everyone = AdminNotificationAudienceSchema(org_ids=[org.id])
+    admins = AdminNotificationAudienceSchema(org_ids=[org.id], admins_only=True)
+    assert admin_service.preview_notification_recipients(everyone) == 4
+    assert admin_service.preview_notification_recipients(admins) == 2
 
 
 def test_preview_notification_recipients_bogus_org_id_contributes_zero():
     """a bogus org_id inside a selection contributes zero rather than erroring
     (plan.md §4.3, §5)"""
-    count = admin_service.preview_notification_recipients([9999999])
+    count = admin_service.preview_notification_recipients(
+        AdminNotificationAudienceSchema(org_ids=[9999999])
+    )
 
     assert count == 0
 

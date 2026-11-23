@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import { trackEvent } from '@/lib/analytics';
-import { ANALYTICS_EVENTS } from '@/constants/analytics';
+import { ANALYTICS_EVENTS, TRIAL_INVITE_SOURCES } from '@/constants/analytics';
+import { BASE_PLANS } from '@/components/admin/constants';
+import { FREE_TRIAL_PLAN_NAME } from '@/constants/trial';
+import { TrialSignupInviteForm } from '@/components/trial/TrialSignupInviteForm';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -28,12 +31,6 @@ interface CreateOrgDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const PLAN_OPTIONS = [
-  { value: 'Dalgo', label: 'Dalgo' },
-  { value: 'Free Trial', label: 'Free Trial' },
-  { value: 'Internal', label: 'Internal' },
-];
 
 const DURATION_OPTIONS = [
   { value: 'Monthly', label: 'Monthly' },
@@ -87,16 +84,6 @@ export function CreateOrgDialog({ open, onOpenChange }: CreateOrgDialogProps) {
       newErrors.website = 'Please enter a valid website URL';
     }
 
-    // For Free Trial, start and end dates are required
-    if (formData.base_plan === 'Free Trial') {
-      if (!formData.start_date) {
-        newErrors.start_date = 'Start date is required for trial accounts';
-      }
-      if (!formData.end_date) {
-        newErrors.end_date = 'End date is required for trial accounts';
-      }
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -114,8 +101,7 @@ export function CreateOrgDialog({ open, onOpenChange }: CreateOrgDialogProps) {
         base_plan: formData.base_plan,
         subscription_duration: formData.subscription_duration,
         superset_included: formData.superset_included === 'true',
-        can_upgrade_plan:
-          formData.superset_included === 'false' || formData.base_plan === 'Free Trial',
+        can_upgrade_plan: formData.superset_included === 'false',
         start_date: formData.start_date || undefined,
         end_date: formData.end_date || undefined,
       };
@@ -179,133 +165,153 @@ export function CreateOrgDialog({ open, onOpenChange }: CreateOrgDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Organization Name *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => updateField('name', e.target.value)}
-              placeholder="Enter organization name"
-              className={errors.name ? 'border-red-500' : ''}
-            />
-            {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="website">Website (Optional)</Label>
-            <Input
-              id="website"
-              type="url"
-              value={formData.website}
-              onChange={(e) => updateField('website', e.target.value)}
-              placeholder="https://your-organization.org"
-              className={errors.website ? 'border-red-500' : ''}
-            />
-            {errors.website && <p className="text-sm text-red-500">{errors.website}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="base_plan">Plan Type *</Label>
-            <Select
-              value={formData.base_plan}
-              onValueChange={(value) => updateField('base_plan', value)}
+        <div className="space-y-2">
+          <Label htmlFor="base_plan">Plan Type *</Label>
+          <Select
+            value={formData.base_plan}
+            onValueChange={(value) => updateField('base_plan', value)}
+          >
+            <SelectTrigger
+              id="base_plan"
+              className={errors.base_plan ? 'border-red-500' : ''}
+              data-testid="create-org-dialog-plan-select"
             >
-              <SelectTrigger className={errors.base_plan ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Select plan type" />
-              </SelectTrigger>
-              <SelectContent>
-                {PLAN_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.base_plan && <p className="text-sm text-red-500">{errors.base_plan}</p>}
-          </div>
+              <SelectValue placeholder="Select plan type" />
+            </SelectTrigger>
+            <SelectContent>
+              {BASE_PLANS.map((plan) => (
+                <SelectItem key={plan} value={plan}>
+                  {plan}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.base_plan && <p className="text-sm text-red-500">{errors.base_plan}</p>}
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="subscription_duration">Billing Frequency *</Label>
-            <Select
-              value={formData.subscription_duration}
-              onValueChange={(value) => updateField('subscription_duration', value)}
-            >
-              <SelectTrigger className={errors.subscription_duration ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Select billing frequency" />
-              </SelectTrigger>
-              <SelectContent>
-                {DURATION_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.subscription_duration && (
-              <p className="text-sm text-red-500">{errors.subscription_duration}</p>
-            )}
-          </div>
+        {formData.base_plan === FREE_TRIAL_PLAN_NAME ? (
+          <TrialSignupInviteForm source={TRIAL_INVITE_SOURCES.HEADER} onDone={handleClose} />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Organization Name *</Label>
+              <Input
+                id="name"
+                data-testid="create-org-dialog-name-input"
+                value={formData.name}
+                onChange={(e) => updateField('name', e.target.value)}
+                placeholder="Enter organization name"
+                className={errors.name ? 'border-red-500' : ''}
+              />
+              {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="superset_included">Is Superset Included? *</Label>
-            <Select
-              value={formData.superset_included}
-              onValueChange={(value) => updateField('superset_included', value)}
-            >
-              <SelectTrigger className={errors.superset_included ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Select option" />
-              </SelectTrigger>
-              <SelectContent>
-                {SUPERSET_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.superset_included && (
-              <p className="text-sm text-red-500">{errors.superset_included}</p>
-            )}
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="website">Website (Optional)</Label>
+              <Input
+                id="website"
+                data-testid="create-org-dialog-website-input"
+                type="url"
+                value={formData.website}
+                onChange={(e) => updateField('website', e.target.value)}
+                placeholder="https://your-organization.org"
+                className={errors.website ? 'border-red-500' : ''}
+              />
+              {errors.website && <p className="text-sm text-red-500">{errors.website}</p>}
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="start_date">
-              Start Date{formData.base_plan === 'Free Trial' ? ' *' : ''}
-            </Label>
-            <Input
-              id="start_date"
-              type="date"
-              value={formData.start_date}
-              onChange={(e) => updateField('start_date', e.target.value)}
-              className={errors.start_date ? 'border-red-500' : ''}
-            />
-            {errors.start_date && <p className="text-sm text-red-500">{errors.start_date}</p>}
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="subscription_duration">Billing Frequency *</Label>
+              <Select
+                value={formData.subscription_duration}
+                onValueChange={(value) => updateField('subscription_duration', value)}
+              >
+                <SelectTrigger
+                  className={errors.subscription_duration ? 'border-red-500' : ''}
+                  data-testid="create-org-dialog-billing-select"
+                >
+                  <SelectValue placeholder="Select billing frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DURATION_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.subscription_duration && (
+                <p className="text-sm text-red-500">{errors.subscription_duration}</p>
+              )}
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="end_date">
-              End Date{formData.base_plan === 'Free Trial' ? ' *' : ''}
-            </Label>
-            <Input
-              id="end_date"
-              type="date"
-              value={formData.end_date}
-              onChange={(e) => updateField('end_date', e.target.value)}
-              className={errors.end_date ? 'border-red-500' : ''}
-            />
-            {errors.end_date && <p className="text-sm text-red-500">{errors.end_date}</p>}
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="superset_included">Is Superset Included? *</Label>
+              <Select
+                value={formData.superset_included}
+                onValueChange={(value) => updateField('superset_included', value)}
+              >
+                <SelectTrigger
+                  className={errors.superset_included ? 'border-red-500' : ''}
+                  data-testid="create-org-dialog-superset-select"
+                >
+                  <SelectValue placeholder="Select option" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUPERSET_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.superset_included && (
+                <p className="text-sm text-red-500">{errors.superset_included}</p>
+              )}
+            </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Create Organization'}
-            </Button>
-          </DialogFooter>
-        </form>
+            <div className="space-y-2">
+              <Label htmlFor="start_date">Start Date</Label>
+              <Input
+                id="start_date"
+                data-testid="create-org-dialog-start-date-input"
+                type="date"
+                value={formData.start_date}
+                onChange={(e) => updateField('start_date', e.target.value)}
+                className={errors.start_date ? 'border-red-500' : ''}
+              />
+              {errors.start_date && <p className="text-sm text-red-500">{errors.start_date}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="end_date">End Date</Label>
+              <Input
+                id="end_date"
+                data-testid="create-org-dialog-end-date-input"
+                type="date"
+                value={formData.end_date}
+                onChange={(e) => updateField('end_date', e.target.value)}
+                className={errors.end_date ? 'border-red-500' : ''}
+              />
+              {errors.end_date && <p className="text-sm text-red-500">{errors.end_date}</p>}
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={isSubmitting}
+                data-testid="create-org-dialog-cancel"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting} data-testid="create-org-dialog-submit">
+                {isSubmitting ? 'Creating...' : 'Create Organization'}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -24,6 +24,13 @@ class AdminOrgCreateError(AdminServiceError):
         super().__init__(message, "ADMIN_ORG_CREATE_ERROR")
 
 
+class AdminOrgUpdateError(AdminServiceError):
+    """org update rejected (e.g. a trial end date moved earlier) — maps to 400"""
+
+    def __init__(self, message: str):
+        super().__init__(message, "ADMIN_ORG_UPDATE_ERROR")
+
+
 class AdminOrgDeleteError(AdminServiceError):
     """org deletion failed (OrgCleanupService raised) — maps to 400"""
 

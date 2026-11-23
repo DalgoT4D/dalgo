@@ -438,6 +438,7 @@ export interface CreateAdminNotificationForm {
   urgent?: boolean;
   org_ids?: number[];
   superset_clients?: boolean;
+  admins_only?: boolean;
   send_in_app?: boolean;
   send_email?: boolean;
   notification_type: 'platform' | 'announcement';
@@ -477,12 +478,14 @@ export function useAdminNotifications(page = 1, limit = DEFAULT_PAGE_SIZE) {
 export function useAdminNotificationActions() {
   const previewRecipients = async (
     orgIds?: number[],
-    supersetClients?: boolean
+    supersetClients?: boolean,
+    adminsOnly?: boolean
   ): Promise<AdminNotificationPreview> => {
     try {
       return (await apiPost('/api/v1/admin/notifications/preview', {
         org_ids: orgIds,
         superset_clients: supersetClients,
+        admins_only: adminsOnly,
       })) as AdminNotificationPreview;
     } catch (error: unknown) {
       toastError.api(error, 'Failed to preview recipients');

@@ -66,7 +66,9 @@ describe('BroadcastHistory table', () => {
   it('labels a null audience as whole platform', () => {
     renderHistory({ notifications: [{ ...history[0], target_org_names: null }] });
 
-    expect(screen.getByTestId('notification-history-row-10')).toHaveTextContent('Whole platform');
+    expect(screen.getByTestId('notification-history-row-10')).toHaveTextContent(
+      'All organizations'
+    );
   });
 
   it('shows a skeleton while a page is loading', () => {

@@ -102,6 +102,9 @@ export const ANALYTICS_EVENTS = {
   TRIAL_SIGNUP_SUBMITTED: 'trial_onboarding:signup_submitted',
   // Verification link re-sent from the check-your-email card (re-POSTs signup).
   TRIAL_LINK_RESENT: 'trial_onboarding:link_resent',
+  // trial signup sent on someone's behalf ({ source }); separate so the public funnel stays clean
+  TRIAL_INVITE_SENT: 'trial_onboarding:invite_sent',
+  TRIAL_INVITE_RESENT: 'trial_onboarding:invite_resent',
   TRIAL_ACTIVATED: 'trial_onboarding:trial_activated',
   TRIAL_PROVISIONING_VIDEO_PLAYED: 'trial_onboarding:provisioning_video_played',
   // A failed clone was re-enqueued. Carries { from: 'failed' | 'timeout' } — which
@@ -416,6 +419,14 @@ export const SUBSCRIPTION_REQUEST_SOURCES = {
 
 export type SubscriptionRequestSource =
   (typeof SUBSCRIPTION_REQUEST_SOURCES)[keyof typeof SUBSCRIPTION_REQUEST_SOURCES];
+
+// `source` for TRIAL_INVITE_SENT / TRIAL_INVITE_RESENT — where the trial was started from.
+export const TRIAL_INVITE_SOURCES = {
+  ADMIN_PORTAL: 'admin_portal',
+  HEADER: 'header',
+} as const;
+
+export type TrialInviteSource = (typeof TRIAL_INVITE_SOURCES)[keyof typeof TRIAL_INVITE_SOURCES];
 
 // `entry` values for the insight walkthrough — which surface sent the user into the fork.
 // Without this, a walkthrough begun from a trial nudge is indistinguishable from one begun in

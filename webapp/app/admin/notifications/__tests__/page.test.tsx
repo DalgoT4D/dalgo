@@ -103,7 +103,9 @@ describe('NotificationsPage composer', () => {
   it('previews the whole-platform audience by default and enables send once resolved', async () => {
     render(<NotificationsPage />);
 
-    await waitFor(() => expect(mockPreviewRecipients).toHaveBeenCalledWith(undefined, false));
+    await waitFor(() =>
+      expect(mockPreviewRecipients).toHaveBeenCalledWith(undefined, false, false)
+    );
     expect(await screen.findByText(/Reaches 5 people/)).toBeInTheDocument();
 
     const user = userEvent.setup({ delay: null });
@@ -123,7 +125,9 @@ describe('NotificationsPage composer', () => {
   it('switching to one-or-more-orgs re-previews with the selected org_ids', async () => {
     const user = userEvent.setup({ delay: null });
     render(<NotificationsPage />);
-    await waitFor(() => expect(mockPreviewRecipients).toHaveBeenCalledWith(undefined, false));
+    await waitFor(() =>
+      expect(mockPreviewRecipients).toHaveBeenCalledWith(undefined, false, false)
+    );
     mockPreviewRecipients.mockClear();
     mockPreviewRecipients.mockResolvedValue({ recipient_count: 2 });
 
@@ -132,7 +136,7 @@ describe('NotificationsPage composer', () => {
     const listbox = await screen.findByTestId('broadcast-org-picker-listbox');
     await user.click(await within(listbox).findByText('Akshara'));
 
-    await waitFor(() => expect(mockPreviewRecipients).toHaveBeenCalledWith([1], false));
+    await waitFor(() => expect(mockPreviewRecipients).toHaveBeenCalledWith([1], false, false));
     expect(await screen.findByText(/Reaches 2 people/)).toBeInTheDocument();
   });
 
@@ -140,7 +144,9 @@ describe('NotificationsPage composer', () => {
     mockSendNotification.mockResolvedValueOnce({ id: 99, recipient_count: 5 });
     const user = userEvent.setup({ delay: null });
     render(<NotificationsPage />);
-    await waitFor(() => expect(mockPreviewRecipients).toHaveBeenCalledWith(undefined, false));
+    await waitFor(() =>
+      expect(mockPreviewRecipients).toHaveBeenCalledWith(undefined, false, false)
+    );
 
     await user.type(screen.getByTestId('broadcast-subject'), 'Subject');
     await user.type(screen.getByTestId('broadcast-message'), 'Hello everyone');
@@ -153,6 +159,7 @@ describe('NotificationsPage composer', () => {
         urgent: false,
         org_ids: undefined,
         superset_clients: false,
+        admins_only: false,
         send_in_app: true,
         send_email: true,
         notification_type: 'platform',
@@ -220,7 +227,9 @@ describe('NotificationsPage tabs', () => {
   it('keeps an unsent draft alive across a round-trip to history', async () => {
     const user = userEvent.setup({ delay: null });
     render(<NotificationsPage />);
-    await waitFor(() => expect(mockPreviewRecipients).toHaveBeenCalledWith(undefined, false));
+    await waitFor(() =>
+      expect(mockPreviewRecipients).toHaveBeenCalledWith(undefined, false, false)
+    );
 
     await user.type(screen.getByTestId('broadcast-subject'), 'Half typed');
     await user.type(screen.getByTestId('broadcast-message'), 'Do not lose me');
@@ -236,7 +245,9 @@ describe('NotificationsPage tabs', () => {
     mockSendNotification.mockRejectedValueOnce(new Error('boom'));
     const user = userEvent.setup({ delay: null });
     render(<NotificationsPage />);
-    await waitFor(() => expect(mockPreviewRecipients).toHaveBeenCalledWith(undefined, false));
+    await waitFor(() =>
+      expect(mockPreviewRecipients).toHaveBeenCalledWith(undefined, false, false)
+    );
 
     await user.type(screen.getByTestId('broadcast-subject'), 'Subject');
     await user.type(screen.getByTestId('broadcast-message'), 'Hello everyone');

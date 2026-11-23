@@ -1,6 +1,6 @@
 /**
- * AdminOrganizationsPage tests — the org list: rendering, the search filter, and
- * reaching an org's detail page (which must work without a mouse).
+ * AdminOrganizationsPage tests — the org list: rendering, the search and plan filters,
+ * and reaching an org's detail page (which must work without a mouse).
  */
 
 import React from 'react';
@@ -19,7 +19,13 @@ jest.mock('next/navigation', () => ({
 const orgs = [
   { id: 1, name: 'Akshara', slug: 'akshara', base_plan: 'Dalgo', user_count: 5 },
   { id: 2, name: 'Bhumi', slug: 'bhumi', base_plan: 'Free Trial', user_count: 2 },
+  { id: 3, name: 'Pratham', slug: 'pratham', base_plan: 'Free Trial', user_count: 3 },
 ];
+
+async function choosePlan(user: ReturnType<typeof userEvent.setup>, plan: string) {
+  await user.click(screen.getByTestId('admin-org-plan-filter'));
+  await user.click(await screen.findByRole('option', { name: plan }));
+}
 
 const mockMutate = jest.fn().mockResolvedValue(undefined);
 
@@ -49,6 +55,58 @@ describe('AdminOrganizationsPage', () => {
     await user.type(screen.getByPlaceholderText('Search by name or slug'), 'bhumi');
     expect(screen.queryByText('Akshara')).not.toBeInTheDocument();
     expect(screen.getByText('Bhumi')).toBeInTheDocument();
+  });
+
+  it('filters the list by plan', async () => {
+    const user = userEvent.setup();
+    render(<AdminOrganizationsPage />);
+    await choosePlan(user, 'Free Trial');
+    expect(screen.queryByText('Akshara')).not.toBeInTheDocument();
+    expect(screen.getByText('Bhumi')).toBeInTheDocument();
+    expect(screen.getByText('Pratham')).toBeInTheDocument();
+  });
+
+  it('applies the plan filter and the search box together', async () => {
+    const user = userEvent.setup();
+    render(<AdminOrganizationsPage />);
+    await choosePlan(user, 'Free Trial');
+    await user.type(screen.getByPlaceholderText('Search by name or slug'), 'prat');
+    expect(screen.queryByText('Akshara')).not.toBeInTheDocument();
+    expect(screen.queryByText('Bhumi')).not.toBeInTheDocument();
+    expect(screen.getByText('Pratham')).toBeInTheDocument();
+  });
+
+  it('sorts by a column when its header is clicked, toggling the direction', async () => {
+    const user = userEvent.setup();
+    render(<AdminOrganizationsPage />);
+    const rowNames = () =>
+      screen.getAllByTestId(/^admin-org-row-/).map((row) => row.querySelector('td')?.textContent);
+
+    await user.click(screen.getByTestId('admin-org-sort-users'));
+    expect(rowNames()).toEqual(['Bhumi', 'Pratham', 'Akshara']);
+
+    await user.click(screen.getByTestId('admin-org-sort-users'));
+    expect(rowNames()).toEqual(['Akshara', 'Pratham', 'Bhumi']);
+  });
+
+  it('splits a long list into pages', async () => {
+    const manyOrgs = Array.from({ length: 12 }, (_, i) => ({
+      id: i + 1,
+      name: `Org ${String(i + 1).padStart(2, '0')}`,
+      slug: `org-${i + 1}`,
+      base_plan: 'Dalgo',
+      user_count: 1,
+    }));
+    (useAdminPortal.useAdminOrgs as jest.Mock).mockReturnValue({
+      orgs: manyOrgs,
+      isLoading: false,
+    });
+    const user = userEvent.setup();
+    render(<AdminOrganizationsPage />);
+
+    expect(screen.getAllByTestId(/^admin-org-row-/)).toHaveLength(10);
+    await user.click(screen.getByTestId('next-page-btn'));
+    expect(screen.getAllByTestId(/^admin-org-row-/)).toHaveLength(2);
   });
 
   it('opens an org when its row is clicked', async () => {
