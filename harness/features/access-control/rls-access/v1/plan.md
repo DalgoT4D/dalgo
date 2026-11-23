@@ -219,7 +219,7 @@ The row scope lives in a `ContextVar` (Python's per-request/per-task variable). 
 **Why it matters:** The creator rule and group shares can both grant Edit today. A single cap covers every path. Deleting Edit shares instead would remove Members' only access to private dashboards shared with them.
 
 **D7 — No Redis cache for access-list rows.**
-**Example:** Rahul's rows are read with one indexed query on `(upload, email)` against the live upload — about a millisecond — once per request, only when a query touches a filtered table.
+**Example:** Rahul's rows are read with one indexed query on `(upload, orguser)` against the live upload — about a millisecond — once per request, only when a query touches a filtered table.
 **Why it matters:** Spec §3: changes "apply at once". A cache would have to be cleared for everyone on both the old and the new list on every save; if it missed someone removed from the list, they would keep their old scope until the cache expired.
 
 ---
@@ -261,15 +261,32 @@ class OrgAccessListUpload(models.Model):
 
 
 class OrgAccessListRow(models.Model):
-    """One row of an upload. Several rows per email add up."""
+    """One row of an upload, for one person. Several rows for the same person add up."""
     upload = models.ForeignKey(OrgAccessListUpload, on_delete=models.CASCADE, related_name="rows")
-    email = models.EmailField()          # lowercased; not an FK — people can be listed before they're invited
+    orguser = models.ForeignKey(OrgUser, null=True, on_delete=models.CASCADE)   # set once the person is in the org
+    email = models.EmailField(null=True)                                         # lowercased; only until they join
     # "*" = every value, [] = none, ["Pune", "Nashik"] = those values (data's spelling)
     scope_values = models.JSONField()    # {"district": ["Solapur"], "taluka": ["Pandharpur"], "dam_id": "*"}
 
     class Meta:
-        indexes = [models.Index(fields=["upload", "email"])]
+        indexes = [models.Index(fields=["upload", "orguser"])]
+        constraints = [
+            # exactly one of orguser / email is set
+            models.CheckConstraint(
+                check=Q(orguser__isnull=False, email__isnull=True) | Q(orguser__isnull=True, email__isnull=False),
+                name="access_row_orguser_or_email",
+            ),
+        ]
 ```
+
+Each row points at a person in one of two ways:
+
+| Person                         | `orguser`     | `email`           |
+| ------------------------------ | ------------- | ----------------- |
+| Rahul, already in the org      | Rahul (id 45) | empty             |
+| Ravi, invited, not joined yet  | empty         | `ravi@atecf.org`  |
+
+When Ravi accepts his invite, his rows get `orguser=Ravi` and `email` is emptied (rule 4). From then on they are found only by `orguser`.
 
 Each upload stores its own rows, inserted in that file's order. The template download reads only the live upload's rows ordered by `id`, so it comes back in the order of the **last saved file**. Earlier uploads don't matter: their rows are deleted on Save.
 
@@ -293,7 +310,8 @@ Each upload stores its own rows, inserted in that file's order. The template dow
 | Field          | Example                                            | Why it's needed                                                                                                |
 | -------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `upload`       | Upload #1                                          | Which list this row belongs to. Deleting an upload deletes its rows.                                           |
-| `email`        | `rahul@mh.gov.in`                                  | Whose access this is, stored lowercased. Not linked to a user, so people can be listed before they're invited. |
+| `orguser`      | Rahul (id 45)                                      | Whose access this is. Removing Rahul from the org deletes his rows with him.                                   |
+| `email`        | `ravi@atecf.org`                                   | For someone not in the org yet: whom Save invites, and how their rows are found when they accept. Emptied then. |
 | `scope_values` | district: Solapur, taluka: Pandharpur, dam_id: `*` | What this person can see. `*` means every value, blank means none, a list means those values.                  |
 
 **How many rows each model has**
@@ -342,6 +360,27 @@ def lock_org_row_access(org):
 **Why it matters:** Without it, Abhishek would preview Meera's sheet thinking it's his, and could save a list he never reviewed.
 **How:** The upload, previewed, save and discard endpoints take `upload_id` (§5.15). The preview header carries it too (§5.6). Each checks `upload_id` is the org's current draft; if not, 409 with who replaced it and when.
 
+**Rule 4 — When an invited person accepts, their rows are switched from `email` to their new `OrgUser`.**
+**Example:** Ravi is on the list as `email=ravi@atecf.org`. Save invites him. He accepts on 21 Nov. His rows become `orguser=Ravi, email=empty`, and on his first login he sees only his district. Nobody re-uploads the sheet. Before he accepts he can't log in, so there is nothing to filter.
+**Why it matters:** Without it, Ravi's rows would never match him and he would see nothing from filtered tables.
+**How:** one more step in `accept_invitation_v1` ([orguserfunctions.py:400](../../../../../backend/ddpui/core/orguserfunctions.py)), next to the existing steps for group members and dashboard shares:
+
+```python
+OrgAccessListRow.objects.filter(
+    upload__org=target_org, orguser=None, email__iexact=invitation.invited_email
+).update(orguser=orguser, email=None)
+```
+
+It matches by org and email, not by draft or live, so it fixes both uploads at once, and another org's rows for the same email are untouched.
+
+| Event                                                     | Rows for that person                                                                         |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Ravi accepts his invite                                   | Switched to his `OrgUser`, email emptied; filtered from his first login                      |
+| Ravi accepts before Save (someone invited him by hand)    | The draft's rows are switched; Save finds him already linked and doesn't invite him          |
+| Ravi's invite is cancelled, then sent again and accepted  | Still matched, because the row keeps his email until he joins                                |
+| Rahul changes his login email after joining               | Unaffected; his rows are on `orguser`                                                        |
+| Rahul is removed from the org                             | Deleted with his `OrgUser` (`CASCADE`)                                                       |
+
 **A same-named column that means something else is fixed in dbt.**
 **Example:** `prod.applications` has a `state` column holding application status ("approved", "pending"). Dalgo filters it like any other `state` column, so Members see no rows from it. Review check 7 flags it; consulting renames the column in dbt (`application_status`) and the table stops being filtered.
 **Why it matters:** A wrong match only hides rows, never shows extra ones, and fixing names in dbt is the spec's rule for every naming problem (spec §8: "Names must match; differences are fixed in dbt").
@@ -361,13 +400,15 @@ class RowScope:
 _current: ContextVar[Optional["LazyScope"]] = ContextVar("row_scope", default=None)
 ```
 
-- `set_for_request(orguser, preview_email, draft_upload_id)` — called from `CustomJwtAuthMiddleware.authenticate()` right after `request.orguser` is set. Stores a `LazyScope`; nothing is read from the database until a query touches the warehouse.
-- `resolve_for_orguser(orguser)` — unrestricted if role is super-admin, admin or analyst, or the org has no saved row access (no upload with `status="live"`). Otherwise loads the Member's rows from the live upload by lowercased email.
-- `resolve_for_email(org, email, draft_upload_id=None)` — used by preview and alerts. With `draft_upload_id`, reads that draft upload's rows (preview of an unsaved list), after checking it is still the org's draft (§5.1 rule 3); otherwise reads the live upload's rows. Treats the person as a Member.
+- `set_for_request(orguser, preview_orguser, draft_upload_id)` — called from `CustomJwtAuthMiddleware.authenticate()` right after `request.orguser` is set. Stores a `LazyScope`; nothing is read from the database until a query touches the warehouse.
+- `resolve_for_orguser(orguser)` — unrestricted if role is super-admin, admin or analyst, or the org has no saved row access (no upload with `status="live"`). Otherwise loads the Member's rows from the live upload by their `orguser`.
+- `resolve_as_member(orguser, draft_upload_id=None)` — used by preview. Reads that person's rows by `orguser`, always treating them as a Member. With `draft_upload_id`, reads that draft upload's rows (preview of an unsaved list), after checking it is still the org's draft (§5.1 rule 3); otherwise reads the live upload's rows.
+
+Rows are only ever read by `orguser`. Rows still holding an `email` (people not joined yet) are never used to filter: those people can't log in, and preview shows them as "hasn't accepted the invite yet" (§5.6).
 - `use(scope)` — a context manager for Celery tasks and the PDF render.
 - `RowScopeResetMiddleware` — resets `_current` before and after each request.
 
-#### Creating a row scope: `resolve_for_orguser` and `resolve_for_email`
+#### Creating a row scope: `resolve_for_orguser` and `resolve_as_member`
 
 These are the only two functions that create a `RowScope`. Everything else (`LazyScope`, `use`) calls one of them.
 
@@ -380,11 +421,12 @@ def resolve_for_orguser(orguser) -> RowScope:
     live = _live_upload(org)
     if live is None:
         return _unrestricted(org.id)                       # row access not set up yet
-    return _scope_from_upload(live, orguser.user.email)
+    return _scope_from_upload(live, orguser)
 
 
-def resolve_for_email(org, email, draft_upload_id=None) -> RowScope:
-    """A person's row scope by email, always treated as a Member; used by preview and alerts."""
+def resolve_as_member(orguser, draft_upload_id=None) -> RowScope:
+    """A person's row scope, always treated as a Member; used by preview."""
+    org = orguser.org
     if draft_upload_id:
         upload = OrgAccessListUpload.objects.filter(
             id=draft_upload_id, org=org, status=OrgAccessListUpload.Status.DRAFT
@@ -395,15 +437,15 @@ def resolve_for_email(org, email, draft_upload_id=None) -> RowScope:
         upload = _live_upload(org)
         if upload is None:
             return _unrestricted(org.id)                   # nothing saved yet
-    return _scope_from_upload(upload, email)
+    return _scope_from_upload(upload, orguser)
 
 
 def _live_upload(org):
     return OrgAccessListUpload.objects.filter(org=org, status=OrgAccessListUpload.Status.LIVE).first()
 
 
-def _scope_from_upload(upload, email) -> RowScope:
-    rows = OrgAccessListRow.objects.filter(upload=upload, email=email.lower()).order_by("id")
+def _scope_from_upload(upload, orguser) -> RowScope:
+    rows = OrgAccessListRow.objects.filter(upload=upload, orguser=orguser).order_by("id")
     return RowScope(
         org_id=upload.org_id,
         unrestricted=False,
@@ -422,10 +464,11 @@ def _unrestricted(org_id) -> RowScope:
 | `resolve_for_orguser(Rahul)`, flag off or nothing saved yet | `unrestricted=True`                                         |
 | `resolve_for_orguser(Rahul)`, list saved                    | `rows=({"district": ["Solapur"], ...},)` from the live list |
 | `resolve_for_orguser(new.user)`, not on the list            | `rows=()` → sees nothing on filtered tables                 |
-| `resolve_for_email(ATECF, "rahul@…", 57)`                   | Rahul's rows from draft upload #57                          |
-| `resolve_for_email(ATECF, "rahul@…", 57)`, #57 replaced     | `DraftReplacedError` → 409                                  |
+| `resolve_as_member(Rahul, 57)`                              | Rahul's rows from draft upload #57                          |
+| `resolve_as_member(Rahul, 57)`, #57 replaced                | `DraftReplacedError` → 409                                  |
 
 - **`DraftReplacedError`** is new, in `ddpui/core/rls/exceptions.py`; the API maps it to 409.
+- **`PreviewUserNotFoundError`** is new, in the same file; the API maps it to 404. It is raised when the preview header names someone who isn't an org user in this org.
 
 #### How a request gets its row scope
 
@@ -451,25 +494,23 @@ _current: ContextVar[Optional["LazyScope"]] = ContextVar("row_scope", default=No
 class LazyScope:
     """Knows who the request is for; reads their rows only on the first warehouse query."""
 
-    def __init__(self, orguser, preview_email=None, draft_upload_id=None):
+    def __init__(self, orguser, preview_orguser=None, draft_upload_id=None):
         self.orguser = orguser
-        self.preview_email = preview_email
+        self.preview_orguser = preview_orguser
         self.draft_upload_id = draft_upload_id
         self._scope = None
 
     def get(self) -> RowScope:
         if self._scope is None:
-            if self.preview_email:
-                self._scope = resolve_for_email(
-                    self.orguser.org, self.preview_email, self.draft_upload_id
-                )
+            if self.preview_orguser:
+                self._scope = resolve_as_member(self.preview_orguser, self.draft_upload_id)
             else:
                 self._scope = resolve_for_orguser(self.orguser)
         return self._scope
 
 
-def set_for_request(orguser, preview_email=None, draft_upload_id=None):
-    _current.set(LazyScope(orguser, preview_email, draft_upload_id))
+def set_for_request(orguser, preview_orguser=None, draft_upload_id=None):
+    _current.set(LazyScope(orguser, preview_orguser, draft_upload_id))
 
 
 def current() -> Optional[RowScope]:
@@ -478,14 +519,17 @@ def current() -> Optional[RowScope]:
     return lazy.get() if lazy else None
 
 
-def preview_headers(request, orguser) -> tuple[Optional[str], Optional[str]]:
+def preview_headers(request, orguser) -> tuple[Optional[OrgUser], Optional[str]]:
     """Preview headers count only for super-admins, Admins and Analysts with the flag on (§5.6)."""
-    email = request.headers.get("X-Row-Access-Preview")
-    if not email or orguser.new_role.slug not in UNRESTRICTED_ROLES:
+    preview_id = request.headers.get("X-Row-Access-Preview")
+    if not preview_id or orguser.new_role.slug not in UNRESTRICTED_ROLES:
         return None, None
     if not is_feature_flag_enabled("ROW_ACCESS", org=orguser.org):
         return None, None
-    return email, request.headers.get("X-Row-Access-Draft")
+    preview_orguser = OrgUser.objects.filter(id=preview_id, org=orguser.org).first()   # same org only
+    if preview_orguser is None:
+        raise PreviewUserNotFoundError(preview_id)          # → 404
+    return preview_orguser, request.headers.get("X-Row-Access-Draft")
 
 
 class RowScopeResetMiddleware:
@@ -505,8 +549,8 @@ class RowScopeResetMiddleware:
 ```python
                 request.orguser = orguser
                 request.token = token
-                preview_email, draft_upload_id = row_scope.preview_headers(request, orguser)  # NEW
-                row_scope.set_for_request(orguser, preview_email, draft_upload_id)            # NEW
+                preview_orguser, draft_upload_id = row_scope.preview_headers(request, orguser)  # NEW
+                row_scope.set_for_request(orguser, preview_orguser, draft_upload_id)            # NEW
                 return request
 ```
 
@@ -726,6 +770,8 @@ File: `ddpui/core/rls/access_list_service.py` (new).
    `"Pune; Nashik"` → `["Pune", "Nashik"]`; `"*"` → `"*"`; `""` → `[]`.
 2. **Scope columns** = header minus `email`, lowercased and trimmed. Duplicate headers are a blocking error.
 3. **Find filtered tables** from the schema cache: every `schema.table` that has at least one scope column, matched ignoring case (§5.3).
+4. **Link each email to a person:** if it belongs to an `OrgUser` in this org, the row gets `orguser`. Otherwise the row keeps the `email`; that person is invited when the list is saved (§5.7) and listed by check 4.
+   **Example:** `rahul@mh.gov.in` → `orguser=Rahul`. `ravi@atecf.org` (not in this org yet) → `email=ravi@atecf.org`.
 
    **Stop here if any blocking check fails** (§5.5 checks 1 and 2). Nothing is stored and the existing draft and live uploads are untouched. The task result carries the errors, and the page shows them straight away:
 
@@ -733,12 +779,14 @@ File: `ddpui/core/rls/access_list_service.py` (new).
    {"status": "blocked", "errors": [{"check": 2, "message": "Column 'ngo' is not in any table"}]}
    ```
 
-4. **Fetch real values** (D5): for each filtered table, one grouped count over the scope columns it has. Results are capped at 50,000 groups per table. Above that, Dalgo falls back to `SELECT DISTINCT` per column (also capped), and the "everyone at once" counts for that table show "too many to count". These run on the warehouse in a Celery task with progress, so a slow warehouse doesn't time out the upload request.
-5. **Clean values** (D4): match each value case- and space-insensitively against the real values for that column. Store the data's spelling. Unmatched values are kept as typed and flagged "value not found", with the closest match from `difflib.get_close_matches` ("Ahmednagar" → did you mean "Ahilyanagar"?). For non-text columns, the sheet value goes through the same converter as `coerce` (§5.3) before comparing, so `"101"` matches `101` and `"yes"` matches `true`. Values are still stored as text.
-6. **Store as the draft upload** (§5.1 rule 1: row-access lock held), in one transaction:
+5. **Fetch real values** (D5): for each filtered table, one grouped count over the scope columns it has. Results are capped at 50,000 groups per table. Above that, Dalgo falls back to `SELECT DISTINCT` per column (also capped), and the "everyone at once" counts for that table show "too many to count". These run on the warehouse in a Celery task with progress, so a slow warehouse doesn't time out the upload request.
+6. **Clean values** (D4): match each value case- and space-insensitively against the real values for that column. Store the data's spelling. Unmatched values are kept as typed and flagged "value not found", with the closest match from `difflib.get_close_matches` ("Ahmednagar" → did you mean "Ahilyanagar"?). For non-text columns, the sheet value goes through the same converter as `coerce` (§5.3) before comparing, so `"101"` matches `101` and `"yes"` matches `true`. Values are still stored as text.
+7. **Store as the draft upload** (§5.1 rule 1: row-access lock held), in one transaction:
    - delete the org's existing draft upload, if any (its rows go with it);
    - create `OrgAccessListUpload(status="draft")` with `scope_columns`, `review_result` (§5.5) and `uploaded_by`;
-   - `bulk_create` its rows in CSV order.
+   - `bulk_create` its rows in CSV order, each with its `orguser` or `email` from step 4.
+
+   Nobody is invited at upload, so a discarded or replaced draft sends no emails.
 
    The live upload is not touched, so Members keep their current access until Save. Only files with no blocking errors reach this step, so `review_result` holds warnings and info only.
 
@@ -748,7 +796,7 @@ All checks from spec §5. They run on upload only — no daily job.
 
 | Type          | Stored?                                        | Where the page gets it                                                                    |
 | ------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| **Blocking**  | No. The file is not saved at all (§5.4 step 3) | The upload task's result, shown once right after upload                                   |
+| **Blocking**  | No. The file is not saved at all (§5.4 step 4) | The upload task's result, shown once right after upload                                   |
 | Warning, Info | Yes, in the draft's `review_result`            | `GET /draft/` or `GET /status/`, so they survive a refresh until a new file replaces them |
 
 **Example:** Abhishek uploads a CSV with a column `ngo` that no table has. The page shows "Column 'ngo' is not in any table" and nothing is saved. He fixes the sheet and uploads again; this time it is stored as a draft with 3 warnings, which stay on the page until he uploads a corrected file.
@@ -758,8 +806,8 @@ All checks from spec §5. They run on upload only — no daily job.
 | 1   | File is malformed: no `email` column, duplicate headers, not a CSV  | `email` column missing                                                        | **Blocking**                                           | Parse step                                                                                                                                          |
 | 2   | A scope column exists in no table                                   | `ngo` vs the data's `ngo_name`                                                | **Blocking**                                           | Schema cache                                                                                                                                        |
 | 3   | Member has no row, so sees nothing                                  | `new.user@atecf.org`                                                          | Warning                                                | Members (role = member) not on the list                                                                                                             |
-| 4   | Email on the list isn't a Dalgo user                                | Typo, or not invited yet                                                      | Warning                                                | Not an `OrgUser` in this org. Shown with an **Invite** button                                                                                       |
-| 5   | Value not found in the data, with the closest match                 | "Ahmednagar": did you mean "Ahilyanagar"?                                     | Warning                                                | §5.4 step 5                                                                                                                                         |
+| 4   | Email on the list isn't in this org yet                             | `ravi@atecf.org`, or a typo                                                   | Warning: "These people will be invited when you save"  | Not an `OrgUser` in this org (§5.4 step 4). The full list is shown so the Admin can catch a typo before anyone is invited                            |
+| 5   | Value not found in the data, with the closest match                 | "Ahmednagar": did you mean "Ahilyanagar"?                                     | Warning                                                | §5.4 step 6                                                                                                                                         |
 | 6   | Blank cell, so sees nothing on tables with that column              | `dam_id` left empty                                                           | Warning                                                | Cell is `[]`                                                                                                                                        |
 | 7   | Same-named column whose values never match the list                 | `state` holding application status                                            | Warning: "rename it in dbt if it means something else" | No listed value for that column is found in that table, while it is found in other tables                                                           |
 | 8   | Partial scope: scoped to a taluka, but a table only has district    | Sees the whole district on that table                                         | Info                                                   | Person has a non-`*` value on a column the table lacks                                                                                              |
@@ -768,7 +816,9 @@ All checks from spec §5. They run on upload only — no daily job.
 | 11  | Tables affected                                                     | `silt_daily: district, taluka`. `farmer_list`: not filtered (no scope column) | Info, shown before saving                              | Schema cache                                                                                                                                        |
 | 12  | Dashboards Members can open that use unfiltered tables              | Listed by dashboard                                                           | Warning                                                | Dashboards that are not private, or private but shared with a Member or a group containing one, whose charts/KPIs read a table with no scope column |
 
-Also, from spec §4 journey 5: a saved row whose email is no longer a Dalgo user is shown as "no Dalgo user" (check 4 covers it).
+Also, from spec §4 journey 5: when someone is removed from the org, their saved rows are deleted with their `OrgUser`, so they drop off the list.
+
+**Example:** Abhishek's sheet has `rahul@mh.gov.in` (in the org), `ravi@atecf.org` (new to Dalgo) and `rahull@mh.gov.in` (a typo). Check 4 lists Ravi and `rahull@mh.gov.in` as "will be invited when you save". Abhishek spots the typo, fixes the sheet and uploads again. On Save, only Ravi is invited.
 
 **Repeated emails are allowed** — they are how a person gets two scopes. They are not an error.
 
@@ -778,7 +828,7 @@ Also, from spec §4 journey 5: a saved row whose email is no longer a Dalgo user
 1. What changes   — dashboards affected, each: N charts filtered, M shown in full → open for tables + columns
 2. Must fix       — blocking errors, from the upload result only; nothing was saved, re-upload a fixed file
 3. People         — grouped counts side by side:
-                      will see their data | will see nothing | sees everything | not in Dalgo yet
+                      will see their data | will see nothing | sees everything | will be invited / not joined yet
                     only groups needing action start open
 4. Worth a look   — collapsed: same-named columns, partial scopes, unassigned values
 5. Preview, then save
@@ -792,10 +842,11 @@ Spec §6: pick a person and see any dashboard exactly as they would, including e
 
 **How it works**
 
-- The webapp's dashboard view takes `?previewAs=rahul@mh.gov.in&draft=<upload_id>`. In preview mode, every data request carries `X-Row-Access-Preview: <email>`, plus `X-Row-Access-Draft: <upload_id>` when previewing a draft.
-- `authenticate()` honours these headers **only** for super-admins, Admins and Analysts in an org with the flag on. For anyone else they are ignored. The scope becomes `resolve_for_email(org, email, draft_upload_id)`. If that upload is no longer the org's draft, the request gets 409 "replaced by …" (§5.1 rule 3).
+- **Only people who have joined can be previewed.** Someone still on the list by `email` shows in the "Preview as" picker greyed out: "Ravi hasn't accepted the invite yet, so there's nothing to preview." Once he accepts, he can be previewed like anyone else.
+- The webapp's dashboard view takes `?previewAs=<orguser_id>&draft=<upload_id>`. In preview mode, every data request carries `X-Row-Access-Preview: <orguser_id>`, plus `X-Row-Access-Draft: <upload_id>` when previewing a draft.
+- `authenticate()` honours these headers **only** for super-admins, Admins and Analysts in an org with the flag on. For anyone else they are ignored. The preview `OrgUser` must be in the same org (otherwise 404). The scope becomes `resolve_as_member(preview_orguser, draft_upload_id)`. If that upload is no longer the org's draft, the request gets 409 "replaced by …" (§5.1 rule 3).
 - **Which list preview uses:** the draft upload if there is one (what the person **will** see after Save), otherwise the live upload (what they see **now**). So preview works before and after Save (spec §6: "after that, preview is available anytime").
-- `GET /api/rls/preview/dashboards/{id}/?email=` answers "can this person open this dashboard?" using `access_control` for that person's `OrgUser` (role Member assumed if they aren't a user yet). If they can't, the page shows "Rahul can't open this dashboard" instead of charts.
+- `GET /api/rls/preview/dashboards/{id}/?orguser_id=` answers "can this person open this dashboard?" using `access_control` for that `OrgUser`. If they can't, the page shows "Rahul can't open this dashboard" instead of charts.
 - A banner shows which list is used: "Previewing as rahul@mh.gov.in · Unsaved upload · Exit preview", or "· Saved list ·".
 - Starting a preview of a draft calls `POST /api/rls/draft/{upload_id}/previewed/`, which sets `previewed = True` on the draft upload (`update_fields=["previewed"]`). Opening the "everyone at once" table counts too, so an org with no dashboards yet can still complete its first setup.
 
@@ -808,8 +859,9 @@ Spec §6: pick a person and see any dashboard exactly as they would, including e
 | rahul@mh.gov.in    | Solapur    | Pandharpur | \*     | 1,234           | 89        | Has access                |
 | new.user@atecf.org | Solapur    | _(blank)_  | \*     | 0               | 12        | No row on `taluka` tables |
 | anita@atecf.org    | Ahmednagar | Parner     | \*     | 0               | 0         | Value not found           |
+| ravi@atecf.org     | Solapur    | Mohol      | \*     | 640             | 31        | Not joined yet            |
 
-Status values (spec §6): has access, no row, value not found.
+Status values (spec §6): has access, no row, value not found, plus "not joined yet" for people still on the list by `email`. Their counts show what they will see once they accept.
 
 ### 5.7 Save
 
@@ -820,6 +872,7 @@ Status values (spec §6): has access, no row, value not found.
 3. On the draft: set `saved_by`, `saved_at`.
 4. Delete the previous live upload (its rows go with it), then set the draft's `status` to `live`. Deleting first keeps the one-live-upload constraint true at every step.
 5. Write the draft with `save(update_fields=[...])` (§5.1 rule 2).
+6. After the transaction commits, invite everyone still on the list by `email` (below).
 
 ```python
 previous = OrgAccessListUpload.objects.filter(org=org, status=OrgAccessListUpload.Status.LIVE).first()
@@ -827,7 +880,19 @@ if previous:
     previous.delete()
 draft.status = OrgAccessListUpload.Status.LIVE
 draft.save(update_fields=["status", "saved_by", "saved_at"])
+transaction.on_commit(lambda: invite_people_on_list(draft, saved_by))
 ```
+
+**Inviting the people on the list.** After the Save commits (`transaction.on_commit`, so a failed Save sends no emails), `invite_people_on_list` takes each distinct `email` still on the saved rows and invites it as a Member with the existing `invite_user_to_org` ([orguserfunctions.py:245](../../../../../backend/ddpui/core/orguserfunctions.py)):
+
+| Email on the list                                 | What happens                                                                                                  |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Ravi, new to Dalgo                                | An invite is created and emailed. His rows keep the email until he accepts (§5.1 rule 4)                      |
+| Sunita, a Dalgo user in another org               | `invite_user_to_org` adds her to this org at once. Her rows are switched to her new `OrgUser` straight away (same update as rule 4) |
+| Meena, already has a pending invite for this org  | Skipped. `invite_user_to_org` would re-send her invite email on every Save                                    |
+| Rahul, joined between upload and Save             | Nothing to do: his rows were already switched when he accepted                                                 |
+
+**Example:** Abhishek saves a list with Ravi, Sunita and Meena still on it by email. Ravi gets an invite email. Sunita is added to ATECF at once and is filtered from her next login. Meena gets nothing new.
 
 **Discard** (`DELETE /api/rls/draft/{upload_id}/`): row-access lock held; 409 if `upload_id` is not the current draft, otherwise the draft upload is deleted with its rows. The live upload is untouched.
 
@@ -841,6 +906,8 @@ Takes effect on the next request. There is nothing to invalidate (D7).
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | First time (nothing saved) | Header `email` + the scope columns the Admin picked on the page (`?columns=district,taluka,dam_id`). One row per current Member, scope cells blank. Admins and Analysts are left out. |
 | After a save               | The live upload's rows in their uploaded order (by `id`), then a row for each Member not yet on it, scope cells blank.                                                                |
+
+The `email` cell is written from the row's person: `orguser.user.email`, or the row's own `email` for someone not joined yet.
 
 Values are written back joined with `; `, and `*` as `*`. There are no reference-value rows; spec v3 doesn't ask for them, and they would break re-upload.
 
@@ -914,7 +981,7 @@ alert's table filtered for this org?
   yes → group recipients by scope:
           Admin / Analyst orguser  → "unrestricted"
           Member orguser           → their saved rows
-          external email           → saved rows for that email (none → sees nothing)
+          external email           → no rows (sees nothing from filtered tables)
         for each distinct scope:
           with row_scope.use(scope): compute value
           condition met? → render + deliver to that group only
@@ -925,7 +992,7 @@ alert's table filtered for this org?
 **Example:** "Notify when silt removed < 100 tonnes this week." Rahul (Pandharpur, 80 t) gets an alert showing 80 t. Sunita (D-104, 140 t) gets nothing. Priya (Admin, 2,300 t org-wide) gets nothing.
 
 - People with identical rows share one evaluation (fewer warehouse queries).
-- An external email not on the list gets nothing from a filtered table — it fails closed.
+- An external email gets nothing from a filtered table — it fails closed. Rows are read only by `orguser`, so an external recipient never matches a row, even one still holding their email.
 - `AlertLog` stays one row per evaluation. A new nullable `scope_label` column ("unrestricted", or the recipient emails) tells them apart. `alert_snapshot.recipients` records who that evaluation was for.
 - KPI-RAG alerts go through `kpi_service`, which uses `AggQueryBuilder`, so they're covered the same way.
 - `AlertService.dry_run()` (the "Test" button) runs as the alert's author: unrestricted, since only Admins and Analysts can create alerts once Members are view-only.
@@ -962,12 +1029,12 @@ Router: `ddpui/api/rls_api.py`, mounted at `/api/rls/`. New permission `can_mana
 | POST   | `/draft/{upload_id}/previewed/`    | Record that the draft upload has been previewed (§5.6). 409 if replaced                                                                                |
 | POST   | `/draft/{upload_id}/save/`         | Commit (§5.7). 409 if replaced                                                                                                                         |
 | GET    | `/preview/people/`                 | People on the draft/saved list, for the "Preview as" picker                                                                                            |
-| GET    | `/preview/dashboards/{id}/?email=` | Can this person open this dashboard?                                                                                                                   |
+| GET    | `/preview/dashboards/{id}/?orguser_id=` | Can this person open this dashboard?                                                                                                              |
 | GET    | `/preview/everyone/`               | "Everyone at once" table                                                                                                                               |
 | GET    | `/table-status/`                   | Filtered or not, for the chart-builder note                                                                                                            |
 | GET    | `/me/`                             | For the current Member: `{filtered: bool, scope: {column: values}}` — used to lock dashboard filters                                                   |
 
-Invites use the existing `POST /api/v1/organizations/users/invite/` one at a time, role Member (bulk invite is phase 2).
+People on the list who aren't in the org yet are invited as Members on Save (§5.7), through the existing `invite_user_to_org`. There is no separate invite endpoint for row access.
 
 ---
 
@@ -1072,7 +1139,7 @@ New components in `webapp/components/settings/access/row-access/`:
 | `RowAccessTab.tsx`         | Status: scope columns, people count, filtered tables, latest review, the column-change warning (below). Buttons: Download template, Upload |
 | `TemplateDialog.tsx`       | First time only: one search box for columns (shows the tables that have each) and tables (shows their columns); ticked columns go into the template      |
 | `UploadReview.tsx`         | The 5-step review (§5.5): What changes → Must fix → People → Worth a look → Preview, then save                                                           |
-| `PeopleGroups.tsx`         | Grouped counts; "not in Dalgo yet" rows have an **Invite** button                                                                                        |
+| `PeopleGroups.tsx`         | Grouped counts, including "will be invited when you save" (check 4) and "invited, not joined yet"                                                       |
 | `EveryonePreviewTable.tsx` | "Everyone at once" table (cut first if late)                                                                                                             |
 
 A file with blocking errors shows them and is not saved, so there is no Save button for it. Save stays disabled on first setup until a preview has been opened.
@@ -1086,7 +1153,8 @@ A file with blocking errors shows them and is not saved, so there is no Save but
 ### 7.2 Preview mode
 
 - "Preview as" picker on the Row access page and on any dashboard (Admins/Analysts only).
-- Adds `?previewAs=<email>&draft=<upload_id>` to the dashboard URL (no `draft` when previewing the saved list). On a 409 "replaced", the page shows who replaced the draft and a Reload button. An API client wrapper adds the two headers to every request while those params are present.
+- People not joined yet are greyed out in the picker: "hasn't accepted the invite yet, so there's nothing to preview".
+- Adds `?previewAs=<orguser_id>&draft=<upload_id>` to the dashboard URL (no `draft` when previewing the saved list). On a 409 "replaced", the page shows who replaced the draft and a Reload button. An API client wrapper adds the two headers to every request while those params are present.
 - Banner: "Previewing as rahul@mh.gov.in · Unsaved upload · Exit preview" (or "Saved list" when there is no draft).
 - If the person can't open the dashboard, show that instead of charts.
 
@@ -1145,7 +1213,8 @@ The two missing access checks (§5.10) exist today without row access, so they s
 - Values reach SQL only through SQLAlchemy expressions (`in_()`), never string formatting.
 - Preview headers are honoured only for super-admins, Admins and Analysts.
 - The PDF scope token is signed, short-lived (5 minutes) and only accepted together with the existing render secret.
-- The access list holds emails and scope values only. Emails are already in Dalgo; no new kind of PII (personally identifiable information).
+- The access list holds links to org users and scope values. An email is stored only for someone not in the org yet, until they accept. No new kind of PII (personally identifiable information).
+- Rows are only read by `orguser`, so a row still holding an email can never filter anyone's data.
 - Multi-tenancy: `OrgAccessListUpload` has an `org` FK, rows belong to an upload, and every query filters by `request.orguser.org`.
 
 **Performance targets**
@@ -1168,6 +1237,9 @@ The two missing access checks (§5.10) exist today without row access, so they s
 - `build_condition`: a scope column the table lacks is ignored; the other scope columns still filter, and a table with none left is shown in full.
 - `build_condition`: table with no scope column → no filter.
 - Upload: cleaning (`pune ` → `Pune`), "did you mean", repeated emails allowed, blank vs `*`.
+- Upload: an org user is linked by `orguser`; anyone else keeps their `email` and is listed by check 4.
+- Save invites each email once after commit: a new person gets an invite, a Dalgo user from another org is added and linked at once, a pending invite is not re-sent.
+- Accepting an invite switches that person's rows from `email` to their new `OrgUser` in both draft and live, and another org's rows with the same email are untouched (§5.1 rule 4).
 - Upload while a live list exists: Members keep the live rows until Save; a second upload replaces the draft.
 - Preview, Save or Discard with a replaced `upload_id` → 409 naming who replaced it (§5.1 rule 3).
 - Save: blocked by errors; blocked before first preview; switches the live upload and deletes the previous one in one transaction.
@@ -1233,7 +1305,7 @@ Consulting covers these with the org's Admin at handover:
 - Someone clicking through the public-link warning.
 - A scope column renamed or dropped in dbt without re-uploading the sheet with the new name: Members then see that column unfiltered.
 
-Also: add indexes on scope columns in large tables; keep external users as Members; when someone leaves, remove them from Dalgo (the leftover row then shows as "no Dalgo user").
+Also: add indexes on scope columns in large tables; keep external users as Members; when someone leaves, remove them from Dalgo (their rows are removed with them).
 
 ---
 
@@ -1242,7 +1314,7 @@ Also: add indexes on scope columns in large tables; keep external users as Membe
 | #   | Decision                                        | Outcome                                                                                 |
 | --- | ----------------------------------------------- | --------------------------------------------------------------------------------------- |
 | 1   | Public link on a dashboard with filtered tables | Warn, then public viewers see all rows. Only Admins and Analysts can make public links. |
-| 2   | Bulk invite by CSV                              | Phase 2. ATECF's ~40 users are invited one at a time in v1.                             |
+| 2   | Bulk invite by CSV                              | Phase 2 for Settings → Access → People. In v1, people on the access list who aren't in the org yet are invited when the list is saved (§5.7). |
 | 3   | Warehouse table as the source                   | Phase 2, refreshed only with "Sync now".                                                |
 | 4   | Hand-written rules                              | Cut.                                                                                    |
 | 5   | Groups on the access list                       | Cut from v1; phase 2 if needed.                                                         |
