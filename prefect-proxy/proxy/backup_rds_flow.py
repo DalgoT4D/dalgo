@@ -21,6 +21,25 @@ def _load_secret(block_name: str) -> dict:
     return value
 
 
+def _s3_client(aws: dict, logger):
+    """Static keys only if the secret block still carries them (legacy).
+
+    Otherwise use boto3's default credential chain: the IRSA role on EKS
+    (service account prefect-backup) or the instance role on EC2.
+    """
+    access_key = aws.get("AWS_ACCESS_KEY")
+    secret_key = aws.get("AWS_SECRET_KEY")
+    if access_key and secret_key:
+        logger.info("S3 auth: static keys from secret block")
+        return boto3.client(
+            "s3",
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
+        )
+    logger.info("S3 auth: default credential chain (IAM role)")
+    return boto3.client("s3")
+
+
 @task
 def backup_rds(rds_secret_block: str, aws_secret_block: str, retention_days: int):
     logger = get_run_logger()
@@ -34,8 +53,6 @@ def backup_rds(rds_secret_block: str, aws_secret_block: str, retention_days: int
     s3_backup_path = rds["S3_BACKUP_PATH"]
 
     s3_bucket = aws["S3_BUCKET"]
-    aws_access_key = aws["AWS_ACCESS_KEY"]
-    aws_secret_key = aws["AWS_SECRET_KEY"]
 
     logger.info("Connecting to database host: %s", pg_host)
     conn = psycopg2.connect(
@@ -57,11 +74,7 @@ def backup_rds(rds_secret_block: str, aws_secret_block: str, retention_days: int
     conn.close()
     logger.info("Found %d database(s) to back up: %s", len(databases), databases)
 
-    s3_client = boto3.client(
-        "s3",
-        aws_access_key_id=aws_access_key,
-        aws_secret_access_key=aws_secret_key,
-    )
+    s3_client = _s3_client(aws, logger)
 
     IST = pytz.timezone("Asia/Kolkata")
     timestamp = datetime.datetime.now(IST).strftime("%Y-%m-%d")

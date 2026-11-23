@@ -3,7 +3,8 @@ Creates or updates Prefect Secret blocks for RDS backup configuration.
 
 Two block types:
   rds   — credentials for one RDS instance (PG_HOST, PG_USER, PG_PASSWORD, S3_BACKUP_PATH)
-  s3    — shared AWS/S3 config (S3_BUCKET, AWS_ACCESS_KEY, AWS_SECRET_KEY)
+  s3    — shared S3 config (S3_BUCKET; AWS_ACCESS_KEY/AWS_SECRET_KEY optional, legacy).
+          Without keys the flow uses the pod's IAM role (IRSA service account prefect-backup).
 
 PREFECT_API_URL is read from the environment.
 
@@ -16,12 +17,10 @@ Usage:
         --pg-password secret \\
         --s3-backup-path backups/my-rds
 
-    # Create/update the shared S3 secret block
+    # Create/update the shared S3 secret block (no keys: IAM role is used)
     uv run python scripts/setup_backup_secrets.py s3 \\
         --name backup-s3 \\
-        --s3-bucket dalgo-backups \\
-        --aws-access-key AKIA... \\
-        --aws-secret-key ...
+        --s3-bucket dalgo-backups
 """
 
 import argparse
@@ -54,11 +53,12 @@ async def setup_rds(args):
 
 
 async def setup_s3(args):
-    value = {
-        "S3_BUCKET": args.s3_bucket,
-        "AWS_ACCESS_KEY": args.aws_access_key,
-        "AWS_SECRET_KEY": args.aws_secret_key,
-    }
+    value = {"S3_BUCKET": args.s3_bucket}
+    if bool(args.aws_access_key) != bool(args.aws_secret_key):
+        raise SystemExit("Pass both --aws-access-key and --aws-secret-key, or neither")
+    if args.aws_access_key:
+        value["AWS_ACCESS_KEY"] = args.aws_access_key
+        value["AWS_SECRET_KEY"] = args.aws_secret_key
     await upsert_secret(args.name, value)
 
 
@@ -76,8 +76,11 @@ def main():
     s3 = sub.add_parser("s3", help="Shared AWS/S3 config")
     s3.add_argument("--name", required=True, help="Secret block name (e.g. backup-s3)")
     s3.add_argument("--s3-bucket", required=True)
-    s3.add_argument("--aws-access-key", required=True)
-    s3.add_argument("--aws-secret-key", required=True)
+    s3.add_argument(
+        "--aws-access-key",
+        help="Optional legacy static key. Omit to use the IAM role (IRSA on EKS / instance role on EC2)",
+    )
+    s3.add_argument("--aws-secret-key", help="Optional legacy static secret; pair with --aws-access-key")
 
     args = parser.parse_args()
 
