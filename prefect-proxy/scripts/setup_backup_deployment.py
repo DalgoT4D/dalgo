@@ -11,7 +11,8 @@ Usage:
         --rds-secret-block rds-production \\
         --aws-secret-block backup-s3 \\
         --retention-days 30 \\
-        --cron "0 2 * * *"
+        --cron "0 2 * * *" \\
+        --service-account prefect-backup
 """
 
 import argparse
@@ -42,6 +43,9 @@ def create_deployment(args):
             "retention_days": args.retention_days,
         },
         schedules=[{"schedule": {"cron": args.cron, "timezone": "Asia/Kolkata"}, "active": True}],
+        job_variables=(
+            {"service_account_name": args.service_account} if args.service_account else None
+        ),
         build=False,
         push=False,
     )
@@ -57,6 +61,10 @@ def main():
     parser.add_argument("--aws-secret-block", required=True, help="Prefect secret block name for S3 creds")
     parser.add_argument("--retention-days", type=int, default=30)
     parser.add_argument("--cron", default="0 8 * * *", help="Cron schedule (default: 8am IST daily)")
+    parser.add_argument(
+        "--service-account",
+        help="K8s service account for flow-run pods (e.g. prefect-backup, which carries the S3 IAM role)",
+    )
     args = parser.parse_args()
 
     create_deployment(args)

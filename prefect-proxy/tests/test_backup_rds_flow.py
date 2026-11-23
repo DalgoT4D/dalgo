@@ -141,3 +141,49 @@ def test_backup_rds_no_databases(
 
     mock_subprocess.assert_not_called()
     mock_s3.upload_file.assert_not_called()
+
+
+# ── S3 credentials ────────────────────────────────────────────────────────────
+
+
+@patch("proxy.backup_rds_flow.get_run_logger")
+@patch("proxy.backup_rds_flow.subprocess.run")
+@patch("proxy.backup_rds_flow.boto3")
+@patch("proxy.backup_rds_flow.psycopg2")
+@patch("proxy.backup_rds_flow.Secret")
+def test_backup_rds_uses_static_keys_when_block_has_them(
+    mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, mock_logger
+):
+    mock_s3 = _setup_mocks(mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, [])
+    mock_s3.list_objects_v2.return_value = {}
+
+    backup_rds.fn("rds-production", "backup-s3", 30)
+
+    mock_boto3.client.assert_called_once_with(
+        "s3",
+        aws_access_key_id=AWS_CONFIG["AWS_ACCESS_KEY"],
+        aws_secret_access_key=AWS_CONFIG["AWS_SECRET_KEY"],
+    )
+
+
+@patch("proxy.backup_rds_flow.get_run_logger")
+@patch("proxy.backup_rds_flow.subprocess.run")
+@patch("proxy.backup_rds_flow.boto3")
+@patch("proxy.backup_rds_flow.psycopg2")
+@patch("proxy.backup_rds_flow.Secret")
+def test_backup_rds_uses_default_credential_chain_without_keys(
+    mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, mock_logger
+):
+    """No keys in the block -> boto3 default chain (IRSA role on EKS, instance role on EC2)."""
+    mock_s3 = _setup_mocks(mock_secret_cls, mock_psycopg2, mock_boto3, mock_subprocess, ["app_db"])
+    mock_secret_cls.load.side_effect = [
+        _mock_secret(RDS_CONFIG),
+        _mock_secret({"S3_BUCKET": "dalgo-backups"}),
+    ]
+    mock_s3.list_objects_v2.return_value = {}
+
+    backup_rds.fn("rds-production", "backup-s3", 30)
+
+    mock_boto3.client.assert_called_once_with("s3")
+    mock_s3.upload_file.assert_called_once()
+    assert mock_s3.upload_file.call_args.args[1] == "dalgo-backups"
