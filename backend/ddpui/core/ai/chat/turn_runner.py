@@ -25,7 +25,7 @@ import time
 import uuid
 from typing import AsyncIterator, Literal
 
-from asgiref.sync import sync_to_async
+from channels.db import database_sync_to_async
 from langchain_core.messages import AIMessage, AIMessageChunk, ToolMessage
 from langchain.agents.middleware.human_in_the_loop import HITLResponse
 from langgraph.types import Command
@@ -319,7 +319,7 @@ async def run_turn(
         if trace_ctx_token is not None:
             reset_current_turn_handler(trace_ctx_token)
         try:
-            await sync_to_async(ChatWithDataTurnAudit.objects.create)(
+            await database_sync_to_async(ChatWithDataTurnAudit.objects.create)(
                 org=orguser.org,
                 orguser=orguser,
                 session=session,
