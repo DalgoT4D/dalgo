@@ -334,31 +334,44 @@ Each upload stores its own rows, inserted in that file's order. The template dow
 
 #### Rules for writing these models
 
-**Rule 1 — Upload, Save and Discard take the org's row-access lock first.**
-**Example:** Two consulting staff upload a list for ATECF at the same moment. Without the lock, both delete "the" draft and both create one, and the second fails on the one-draft constraint. With the lock, the second upload waits, then replaces the first draft.
-**How:** lock the org's own `Org` row with `select_for_update()` inside `transaction.atomic()`. Nothing is written to it; it is only used as the lock. The lock is released when the transaction ends.
+**Rule 1 — An org has at most one draft at a time. A new upload is refused while one exists, until it is saved or discarded.**
+**Example:** Abhishek uploads a list for ATECF at 10:00 and hasn't saved it. Meera uploads another at 10:05. Dalgo refuses hers: "Abhishek has an unsaved upload from 10:00. Save or discard it first." Either of them can Save or Discard Abhishek's draft from the Row access page; then Meera uploads again.
+**Why it matters:** Abhishek's reviewed draft can't be silently replaced by someone else's sheet.
+**How:** no lock. The database's `one_draft_upload_per_org` constraint decides. Upload only **inserts** a draft; it never deletes an existing one.
 
 ```python
-def lock_org_row_access(org):
-    """Make row-access writes for one org take turns until the transaction ends."""
-    Org.objects.select_for_update().get(id=org.id)
+try:
+    with transaction.atomic():
+        draft = OrgAccessListUpload.objects.create(org=org, status=OrgAccessListUpload.Status.DRAFT, ...)
+        OrgAccessListRow.objects.bulk_create(rows)
+except IntegrityError as err:
+    raise DraftExistsError(org) from err      # → 409 naming who uploaded the existing draft and when
 ```
 
-| Who                                         | Waits?                                    |
-| ------------------------------------------- | ----------------------------------------- |
-| Another row-access write for the same org   | Yes, until the first transaction ends     |
-| Any row-access write for a different org    | No (different `Org` row)                  |
-| Any read of the org (dashboards, charts, …) | No (`select_for_update` only blocks writes and other locks) |
-| Another feature writing that same `Org` row | Only for the few milliseconds the row-access step runs |
+`POST /draft/` also checks for an existing draft **before** starting the review task, so Meera is told at once instead of after the warehouse checks. The constraint is the final guard for two uploads at the same moment: the database lets one insert through and refuses the other, whichever server or Celery worker they run on.
+
+| Situation                                   | Result                                                        |
+| ------------------------------------------- | ------------------------------------------------------------- |
+| ATECF has no draft                          | Upload is stored as the draft                                 |
+| ATECF has Abhishek's unsaved draft          | Meera's upload → 409 "Abhishek has an unsaved upload from 10:00" |
+| Abhishek and Meera upload at the same moment | One is stored; the other gets the same 409                    |
+| Bhumi uploads while ATECF has a draft       | Stored (the rule is per org)                                  |
+| Abhishek wants to upload a corrected file   | He discards his own draft first ("Discard and upload again" on the page) |
 
 **Rule 2 — every write to an upload saves only the fields it changed.**
 **Example:** Save writes `status`, `saved_by` and `saved_at` on the draft. Marking a draft previewed writes only `previewed`. Neither puts back an old value of the other's field.
-**How:** `save(update_fields=[...])`, listing only its own fields.
+**How:** `save(update_fields=[...])` or a queryset `.update(...)`, naming only its own fields.
 
-**Rule 3 — Preview, Save and Discard name the draft upload they act on.**
-**Example:** Abhishek uploads sheet A (upload #1) and Meera uploads sheet B a second later (upload #2 replaces #1). Abhishek's page still thinks his draft is #1. When he clicks Preview or Save, his request says `upload_id = 1`. #1 is no longer the org's draft, so Dalgo refuses with 409: "This upload was replaced by Meera's upload at 10:00. Reload to see it." After reloading he sees Meera's sheet, labelled "Draft uploaded by Meera".
-**Why it matters:** Without it, Abhishek would preview Meera's sheet thinking it's his, and could save a list he never reviewed.
-**How:** The upload, previewed, save and discard endpoints take `upload_id` (§5.15). The preview header carries it too (§5.6). Each checks `upload_id` is the org's current draft; if not, 409 with who replaced it and when.
+**Rule 3 — Preview, Save and Discard name the draft upload they act on, and change it only if it is still the draft.**
+**Example:** Abhishek has draft #1 open. Meera discards it, then uploads her own sheet as draft #2. Abhishek's page still thinks the draft is #1. When he clicks Save, his request says `upload_id = 1`. #1 is no longer the org's draft, so Dalgo refuses with 409: "This draft was already saved or discarded. Reload to see the current one." After reloading he sees Meera's sheet, labelled "Draft uploaded by Meera".
+**Why it matters:** Without it, Abhishek would save a list he never reviewed.
+**How:** The previewed, save and discard endpoints take `upload_id` (§5.15). The preview header carries it too (§5.6). The check and the change are **one** database statement, filtered on `id=upload_id, status="draft"`, so two Admins clicking at the same moment can't both succeed. If it changes 0 rows, the endpoint raises `DraftNotCurrentError` → 409.
+
+| Clash at the same moment          | Result                                                       |
+| --------------------------------- | ------------------------------------------------------------ |
+| Two Admins click Save on draft #1 | One saves it; the other gets 409                             |
+| Save and Discard on draft #1      | Whichever runs first wins; the other gets 409                |
+| Save on draft #1 after it was discarded | 409; the live list is untouched                        |
 
 **Rule 4 — When an invited person accepts, their rows are switched from `email` to their new `OrgUser`.**
 **Example:** Ravi is on the list as `email=ravi@atecf.org`. Save invites him. He accepts on 21 Nov. His rows become `orguser=Ravi, email=empty`, and on his first login he sees only his district. Nobody re-uploads the sheet. Before he accepts he can't log in, so there is nothing to filter.
@@ -432,7 +445,7 @@ def resolve_as_member(orguser, draft_upload_id=None) -> RowScope:
             id=draft_upload_id, org=org, status=OrgAccessListUpload.Status.DRAFT
         ).first()
         if upload is None:
-            raise DraftReplacedError(draft_upload_id)      # → 409 "replaced by …" (§5.1 rule 3)
+            raise DraftNotCurrentError(draft_upload_id)    # → 409 "already saved or discarded" (§5.1 rule 3)
     else:
         upload = _live_upload(org)
         if upload is None:
@@ -465,9 +478,9 @@ def _unrestricted(org_id) -> RowScope:
 | `resolve_for_orguser(Rahul)`, list saved                    | `rows=({"district": ["Solapur"], ...},)` from the live list |
 | `resolve_for_orguser(new.user)`, not on the list            | `rows=()` → sees nothing on filtered tables                 |
 | `resolve_as_member(Rahul, 57)`                              | Rahul's rows from draft upload #57                          |
-| `resolve_as_member(Rahul, 57)`, #57 replaced                | `DraftReplacedError` → 409                                  |
+| `resolve_as_member(Rahul, 57)`, #57 saved or discarded      | `DraftNotCurrentError` → 409                                |
 
-- **`DraftReplacedError`** is new, in `ddpui/core/rls/exceptions.py`; the API maps it to 409.
+- **`DraftNotCurrentError`** and **`DraftExistsError`** are new, in `ddpui/core/rls/exceptions.py`; the API maps both to 409 (§5.1 rules 1 and 3).
 - **`PreviewUserNotFoundError`** is new, in the same file; the API maps it to 404. It is raised when the preview header names someone who isn't an org user in this org.
 
 #### How a request gets its row scope
@@ -781,12 +794,13 @@ File: `ddpui/core/rls/access_list_service.py` (new).
 
 5. **Fetch real values** (D5): for each filtered table, one grouped count over the scope columns it has. Results are capped at 50,000 groups per table. Above that, Dalgo falls back to `SELECT DISTINCT` per column (also capped), and the "everyone at once" counts for that table show "too many to count". These run on the warehouse in a Celery task with progress, so a slow warehouse doesn't time out the upload request.
 6. **Clean values** (D4): match each value case- and space-insensitively against the real values for that column. Store the data's spelling. Unmatched values are kept as typed and flagged "value not found", with the closest match from `difflib.get_close_matches` ("Ahmednagar" → did you mean "Ahilyanagar"?). For non-text columns, the sheet value goes through the same converter as `coerce` (§5.3) before comparing, so `"101"` matches `101` and `"yes"` matches `true`. Values are still stored as text.
-7. **Store as the draft upload** (§5.1 rule 1: row-access lock held), in one transaction:
-   - delete the org's existing draft upload, if any (its rows go with it);
+7. **Store as the draft upload** (§5.1 rule 1), in one transaction:
    - create `OrgAccessListUpload(status="draft")` with `scope_columns`, `review_result` (§5.5) and `uploaded_by`;
    - `bulk_create` its rows in CSV order, each with its `orguser` or `email` from step 4.
 
-   Nobody is invited at upload, so a discarded or replaced draft sends no emails.
+   An existing draft is never deleted here. If another Admin's draft was stored while this file was being reviewed, the insert hits the one-draft constraint and the task result is a 409 naming that draft's uploader.
+
+   Nobody is invited at upload, so a discarded draft sends no emails.
 
    The live upload is not touched, so Members keep their current access until Save. Only files with no blocking errors reach this step, so `review_result` holds warnings and info only.
 
@@ -797,9 +811,9 @@ All checks from spec §5. They run on upload only — no daily job.
 | Type          | Stored?                                        | Where the page gets it                                                                    |
 | ------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | **Blocking**  | No. The file is not saved at all (§5.4 step 4) | The upload task's result, shown once right after upload                                   |
-| Warning, Info | Yes, in the draft's `review_result`            | `GET /draft/` or `GET /status/`, so they survive a refresh until a new file replaces them |
+| Warning, Info | Yes, in the draft's `review_result`            | `GET /draft/` or `GET /status/`, so they survive a refresh until the draft is saved or discarded |
 
-**Example:** Abhishek uploads a CSV with a column `ngo` that no table has. The page shows "Column 'ngo' is not in any table" and nothing is saved. He fixes the sheet and uploads again; this time it is stored as a draft with 3 warnings, which stay on the page until he uploads a corrected file.
+**Example:** Abhishek uploads a CSV with a column `ngo` that no table has. The page shows "Column 'ngo' is not in any table" and nothing is saved. He fixes the sheet and uploads again; this time it is stored as a draft with 3 warnings, which stay on the page until he saves it, or discards it and uploads a corrected file.
 
 | #   | Check                                                               | Example                                                                       | Type                                                   | How                                                                                                                                                 |
 | --- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -844,7 +858,7 @@ Spec §6: pick a person and see any dashboard exactly as they would, including e
 
 - **Only people who have joined can be previewed.** Someone still on the list by `email` shows in the "Preview as" picker greyed out: "Ravi hasn't accepted the invite yet, so there's nothing to preview." Once he accepts, he can be previewed like anyone else.
 - The webapp's dashboard view takes `?previewAs=<orguser_id>&draft=<upload_id>`. In preview mode, every data request carries `X-Row-Access-Preview: <orguser_id>`, plus `X-Row-Access-Draft: <upload_id>` when previewing a draft.
-- `authenticate()` honours these headers **only** for super-admins, Admins and Analysts in an org with the flag on. For anyone else they are ignored. The preview `OrgUser` must be in the same org (otherwise 404). The scope becomes `resolve_as_member(preview_orguser, draft_upload_id)`. If that upload is no longer the org's draft, the request gets 409 "replaced by …" (§5.1 rule 3).
+- `authenticate()` honours these headers **only** for super-admins, Admins and Analysts in an org with the flag on. For anyone else they are ignored. The preview `OrgUser` must be in the same org (otherwise 404). The scope becomes `resolve_as_member(preview_orguser, draft_upload_id)`. If that upload is no longer the org's draft, the request gets 409 "already saved or discarded" (§5.1 rule 3).
 - **Which list preview uses:** the draft upload if there is one (what the person **will** see after Save), otherwise the live upload (what they see **now**). So preview works before and after Save (spec §6: "after that, preview is available anytime").
 - `GET /api/rls/preview/dashboards/{id}/?orguser_id=` answers "can this person open this dashboard?" using `access_control` for that `OrgUser`. If they can't, the page shows "Rahul can't open this dashboard" instead of charts.
 - A banner shows which list is used: "Previewing as rahul@mh.gov.in · Unsaved upload · Exit preview", or "· Saved list ·".
@@ -865,23 +879,26 @@ Status values (spec §6): has access, no row, value not found, plus "not joined 
 
 ### 5.7 Save
 
-`POST /api/rls/draft/{upload_id}/save/` in one transaction, holding the org's row-access lock (§5.1 rule 1) from start to finish:
+`POST /api/rls/draft/{upload_id}/save/`, in one transaction:
 
-1. Refuse with 409 if `upload_id` is not the org's current draft (§5.1 rule 3). (No blocking-error check needed: a file with one never becomes a draft.)
-2. Refuse if this is the first setup (no live upload yet) and the draft hasn't been previewed. Later saves don't need a preview (spec §6).
-3. On the draft: set `saved_by`, `saved_at`.
-4. Delete the previous live upload (its rows go with it), then set the draft's `status` to `live`. Deleting first keeps the one-live-upload constraint true at every step.
-5. Write the draft with `save(update_fields=[...])` (§5.1 rule 2).
-6. After the transaction commits, invite everyone still on the list by `email` (below).
+1. Refuse if this is the first setup (no live upload yet) and the draft hasn't been previewed. Later saves don't need a preview (spec §6). (No blocking-error check needed: a file with one never becomes a draft.)
+2. Delete the previous live upload (its rows go with it). Deleting first keeps the one-live-upload constraint true at every step.
+3. Switch the draft to live and set `saved_by`, `saved_at`, in **one** statement that only matches if `upload_id` is still the org's draft (§5.1 rule 3).
+4. If that changed 0 rows, the draft was already saved or discarded: raise `DraftNotCurrentError` → 409. The transaction rolls back, so the previous live upload deleted in step 2 is **restored**.
+5. After the transaction commits, invite everyone still on the list by `email` (below).
 
 ```python
-previous = OrgAccessListUpload.objects.filter(org=org, status=OrgAccessListUpload.Status.LIVE).first()
-if previous:
-    previous.delete()
-draft.status = OrgAccessListUpload.Status.LIVE
-draft.save(update_fields=["status", "saved_by", "saved_at"])
-transaction.on_commit(lambda: invite_people_on_list(draft, saved_by))
+with transaction.atomic():
+    OrgAccessListUpload.objects.filter(org=org, status=OrgAccessListUpload.Status.LIVE).delete()
+    updated = OrgAccessListUpload.objects.filter(
+        id=upload_id, org=org, status=OrgAccessListUpload.Status.DRAFT
+    ).update(status=OrgAccessListUpload.Status.LIVE, saved_by=orguser, saved_at=timezone.now())
+    if updated == 0:
+        raise DraftNotCurrentError(upload_id)          # rollback: the old live list comes back
+    transaction.on_commit(lambda: invite_people_on_list(upload_id, orguser))
 ```
+
+**Why the rollback matters:** if Meera discarded the draft a moment before Abhishek's Save, step 2 would already have deleted the live list. Without the rollback, ATECF would have no live list, and Members would see everything.
 
 **Inviting the people on the list.** After the Save commits (`transaction.on_commit`, so a failed Save sends no emails), `invite_people_on_list` takes each distinct `email` still on the saved rows and invites it as a Member with the existing `invite_user_to_org` ([orguserfunctions.py:245](../../../../../backend/ddpui/core/orguserfunctions.py)):
 
@@ -894,7 +911,13 @@ transaction.on_commit(lambda: invite_people_on_list(draft, saved_by))
 
 **Example:** Abhishek saves a list with Ravi, Sunita and Meena still on it by email. Ravi gets an invite email. Sunita is added to ATECF at once and is filtered from her next login. Meena gets nothing new.
 
-**Discard** (`DELETE /api/rls/draft/{upload_id}/`): row-access lock held; 409 if `upload_id` is not the current draft, otherwise the draft upload is deleted with its rows. The live upload is untouched.
+**Discard** (`DELETE /api/rls/draft/{upload_id}/`): one statement that deletes the upload only if it is still the org's draft; its rows go with it. If it deleted nothing, 409 (§5.1 rule 3). The live upload is untouched. Any Admin can discard any draft, so a forgotten draft never blocks uploads for long.
+
+```python
+deleted, _ = OrgAccessListUpload.objects.filter(id=upload_id, org=org, status=OrgAccessListUpload.Status.DRAFT).delete()
+if deleted == 0:
+    raise DraftNotCurrentError(upload_id)
+```
 
 Takes effect on the next request. There is nothing to invalidate (D7).
 
@@ -1023,11 +1046,11 @@ Router: `ddpui/api/rls_api.py`, mounted at `/api/rls/`. New permission `can_mana
 | GET    | `/status/`                         | Live upload: scope columns, counts, filtered tables (live, from the schema cache), saved by/at, `review_result`                                                |
 | GET    | `/template/`                       | CSV download (§5.8)                                                                                                                                    |
 | GET    | `/columns/`                        | Every warehouse table and its columns, from the schema cache, for the column search (§5.8)                                                             |
-| POST   | `/draft/`                          | Upload CSV (multipart) → starts the review task, returns `task_id`; the task result gives the new `upload_id`, or the blocking errors (nothing stored) |
+| POST   | `/draft/`                          | Upload CSV (multipart) → starts the review task, returns `task_id`; the task result gives the new `upload_id`, or the blocking errors (nothing stored). 409 if the org already has a draft (§5.1 rule 1) |
 | GET    | `/draft/`                          | Current draft upload: `upload_id`, uploaded by/at, `review_result`                                                                                     |
-| DELETE | `/draft/{upload_id}/`              | Discard: deletes the draft upload and its rows (§5.7). 409 if replaced                                                                                 |
-| POST   | `/draft/{upload_id}/previewed/`    | Record that the draft upload has been previewed (§5.6). 409 if replaced                                                                                |
-| POST   | `/draft/{upload_id}/save/`         | Commit (§5.7). 409 if replaced                                                                                                                         |
+| DELETE | `/draft/{upload_id}/`              | Discard: deletes the draft upload and its rows (§5.7). 409 if not current                                                                                |
+| POST   | `/draft/{upload_id}/previewed/`    | Record that the draft upload has been previewed (§5.6). 409 if not current                                                                               |
+| POST   | `/draft/{upload_id}/save/`         | Commit (§5.7). 409 if not current                                                                                                                        |
 | GET    | `/preview/people/`                 | People on the draft/saved list, for the "Preview as" picker                                                                                            |
 | GET    | `/preview/dashboards/{id}/?orguser_id=` | Can this person open this dashboard?                                                                                                              |
 | GET    | `/preview/everyone/`               | "Everyone at once" table                                                                                                                               |
@@ -1144,6 +1167,8 @@ New components in `webapp/components/settings/access/row-access/`:
 
 A file with blocking errors shows them and is not saved, so there is no Save button for it. Save stays disabled on first setup until a preview has been opened.
 
+While the org has a draft, the Upload button is replaced by "Unsaved upload by Abhishek, 10:00" with **Review**, **Save** and **Discard** (§5.1 rule 1). For the person who uploaded it, Discard reads **Discard and upload again**.
+
 **Column-change warning.** Always shown to Admins at the top of the Row access page (static text, no check behind it):
 
 > ⚠ **Keep your access columns stable.** If a column used for row access (for example `district`) is renamed or removed in dbt, Dalgo stops filtering on it, and people may see data that isn't theirs. When you change one of these columns, upload an updated access sheet at the same time.
@@ -1154,7 +1179,7 @@ A file with blocking errors shows them and is not saved, so there is no Save but
 
 - "Preview as" picker on the Row access page and on any dashboard (Admins/Analysts only).
 - People not joined yet are greyed out in the picker: "hasn't accepted the invite yet, so there's nothing to preview".
-- Adds `?previewAs=<orguser_id>&draft=<upload_id>` to the dashboard URL (no `draft` when previewing the saved list). On a 409 "replaced", the page shows who replaced the draft and a Reload button. An API client wrapper adds the two headers to every request while those params are present.
+- Adds `?previewAs=<orguser_id>&draft=<upload_id>` to the dashboard URL (no `draft` when previewing the saved list). On a 409 "already saved or discarded", the page shows a Reload button. An API client wrapper adds the two headers to every request while those params are present.
 - Banner: "Previewing as rahul@mh.gov.in · Unsaved upload · Exit preview" (or "Saved list" when there is no draft).
 - If the person can't open the dashboard, show that instead of charts.
 
@@ -1240,8 +1265,9 @@ The two missing access checks (§5.10) exist today without row access, so they s
 - Upload: an org user is linked by `orguser`; anyone else keeps their `email` and is listed by check 4.
 - Save invites each email once after commit: a new person gets an invite, a Dalgo user from another org is added and linked at once, a pending invite is not re-sent.
 - Accepting an invite switches that person's rows from `email` to their new `OrgUser` in both draft and live, and another org's rows with the same email are untouched (§5.1 rule 4).
-- Upload while a live list exists: Members keep the live rows until Save; a second upload replaces the draft.
-- Preview, Save or Discard with a replaced `upload_id` → 409 naming who replaced it (§5.1 rule 3).
+- Upload while a live list exists: Members keep the live rows until Save.
+- Upload while the org has a draft → 409 naming its uploader; two uploads at the same moment → one stored, the other 409 (§5.1 rule 1).
+- Preview, Save or Discard with an `upload_id` that was already saved or discarded → 409 (§5.1 rule 3); a Save that gets 409 leaves the previous live list in place.
 - Save: blocked by errors; blocked before first preview; switches the live upload and deletes the previous one in one transaction.
 - Member cap: creator, user Edit grant and group Edit grant all return View for a Member.
 
