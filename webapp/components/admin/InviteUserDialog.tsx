@@ -19,8 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useRoles } from '@/hooks/api/useUserManagement';
-import { useAdminOrgUserActions } from '@/hooks/api/useAdminPortal';
+import { useAdminOrgUserActions, useAdminRoles } from '@/hooks/api/useAdminPortal';
 import { EMAIL_RE } from '@/components/admin/constants';
 import { trackEvent } from '@/lib/analytics';
 import { ANALYTICS_EVENTS } from '@/constants/analytics';
@@ -38,7 +37,7 @@ interface InviteUserDialogProps {
  * and a platform admin may pick ANY role — the backend skips the inviter cap.
  */
 export function InviteUserDialog({ open, onOpenChange, orgId, onSuccess }: InviteUserDialogProps) {
-  const { roles } = useRoles();
+  const { roles, isLoading: rolesLoading, isError: rolesError } = useAdminRoles(open);
   const { inviteUser } = useAdminOrgUserActions();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -114,13 +113,17 @@ export function InviteUserDialog({ open, onOpenChange, orgId, onSuccess }: Invit
 
           <div className="space-y-2">
             <Label htmlFor="admin-invite-role">Role</Label>
-            <Select value={roleUuid} onValueChange={setRoleUuid}>
+            <Select
+              value={roleUuid}
+              onValueChange={setRoleUuid}
+              disabled={rolesLoading || !!rolesError}
+            >
               <SelectTrigger
                 id="admin-invite-role"
                 className={errors.role ? 'border-destructive' : ''}
                 data-testid="admin-invite-role-select"
               >
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder={rolesLoading ? 'Loading roles…' : 'Select a role'} />
               </SelectTrigger>
               <SelectContent>
                 {roles?.map((role) => (
@@ -130,6 +133,11 @@ export function InviteUserDialog({ open, onOpenChange, orgId, onSuccess }: Invit
                 ))}
               </SelectContent>
             </Select>
+            {rolesError && (
+              <p className="text-sm text-destructive" data-testid="admin-invite-roles-error">
+                Couldn&apos;t load roles. Close and try again.
+              </p>
+            )}
             {errors.role && <p className="text-sm text-destructive">{errors.role}</p>}
           </div>
 
@@ -142,7 +150,11 @@ export function InviteUserDialog({ open, onOpenChange, orgId, onSuccess }: Invit
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} data-testid="admin-invite-submit">
+            <Button
+              type="submit"
+              disabled={isSubmitting || !!rolesError}
+              data-testid="admin-invite-submit"
+            >
               {isSubmitting ? 'Sending…' : 'Send invitation'}
             </Button>
           </DialogFooter>

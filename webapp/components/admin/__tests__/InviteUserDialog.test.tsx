@@ -17,14 +17,13 @@ const mockTrackEvent = jest.fn();
 jest.mock('@/lib/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
 }));
-jest.mock('@/hooks/api/useUserManagement', () => ({
-  useRoles: () => ({ roles: [{ uuid: 'role-guest', name: 'Guest', slug: 'guest' }] }),
-}));
-
 const mockInvite = jest.fn().mockResolvedValue(undefined);
 
 beforeEach(() => {
   jest.clearAllMocks();
+  (useAdminPortal.useAdminRoles as jest.Mock).mockReturnValue({
+    roles: [{ uuid: 'role-guest', name: 'Guest', slug: 'guest' }],
+  });
   (useAdminPortal.useAdminOrgUserActions as jest.Mock).mockReturnValue({
     inviteUser: mockInvite,
     changeRole: jest.fn(),
@@ -91,5 +90,17 @@ describe('Admin InviteUserDialog', () => {
 
     await waitFor(() => expect(mockInvite).toHaveBeenCalled());
     expect(mockTrackEvent).not.toHaveBeenCalled();
+  });
+
+  it('shows an error and blocks submit when roles fail to load', () => {
+    (useAdminPortal.useAdminRoles as jest.Mock).mockReturnValue({
+      roles: undefined,
+      isLoading: false,
+      isError: new Error('boom'),
+    });
+    renderDialog();
+
+    expect(screen.getByTestId('admin-invite-roles-error')).toBeInTheDocument();
+    expect(screen.getByTestId('admin-invite-submit')).toBeDisabled();
   });
 });

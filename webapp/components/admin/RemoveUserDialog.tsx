@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,6 +11,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   getRemovalImpact,
   useAdminOrgUserActions,
@@ -29,10 +37,9 @@ interface RemoveUserDialogProps {
 }
 
 /**
- * Remove a user from an org — destructive, but ORPHANING rather than deleting: the
- * dashboards / charts / report snapshots they created are KEPT, with created_by set
- * to NULL (Access Control v2 switched dashboards and charts from CASCADE to SET_NULL;
- * reports already were). See plan.md §4.6 / research §5, and the counts rendered below.
+ * Remove a user from an org — destructive, but REASSIGNING rather than deleting: the
+ * dashboards / charts / report snapshots they created are KEPT and moved to an org
+ * admin (outside Tech4Dev) picked here. With no such admin, removal is blocked.
  *
  * SAFETY GUARDRAIL (non-negotiable): when the dialog opens it fetches the real
  * removal-impact counts and shows them. The confirm button stays DISABLED until
@@ -50,6 +57,7 @@ export function RemoveUserDialog({
   const { removeUser } = useAdminOrgUserActions();
 
   const [isRemoving, setIsRemoving] = useState(false);
+  const [newOwnerId, setNewOwnerId] = useState('');
   const {
     impact,
     isLoading: loadingImpact,
@@ -59,13 +67,20 @@ export function RemoveUserDialog({
     getRemovalImpact(orgId, target.orguser_id)
   );
 
+  const newOwnerOptions = impact?.new_owner_options ?? [];
+
+  // Clear the previous choice when another user's options load.
+  useEffect(() => {
+    setNewOwnerId('');
+  }, [impact]);
+
   const handleRemove = async () => {
     // Guardrail: never remove without the impact having been fetched and shown.
-    if (!orgUser || !impactShown) return;
+    if (!orgUser || !impactShown || !newOwnerId) return;
 
     setIsRemoving(true);
     try {
-      await removeUser(orgId, orgUser.orguser_id);
+      await removeUser(orgId, orgUser.orguser_id, Number(newOwnerId));
       // The highest-stakes action in the portal — worth an event despite the general
       // "skip deletes" rule. Counts only, never the removed user's email.
       trackEvent(ANALYTICS_EVENTS.ADMIN_USER_REMOVED, {
@@ -81,8 +96,8 @@ export function RemoveUserDialog({
     }
   };
 
-  // Confirm is only allowed once the counts are on screen.
-  const canConfirm = impactShown && !isRemoving;
+  // Confirm is only allowed once the counts are on screen and a new owner is picked.
+  const canConfirm = impactShown && !!newOwnerId && !isRemoving;
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -115,7 +130,7 @@ export function RemoveUserDialog({
                   className="rounded-md border border-muted-foreground/30 bg-muted/40 p-3 text-sm"
                 >
                   <p className="font-medium">
-                    Their content will be kept — only the creator link is removed from:
+                    Their content will be kept and moved to the admin you choose below:
                   </p>
                   <ul className="mt-1 list-disc pl-5 text-muted-foreground">
                     <li data-testid="removal-impact-dashboards">
@@ -133,6 +148,34 @@ export function RemoveUserDialog({
                       </li>
                     )}
                   </ul>
+                </div>
+              )}
+
+              {impact !== null && newOwnerOptions.length === 0 && (
+                <p data-testid="removal-no-new-owner" className="text-sm text-destructive">
+                  This org has no admin outside Tech4Dev to take over their content. Make someone an
+                  admin first.
+                </p>
+              )}
+
+              {newOwnerOptions.length > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="admin-remove-new-owner">Transfer their content to</Label>
+                  <Select value={newOwnerId} onValueChange={setNewOwnerId}>
+                    <SelectTrigger
+                      id="admin-remove-new-owner"
+                      data-testid="admin-remove-new-owner-select"
+                    >
+                      <SelectValue placeholder="Select an admin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {newOwnerOptions.map((option) => (
+                        <SelectItem key={option.orguser_id} value={option.orguser_id.toString()}>
+                          {option.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </div>

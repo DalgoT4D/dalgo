@@ -2,6 +2,7 @@ import useSWR from 'swr';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/api';
 import { toastSuccess, toastError } from '@/lib/toast';
 import { DEFAULT_PAGE_SIZE } from '@/constants/notifications';
+import type { Role } from '@/types/user-management';
 
 export interface AdminStats {
   total_orgs: number;
@@ -218,20 +219,36 @@ export interface AdminOrgUsers {
 }
 
 /**
- * What removing a user would orphan (drives the RemoveUserDialog warning).
- * dashboards/charts/reports are all SET_NULL — kept, with the creator link cleared.
- * Nothing is deleted (Access Control v2 switched dashboards/charts from CASCADE to
- * SET_NULL; reports already were).
+ * What removing a user would move (drives the RemoveUserDialog warning).
+ * Nothing is deleted: their dashboards/charts/reports go to the org admin picked
+ * from new_owner_options.
  */
 export interface RemovalImpact {
   dashboards_orphaned: number;
   charts_orphaned: number;
   reports_orphaned: number;
+  /** Org admins outside Tech4Dev who can take over the content; empty blocks removal. */
+  new_owner_options: AdminOrgUser[];
 }
 
 export interface AdminInviteUserForm {
   invited_email: string;
   invited_role_uuid: string;
+}
+
+/** Assignable org-user roles; not capped by the admin's role in the selected org. */
+export function useAdminRoles(enabled: boolean = true) {
+  const { data, error, isLoading } = useSWR<Role[]>(
+    enabled ? '/api/v1/admin/roles' : null,
+    apiGet,
+    { revalidateOnFocus: false }
+  );
+
+  return {
+    roles: data,
+    isLoading,
+    isError: error,
+  };
 }
 
 /** List an org's members plus its pending invitations. */
@@ -380,9 +397,13 @@ export function useAdminOrgUserActions() {
     }
   };
 
-  const removeUser = async (orgId: number, orgUserId: number): Promise<void> => {
+  const removeUser = async (
+    orgId: number,
+    orgUserId: number,
+    newOwnerId: number
+  ): Promise<void> => {
     try {
-      await apiDelete(`/api/v1/admin/orgs/${orgId}/users/${orgUserId}`);
+      await apiDelete(`/api/v1/admin/orgs/${orgId}/users/${orgUserId}?new_owner_id=${newOwnerId}`);
       toastSuccess.generic('User removed from organization');
     } catch (error: unknown) {
       toastError.api(error, 'Failed to remove user');
