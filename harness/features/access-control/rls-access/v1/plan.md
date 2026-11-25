@@ -15,6 +15,7 @@
 | **Row scope**                             | What one person may see, worked out from their access-list rows.                                                                                     |
 | `AggQueryBuilder`                         | The shared SQLAlchemy query builder in `ddpui/core/datainsights/query_builder.py`. Charts, KPIs, maps, filters and alerts all build queries with it. |
 | **Member floor**                          | `OrgPreferences.default_member_level`: the access a Member gets to non-private dashboards, charts, KPIs and reports.                                 |
+| **Row access switch**                     | `OrgPreferences.row_access_enabled`: the org's own on/off switch on the Row access page. Members are filtered only when it is on (§5.2).             |
 | HLD / LLD                                 | High-Level Design / Low-Level Design.                                                                                                                |
 
 ---
@@ -131,26 +132,26 @@ At Bhumi, a Fellow's row sets `fellow` to her own email and `school_id` to her s
 
 Every code path that reads warehouse rows for a Member is affected. Admins and Analysts are unaffected except for the Row access page, preview, and the chart-builder note.
 
-| Surface                       | Where                                                                                                                                                       | Change                                                                                                                                                                   |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Query builder**             | `ddpui/core/datainsights/query_builder.py` → `AggQueryBuilder.fetch_from()`                                                                                 | Adds the row-access condition for the current row scope. One choke point for charts, pivots, maps, KPIs, filter values, report data and alerts.                          |
-| **Request auth**              | `ddpui/auth.py` → `CustomJwtAuthMiddleware.authenticate()`                                                                                                  | Sets the row scope for the request (lazily resolved). Reads the preview header for Admins/Analysts.                                                                      |
-| **Scope reset**               | New Django middleware in `ddpui/settings.py` `MIDDLEWARE`                                                                                                   | Clears the row scope at the start and end of every request so nothing leaks between requests on one thread.                                                              |
-| **Chart routes**              | `ddpui/api/charts_api.py`: `chart-data`, `chart-data-preview`, `chart-data-preview/total-rows`, `map-data`, `map-data-overlay`, `download-csv`, `{id}/data` | Filtered automatically via the builder. Payload routes get a **table guard** for Members (§5.9). `{id}/data` gets its missing access check (§5.10).                      |
-| **KPI routes**                | `ddpui/api/kpi_api.py` → `{kpi_id}/data/`                                                                                                                   | Filtered automatically. Gets its missing access check.                                                                                                                   |
-| **Filter values**             | `ddpui/api/filter_api.py` → `/preview/` → `dashboard_service.get_value_filter_options_with_fallback()`                                                      | Filtered automatically (a Member only sees their own values in the dropdown). Table guard for Members.                                                                   |
-| **Raw warehouse routes**      | `ddpui/api/warehouse_api.py` (`table_data`, `column-values`, `download`, `table_count`, `insights`, `ask`), `filter_api` schema/table/column lists          | **Blocked for Members** by removing `can_view_warehouse_data` and `can_view_warehouses` from the Member role. Not filtered (spec §7).                                    |
-| **Reports**                   | `ddpui/api/report_api.py` data routes; `ddpui/core/reports/pdf_export_service.py`; report email task                                                        | Data routes filtered automatically (snapshots freeze config, not data). **PDF export renders through the public share route**, so it needs a signed scope token (§5.11). |
-| **Alerts**                    | `ddpui/celeryworkers/alert_tasks.py` → `evaluate_alert()`; `ddpui/core/alerts/*`                                                                            | Evaluate once per distinct recipient scope; send each recipient only their result (§5.12).                                                                               |
-| **Public routes**             | `ddpui/api/public_api.py`                                                                                                                                   | No row scope → unfiltered, by decision 1. Sharing modal warns first (§5.14).                                                                                             |
-| **Access control**            | `ddpui/core/access/access_control.py`                                                                                                                       | Members capped at View everywhere (§6.2).                                                                                                                                |
-| **Sharing**                   | `ddpui/api/access_api.py`, `ddpui/core/access/resource_share.py`                                                                                            | Edit grants to Members rejected; Members can't change sharing (follows from the cap).                                                                                    |
-| **Roles**                     | `seed/003_role_permissions.json` + data migration                                                                                                           | Member loses create/edit/delete and raw-warehouse permissions (§6.1).                                                                                                    |
-| **Member floor**              | `ddpui/models/org_preferences.py`, `webapp/components/settings/access/RolesTab.tsx`                                                                         | Fixed at View; not editable (§6.3).                                                                                                                                      |
-| **Row access settings (new)** | `ddpui/api/rls_api.py`, `ddpui/core/rls/*`, `ddpui/models/rls.py`; `webapp/components/settings/access/RowAccessTab.tsx`                                     | New page: template, upload, review, preview, save.                                                                                                                       |
-| **Webapp dashboards**         | Dashboard view, filters, chart builder, share modal, nav                                                                                                    | Preview mode banner; locked scope filters; "Members will see this in full" note; hide create/edit for Members.                                                           |
-| **Superset**                  | `superset_service.py`                                                                                                                                       | No change (out of scope).                                                                                                                                                |
-| **AI chat**                   | `chat-with-data`                                                                                                                                            | No change — Members don't have it, and it stays that way until it applies row access (phase 2).                                                                          |
+| Surface                       | Where                                                                                                                                                                                                                                                    | Change                                                                                                                                                                   |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Query builder**             | `ddpui/core/datainsights/query_builder.py` → `AggQueryBuilder.fetch_from()`                                                                                                                                                                              | Takes a required `scope` argument and adds the row-access condition for it. One choke point for charts, pivots, maps, KPIs, filter values, report data and alerts.       |
+| **Data API routes**           | `charts_api.py`, `kpi_api.py`, `filter_api.py`, `report_api.py`, `dashboard_native_api.py`, `public_api.py`, `warehouse_api.py`                                                                                                                          | Each route that reads warehouse rows creates the scope once (`row_scope.for_request(request)`, or `UNRESTRICTED` on public routes) and passes it down (§5.2).            |
+| **Services on the data path** | `charts_service.py`, `pivot_service.py`, `maps_service.py`, `kpi_service.py`, `metric_service.py`, `dashboard_service.py`, `report_service.py`, `alerts/alert_query.py`, `datainsights/insights/*`, `warehousefunctions.py`, `visualizationfunctions.py` | Every function between a route and `fetch_from()` takes `scope` as a required argument and passes it on (§5.2).                                                          |
+| **Chart routes**              | `ddpui/api/charts_api.py`: `chart-data`, `chart-data-preview`, `chart-data-preview/total-rows`, `map-data`, `map-data-overlay`, `download-csv`, `{id}/data`                                                                                              | Filtered automatically via the builder. Payload routes get a **table guard** for Members (§5.9). `{id}/data` gets its missing access check (§5.10).                      |
+| **KPI routes**                | `ddpui/api/kpi_api.py` → `{kpi_id}/data/`                                                                                                                                                                                                                | Filtered automatically. Gets its missing access check.                                                                                                                   |
+| **Filter values**             | `ddpui/api/filter_api.py` → `/preview/` → `dashboard_service.get_value_filter_options_with_fallback()`                                                                                                                                                   | Filtered automatically (a Member only sees their own values in the dropdown). Table guard for Members.                                                                   |
+| **Raw warehouse routes**      | `ddpui/api/warehouse_api.py` (`table_data`, `column-values`, `download`, `table_count`, `insights`, `ask`), `filter_api` schema/table/column lists                                                                                                       | **Blocked for Members** by removing `can_view_warehouse_data` and `can_view_warehouses` from the Member role. Not filtered (spec §7).                                    |
+| **Reports**                   | `ddpui/api/report_api.py` data routes; `ddpui/core/reports/pdf_export_service.py`                                                                                                                                                                       | Data routes filtered automatically (snapshots freeze config, not data). **PDF export renders through the public share route**, so a Member's export needs a scope token (§5.11). |
+| **Alerts**                    | `ddpui/celeryworkers/alert_tasks.py` → `evaluate_alert()`; `ddpui/core/alerts/*`                                                                                                                                                                         | Evaluate once per distinct recipient scope; send each recipient only their result (§5.12).                                                                               |
+| **Public routes**             | `ddpui/api/public_api.py`                                                                                                                                                                                                                                | Pass `UNRESTRICTED` → unfiltered, by decision 1. Sharing modal warns first (§5.14).                                                                                      |
+| **Access control**            | `ddpui/core/access/access_control.py`                                                                                                                                                                                                                    | Members capped at View everywhere (§6.2).                                                                                                                                |
+| **Sharing**                   | `ddpui/api/access_api.py`, `ddpui/core/access/resource_share.py`                                                                                                                                                                                         | Edit grants to Members rejected; Members can't change sharing (follows from the cap).                                                                                    |
+| **Roles**                     | `seed/003_role_permissions.json` + data migration                                                                                                                                                                                                        | Member loses create/edit/delete and raw-warehouse permissions (§6.1).                                                                                                    |
+| **Member floor**              | `ddpui/models/org_preferences.py`, `webapp/components/settings/access/RolesTab.tsx`                                                                                                                                                                      | Fixed at View; not editable (§6.3).                                                                                                                                      |
+| **Row access settings (new)** | `ddpui/api/rls_api.py`, `ddpui/core/rls/*`, `ddpui/models/rls.py`, `ddpui/models/org_preferences.py`; `webapp/components/settings/access/RowAccessTab.tsx`                                                                                               | New page: template, upload, review, preview, save, and the org's on/off switch (§5.2).                                                                                   |
+| **Webapp dashboards**         | Dashboard view, filters, chart builder, share modal, nav                                                                                                                                                                                                 | Preview mode banner; locked scope filters; "Members will see this in full" note; hide create/edit for Members.                                                           |
+| **Superset**                  | `superset_service.py`                                                                                                                                                                                                                                    | No change (out of scope).                                                                                                                                                |
+| **AI chat**                   | `chat-with-data`                                                                                                                                                                                                                                         | No change — Members don't have it, and it stays that way until it applies row access (phase 2).                                                                          |
 
 ---
 
@@ -159,7 +160,7 @@ Every code path that reads warehouse rows for a Member is affected. Admins and A
 ### 4.1 Where row access sits
 
 ```
-request ─► JWT auth (CustomJwtAuthMiddleware) ── sets row scope for this request (lazy)
+request ─► JWT auth (CustomJwtAuthMiddleware) ── request.orguser = Rahul
               │
               ▼
           @has_permission  ── role permissions (Members: view-only)
@@ -168,10 +169,13 @@ request ─► JWT auth (CustomJwtAuthMiddleware) ── sets row scope for this
           @has_access / access_control  ── can this person open this dashboard/chart?
               │                              (Members capped at View)
               ▼
-          service code ─► AggQueryBuilder.fetch_from(schema, table)
+          API route ── scope = row_scope.for_request(request)   (created once)
+              │
+              ▼
+          service code(…, scope) ─► AggQueryBuilder.fetch_from(table, schema, scope)
                                   │
                                   ▼
-                       row_filter.condition_for(schema, table)
+                       row_filter.condition_for(scope, schema, table)
                          • no scope / Admin / Analyst  → no condition
                          • table not filtered          → no condition
                          • otherwise                   → (row1) OR (row2) …  or FALSE
@@ -184,21 +188,23 @@ Row access is the last layer. If someone can't open a dashboard, row access neve
 
 ### 4.2 Design decisions
 
-**D1 — Apply the condition inside `AggQueryBuilder.fetch_from()`, using a per-request row scope.**
+**D1 — Apply the condition inside `AggQueryBuilder.fetch_from()`, using a row scope passed down as a required argument.**
 **Example:** `build_chart_query()` paginates by building an inner query with `LIMIT` and wrapping it ([charts_service.py:516](../../../../../backend/ddpui/core/charts/charts_service.py)). Because the condition is added in `fetch_from()`, it lands on the **inner** query, before `LIMIT`. Page 2 of Rahul's "view data" is page 2 of Pandharpur rows, and `total-rows` counts Pandharpur rows.
-**Why it matters:** There are 32 `fetch_from()` calls across charts, pivots, maps, KPIs, filters, metrics and alerts. Passing `orguser` through every service signature is a large diff and one missed call is a leak. One hook covers all of them, including future ones.
+**Why it matters:** There are 31 `fetch_from()` calls across charts, pivots, maps, KPIs, filters, metrics and alerts. All of them go through one function, so the filter is written once.
 
-The row scope lives in a `ContextVar` (Python's per-request/per-task variable). It is set by auth for HTTP requests and by an explicit `with row_scope.use(...)` block in Celery tasks and the PDF render.
+**The scope is a plain argument, created once and passed down.** Each API route that reads warehouse rows builds it with `row_scope.for_request(request)` and passes it to the service, which passes it on until it reaches `fetch_from(table, schema, scope)`. Background work builds its scope the same way and passes it: alerts per group of recipients (§5.12), the PDF render from its signed token (§5.11).
+**Example:** Rahul opens "Silt progress". `get_chart_data_by_id` creates Rahul's scope, calls `charts_service` with it, and `fetch_from` adds `district IN ('Solapur')`.
+**Why it matters:** `scope` has **no default** anywhere on the path. A call site that forgets it fails at once in tests (missing argument) instead of quietly showing every row. Anyone reading a function can see that it filters by person.
 
 **D2 — Fail closed everywhere.**
 
-| Situation                                                                          | Result for a Member with values (not `*`)                         |
-| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Table not seen before (created after the last save)                                | Look up its columns live. If it has a scope column, filter it.    |
+| Situation                                                                          | Result for a Member with values (not `*`)                                                                      |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Table not seen before (created after the last save)                                | Look up its columns live. If it has a scope column, filter it.                                                 |
 | A scope column filtered at the last save is now missing                            | **Ignored** (team decision): that column isn't filtered; the table's other scope columns still are. See §5.13. |
-| Column lookup fails (warehouse error)                                              | No rows from that table.                                          |
-| Person not on the list                                                             | No rows from filtered tables.                                     |
-| Value can't be converted to the column's type (e.g. `D-104` for an integer column) | That value matches nothing.                                       |
+| Column lookup fails (warehouse error)                                              | No rows from that table.                                                                                       |
+| Person not on the list                                                             | No rows from filtered tables.                                                                                  |
+| Value can't be converted to the column's type (e.g. `D-104` for an integer column) | That value matches nothing.                                                                                    |
 
 **Why it matters:** The spec says row access "never falls back to showing more". Treating any of these cases as "no filter" would show a Member every row. The one exception is a missing scope column: the team decided that whoever renames or drops a scope column in dbt re-uploads the sheet at the same time (§5.13).
 
@@ -230,7 +236,7 @@ The row scope lives in a `ContextVar` (Python's per-request/per-task variable). 
 
 File: `ddpui/models/rls.py` (new). Two models, one migration. Every org's lists live in the same tables, kept apart by `org`.
 
-**The idea:** every CSV upload is stored as an **upload** with its rows. One upload per org is **live** (`status="live"`): the list Members are filtered by. A newer upload that hasn't been saved yet is the **draft**. Save makes the draft live and deletes the previous live upload, so an org has at most two uploads. **No live upload = row access not set up yet**, so Members see everything.
+**The idea:** every CSV upload is stored as an **upload** with its rows. One upload per org is **live** (`status="live"`): the list Members are filtered by. A newer upload that hasn't been saved yet is the **draft**. Save makes the draft live and deletes the previous live upload, so an org has at most two uploads. **No live upload = row access not set up yet**, so Members see everything. Members are filtered by the live upload only while the org's row access switch is on (§5.2).
 
 ```python
 class OrgAccessListUpload(models.Model):
@@ -242,6 +248,7 @@ class OrgAccessListUpload(models.Model):
 
     org = models.ForeignKey(Org, on_delete=models.CASCADE, related_name="access_list_uploads")
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
+    file_name = models.CharField(max_length=255)       # "atecf_access_nov.csv": the uploaded file's name, shown on the page
     scope_columns = models.JSONField(default=list)     # ["district", "taluka", "dam_id"]: CSV header minus email
     # Warnings and info from the §5.5 checks, kept so the page shows them again without re-querying the warehouse.
     # Blocking errors are never stored: a file with one is not saved at all (§5.4).
@@ -281,10 +288,10 @@ class OrgAccessListRow(models.Model):
 
 Each row points at a person in one of two ways:
 
-| Person                         | `orguser`     | `email`           |
-| ------------------------------ | ------------- | ----------------- |
-| Rahul, already in the org      | Rahul (id 45) | empty             |
-| Ravi, invited, not joined yet  | empty         | `ravi@atecf.org`  |
+| Person                        | `orguser`     | `email`          |
+| ----------------------------- | ------------- | ---------------- |
+| Rahul, already in the org     | Rahul (id 45) | empty            |
+| Ravi, invited, not joined yet | empty         | `ravi@atecf.org` |
 
 When Ravi accepts his invite, his rows get `orguser=Ravi` and `email` is emptied (rule 4). From then on they are found only by `orguser`.
 
@@ -298,7 +305,8 @@ Each upload stores its own rows, inserted in that file's order. The template dow
 
 | Field                        | Example                                   | Why it's needed                                                                                                                                            |
 | ---------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `status`                     | `draft` or `live`                         | Members read only the live upload. Preview reads the draft. No live upload means row access isn't set up, so Members see everything.                      |
+| `status`                     | `draft` or `live`                         | Members read only the live upload. Preview reads the draft. No live upload means row access isn't set up, so Members see everything.                       |
+| `file_name`                  | `atecf_access_nov.csv`                    | Shown on the page next to each upload, so Admins know which sheet is live and which is the draft. Taken from the uploaded file, without its folder path.   |
 | `scope_columns`              | `district`, `taluka`, `dam_id`            | The CSV headers minus `email`. Dalgo looks for these columns in every table.                                                                               |
 | `review_result`              | Warnings, info, people groups, row counts | The page shows the latest review after a refresh (spec §5). "Everyone at once" reads the counts. No blocking errors here: a file with one is never stored. |
 | `previewed`                  | `true` after a preview                    | A first setup can't be saved until it has been previewed (spec §6).                                                                                        |
@@ -307,12 +315,12 @@ Each upload stores its own rows, inserted in that file's order. The template dow
 
 `OrgAccessListRow`: one per CSV row
 
-| Field          | Example                                            | Why it's needed                                                                                                |
-| -------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `upload`       | Upload #1                                          | Which list this row belongs to. Deleting an upload deletes its rows.                                           |
-| `orguser`      | Rahul (id 45)                                      | Whose access this is. Removing Rahul from the org deletes his rows with him.                                   |
+| Field          | Example                                            | Why it's needed                                                                                                 |
+| -------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `upload`       | Upload #1                                          | Which list this row belongs to. Deleting an upload deletes its rows.                                            |
+| `orguser`      | Rahul (id 45)                                      | Whose access this is. Removing Rahul from the org deletes his rows with him.                                    |
 | `email`        | `ravi@atecf.org`                                   | For someone not in the org yet: whom Save invites, and how their rows are found when they accept. Emptied then. |
-| `scope_values` | district: Solapur, taluka: Pandharpur, dam_id: `*` | What this person can see. `*` means every value, blank means none, a list means those values.                  |
+| `scope_values` | district: Solapur, taluka: Pandharpur, dam_id: `*` | What this person can see. `*` means every value, blank means none, a list means those values.                   |
 
 **How many rows each model has**
 
@@ -329,6 +337,8 @@ Each upload stores its own rows, inserted in that file's order. The template dow
 | Save                    | #1 live                           | #1: Pandharpur                  |
 | Re-upload (Rahul moves) | #1 live, #2 draft                 | #1: Pandharpur                  |
 | Save                    | #2 live (#1 and its rows deleted) | #2: Mohol                       |
+
+This table assumes ATECF's row access switch is on. With it off, Rahul is filtered by nothing at every step (§5.2).
 
 **Why it matters:** Members only ever read the live upload's rows, so an unsaved list can't reach them. Rows are stored once, in one table and one format, and Save is a switch, not a copy. If history is ever needed, Save stops deleting the previous upload; nothing else changes.
 
@@ -350,13 +360,13 @@ except IntegrityError as err:
 
 `POST /draft/` also checks for an existing draft **before** starting the review task, so Meera is told at once instead of after the warehouse checks. The constraint is the final guard for two uploads at the same moment: the database lets one insert through and refuses the other, whichever server or Celery worker they run on.
 
-| Situation                                   | Result                                                        |
-| ------------------------------------------- | ------------------------------------------------------------- |
-| ATECF has no draft                          | Upload is stored as the draft                                 |
-| ATECF has Abhishek's unsaved draft          | Meera's upload → 409 "Abhishek has an unsaved upload from 10:00" |
-| Abhishek and Meera upload at the same moment | One is stored; the other gets the same 409                    |
-| Bhumi uploads while ATECF has a draft       | Stored (the rule is per org)                                  |
-| Abhishek wants to upload a corrected file   | He discards his own draft first ("Discard and upload again" on the page) |
+| Situation                                    | Result                                                                   |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| ATECF has no draft                           | Upload is stored as the draft                                            |
+| ATECF has Abhishek's unsaved draft           | Meera's upload → 409 "Abhishek has an unsaved upload from 10:00"         |
+| Abhishek and Meera upload at the same moment | One is stored; the other gets the same 409                               |
+| Bhumi uploads while ATECF has a draft        | Stored (the rule is per org)                                             |
+| Abhishek wants to upload a corrected file    | He discards his own draft first ("Discard and upload again" on the page) |
 
 **Rule 2 — every write to an upload saves only the fields it changed.**
 **Example:** Save writes `status`, `saved_by` and `saved_at` on the draft. Marking a draft previewed writes only `previewed`. Neither puts back an old value of the other's field.
@@ -367,11 +377,11 @@ except IntegrityError as err:
 **Why it matters:** Without it, Abhishek would save a list he never reviewed.
 **How:** The previewed, save and discard endpoints take `upload_id` (§5.15). The preview header carries it too (§5.6). The check and the change are **one** database statement, filtered on `id=upload_id, status="draft"`, so two Admins clicking at the same moment can't both succeed. If it changes 0 rows, the endpoint raises `DraftNotCurrentError` → 409.
 
-| Clash at the same moment          | Result                                                       |
-| --------------------------------- | ------------------------------------------------------------ |
-| Two Admins click Save on draft #1 | One saves it; the other gets 409                             |
-| Save and Discard on draft #1      | Whichever runs first wins; the other gets 409                |
-| Save on draft #1 after it was discarded | 409; the live list is untouched                        |
+| Clash at the same moment                | Result                                        |
+| --------------------------------------- | --------------------------------------------- |
+| Two Admins click Save on draft #1       | One saves it; the other gets 409              |
+| Save and Discard on draft #1            | Whichever runs first wins; the other gets 409 |
+| Save on draft #1 after it was discarded | 409; the live list is untouched               |
 
 **Rule 4 — When an invited person accepts, their rows are switched from `email` to their new `OrgUser`.**
 **Example:** Ravi is on the list as `email=ravi@atecf.org`. Save invites him. He accepts on 21 Nov. His rows become `orguser=Ravi, email=empty`, and on his first login he sees only his district. Nobody re-uploads the sheet. Before he accepts he can't log in, so there is nothing to filter.
@@ -386,13 +396,13 @@ OrgAccessListRow.objects.filter(
 
 It matches by org and email, not by draft or live, so it fixes both uploads at once, and another org's rows for the same email are untouched.
 
-| Event                                                     | Rows for that person                                                                         |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Ravi accepts his invite                                   | Switched to his `OrgUser`, email emptied; filtered from his first login                      |
-| Ravi accepts before Save (someone invited him by hand)    | The draft's rows are switched; Save finds him already linked and doesn't invite him          |
-| Ravi's invite is cancelled, then sent again and accepted  | Still matched, because the row keeps his email until he joins                                |
-| Rahul changes his login email after joining               | Unaffected; his rows are on `orguser`                                                        |
-| Rahul is removed from the org                             | Deleted with his `OrgUser` (`CASCADE`)                                                       |
+| Event                                                    | Rows for that person                                                                |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Ravi accepts his invite                                  | Switched to his `OrgUser`, email emptied; filtered from his first login             |
+| Ravi accepts before Save (someone invited him by hand)   | The draft's rows are switched; Save finds him already linked and doesn't invite him |
+| Ravi's invite is cancelled, then sent again and accepted | Still matched, because the row keeps his email until he joins                       |
+| Rahul changes his login email after joining              | Unaffected; his rows are on `orguser`                                               |
+| Rahul is removed from the org                            | Deleted with his `OrgUser` (`CASCADE`)                                              |
 
 **A same-named column that means something else is fixed in dbt.**
 **Example:** `prod.applications` has a `state` column holding application status ("approved", "pending"). Dalgo filters it like any other `state` column, so Members see no rows from it. Review check 7 flags it; consulting renames the column in dbt (`application_status`) and the table stops being filtered.
@@ -405,31 +415,42 @@ File: `ddpui/core/rls/row_scope.py` (new).
 ```python
 @dataclass(frozen=True)
 class RowScope:
-    org_id: int
-    unrestricted: bool                       # Admin / Analyst / super-admin
+    org_id: Optional[int]
+    unrestricted: bool                       # Admin / Analyst / super-admin / public link
     scope_columns: tuple[str, ...]
     rows: tuple[dict, ...]                   # the person's rows; empty = not on the list
 
-_current: ContextVar[Optional["LazyScope"]] = ContextVar("row_scope", default=None)
+
+UNRESTRICTED = RowScope(org_id=None, unrestricted=True, scope_columns=(), rows=())
 ```
 
-- `set_for_request(orguser, preview_orguser, draft_upload_id)` — called from `CustomJwtAuthMiddleware.authenticate()` right after `request.orguser` is set. Stores a `LazyScope`; nothing is read from the database until a query touches the warehouse.
+**The rule:** a `RowScope` is created once, where the work starts, and passed down as an argument to every function until `fetch_from()`. Nothing stores it globally.
+
+| Where the work starts    | Creates the scope with                                       | Example                                      |
+| ------------------------ | ------------------------------------------------------------ | -------------------------------------------- |
+| An API route (logged in) | `row_scope.for_request(request)`                             | Rahul opens a chart → Rahul's rows           |
+| An API route in preview  | `row_scope.for_request(request)` (reads the preview headers) | Priya previews as Rahul → Rahul's rows       |
+| A public route           | `row_scope.UNRESTRICTED` (decision 1)                        | Public link → all rows                       |
+| The PDF render           | `row_scope.from_pdf_token(request, snapshot)` (§5.11)        | Rahul exports a report → Rahul's rows        |
+| An alert evaluation      | `resolve_for_orguser(...)` per recipient group (§5.12)       | Rahul's alert → Rahul's rows                 |
+| Admin-only code          | `row_scope.UNRESTRICTED`                                     | Warehouse insights (Members can't call them) |
+
+- `for_request(request)` — the API helper. Returns the previewed person's scope if valid preview headers are present (§5.6), otherwise the caller's own. Each route calls it once and passes the scope down.
 - `resolve_for_orguser(orguser)` — unrestricted if role is super-admin, admin or analyst, or the org has no saved row access (no upload with `status="live"`). Otherwise loads the Member's rows from the live upload by their `orguser`.
 - `resolve_as_member(orguser, draft_upload_id=None)` — used by preview. Reads that person's rows by `orguser`, always treating them as a Member. With `draft_upload_id`, reads that draft upload's rows (preview of an unsaved list), after checking it is still the org's draft (§5.1 rule 3); otherwise reads the live upload's rows.
+- `UNRESTRICTED` — no filter. Passed by public routes and Admin-only code, so "no filter" is always written out where it happens.
 
 Rows are only ever read by `orguser`. Rows still holding an `email` (people not joined yet) are never used to filter: those people can't log in, and preview shows them as "hasn't accepted the invite yet" (§5.6).
-- `use(scope)` — a context manager for Celery tasks and the PDF render.
-- `RowScopeResetMiddleware` — resets `_current` before and after each request.
 
 #### Creating a row scope: `resolve_for_orguser` and `resolve_as_member`
 
-These are the only two functions that create a `RowScope`. Everything else (`LazyScope`, `use`) calls one of them.
+These are the only two functions that read access-list rows. `for_request` and `from_pdf_token` call one of them.
 
 ```python
 def resolve_for_orguser(orguser) -> RowScope:
     """The logged-in person's row scope, from the live list."""
     org = orguser.org
-    if orguser.new_role.slug in UNRESTRICTED_ROLES or not is_feature_flag_enabled("ROW_ACCESS", org=org):
+    if orguser.new_role.slug in UNRESTRICTED_ROLES or not row_access_on(org):
         return _unrestricted(org.id)
     live = _live_upload(org)
     if live is None:
@@ -451,6 +472,13 @@ def resolve_as_member(orguser, draft_upload_id=None) -> RowScope:
         if upload is None:
             return _unrestricted(org.id)                   # nothing saved yet
     return _scope_from_upload(upload, orguser)
+
+
+def row_access_on(org) -> bool:
+    """Members are filtered only when the feature flag and the org's switch are both on."""
+    if not is_feature_flag_enabled("ROW_ACCESS", org=org):
+        return False
+    return OrgPreferences.objects.filter(org=org, row_access_enabled=True).exists()
 
 
 def _live_upload(org):
@@ -475,6 +503,7 @@ def _unrestricted(org_id) -> RowScope:
 | ----------------------------------------------------------- | ----------------------------------------------------------- |
 | `resolve_for_orguser(Priya)` (Admin)                        | `unrestricted=True`, no database read                       |
 | `resolve_for_orguser(Rahul)`, flag off or nothing saved yet | `unrestricted=True`                                         |
+| `resolve_for_orguser(Rahul)`, list saved, switch off        | `unrestricted=True`                                         |
 | `resolve_for_orguser(Rahul)`, list saved                    | `rows=({"district": ["Solapur"], ...},)` from the live list |
 | `resolve_for_orguser(new.user)`, not on the list            | `rows=()` → sees nothing on filtered tables                 |
 | `resolve_as_member(Rahul, 57)`                              | Rahul's rows from draft upload #57                          |
@@ -486,13 +515,11 @@ def _unrestricted(org_id) -> RowScope:
 #### How a request gets its row scope
 
 ```
-Request ─► RowScopeResetMiddleware      clear the slot (Django middleware, runs first)
-        ─► CustomJwtAuthMiddleware      Ninja auth on the router (routes.py:41)
-             authenticate()             request.orguser = Rahul
-             set_for_request(Rahul)     slot = LazyScope(Rahul) — nothing read yet
-        ─► API → service → fetch_from() → current()   first warehouse query reads Rahul's rows
-        ─► response
-        ─► RowScopeResetMiddleware      clear the slot again
+Request ─► CustomJwtAuthMiddleware      request.orguser = Rahul   (unchanged)
+        ─► API route                    scope = row_scope.for_request(request)    ← created once
+        ─► service(..., scope)          passes it on
+        ─► fetch_from(table, schema, scope)   adds Rahul's condition
+        ─► response                     the scope ends with the request; nothing to clean up
 ```
 
 `ddpui/core/rls/row_scope.py`:
@@ -500,116 +527,129 @@ Request ─► RowScopeResetMiddleware      clear the slot (Django middleware, r
 ```python
 UNRESTRICTED_ROLES = {RoleSlug.SUPER_ADMIN, RoleSlug.ADMIN, RoleSlug.ANALYST}
 
-from contextvars import ContextVar
-_current: ContextVar[Optional["LazyScope"]] = ContextVar("row_scope", default=None)
 
-
-class LazyScope:
-    """Knows who the request is for; reads their rows only on the first warehouse query."""
-
-    def __init__(self, orguser, preview_orguser=None, draft_upload_id=None):
-        self.orguser = orguser
-        self.preview_orguser = preview_orguser
-        self.draft_upload_id = draft_upload_id
-        self._scope = None
-
-    def get(self) -> RowScope:
-        if self._scope is None:
-            if self.preview_orguser:
-                self._scope = resolve_as_member(self.preview_orguser, self.draft_upload_id)
-            else:
-                self._scope = resolve_for_orguser(self.orguser)
-        return self._scope
-
-
-def set_for_request(orguser, preview_orguser=None, draft_upload_id=None):
-    _current.set(LazyScope(orguser, preview_orguser, draft_upload_id))
-
-
-def current() -> Optional[RowScope]:
-    """None = no logged-in user (public route, background job) → no filter."""
-    lazy = _current.get()
-    return lazy.get() if lazy else None
+def for_request(request) -> RowScope:
+    """The row scope for this API request: the previewed person's, or the caller's own."""
+    preview_orguser, draft_upload_id = preview_headers(request, request.orguser)
+    if preview_orguser is not None:
+        return resolve_as_member(preview_orguser, draft_upload_id)
+    return resolve_for_orguser(request.orguser)
 
 
 def preview_headers(request, orguser) -> tuple[Optional[OrgUser], Optional[str]]:
-    """Preview headers count only for super-admins, Admins and Analysts with the flag on (§5.6)."""
+    """Preview headers count only for super-admins, Admins and Analysts with row access on (§5.6)."""
     preview_id = request.headers.get("X-Row-Access-Preview")
     if not preview_id or orguser.new_role.slug not in UNRESTRICTED_ROLES:
         return None, None
-    if not is_feature_flag_enabled("ROW_ACCESS", org=orguser.org):
+    if not row_access_on(orguser.org):
         return None, None
     preview_orguser = OrgUser.objects.filter(id=preview_id, org=orguser.org).first()   # same org only
     if preview_orguser is None:
         raise PreviewUserNotFoundError(preview_id)          # → 404
     return preview_orguser, request.headers.get("X-Row-Access-Draft")
-
-
-class RowScopeResetMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        _current.set(None)
-        try:
-            return self.get_response(request)
-        finally:
-            _current.set(None)
 ```
 
-`ddpui/auth.py` → `CustomJwtAuthMiddleware.authenticate()`, at the end (two new lines):
+**A route and a service with the scope.** Example: `GET /api/charts/{chart_id}/data/`.
 
 ```python
-                request.orguser = orguser
-                request.token = token
-                preview_orguser, draft_upload_id = row_scope.preview_headers(request, orguser)  # NEW
-                row_scope.set_for_request(orguser, preview_orguser, draft_upload_id)            # NEW
-                return request
-```
-
-`ddpui/settings.py` → add near the top of `MIDDLEWARE`, so it wraps everything else:
-
-```python
-MIDDLEWARE = [
-    "django_prometheus.middleware.PrometheusBeforeMiddleware",
-    "ddpui.core.rls.row_scope.RowScopeResetMiddleware",   # NEW
-    "corsheaders.middleware.CorsMiddleware",
+# ddpui/api/charts_api.py
+def get_chart_data_by_id(request, chart_id: int, dashboard_filters: Optional[str] = None):
+    scope = row_scope.for_request(request)                          # NEW: created once
     ...
-]
+    query_builder = charts_service.build_chart_query(payload, org_warehouse, scope)   # NEW argument
+
+
+# ddpui/core/charts/charts_service.py
+def build_chart_query(payload: ChartDataPayload, org_warehouse: OrgWarehouse, scope: RowScope):
+    ...
+    query_builder.fetch_from(payload.table_name, payload.schema_name, scope)        # NEW argument
 ```
 
-| Request                                | Slot after `authenticate()`         | `current()` on a warehouse query   |
-| -------------------------------------- | ----------------------------------- | ---------------------------------- |
-| Rahul (Member) opens a chart           | `LazyScope(Rahul)`                  | Rahul's rows: `district = Solapur` |
-| Priya (Admin) opens a chart            | `LazyScope(Priya)`                  | `unrestricted=True`, no rows read  |
-| Priya previews as Rahul                | `LazyScope(Priya, "rahul@…")`       | Rahul's rows                       |
-| Rahul sends the preview header himself | `LazyScope(Rahul)` (header ignored) | Rahul's rows                       |
-| Public dashboard link (no login)       | empty (reset by middleware)         | `None` → no filter (decision 1)    |
+`scope` has **no default** in any of these signatures. If a route or service forgets to pass it, Python raises `TypeError: missing 1 required positional argument: 'scope'` the first time a test calls it, so a missed path is caught before release instead of leaking rows.
 
-**When there is no row scope at all** (public routes, Admin-only background jobs), the builder adds no condition. That is correct for public links (decision 1) and for jobs that run as the org. Every Member-reachable path is covered by the launch-gate tests in §8, including a test that fails if a new Member-reachable route appears without being reviewed.
+**Functions that gain `scope`.** Every function between a data route and `fetch_from()`:
 
-**Feature flag:** `ROW_ACCESS` in `ddpui/utils/feature_flags.py`. If the flag is off for an org, `resolve_for_orguser` returns unrestricted and the settings page is hidden. That is how the 3 Dec release reaches Bhumi and ATECF only.
+| File                                                                                                            | Functions                                                                               |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `core/charts/charts_service.py`                                                                                 | `build_chart_query` and its callers (chart data, table preview, total rows, CSV stream) |
+| `core/charts/pivot_service.py`, `maps_service.py`                                                               | the functions that call `build_chart_query`                                             |
+| `core/kpi/kpi_service.py`                                                                                       | `compute_latest_value`, `_compute_trend` and the KPI data functions that call them      |
+| `core/metric/metric_service.py`                                                                                 | `compute_metric_value_with_sql`                                                         |
+| `services/dashboard_service.py`                                                                                 | `get_value_filter_options_with_fallback` (filter dropdown values)                       |
+| `core/reports/report_service.py`                                                                                | report data functions that call the chart and KPI services                              |
+| `core/alerts/alert_query.py`                                                                                    | `_execute_standalone` and the KPI/metric paths (§5.12)                                  |
+| `api/filter_api.py`, `api/public_api.py`                                                                        | `get_filter_preview`, `_execute_filter_preview`                                         |
+| Admin-only: `warehouse_api.py`, `warehousefunctions.py`, `visualizationfunctions.py`, `datainsights/insights/*` | pass `UNRESTRICTED` (Members can't reach them, spec §7)                                 |
+
+The exact list is confirmed at the start of M2 with a search for `fetch_from(`; the missing-argument error catches any function left out.
+
+| Request                                | Scope created by                                  | Condition on a warehouse query     |
+| -------------------------------------- | ------------------------------------------------- | ---------------------------------- |
+| Rahul (Member) opens a chart           | `for_request` → `resolve_for_orguser(Rahul)`      | Rahul's rows: `district = Solapur` |
+| Priya (Admin) opens a chart            | `for_request` → `resolve_for_orguser(Priya)`      | `unrestricted=True`, no filter     |
+| Priya previews as Rahul                | `for_request` → `resolve_as_member(Rahul, draft)` | Rahul's rows                       |
+| Rahul sends the preview header himself | `for_request` (header ignored) → his own          | Rahul's rows                       |
+| Public dashboard link (no login)       | `UNRESTRICTED`, written in the public route       | No filter (decision 1)             |
+
+**CSV download streams after the route returns.** `POST /download-csv/` returns a `StreamingHttpResponse`, and its generator runs the page queries later ([charts_api.py:834](../../../../../backend/ddpui/api/charts_api.py)). The route creates the scope **before** building the response and passes it into `stream_chart_data_csv(..., scope)`, so every page of the file is filtered.
+**Example:** Rahul downloads "Silt progress" as CSV. All 40 pages of the file hold Pandharpur rows only.
+
+**Why no clean-up is needed:** the scope is a normal argument and lives only as long as the function call. Nothing is shared between requests, so there is no middleware and nothing to reset in tests.
+
+Every Member-reachable path is also covered by the launch-gate tests in §8, including a test that fails if a new Member-reachable route appears without being reviewed.
+
+#### Feature flag and the org's on/off switch
+
+Two separate controls decide whether Members are filtered. Both must be on.
+
+| Control           | Who sets it                                             | Where                                                | What it does                                                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ROW_ACCESS` flag | The Dalgo team                                          | `ddpui/utils/feature_flags.py`                       | Off: the Row access page is hidden and nobody is filtered. This is how the 3 Dec release reaches Bhumi and ATECF only.                                                                                |
+| Row access switch | The org's Admins and Analysts (`can_manage_row_access`) | `OrgPreferences.row_access_enabled`, default `False` | Off: the page shows only the switch; template, upload, review, preview, save and discard are locked, and Members see everything. On: the page unlocks, and Members are filtered once a list is saved. |
+
+```python
+# ddpui/models/org_preferences.py: new field, one migration
+row_access_enabled = models.BooleanField(default=False)
+```
+
+**The rule:** the switch starts off. Nothing else on the Row access page works until an Admin turns it on.
+**Example:** On 20 Nov Abhishek opens the Row access page for ATECF and sees only "Row access: Off". He turns it on, and Download template and Upload appear. Members still see everything, because no list is saved yet. He uploads, previews and saves; from Rahul's next request Rahul sees Pandharpur only. If something looks wrong later, Abhishek turns the switch off: Members see everything again and the page locks, but the saved list (and any draft) stays as it is. Turning it back on picks up where he left off.
+**Why it matters:** the org opts in on purpose, and can stop filtering at once without deleting its list or asking the Dalgo team to change the flag.
+
+| Flag | Switch | Live list | Row access page                     | Rahul (Member) sees |
+| ---- | ------ | --------- | ----------------------------------- | ------------------- |
+| Off  | any    | any       | Hidden                              | Everything          |
+| On   | Off    | any       | Only the switch                     | Everything          |
+| On   | On     | None yet  | Unlocked: template, upload, preview | Everything          |
+| On   | On     | Saved     | Unlocked                            | Pandharpur only     |
+
+- **Every `/api/rls/` endpoint checks the switch** except `GET /status/` and `PUT /enabled/`. With it off, they return 400 "Turn on row access first". Two read endpoints answer instead of refusing: `/me/` returns `{filtered: false}` and `/table-status/` returns `{filtered: false}`, so Member dashboards and the chart builder keep working.
+- **Preview needs the switch on.** `preview_headers` checks `row_access_on(org)` instead of only the flag, so with the switch off the headers are ignored (§5.6).
+- **Save and Discard don't change the switch.** It is already on before anything can be uploaded, so the first Save filters Members straight away (after the required preview, §5.7).
+- Turning the switch on or off takes effect on the next request; there is nothing to invalidate (D7). `row_access_on` adds one small query, made once per request, when the route creates a Member's scope.
+- Everything that reads a Member's scope goes through `resolve_for_orguser`, so alerts (§5.12) and PDF exports (§5.11) follow the switch with no extra code.
 
 ### 5.3 Building the condition
 
 File: `ddpui/core/rls/row_filter.py` (new). Called from `AggQueryBuilder.fetch_from()`.
 
 ```python
-def fetch_from(self, db_table: str, db_schema: str):
+def fetch_from(self, db_table: str, db_schema: str, scope: RowScope):
     self.select_from = table(db_table, schema=db_schema)
-    condition = row_filter.condition_for(db_schema, db_table)
+    condition = row_filter.condition_for(scope, db_schema, db_table)
     if condition is not None:
         self.where_clauses.append(condition)
     return self
 ```
 
-`condition_for` connects `fetch_from` to `build_condition`: it finds who is asking and the table's real columns.
+`scope` is required. Every one of the 31 existing `fetch_from()` calls passes it (§5.2).
+
+`condition_for` connects `fetch_from` to `build_condition`: it takes the scope it was given and looks up the table's real columns.
 
 ```python
-def condition_for(db_schema: str, db_table: str):
+def condition_for(scope: RowScope, db_schema: str, db_table: str):
     """The row filter for this table, or None for no filter."""
-    scope = row_scope.current()
-    if scope is None or scope.unrestricted:
+    if scope.unrestricted:
         return None                                    # public link / Admin / Analyst
     if db_schema.lower() == "information_schema":
         return None                                    # listing tables/columns, not NGO data
@@ -617,14 +657,14 @@ def condition_for(db_schema: str, db_table: str):
     return build_condition(scope, live_columns)
 ```
 
-| Rahul opens a chart on…                       | `condition_for` returns                        |
-| --------------------------------------------- | ---------------------------------------------- |
-| `prod.silt_data` (has `district`)             | `district IN ('Solapur')`                      |
-| `prod.national_totals` (no scope column)      | `None` → shown in full                         |
+| Rahul opens a chart on…                                             | `condition_for` returns                           |
+| ------------------------------------------------------------------- | ------------------------------------------------- |
+| `prod.silt_data` (has `district`)                                   | `district IN ('Solapur')`                         |
+| `prod.national_totals` (no scope column)                            | `None` → shown in full                            |
 | `prod.silt_data` after `district` was renamed, `taluka` still there | `taluka IN ('Pandharpur')`: `district` is ignored |
-| `prod.silt_data` after its only scope column was renamed | `None` → shown in full (team decision, §5.13) |
-| Any table, logged in as Priya (Admin)         | `None`                                         |
-| Any table, via a public link                  | `None` (no row scope, decision 1)              |
+| `prod.silt_data` after its only scope column was renamed            | `None` → shown in full (team decision, §5.13)     |
+| Any table, logged in as Priya (Admin)                               | `None`                                            |
+| Any table, via a public link                                        | `None` (`UNRESTRICTED`, decision 1)               |
 
 ```python
 def build_condition(scope: RowScope, live_columns: dict[str, str]):
@@ -795,7 +835,7 @@ File: `ddpui/core/rls/access_list_service.py` (new).
 5. **Fetch real values** (D5): for each filtered table, one grouped count over the scope columns it has. Results are capped at 50,000 groups per table. Above that, Dalgo falls back to `SELECT DISTINCT` per column (also capped), and the "everyone at once" counts for that table show "too many to count". These run on the warehouse in a Celery task with progress, so a slow warehouse doesn't time out the upload request.
 6. **Clean values** (D4): match each value case- and space-insensitively against the real values for that column. Store the data's spelling. Unmatched values are kept as typed and flagged "value not found", with the closest match from `difflib.get_close_matches` ("Ahmednagar" → did you mean "Ahilyanagar"?). For non-text columns, the sheet value goes through the same converter as `coerce` (§5.3) before comparing, so `"101"` matches `101` and `"yes"` matches `true`. Values are still stored as text.
 7. **Store as the draft upload** (§5.1 rule 1), in one transaction:
-   - create `OrgAccessListUpload(status="draft")` with `scope_columns`, `review_result` (§5.5) and `uploaded_by`;
+   - create `OrgAccessListUpload(status="draft")` with `file_name` (the uploaded file's name, e.g. `atecf_access_nov.csv`), `scope_columns`, `review_result` (§5.5) and `uploaded_by`;
    - `bulk_create` its rows in CSV order, each with its `orguser` or `email` from step 4.
 
    An existing draft is never deleted here. If another Admin's draft was stored while this file was being reviewed, the insert hits the one-draft constraint and the task result is a 409 naming that draft's uploader.
@@ -808,27 +848,27 @@ File: `ddpui/core/rls/access_list_service.py` (new).
 
 All checks from spec §5. They run on upload only — no daily job.
 
-| Type          | Stored?                                        | Where the page gets it                                                                    |
-| ------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| **Blocking**  | No. The file is not saved at all (§5.4 step 4) | The upload task's result, shown once right after upload                                   |
+| Type          | Stored?                                        | Where the page gets it                                                                           |
+| ------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Blocking**  | No. The file is not saved at all (§5.4 step 4) | The upload task's result, shown once right after upload                                          |
 | Warning, Info | Yes, in the draft's `review_result`            | `GET /draft/` or `GET /status/`, so they survive a refresh until the draft is saved or discarded |
 
 **Example:** Abhishek uploads a CSV with a column `ngo` that no table has. The page shows "Column 'ngo' is not in any table" and nothing is saved. He fixes the sheet and uploads again; this time it is stored as a draft with 3 warnings, which stay on the page until he saves it, or discards it and uploads a corrected file.
 
-| #   | Check                                                               | Example                                                                       | Type                                                   | How                                                                                                                                                 |
-| --- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | File is malformed: no `email` column, duplicate headers, not a CSV  | `email` column missing                                                        | **Blocking**                                           | Parse step                                                                                                                                          |
-| 2   | A scope column exists in no table                                   | `ngo` vs the data's `ngo_name`                                                | **Blocking**                                           | Schema cache                                                                                                                                        |
-| 3   | Member has no row, so sees nothing                                  | `new.user@atecf.org`                                                          | Warning                                                | Members (role = member) not on the list                                                                                                             |
-| 4   | Email on the list isn't in this org yet                             | `ravi@atecf.org`, or a typo                                                   | Warning: "These people will be invited when you save"  | Not an `OrgUser` in this org (§5.4 step 4). The full list is shown so the Admin can catch a typo before anyone is invited                            |
-| 5   | Value not found in the data, with the closest match                 | "Ahmednagar": did you mean "Ahilyanagar"?                                     | Warning                                                | §5.4 step 6                                                                                                                                         |
-| 6   | Blank cell, so sees nothing on tables with that column              | `dam_id` left empty                                                           | Warning                                                | Cell is `[]`                                                                                                                                        |
-| 7   | Same-named column whose values never match the list                 | `state` holding application status                                            | Warning: "rename it in dbt if it means something else" | No listed value for that column is found in that table, while it is found in other tables                                                           |
-| 8   | Partial scope: scoped to a taluka, but a table only has district    | Sees the whole district on that table                                         | Info                                                   | Person has a non-`*` value on a column the table lacks                                                                                              |
-| 9   | `*` on every column                                                 | Confirm `lead@atecf.org` should see everything                                | Info                                                   |                                                                                                                                                     |
-| 10  | A value in the data no one is assigned                              | New district Jalna                                                            | Info                                                   | Real values minus all listed values                                                                                                                 |
-| 11  | Tables affected                                                     | `silt_daily: district, taluka`. `farmer_list`: not filtered (no scope column) | Info, shown before saving                              | Schema cache                                                                                                                                        |
-| 12  | Dashboards Members can open that use unfiltered tables              | Listed by dashboard                                                           | Warning                                                | Dashboards that are not private, or private but shared with a Member or a group containing one, whose charts/KPIs read a table with no scope column |
+| #   | Check                                                              | Example                                                                       | Type                                                   | How                                                                                                                                                 |
+| --- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | File is malformed: no `email` column, duplicate headers, not a CSV | `email` column missing                                                        | **Blocking**                                           | Parse step                                                                                                                                          |
+| 2   | A scope column exists in no table                                  | `ngo` vs the data's `ngo_name`                                                | **Blocking**                                           | Schema cache                                                                                                                                        |
+| 3   | Member has no row, so sees nothing                                 | `new.user@atecf.org`                                                          | Warning                                                | Members (role = member) not on the list                                                                                                             |
+| 4   | Email on the list isn't in this org yet                            | `ravi@atecf.org`, or a typo                                                   | Warning: "These people will be invited when you save"  | Not an `OrgUser` in this org (§5.4 step 4). The full list is shown so the Admin can catch a typo before anyone is invited                           |
+| 5   | Value not found in the data, with the closest match                | "Ahmednagar": did you mean "Ahilyanagar"?                                     | Warning                                                | §5.4 step 6                                                                                                                                         |
+| 6   | Blank cell, so sees nothing on tables with that column             | `dam_id` left empty                                                           | Warning                                                | Cell is `[]`                                                                                                                                        |
+| 7   | Same-named column whose values never match the list                | `state` holding application status                                            | Warning: "rename it in dbt if it means something else" | No listed value for that column is found in that table, while it is found in other tables                                                           |
+| 8   | Partial scope: scoped to a taluka, but a table only has district   | Sees the whole district on that table                                         | Info                                                   | Person has a non-`*` value on a column the table lacks                                                                                              |
+| 9   | `*` on every column                                                | Confirm `lead@atecf.org` should see everything                                | Info                                                   |                                                                                                                                                     |
+| 10  | A value in the data no one is assigned                             | New district Jalna                                                            | Info                                                   | Real values minus all listed values                                                                                                                 |
+| 11  | Tables affected                                                    | `silt_daily: district, taluka`. `farmer_list`: not filtered (no scope column) | Info, shown before saving                              | Schema cache                                                                                                                                        |
+| 12  | Dashboards Members can open that use unfiltered tables             | Listed by dashboard                                                           | Warning                                                | Dashboards that are not private, or private but shared with a Member or a group containing one, whose charts/KPIs read a table with no scope column |
 
 Also, from spec §4 journey 5: when someone is removed from the org, their saved rows are deleted with their `OrgUser`, so they drop off the list.
 
@@ -858,7 +898,8 @@ Spec §6: pick a person and see any dashboard exactly as they would, including e
 
 - **Only people who have joined can be previewed.** Someone still on the list by `email` shows in the "Preview as" picker greyed out: "Ravi hasn't accepted the invite yet, so there's nothing to preview." Once he accepts, he can be previewed like anyone else.
 - The webapp's dashboard view takes `?previewAs=<orguser_id>&draft=<upload_id>`. In preview mode, every data request carries `X-Row-Access-Preview: <orguser_id>`, plus `X-Row-Access-Draft: <upload_id>` when previewing a draft.
-- `authenticate()` honours these headers **only** for super-admins, Admins and Analysts in an org with the flag on. For anyone else they are ignored. The preview `OrgUser` must be in the same org (otherwise 404). The scope becomes `resolve_as_member(preview_orguser, draft_upload_id)`. If that upload is no longer the org's draft, the request gets 409 "already saved or discarded" (§5.1 rule 3).
+- `row_scope.for_request(request)` honours these headers **only** for super-admins, Admins and Analysts in an org with the flag on. For anyone else they are ignored. The preview `OrgUser` must be in the same org (otherwise 404). The scope becomes `resolve_as_member(preview_orguser, draft_upload_id)`, and the route passes it down like any other scope. If that upload is no longer the org's draft, the request gets 409 "already saved or discarded" (§5.1 rule 3).
+- **Preview needs the row access switch on** (§5.2). With it off the page is locked and the preview headers are ignored.
 - **Which list preview uses:** the draft upload if there is one (what the person **will** see after Save), otherwise the live upload (what they see **now**). So preview works before and after Save (spec §6: "after that, preview is available anytime").
 - `GET /api/rls/preview/dashboards/{id}/?orguser_id=` answers "can this person open this dashboard?" using `access_control` for that `OrgUser`. If they can't, the page shows "Rahul can't open this dashboard" instead of charts.
 - A banner shows which list is used: "Previewing as rahul@mh.gov.in · Unsaved upload · Exit preview", or "· Saved list ·".
@@ -887,6 +928,8 @@ Status values (spec §6): has access, no row, value not found, plus "not joined 
 4. If that changed 0 rows, the draft was already saved or discarded: raise `DraftNotCurrentError` → 409. The transaction rolls back, so the previous live upload deleted in step 2 is **restored**.
 5. After the transaction commits, invite everyone still on the list by `email` (below).
 
+Save does not touch the row access switch (§5.2). The switch is already on, since nothing can be uploaded while it is off, so Members are filtered by the saved list from their next request.
+
 ```python
 with transaction.atomic():
     OrgAccessListUpload.objects.filter(org=org, status=OrgAccessListUpload.Status.LIVE).delete()
@@ -902,12 +945,12 @@ with transaction.atomic():
 
 **Inviting the people on the list.** After the Save commits (`transaction.on_commit`, so a failed Save sends no emails), `invite_people_on_list` takes each distinct `email` still on the saved rows and invites it as a Member with the existing `invite_user_to_org` ([orguserfunctions.py:245](../../../../../backend/ddpui/core/orguserfunctions.py)):
 
-| Email on the list                                 | What happens                                                                                                  |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Ravi, new to Dalgo                                | An invite is created and emailed. His rows keep the email until he accepts (§5.1 rule 4)                      |
-| Sunita, a Dalgo user in another org               | `invite_user_to_org` adds her to this org at once. Her rows are switched to her new `OrgUser` straight away (same update as rule 4) |
-| Meena, already has a pending invite for this org  | Skipped. `invite_user_to_org` would re-send her invite email on every Save                                    |
-| Rahul, joined between upload and Save             | Nothing to do: his rows were already switched when he accepted                                                 |
+| Email on the list                                | What happens                                                                                                                        |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Ravi, new to Dalgo                               | An invite is created and emailed. His rows keep the email until he accepts (§5.1 rule 4)                                            |
+| Sunita, a Dalgo user in another org              | `invite_user_to_org` adds her to this org at once. Her rows are switched to her new `OrgUser` straight away (same update as rule 4) |
+| Meena, already has a pending invite for this org | Skipped. `invite_user_to_org` would re-send her invite email on every Save                                                          |
+| Rahul, joined between upload and Save            | Nothing to do: his rows were already switched when he accepted                                                                      |
 
 **Example:** Abhishek saves a list with Ravi, Sunita and Meena still on it by email. Ravi gets an invite email. Sunita is added to ATECF at once and is filtered from her next login. Meena gets nothing new.
 
@@ -984,33 +1027,189 @@ Tests: Member without access → 404; Member with access → 200; Admin → 200.
 
 Spec §7: a Member opening a report on filtered tables sees only their rows.
 
-- **Data routes** (`/reports/{id}/charts/{chart_id}/data/`, `/kpis/{kpi_id}/data/`, `/map-data/`, `/table-data/`, `/table-data/total-rows/`): `ReportSnapshot` freezes config but queries data live ([report.py:8](../../../../../backend/ddpui/models/report.py)). These routes go through `AggQueryBuilder`, so they're filtered by the request's row scope with no extra code.
-- **PDF export** (`POST /reports/{id}/export/pdf/`) renders `/share/report/{public_share_token}?print=true` in headless Chromium. That page calls **public** routes, which have no row scope, so **a Member's PDF would contain every row**.
-  - **Fix:** `pdf_export_service.generate_pdf()` takes the requesting `OrgUser`. It already injects a render secret into the page's requests; it also adds a signed, 5-minute scope token (`django.core.signing`, containing `orguser_id`). Public report data routes that see a valid render secret **and** scope token wrap the query in `row_scope.use(resolve_for_orguser(...))`.
-- **Share via email** (`send_report_email_task`) renders the PDF as the sender (`orguser_id` is already passed). Recipients get exactly what the sender sees.
-  **Example:** Rahul emails the monthly report to his deputy. The PDF holds Pandharpur rows only.
+- **Data routes** (`/reports/{id}/charts/{chart_id}/data/`, `/kpis/{kpi_id}/data/`, `/map-data/`, `/table-data/`, `/table-data/total-rows/`): `ReportSnapshot` freezes config but queries data live ([report.py:8](../../../../../backend/ddpui/models/report.py)). Each route creates the scope with `row_scope.for_request(request)` and passes it to `report_service`, like the chart routes.
+- **PDF export** (`POST /reports/{id}/export/pdf/`) renders `/share/report/{public_share_token}?print=true` in headless Chromium. That page calls **public** routes, so without a fix a Member's PDF would contain every row. The fix is below.
+
+#### How a Member's PDF gets their scope
+
+```
+Rahul ─► POST /api/reports/57/export/pdf/      export_report_pdf: Rahul known (login)
+          └─ generate_pdf(57, "abc123", Rahul)
+              ├─ Member → token "k7Xp…" in Redis: rls_pdf:k7Xp… → {orguser_id: 45, snapshot_id: 57}
+              └─ hidden Chromium: every request gets  x-render-secret + x-row-access-pdf: k7Xp…
+                  └─ GET /api/v1/public/reports/abc123/charts/12/data/
+                      └─ scope = row_scope.from_pdf_token(request, snapshot)  → Rahul's scope
+                          └─ generate_chart_data_and_config(..., scope) → fetch_from → Pandharpur only
+          └─ render done → Redis key deleted
+```
+
+**Step 1 — `export_report_pdf` passes the exporter.** `ddpui/api/report_api.py`:
+
+```python
+pdf_bytes = PdfExportService.generate_pdf(snapshot_id, share_token, orguser, dashboard_filters=dashboard_filters)
+```
+
+`orguser` is a required argument of `generate_pdf` (no default), so no caller can skip it.
+
+**Step 2 — `generate_pdf` makes a token for Members only.** `ddpui/core/reports/pdf_export_service.py`:
+
+```python
+scope_token = None
+if row_scope.needs_pdf_scope(orguser):                         # Members only
+    scope_token = secrets.token_urlsafe(32)
+    redis.set(
+        f"rls_pdf:{scope_token}",
+        json.dumps({"orguser_id": orguser.id, "snapshot_id": snapshot_id}),
+        ex=PDF_SCOPE_TTL_S,                                    # 300 s, safety net if the worker dies
+    )
+try:
+    def _inject_render_headers(route):
+        headers = {**route.request.headers, "x-render-secret": render_secret}
+        if scope_token:
+            headers["x-row-access-pdf"] = scope_token
+        route.continue_(headers=headers)
+
+    page.route("**/*", _inject_render_headers)
+    ...                                                        # render, page.pdf()
+finally:
+    if scope_token:
+        redis.delete(f"rls_pdf:{scope_token}")                 # stops working as soon as the PDF is done
+```
+
+- The token is random and carries no data. A new one is made for each export, so two people exporting the same report never mix.
+- `page.route("**/*", ...)` already catches every request the page makes, including the chart-data `fetch(...)` calls. **The frontend does not change.**
+- The token never reaches the user's browser or a URL. Admin and Analyst exports get no token and no header: they run exactly as today.
+
+**Step 3 — `row_scope.py`: who needs a token, and reading it back.**
+
+```python
+def needs_pdf_scope(orguser) -> bool:
+    """Only filtered roles need a scope token for the PDF render."""
+    return orguser.new_role.slug not in UNRESTRICTED_ROLES
+
+
+def from_pdf_token(request, snapshot) -> RowScope:
+    """Scope for a public report request: the Member's during their PDF render, else unrestricted."""
+    token = request.META.get("HTTP_X_ROW_ACCESS_PDF")
+    if not token or not has_valid_render_secret(request):
+        return UNRESTRICTED                                    # public link, or an Admin/Analyst render
+    raw = redis.get(f"rls_pdf:{token}")
+    if raw is None:
+        raise PdfScopeInvalidError()                           # expired or made up → 404
+    data = json.loads(raw)
+    orguser = OrgUser.objects.filter(id=data["orguser_id"], org=snapshot.org).first()
+    if data["snapshot_id"] != snapshot.id or orguser is None:
+        raise PdfScopeInvalidError()                           # another report, or user removed → 404
+    return resolve_for_orguser(orguser)
+```
+
+| Request to a public report route                               | Scope                           |
+| -------------------------------------------------------------- | ------------------------------- |
+| Funder opens the public link                                   | `UNRESTRICTED` (decision 1)     |
+| Priya's (Admin) PDF render, no header                          | `UNRESTRICTED`                  |
+| Rahul's PDF render, valid token                                | Rahul's scope → Pandharpur only |
+| Header present but not in Redis, wrong report, or user removed | 404, never all rows             |
+
+**The rule:** a request carrying a scope token is served with that Member's scope, or refused. It never falls back to all rows.
+**Example:** Rahul's render runs past the 5-minute safety TTL; its remaining chart calls get 404 and those charts show as unavailable, instead of every district's rows.
+**Why it matters:** the render secret skips the report's `is_public` check, so a fallback to "no filter" there would serve every row of a private report.
+
+`PdfScopeInvalidError` is new, in `ddpui/core/rls/exceptions.py`; the public routes map it to 404.
+
+**Step 4 — public report routes pass the scope.** Each of these adds `scope = row_scope.from_pdf_token(request, snapshot)` and passes it on, like `get_public_report_chart_data`:
+
+```python
+def get_public_report_chart_data(request, token: str, chart_id: int):
+    snapshot, chart_config, org_warehouse = _get_frozen_chart_for_public_report(token, chart_id, request)
+    scope = row_scope.from_pdf_token(request, snapshot)                                          # NEW
+    ...
+    chart_data = generate_chart_data_and_config(payload, org_warehouse, scope, chart_id=chart_id)   # NEW: scope
+```
+
+| Route                                 | Function                             |
+| ------------------------------------- | ------------------------------------ |
+| `…/reports/{token}/charts/{id}/data/` | `get_public_report_chart_data`       |
+| `…/charts/{id}/data-preview/`         | `get_public_report_table_data`       |
+| `…/charts/{id}/total-rows/`           | `get_public_report_table_total_rows` |
+| `…/charts/{id}/map-data/`             | `get_public_report_map_data`         |
+| `…/kpis/{id}/data/`                   | `get_public_report_kpi_data`         |
+| `…/filters/preview/`                  | `get_public_report_filter_preview`   |
+
+Public dashboard routes stay `UNRESTRICTED` (decision 1). A route that forgets the scope fails with the missing-argument error (§5.2).
 
 ### 5.12 Alerts
 
 Spec §7: an alert on a filtered table checks its condition and sends its data per recipient, by that person's scope. Engineering to confirm the effort.
 
-`Alert.recipients` is JSON: `{"type": "orguser", "orguser_id": …}` or `{"type": "external", "email": …}` ([alert.py:83](../../../../../backend/ddpui/models/alert.py)). Delivery also has a Slack channel.
+`Alert.recipients` is JSON with three kinds of entry: `{"type": "orguser", "orguser_id": …}`, `{"type": "user_group", …}` or `{"type": "external", "email": …}` ([alert.py:83](../../../../../backend/ddpui/models/alert.py)). Delivery also has a Slack channel.
 
-**Flow in `evaluate_alert()`** (`ddpui/celeryworkers/alert_tasks.py`):
+A scheduled alert runs in a Celery worker (beat → `dispatch_due_alerts` → `evaluate_alert` → `_run_evaluation`), so there is no logged-in user. The alert already stores **who** it is for, so each recipient's scope is resolved from `recipients` at every run (daily, weekly or monthly). A new list, a switch change or a removed user applies from the next run.
+
+**Flow in `_run_evaluation()`** (`ddpui/celeryworkers/alert_tasks.py`):
 
 ```
-alert's table filtered for this org?
-  no  → today's flow, unchanged
-  yes → group recipients by scope:
-          Admin / Analyst orguser  → "unrestricted"
-          Member orguser           → their saved rows
-          external email           → no rows (sees nothing from filtered tables)
-        for each distinct scope:
-          with row_scope.use(scope): compute value
-          condition met? → render + deliver to that group only
-        Slack (if enabled) → evaluated as unrestricted (see Q2)
-        write one AlertLog per scope evaluated
+group recipients by scope (user groups expanded to their members first):
+  Admin / Analyst orguser  → unrestricted
+  Member orguser           → their saved rows
+  external email           → no rows (sees nothing from filtered tables)
+for each distinct scope:
+  compute value with that scope (alert_query → kpi/metric service → fetch_from)
+  condition met? → render + deliver to that group only
+Slack (if enabled) → evaluated as unrestricted (see Q2)
+write one AlertLog per scope evaluated
 ```
+
+When no recipient is filtered (all Admins/Analysts, or row access is off), this is one group and one query: today's behaviour.
+
+```python
+# ddpui/celeryworkers/alert_tasks.py — _run_evaluation
+for scope, people in group_recipients_by_scope(alert).items():
+    value, sql_str, rag_status = alert_query.compute(alert, org_warehouse, scope)
+    eval_input = rag_status if alert.alert_type == AlertType.KPI_RAG else value
+    fired = condition_helpers.evaluate(alert.alert_type, cond, eval_input)
+    deliveries = []
+    if fired:
+        tokens = rendering.tokens_for_alert(alert, current_value=value, rag_status=rag_status)
+        body = rendering.render(alert.message_template, tokens)
+        deliveries = notify_alert_recipients(alert, subject=subject, body=body, recipients=people)  # this group only
+    AlertLog.objects.create(..., value=value, scope_label=label_for(people), deliveries=deliveries)
+# Slack, if enabled: one evaluation with UNRESTRICTED → deliver_slack (Q2)
+
+
+# ddpui/core/alerts/recipient_scope.py (new)
+def group_recipients_by_scope(alert) -> dict[RowScope, list[dict]]:
+    """Recipients grouped by the rows they may see; user groups expanded to their members."""
+    groups = defaultdict(list)
+    for r in expand_user_groups(alert.recipients, alert.org):
+        if r["type"] == "orguser":
+            orguser = OrgUser.objects.filter(id=r["orguser_id"], org=alert.org).first()
+            if orguser is None:
+                continue                                          # left the org → gets nothing
+            groups[row_scope.resolve_for_orguser(orguser)].append(r)
+        else:
+            groups[row_scope.resolve_for_external(alert.org)].append(r)   # external email
+    return groups
+
+
+# ddpui/core/rls/row_scope.py
+def resolve_for_external(org) -> RowScope:
+    """Scope for someone outside the org (an alert's external email): nothing from filtered tables."""
+    if not row_access_on(org):
+        return _unrestricted(org.id)
+    live = _live_upload(org)
+    if live is None:
+        return _unrestricted(org.id)                       # row access not set up yet
+    return RowScope(org.id, False, tuple(live.scope_columns), ())   # the org's scope columns, no rows
+```
+
+| Function                                                                   | Change                                                                                          |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `alert_query.compute(alert, org_warehouse, scope)`                         | New `scope` argument, passed to `compute_metric_value_with_sql`, `compute_latest_value` and `_execute_standalone` (§5.2) |
+| `notify_alert_recipients(alert, *, subject, body, recipients=None)`        | Optional `recipients`; defaults to `alert.recipients`, so other callers don't change            |
+| `group_recipients_by_scope`, `expand_user_groups`                          | New, in `ddpui/core/alerts/recipient_scope.py`                                                  |
+| `row_scope.resolve_for_external(org)`                                      | New: the org's scope columns with no rows, so every filtered table returns nothing and unfiltered tables show as usual. It needs the org's scope columns: with none, every table would look unfiltered |
+
+`RowScope` is a frozen dataclass of tuples, so it can be a dictionary key: two Members with identical rows land in the same group.
 
 **Example:** "Notify when silt removed < 100 tonnes this week." Rahul (Pandharpur, 80 t) gets an alert showing 80 t. Sunita (D-104, 140 t) gets nothing. Priya (Admin, 2,300 t org-wide) gets nothing.
 
@@ -1022,12 +1221,12 @@ alert's table filtered for this org?
 
 ### 5.13 When things are added or change (spec §4 journey 6)
 
-| Event                                                                      | Behaviour                                                                                                                                                                                                                              | Code                                                                                                                                                                                                                                         |
-| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| New table with a scope column                                              | Filtered on the next query (live column lookup). It appears in the Row access page's list of filtered tables.                                                                                                                       | The page lists filtered tables live from the schema cache: every table with at least one scope column                                                                                                                                       |
-| New chart on a table with no scope column, on a dashboard Members can open | The builder (Admin/Analyst) sees a short, non-blocking note: "Members will see this table in full."                                                                                                                                    | `GET /api/rls/table-status/?schema=&table=` → `{filtered, scope_columns}`; shown in the chart builder and when adding a chart to a dashboard                                                                                                 |
-| New value in the data (a new dam)                                          | Visible only to people with `*` in that column                                                                                                                                                                                         | Falls out of §5.3                                                                                                                                                                                                                            |
-| Scope column renamed or dropped                                            | **Ignored** (team decision). The table is filtered on its remaining scope columns; if none are left, it is shown in full. Whoever renames or drops the column in dbt re-uploads the sheet with the new column name at the same time. | `build_condition` uses only the scope columns the table has now (§5.3). The Row access page shows a standing warning about this (§7.1) |
+| Event                                                                      | Behaviour                                                                                                                                                                                                                            | Code                                                                                                                                         |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| New table with a scope column                                              | Filtered on the next query (live column lookup). It appears in the Row access page's list of filtered tables.                                                                                                                        | The page lists filtered tables live from the schema cache: every table with at least one scope column                                        |
+| New chart on a table with no scope column, on a dashboard Members can open | The builder (Admin/Analyst) sees a short, non-blocking note: "Members will see this table in full."                                                                                                                                  | `GET /api/rls/table-status/?schema=&table=` → `{filtered, scope_columns}`; shown in the chart builder and when adding a chart to a dashboard |
+| New value in the data (a new dam)                                          | Visible only to people with `*` in that column                                                                                                                                                                                       | Falls out of §5.3                                                                                                                            |
+| Scope column renamed or dropped                                            | **Ignored** (team decision). The table is filtered on its remaining scope columns; if none are left, it is shown in full. Whoever renames or drops the column in dbt re-uploads the sheet with the new column name at the same time. | `build_condition` uses only the scope columns the table has now (§5.3). The Row access page shows a standing warning about this (§7.1)       |
 
 **Empty-state message.** When a Member's chart returns no rows **because of** row access, the chart shows "No data for your access, contact your admin" rather than a generic empty chart. The data response carries `row_access: "no_rows"` when the condition was `false()`. Where the condition was a real filter that simply matched nothing, the normal empty state shows.
 
@@ -1035,27 +1234,28 @@ alert's table filtered for this org?
 
 **The rule:** Warn, then public viewers see all rows. Only Admins and Analysts can make public links.
 **Example:** Priya turns on the public link for "Silt progress". The sharing modal shows: "This dashboard uses filtered tables (silt_daily, dams). Anyone with the link will see **all** rows, not just their own." She confirms; the link works unfiltered.
-**Code:** `GET /api/access/{rtype}/{id}` (sharing modal data) adds `uses_filtered_tables: [...]`. The frontend shows the warning before the toggle takes effect. Public routes need no change — they have no row scope.
+**Code:** `GET /api/access/{rtype}/{id}` (sharing modal data) adds `uses_filtered_tables: [...]`. The frontend shows the warning before the toggle takes effect. Public routes need no other change: they already pass `UNRESTRICTED`.
 
 ### 5.15 API endpoints
 
 Router: `ddpui/api/rls_api.py`, mounted at `/api/rls/`. New permission `can_manage_row_access` (super-admin, Admin, Analyst). All responses use `api_response(...)`.
 
-| Method | Path                               | What it does                                                                                                                                           |
-| ------ | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/status/`                         | Live upload: scope columns, counts, filtered tables (live, from the schema cache), saved by/at, `review_result`                                                |
-| GET    | `/template/`                       | CSV download (§5.8)                                                                                                                                    |
-| GET    | `/columns/`                        | Every warehouse table and its columns, from the schema cache, for the column search (§5.8)                                                             |
-| POST   | `/draft/`                          | Upload CSV (multipart) → starts the review task, returns `task_id`; the task result gives the new `upload_id`, or the blocking errors (nothing stored). 409 if the org already has a draft (§5.1 rule 1) |
-| GET    | `/draft/`                          | Current draft upload: `upload_id`, uploaded by/at, `review_result`                                                                                     |
-| DELETE | `/draft/{upload_id}/`              | Discard: deletes the draft upload and its rows (§5.7). 409 if not current                                                                                |
-| POST   | `/draft/{upload_id}/previewed/`    | Record that the draft upload has been previewed (§5.6). 409 if not current                                                                               |
-| POST   | `/draft/{upload_id}/save/`         | Commit (§5.7). 409 if not current                                                                                                                        |
-| GET    | `/preview/people/`                 | People on the draft/saved list, for the "Preview as" picker                                                                                            |
-| GET    | `/preview/dashboards/{id}/?orguser_id=` | Can this person open this dashboard?                                                                                                              |
-| GET    | `/preview/everyone/`               | "Everyone at once" table                                                                                                                               |
-| GET    | `/table-status/`                   | Filtered or not, for the chart-builder note                                                                                                            |
-| GET    | `/me/`                             | For the current Member: `{filtered: bool, scope: {column: values}}` — used to lock dashboard filters                                                   |
+| Method | Path                                    | What it does                                                                                                                                                                                                              |
+| ------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/status/`                              | Row access switch (`enabled`). Live upload: `file_name`, scope columns, counts, filtered tables (live, from the schema cache), saved by/at, `review_result`                                                               |
+| PUT    | `/enabled/`                             | Turn the row access switch on or off: `{"enabled": true}` (§5.2). Every other endpoint below returns 400 "Turn on row access first" while it is off, except `/me/` and `/table-status/`, which answer `{filtered: false}` |
+| GET    | `/template/`                            | CSV download (§5.8)                                                                                                                                                                                                       |
+| GET    | `/columns/`                             | Every warehouse table and its columns, from the schema cache, for the column search (§5.8)                                                                                                                                |
+| POST   | `/draft/`                               | Upload CSV (multipart) → starts the review task, returns `task_id`; the task result gives the new `upload_id`, or the blocking errors (nothing stored). 409 if the org already has a draft (§5.1 rule 1)                  |
+| GET    | `/draft/`                               | Current draft upload: `upload_id`, `file_name`, uploaded by/at, `review_result`                                                                                                                                           |
+| DELETE | `/draft/{upload_id}/`                   | Discard: deletes the draft upload and its rows (§5.7). 409 if not current                                                                                                                                                 |
+| POST   | `/draft/{upload_id}/previewed/`         | Record that the draft upload has been previewed (§5.6). 409 if not current                                                                                                                                                |
+| POST   | `/draft/{upload_id}/save/`              | Commit (§5.7). 409 if not current                                                                                                                                                                                         |
+| GET    | `/preview/people/`                      | People on the draft/saved list, for the "Preview as" picker                                                                                                                                                               |
+| GET    | `/preview/dashboards/{id}/?orguser_id=` | Can this person open this dashboard?                                                                                                                                                                                      |
+| GET    | `/preview/everyone/`                    | "Everyone at once" table                                                                                                                                                                                                  |
+| GET    | `/table-status/`                        | Filtered or not, for the chart-builder note                                                                                                                                                                               |
+| GET    | `/me/`                                  | For the current Member: `{filtered: bool, scope: {column: values}}` — used to lock dashboard filters                                                                                                                      |
 
 People on the list who aren't in the org yet are invited as Members on Save (§5.7), through the existing `invite_user_to_org`. There is no separate invite endpoint for row access.
 
@@ -1157,17 +1357,23 @@ Location: a fourth tab, **Row access**, on Settings → Access (`components/sett
 
 New components in `webapp/components/settings/access/row-access/`:
 
-| Component                  | Shows                                                                                                                                                    |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `RowAccessTab.tsx`         | Status: scope columns, people count, filtered tables, latest review, the column-change warning (below). Buttons: Download template, Upload |
-| `TemplateDialog.tsx`       | First time only: one search box for columns (shows the tables that have each) and tables (shows their columns); ticked columns go into the template      |
-| `UploadReview.tsx`         | The 5-step review (§5.5): What changes → Must fix → People → Worth a look → Preview, then save                                                           |
-| `PeopleGroups.tsx`         | Grouped counts, including "will be invited when you save" (check 4) and "invited, not joined yet"                                                       |
-| `EveryonePreviewTable.tsx` | "Everyone at once" table (cut first if late)                                                                                                             |
+| Component                  | Shows                                                                                                                                                                                                                                                  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `RowAccessTab.tsx`         | The row access switch (below). Status: saved file name ("atecf_access_nov.csv · Last saved by Abhishek on 20 Nov"), scope columns, people count, filtered tables, latest review, the column-change warning (below). Buttons: Download template, Upload |
+| `TemplateDialog.tsx`       | First time only: one search box for columns (shows the tables that have each) and tables (shows their columns); ticked columns go into the template                                                                                                    |
+| `UploadReview.tsx`         | The 5-step review (§5.5): What changes → Must fix → People → Worth a look → Preview, then save                                                                                                                                                         |
+| `PeopleGroups.tsx`         | Grouped counts, including "will be invited when you save" (check 4) and "invited, not joined yet"                                                                                                                                                      |
+| `EveryonePreviewTable.tsx` | "Everyone at once" table (cut first if late)                                                                                                                                                                                                           |
 
 A file with blocking errors shows them and is not saved, so there is no Save button for it. Save stays disabled on first setup until a preview has been opened.
 
-While the org has a draft, the Upload button is replaced by "Unsaved upload by Abhishek, 10:00" with **Review**, **Save** and **Discard** (§5.1 rule 1). For the person who uploaded it, Discard reads **Discard and upload again**.
+**Row access switch.** At the top of the page: "Row access: On / Off", calling `PUT /api/rls/enabled/` (§5.2).
+
+- It starts **off**. While it is off, the page shows only the switch and "Row access is off. Members see all rows. Turn it on to upload an access list." Template, Upload, review, preview, Save and Discard are hidden.
+- Turning it on unlocks the rest of the page. Members are still unfiltered until a list is saved.
+- Turning it off asks first: "Members will see all rows on every dashboard until you turn this back on. Your saved list is kept."
+
+While the org has a draft, the Upload button is replaced by "Unsaved upload atecf_access_dec.csv by Abhishek, 10:00" with **Review**, **Save** and **Discard** (§5.1 rule 1). For the person who uploaded it, Discard reads **Discard and upload again**.
 
 **Column-change warning.** Always shown to Admins at the top of the Row access page (static text, no check behind it):
 
@@ -1193,13 +1399,13 @@ While the org has a draft, the Upload button is replaced by "Unsaved upload by A
 
 ### 7.4 Other UI
 
-| Where                                             | Change                                                                                                                   |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Chart builder / add chart to dashboard            | Non-blocking note when `table-status` says not filtered and row access is set up: "Members will see this table in full." |
-| Chart empty state                                 | "No data for your access, contact your admin" when `row_access: "no_rows"`                                               |
-| Sharing modal                                     | Members: read-only, copy public link only. Admins/Analysts: filtered-tables warning before going public                  |
-| Nav, list pages, dashboard/chart/KPI/report pages | Hide create/edit/delete for Members (driven by the removed permissions via `lib/rbac.tsx`)                               |
-| Roles tab                                         | Member floor shown as "View (fixed)"                                                                                     |
+| Where                                             | Change                                                                                                               |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Chart builder / add chart to dashboard            | Non-blocking note when `table-status` says not filtered and row access is on: "Members will see this table in full." |
+| Chart empty state                                 | "No data for your access, contact your admin" when `row_access: "no_rows"`                                           |
+| Sharing modal                                     | Members: read-only, copy public link only. Admins/Analysts: filtered-tables warning before going public              |
+| Nav, list pages, dashboard/chart/KPI/report pages | Hide create/edit/delete for Members (driven by the removed permissions via `lib/rbac.tsx`)                           |
+| Roles tab                                         | Member floor shown as "View (fixed)"                                                                                 |
 
 ---
 
@@ -1218,11 +1424,11 @@ Spec §7: nothing goes live until every route a Member can reach is covered. Eac
 | `GET /api/kpis/{id}/data/`                                                                                                       | Builder + access check         | KPI value = Pandharpur value                   |
 | `GET /api/filters/preview/`                                                                                                      | Builder + table guard          | Only `Solapur` in the district list            |
 | `GET /api/reports/{id}/charts/{chart_id}/data/`, `/kpis/{kpi_id}/data/`, `/map-data/`, `/table-data/`, `/table-data/total-rows/` | Builder                        | Pandharpur only                                |
-| `POST /api/reports/{id}/export/pdf/`, report email                                                                               | Scope token (§5.11)            | Render calls are scoped to Rahul               |
+| `POST /api/reports/{id}/export/pdf/`                                                                                             | Scope token (§5.11)            | Render calls are scoped to Rahul               |
 | Alerts                                                                                                                           | Per-scope evaluation (§5.12)   | Rahul's email holds Pandharpur value only      |
 | `warehouse_api` raw routes, `filter_api` schema/table/column lists                                                               | Permission removed             | 403/404 for Members                            |
 | Public routes                                                                                                                    | —                              | Unfiltered (decision 1)                        |
-| Preview headers sent by a Member                                                                                                 | `authenticate()` ignores them  | Member still sees only their own rows          |
+| Preview headers sent by a Member                                                                                                 | `for_request` ignores them     | Member still sees only their own rows          |
 
 **Route inventory test.** One test lists every Ninja route whose required permissions a Member holds and compares it with a reviewed allowlist in the test file. A new Member-reachable route fails CI until someone adds it to the list — and to this table.
 
@@ -1237,7 +1443,7 @@ The two missing access checks (§5.10) exist today without row access, so they s
 - Server-side only. The browser never says which rows to show; it can't widen its scope by editing a URL, payload or header.
 - Values reach SQL only through SQLAlchemy expressions (`in_()`), never string formatting.
 - Preview headers are honoured only for super-admins, Admins and Analysts.
-- The PDF scope token is signed, short-lived (5 minutes) and only accepted together with the existing render secret.
+- The PDF scope token is made only for Members, is random, lives in Redis only while the render runs (deleted after, 5-minute TTL as a safety net), is tied to one report and is only accepted together with the existing render secret. A request with a bad token is refused, never served unfiltered (§5.11).
 - The access list holds links to org users and scope values. An email is stored only for someone not in the org yet, until they accept. No new kind of PII (personally identifiable information).
 - Rows are only read by `orguser`, so a row still holding an email can never filter anyone's data.
 - Multi-tenancy: `OrgAccessListUpload` has an `org` FK, rows belong to an upload, and every query filters by `request.orguser.org`.
@@ -1269,6 +1475,7 @@ The two missing access checks (§5.10) exist today without row access, so they s
 - Upload while the org has a draft → 409 naming its uploader; two uploads at the same moment → one stored, the other 409 (§5.1 rule 1).
 - Preview, Save or Discard with an `upload_id` that was already saved or discarded → 409 (§5.1 rule 3); a Save that gets 409 leaves the previous live list in place.
 - Save: blocked by errors; blocked before first preview; switches the live upload and deletes the previous one in one transaction.
+- Row access switch: while it is off, upload/save/preview endpoints return 400 and preview headers are ignored; with a saved list, Rahul is unrestricted while it is off and filtered once it is on; turning it off keeps the saved list.
 - Member cap: creator, user Edit grant and group Edit grant all return View for a Member.
 
 **Backend API — `ddpui/tests/api_tests/`**
@@ -1281,7 +1488,7 @@ The two missing access checks (§5.10) exist today without row access, so they s
 
 **Webapp — Playwright `webapp/e2e/row-access.spec.ts`**
 
-- Admin: download template → upload → review → preview Rahul → save.
+- Admin: turn row access on → download template → upload → review → preview Rahul → save.
 - Rahul logs in: locked district filter, filtered charts, "view data" and CSV.
 - Member sees no create/edit buttons; sharing modal read-only.
 
@@ -1289,16 +1496,16 @@ The two missing access checks (§5.10) exist today without row access, so they s
 
 ## 11. Milestones (16 Nov – 2 Dec)
 
-| #   | Dates          | Work                                                                                                                                           | Done when                                                             |
-| --- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| M0  | 16–17 Nov      | Access-check fixes (§5.10), own PR                                                                                                             | Merged and deployed on their own                                      |
-| M1  | 16–19 Nov      | Members view-only backend: permissions + data migration, cap, floor fixed, Edit-share block, `migrate_member_content`                          | Member gets View everywhere; dry-run list ready for org emails        |
-| M2  | 17–20 Nov      | Row access core: models, `ROW_ACCESS` flag, row scope + reset middleware, `fetch_from` hook, schema cache, fail-closed rules, table guard      | Unit tests for §2.1 pass; a Member's `/charts/{id}/data/` is filtered |
-| M3  | 20–25 Nov      | Upload, review checks, draft, save, template, preview endpoints, everyone-at-once                                                              | ATECF's sample CSV gives the expected review                          |
-| M4  | 23–27 Nov      | Webapp: Row access tab, review flow, preview mode, locked filters, empty state, chart-builder note, Member UI hiding, sharing modal, Roles tab | E2E happy path passes                                                 |
-| M5  | 25–30 Nov      | Reports PDF scope token, alerts per scope, public-link warning                                                           | Launch-gate rows for reports and alerts pass                          |
-| M6  | 30 Nov – 2 Dec | Full launch-gate suite, route inventory test, performance check on ATECF-sized data, docs                                                      | All §8 tests green                                                    |
-| —   | 3 Dec          | Flagged release: Bhumi, then ATECF. Members view-only for all orgs (after the notice email)                                                    |                                                                       |
+| #   | Dates          | Work                                                                                                                                                                                                                                                   | Done when                                                             |
+| --- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| M0  | 16–17 Nov      | Access-check fixes (§5.10), own PR                                                                                                                                                                                                                     | Merged and deployed on their own                                      |
+| M1  | 16–19 Nov      | Members view-only backend: permissions + data migration, cap, floor fixed, Edit-share block, `migrate_member_content`                                                                                                                                  | Member gets View everywhere; dry-run list ready for org emails        |
+| M2  | 17–20 Nov      | Row access core: models, `ROW_ACCESS` flag, row access switch (`OrgPreferences.row_access_enabled`), row scope (`for_request`, `scope` passed through every service on the data path), `fetch_from` hook, schema cache, fail-closed rules, table guard | Unit tests for §2.1 pass; a Member's `/charts/{id}/data/` is filtered |
+| M3  | 20–25 Nov      | Upload, review checks, draft, save, template, preview endpoints, everyone-at-once                                                                                                                                                                      | ATECF's sample CSV gives the expected review                          |
+| M4  | 23–27 Nov      | Webapp: Row access tab, review flow, preview mode, locked filters, empty state, chart-builder note, Member UI hiding, sharing modal, Roles tab                                                                                                         | E2E happy path passes                                                 |
+| M5  | 25–30 Nov      | Reports PDF scope token, alerts per scope, public-link warning                                                                                                                                                                                         | Launch-gate rows for reports and alerts pass                          |
+| M6  | 30 Nov – 2 Dec | Full launch-gate suite, route inventory test, performance check on ATECF-sized data, docs                                                                                                                                                              | All §8 tests green                                                    |
+| —   | 3 Dec          | Flagged release: Bhumi, then ATECF. Members view-only for all orgs (after the notice email)                                                                                                                                                            |                                                                       |
 
 **Cut order if late:** (1) "everyone at once" table, (2) "did you mean" suggestions. Nothing else.
 
@@ -1313,7 +1520,7 @@ The two missing access checks (§5.10) exist today without row access, so they s
 | Rows seen outside a person's scope                       | 0                    | Launch-gate tests per route + preview checks during ATECF testing |
 | ATECF's Admin updates the list without consulting's help | Yes, after handover  | Observed; support tickets                                         |
 | Weekly active Members at ATECF and Bhumi                 | Targets to set       | PostHog                                                           |
-| Orgs using row access                                    | 3 by end of Feb 2027 | org has a live upload                                              |
+| Orgs using row access                                    | 3 by end of Feb 2027 | org has a live upload                                             |
 
 **Events:** `row_access_list_uploaded` (rows, people), `row_access_list_saved`, `row_access_preview_used` (single / everyone), and a `row_access_filtered: true` property on dashboard and chart view events.
 
@@ -1330,6 +1537,7 @@ Consulting covers these with the org's Admin at handover:
 - Who can edit the source sheet the CSV comes from.
 - Someone clicking through the public-link warning.
 - A scope column renamed or dropped in dbt without re-uploading the sheet with the new name: Members then see that column unfiltered.
+- Report summary text. It is written by hand, not queried, so it is shown in full to everyone who can open the report, on screen and in the PDF. **Example:** Priya writes "Solapur removed 2,300 t, Beed 1,200 t" in the summary; Rahul (Pandharpur only) sees both numbers above his filtered charts. Keep summaries free of numbers from other scopes, or make the report private to the people who may see them.
 
 Also: add indexes on scope columns in large tables; keep external users as Members; when someone leaves, remove them from Dalgo (their rows are removed with them).
 
@@ -1337,14 +1545,14 @@ Also: add indexes on scope columns in large tables; keep external users as Membe
 
 ## 14. Decisions (spec §9)
 
-| #   | Decision                                        | Outcome                                                                                 |
-| --- | ----------------------------------------------- | --------------------------------------------------------------------------------------- |
-| 1   | Public link on a dashboard with filtered tables | Warn, then public viewers see all rows. Only Admins and Analysts can make public links. |
+| #   | Decision                                        | Outcome                                                                                                                                       |
+| --- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Public link on a dashboard with filtered tables | Warn, then public viewers see all rows. Only Admins and Analysts can make public links.                                                       |
 | 2   | Bulk invite by CSV                              | Phase 2 for Settings → Access → People. In v1, people on the access list who aren't in the org yet are invited when the list is saved (§5.7). |
-| 3   | Warehouse table as the source                   | Phase 2, refreshed only with "Sync now".                                                |
-| 4   | Hand-written rules                              | Cut.                                                                                    |
-| 5   | Groups on the access list                       | Cut from v1; phase 2 if needed.                                                         |
-| 6   | Members view-only across Dalgo                  | Decided. Floor fixed at View; content moves to an Admin.                                |
+| 3   | Warehouse table as the source                   | Phase 2, refreshed only with "Sync now".                                                                                                      |
+| 4   | Hand-written rules                              | Cut.                                                                                                                                          |
+| 5   | Groups on the access list                       | Cut from v1; phase 2 if needed.                                                                                                               |
+| 6   | Members view-only across Dalgo                  | Decided. Floor fixed at View; content moves to an Admin.                                                                                      |
 
 ---
 
