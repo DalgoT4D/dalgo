@@ -1,10 +1,10 @@
-from enum import Enum
+from enum import StrEnum
 
 from django.db import models
 import uuid
 
 
-class RoleSlug(str, Enum):
+class RoleSlug(StrEnum):
     SUPER_ADMIN = "super-admin"
     ADMIN = "admin"
     ANALYST = "analyst"

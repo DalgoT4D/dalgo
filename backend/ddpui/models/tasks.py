@@ -3,7 +3,7 @@ master table to store all operations/commands that a prefect deployment can run
 args to a command are specific to a deployment/flow & will be store as deployment/flow parameters
 """
 
-from enum import Enum
+from enum import StrEnum
 import uuid
 from django.db import models
 from django.utils import timezone
@@ -12,7 +12,7 @@ from ddpui.models.org import OrgDataFlowv1
 from ddpui.models.org_user import OrgUser
 
 
-class TaskType(str, Enum):
+class TaskType(StrEnum):
     """all possible task types"""
 
     DBT = "dbt"
@@ -21,7 +21,7 @@ class TaskType(str, Enum):
     AIRBYTE = "airbyte"
 
 
-class TaskProgressStatus(str, Enum):
+class TaskProgressStatus(StrEnum):
     """all possible statuses of a task progress"""
 
     RUNNING = "running"
@@ -29,7 +29,7 @@ class TaskProgressStatus(str, Enum):
     FAILED = "failed"
 
 
-class TaskProgressHashPrefix(str, Enum):
+class TaskProgressHashPrefix(StrEnum):
     """
     all possible hash prefixes used to run long running process via celery/redis
     the prefix is most cases will be suffixed with orgslug to generate the final hash in redis
@@ -45,7 +45,7 @@ class TaskProgressHashPrefix(str, Enum):
     SOURCE_SCHEMA_CATALOG = "source-schema-catalog"
 
 
-class OrgTaskGeneratedBy(str, Enum):
+class OrgTaskGeneratedBy(StrEnum):
     """an enum for roles assignable to org-users"""
 
     SYSTEM = "system"
@@ -137,7 +137,7 @@ class DataflowOrgTask(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class TaskLockStatus(str, Enum):
+class TaskLockStatus(StrEnum):
     """all possible statuses of a task lock"""
 
     QUEUED = "queued"

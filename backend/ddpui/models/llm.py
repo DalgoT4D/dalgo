@@ -2,7 +2,7 @@
 All models related to ai/llm feature of Dalgo will go here
 """
 
-from enum import Enum
+from enum import StrEnum
 from django.db import models
 from django.utils import timezone
 import uuid
@@ -11,7 +11,7 @@ from ddpui.models.org import Org
 from ddpui.models.org_user import OrgUser
 
 
-class LlmSessionStatus(str, Enum):
+class LlmSessionStatus(StrEnum):
     """all possible statuses of a task progress"""
 
     RUNNING = "running"
@@ -19,14 +19,14 @@ class LlmSessionStatus(str, Enum):
     FAILED = "failed"
 
 
-class LogsSummarizationType(str, Enum):
+class LogsSummarizationType(StrEnum):
     """enum for log summarization types"""
 
     DEPLOYMENT = "deployment"
     AIRBYTE_SYNC = "airbyte_sync"
 
 
-class LlmAssistantType(str, Enum):
+class LlmAssistantType(StrEnum):
     """enum for llm assistant types"""
 
     LOG_SUMMARIZATION = "log_summarization"

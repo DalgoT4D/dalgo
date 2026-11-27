@@ -2,14 +2,14 @@
 All the models related to UI for transformation will go here
 """
 
-from enum import Enum
+from enum import StrEnum
 from django.db import models
 from django.utils import timezone
 
 from ddpui.models.org import OrgDbt
 
 
-class OrgDbtNodeType(str, Enum):
+class OrgDbtNodeType(StrEnum):
     """
     enum for type of node in dbt workflow
     """
@@ -18,7 +18,7 @@ class OrgDbtNodeType(str, Enum):
     OPERATION_NODE = "operation_node"
 
 
-class OrgDbtModelType(str, Enum):
+class OrgDbtModelType(StrEnum):
     """an enum for roles assignable to org-users"""
 
     SOURCE = "source"

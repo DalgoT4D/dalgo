@@ -1,7 +1,7 @@
 [project]
 name = "prefect-proxy"
 version = "0.1.0"
-requires-python = ">=3.10"
+requires-python = ">=3.12,<3.13"
 dependencies = [
   # web server
   "fastapi",
@@ -45,9 +45,15 @@ dev = [
   "respx",
 ]
 
+[tool.uv]
+# Keep pandas/numpy on the majors production ran on Python 3.10 (pulled in via
+# dbt-bigquery -> google-cloud-bigquery[pandas]); the 3.12 resolution otherwise
+# jumps to pandas 3.
+constraint-dependencies = ["pandas<3", "numpy<2.3"]
+
 [tool.black]
 line-length = 100
-target-version = ["py38", "py39", "py310", "py311"]
+target-version = ["py38", "py39", "py310", "py311", "py312"]
 include = 'ddpui\/.*\.pyi?$'
 
 [tool.pylint.messages_control]

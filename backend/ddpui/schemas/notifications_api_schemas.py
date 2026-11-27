@@ -1,11 +1,11 @@
 from typing import List, Optional
 from datetime import datetime
 from pydantic import ConfigDict
-from enum import Enum
+from enum import StrEnum
 from ninja import Schema
 
 
-class NotificationType(str, Enum):
+class NotificationType(StrEnum):
     """Category tag for a notification. Stored as a plain CharField — no migration needed to extend."""
 
     SHARING = "sharing"
@@ -17,7 +17,7 @@ class NotificationType(str, Enum):
     ANNOUNCEMENT = "announcement"
 
 
-class SentToEnum(str, Enum):
+class SentToEnum(StrEnum):
     """
     Schema for sent_to field in create notification
     api payload.

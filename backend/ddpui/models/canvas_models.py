@@ -4,7 +4,7 @@ These models will eventually replace OrgDbtModel, OrgDbtOperation, and DbtEdge
 """
 
 import uuid
-from enum import Enum
+from enum import StrEnum
 from django.db import models
 from django.utils import timezone
 
@@ -12,7 +12,7 @@ from ddpui.models.dbt_workflow import OrgDbtModel
 from ddpui.models.org import OrgDbt
 
 
-class CanvasNodeType(str, Enum):
+class CanvasNodeType(StrEnum):
     """Node types for the unified canvas model"""
 
     SOURCE = "source"

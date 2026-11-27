@@ -35,7 +35,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.12"]
         redis-version: [6]
 
     steps:

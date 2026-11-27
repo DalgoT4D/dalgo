@@ -1,6 +1,6 @@
 import os
 
-from enum import Enum
+from enum import StrEnum
 from django.db import models
 from django.utils import timezone
 
@@ -18,7 +18,7 @@ from ddpui.schemas.org_queue_schema import (
 )
 
 
-class OrgType(str, Enum):
+class OrgType(StrEnum):
     """an enum representing the type of organization"""
 
     SUBSCRIPTION = "subscription"
@@ -31,7 +31,7 @@ class OrgType(str, Enum):
         return [(key.value, key.name) for key in cls]
 
 
-class OrgVizLoginType(str, Enum):
+class OrgVizLoginType(StrEnum):
     """an enum for roles assignable to org-users"""
 
     BASIC_AUTH = "basic"
@@ -43,7 +43,7 @@ class OrgVizLoginType(str, Enum):
         return [(key.value, key.name) for key in cls]
 
 
-class TransformType(str, Enum):
+class TransformType(StrEnum):
     """an enum for transform type available either via ui or github"""
 
     UI = "ui"
