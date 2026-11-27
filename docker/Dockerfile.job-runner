@@ -1,7 +1,7 @@
 # Define version as build arg with default
 ARG PREFECT_VERSION=3.6.29
 
-FROM prefecthq/prefect:${PREFECT_VERSION}-python3.10-kubernetes
+FROM prefecthq/prefect:${PREFECT_VERSION}-python3.12-kubernetes
 
 # Shared volume mount point for client dbt project directories.
 ARG CLIENTDBT_ROOT="/mnt/appdata/clientdbts"
