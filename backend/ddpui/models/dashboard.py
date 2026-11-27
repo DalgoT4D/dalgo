@@ -1,13 +1,13 @@
 """Dashboard models for Dalgo platform"""
 
-from enum import Enum
+from enum import StrEnum
 from django.db import models
 from django.utils import timezone
 from ddpui.models.org import Org
 from ddpui.models.org_user import OrgUser
 
 
-class DashboardType(str, Enum):
+class DashboardType(StrEnum):
     """Dashboard type enum"""
 
     NATIVE = "native"
@@ -19,7 +19,7 @@ class DashboardType(str, Enum):
         return [(key.value, key.name) for key in cls]
 
 
-class DashboardComponentType(str, Enum):
+class DashboardComponentType(StrEnum):
     """Dashboard component types"""
 
     CHART = "chart"
@@ -33,7 +33,7 @@ class DashboardComponentType(str, Enum):
         return [(key.value, key.name) for key in cls]
 
 
-class DashboardFilterType(str, Enum):
+class DashboardFilterType(StrEnum):
     """Dashboard filter types"""
 
     VALUE = "value"

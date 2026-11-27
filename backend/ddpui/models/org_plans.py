@@ -1,11 +1,11 @@
-from enum import Enum
+from enum import StrEnum
 
 from django.db import models
 from django.utils import timezone
 from ddpui.models.org import Org
 
 
-class OrgPlanType(str, Enum):
+class OrgPlanType(StrEnum):
     FREE_TRIAL = "Free Trial"
     DALGO = "Dalgo"
     INTERNAL = "Internal"

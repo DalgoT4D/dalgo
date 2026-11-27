@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import StrEnum
 
 
-class WarehouseType(str, Enum):
+class WarehouseType(StrEnum):
     """
     warehouse types available; this will be same as what is stored in OrgWarehouse.wtype
     """

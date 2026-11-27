@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict
@@ -15,7 +15,7 @@ class WebsocketCloseCodes:
     FORBIDDEN = 4004  # authenticated but not allowed (permission/flag/consent/ownership)
 
 
-class WebsocketResponseStatus(str, Enum):
+class WebsocketResponseStatus(StrEnum):
     SUCCESS = "success"
     ERROR = "error"
 

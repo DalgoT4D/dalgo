@@ -34,6 +34,7 @@ Tags track the Prefect upgrade:
 
 - `0.1` → Prefect 3.1.15
 - `0.2` → Prefect 3.6.29
+- `0.3` → Prefect 3.6.29, Python 3.12
 
 ### Environment-Specific Builds
 

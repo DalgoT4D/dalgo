@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import datetime
-from enum import Enum
+from enum import StrEnum
 from sqlalchemy.sql.selectable import Select
 from decimal import Decimal
 
@@ -9,7 +9,7 @@ from ddpui.core.datainsights.query_builder import AggQueryBuilder
 from ddpui.utils.warehouse.client.warehouse_interface import WarehouseType
 
 
-class TranslateColDataType(str, Enum):
+class TranslateColDataType(StrEnum):
     STRING = "String"
     BOOL = "Boolean"
     DATETIME = "Datetime"
